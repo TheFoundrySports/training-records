@@ -1,73 +1,84 @@
-# React + TypeScript + Vite
+# Training Records
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A workout tracking web app for athletes — built with React 19, TypeScript, Vite, Tailwind CSS v4, and Supabase.
 
-Currently, two official plugins are available:
+## Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+| Layer | Technology |
+|-------|-----------|
+| UI | React 19 + TypeScript |
+| Build | Vite 8 |
+| Styling | Tailwind CSS v4 + shadcn/ui |
+| Routing | React Router v7 |
+| Server state | TanStack Query v5 |
+| Forms | React Hook Form + Zod |
+| Auth / Backend | Supabase (Auth + PostgreSQL + Edge Functions) |
+| Testing | Vitest + React Testing Library |
+| E2E | Playwright (M3+) |
 
-## React Compiler
+## Prerequisites
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Node.js LTS (see `.nvmrc` — currently v24)
+- npm 10+
+- A Supabase project (required for M2+ integration)
 
-## Expanding the ESLint configuration
+## Setup
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+```bash
+# 1. Clone the repo and install dependencies
+npm install
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+# 2. Configure environment variables
+cp .env.example .env.local
+# Edit .env.local and fill in VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# 3. Start the dev server
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Scripts
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start Vite dev server |
+| `npm run build` | TypeScript check + Vite production build |
+| `npm test` | Run Vitest (watch mode) |
+| `npm run lint` | ESLint |
+| `npm run preview` | Preview production build |
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Project structure
+
+```
+src/
+├── app/           # Entry point, Router, AppShell, providers
+├── features/
+│   ├── auth/      # Login, AuthContext, ProtectedRoute
+│   ├── workouts/  # Workout pages, hooks, schemas, types
+│   └── ai/        # AI workout generation chat
+├── components/ui/ # shadcn/ui component copies
+├── lib/
+│   ├── api.ts     # Fetch wrapper with Bearer auth
+│   ├── queryClient.ts
+│   └── supabase.ts
+└── types/         # Shared TypeScript types
+```
+
+## Milestones
+
+| Milestone | Status | Description |
+|-----------|--------|-------------|
+| M1 — Skeleton | ✅ Done | Repo scaffold, routing, auth shell, Vitest wired |
+| M2 — Read path | Pending | WorkoutList + Detail pages, TanStack Query hooks, API client |
+| M3 — Write path | Pending | Create/edit/delete, forms, AI generate, Playwright smoke |
+| M4 — Hardening | Pending | A11y pass, CI, RLS docs |
+
+## Commit convention
+
+This project uses [Conventional Commits](https://www.conventionalcommits.org/):
+
+```
+feat: add workout list page
+fix: correct Bearer token header format
+chore: update dependencies
+docs: update README setup steps
 ```
