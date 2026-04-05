@@ -25,8 +25,6 @@ Run `git status`. If there are uncommitted changes unrelated to a previous `/set
 
 ### 1.2 Resolve Git Platform
 
-<!-- Read `.agent/.1xai-manifest.json` and check for a `platform:*` entry in the `templates` array. -->
-
 - **`platform:glab`** → GitLab (CLI: `glab`)
 - **`platform:gh`** → GitHub (CLI: `gh`)
 - **`platform:az`** → Azure DevOps (CLI: `az`)
@@ -57,16 +55,11 @@ Run `git status`. If there are uncommitted changes unrelated to a previous `/set
 
 ### 2.1 Check Installed Templates from Manifest
 
-<!-- Read `.agent/.1xai-manifest.json` → `templates` array. Templates are entries without a `:` separator (e.g. `docs`, `drupal`, `playwright-ddev`). Platform and à-la-carte entries (`platform:*`, `skill:*`, `rule:*`, `workflow:*`) are not templates. -->
-
 Use this list as the source of truth — no need to detect templates from directory structure.
 
 ### 2.2 Check for Relevant not installed Templates
 
 If templates that look relevant to the project are not in the manifest (e.g., a Drupal project without `playwright-ddev`), mention them:
-
-> "This looks like a Drupal/DDEV project. You could add E2E testing support by running:
-<!-- > `npx @1xINTERNET/1x-ai . --add playwright-ddev`" -->
 
 ## Phase 3: Additional Setups
 
