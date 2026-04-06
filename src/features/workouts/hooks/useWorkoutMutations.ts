@@ -26,13 +26,16 @@ export function useCreateWorkout() {
           duration_minutes: data.durationMinutes,
           notes: data.notes ?? null,
           rpe: data.rpe ?? null,
+          wod_text: data.wodText ?? null,
           user_id: user.id,
         })
         .select()
         .single()
 
       if (error) {
-        throw { error: { code: error.code ?? 'UNKNOWN', message: error.message, details: error.details } }
+        throw {
+          error: { code: error.code ?? 'UNKNOWN', message: error.message, details: error.details },
+        }
       }
 
       return mapRow(workout)
@@ -56,13 +59,16 @@ export function useUpdateWorkout() {
           duration_minutes: data.durationMinutes,
           notes: data.notes ?? null,
           rpe: data.rpe ?? null,
+          wod_text: data.wodText ?? null,
         })
         .eq('id', id)
         .select()
         .single()
 
       if (error) {
-        throw { error: { code: error.code ?? 'UNKNOWN', message: error.message, details: error.details } }
+        throw {
+          error: { code: error.code ?? 'UNKNOWN', message: error.message, details: error.details },
+        }
       }
 
       return mapRow(workout)
@@ -81,7 +87,9 @@ export function useDeleteWorkout() {
       const { error } = await supabase.from('workouts').delete().eq('id', id)
 
       if (error) {
-        throw { error: { code: error.code ?? 'UNKNOWN', message: error.message, details: error.details } }
+        throw {
+          error: { code: error.code ?? 'UNKNOWN', message: error.message, details: error.details },
+        }
       }
     },
     onSuccess: () => {

@@ -43,6 +43,7 @@ export function WorkoutFormPage() {
       durationMinutes: 30,
       notes: '',
       rpe: undefined,
+      wodText: '',
     },
   })
 
@@ -56,6 +57,7 @@ export function WorkoutFormPage() {
         durationMinutes: existing.durationMinutes,
         notes: existing.notes ?? '',
         rpe: existing.rpe,
+        wodText: existing.wodText ?? '',
       })
     }
   }, [isEdit, existing, form])
@@ -87,18 +89,23 @@ export function WorkoutFormPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl">
-      <h1 className="text-2xl font-semibold mb-6">
-        {isEdit ? 'Edit Workout' : 'Log Workout'}
-      </h1>
+      <h1 className="text-2xl font-semibold mb-6">{isEdit ? 'Edit Workout' : 'Log Workout'}</h1>
 
       {mutationError && (
-        <div role="alert" className="mb-4 rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-destructive text-sm">
+        <div
+          role="alert"
+          className="mb-4 rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-destructive text-sm"
+        >
           {mutationError}
         </div>
       )}
 
       <Form {...form}>
-        <form onSubmit={(e) => void form.handleSubmit(onSubmit)(e)} className="space-y-5" noValidate>
+        <form
+          onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
+          className="space-y-5"
+          noValidate
+        >
           {/* Title */}
           <FormField
             control={form.control}
@@ -182,6 +189,24 @@ export function WorkoutFormPage() {
                 <FormControl>
                   <Textarea placeholder="How did it go?" {...field} />
                 </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* WOD Text */}
+          <FormField
+            control={form.control}
+            name="wodText"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>WOD Text</FormLabel>
+                <FormControl>
+                  <Textarea placeholder="Describe the workout in detail…" rows={6} {...field} />
+                </FormControl>
+                <p className="text-xs text-muted-foreground text-right">
+                  {(field.value ?? '').length} / 5000
+                </p>
                 <FormMessage />
               </FormItem>
             )}

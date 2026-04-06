@@ -61,7 +61,7 @@ function renderPage(id = 'w1') {
           <Route path="/workouts" element={<div>Workouts list</div>} />
         </Routes>
       </MemoryRouter>
-    </QueryClientProvider>
+    </QueryClientProvider>,
   )
 }
 
@@ -74,6 +74,7 @@ const sampleWorkout: Workout = {
   durationMinutes: 45,
   rpe: 8,
   notes: 'Felt great today!',
+  wodText: '3 rounds: 21 thrusters, 15 pull-ups, 9 box jumps',
   createdAt: '2026-04-05T08:00:00.000Z',
   updatedAt: '2026-04-05T08:00:00.000Z',
 }
@@ -105,7 +106,9 @@ describe('WorkoutDetailPage', () => {
       data: undefined,
       isLoading: false,
       isError: true,
-      error: { error: { code: 'SERVER_ERROR', message: 'Internal server error' } } as unknown as Error,
+      error: {
+        error: { code: 'SERVER_ERROR', message: 'Internal server error' },
+      } as unknown as Error,
     })
     renderPage()
     expect(screen.getByRole('alert')).toBeInTheDocument()
@@ -126,12 +129,18 @@ describe('WorkoutDetailPage', () => {
 
   it('hides optional fields when they are not set', () => {
     mockUseDelete.mockReturnValue(makeDeleteMutation())
-    const workoutNoOptionals: Workout = { ...sampleWorkout, rpe: undefined, notes: undefined }
+    const workoutNoOptionals: Workout = {
+      ...sampleWorkout,
+      rpe: undefined,
+      notes: undefined,
+      wodText: undefined,
+    }
     mockWorkoutReturn({ data: workoutNoOptionals, isLoading: false, isError: false, error: null })
     renderPage()
 
     expect(screen.queryByText(/\/ 10/)).not.toBeInTheDocument()
     expect(screen.queryByText('Notes')).not.toBeInTheDocument()
+    expect(screen.queryByText('WOD Text')).not.toBeInTheDocument()
   })
 
   it('shows back button to return to workouts list', () => {
@@ -152,7 +161,12 @@ describe('WorkoutDetailPage', () => {
   it('does not show edit/delete buttons for non-owner', () => {
     mockUseDelete.mockReturnValue(makeDeleteMutation())
     // workout belongs to 'u1' but auth returns 'u2'
-    vi.mocked(useAuthMock).mockReturnValueOnce({ user: { id: 'u2' } as never, session: null, role: null, isLoading: false })
+    vi.mocked(useAuthMock).mockReturnValueOnce({
+      user: { id: 'u2' } as never,
+      session: null,
+      role: null,
+      isLoading: false,
+    })
     mockWorkoutReturn({ data: sampleWorkout, isLoading: false, isError: false, error: null })
     renderPage()
     expect(screen.queryByRole('button', { name: /^edit$/i })).not.toBeInTheDocument()
@@ -192,5 +206,23 @@ describe('WorkoutDetailPage', () => {
     await waitFor(() => {
       expect(screen.getByText('Workouts list')).toBeInTheDocument()
     })
+  })
+
+  it('shows WOD Text section when wodText is non-empty', () => {
+    mockUseDelete.mockReturnValue(makeDeleteMutation())
+    mockWorkoutReturn({ data: sampleWorkout, isLoading: false, isError: false, error: null })
+    renderPage()
+
+    expect(screen.getByText('WOD Text')).toBeInTheDocument()
+    expect(screen.getByText(sampleWorkout.wodText!)).toBeInTheDocument()
+  })
+
+  it('hides WOD Text section when wodText is null', () => {
+    mockUseDelete.mockReturnValue(makeDeleteMutation())
+    const workoutNoWod: Workout = { ...sampleWorkout, wodText: undefined }
+    mockWorkoutReturn({ data: workoutNoWod, isLoading: false, isError: false, error: null })
+    renderPage()
+
+    expect(screen.queryByText('WOD Text')).not.toBeInTheDocument()
   })
 })

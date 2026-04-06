@@ -9,6 +9,7 @@ export function mapRow(row: {
   duration_minutes: number
   notes: string | null
   rpe: number | null
+  wod_text: string | null
   created_at: string
   updated_at: string
 }): Workout {
@@ -21,6 +22,7 @@ export function mapRow(row: {
     durationMinutes: row.duration_minutes,
     notes: row.notes ?? undefined,
     rpe: row.rpe ?? undefined,
+    wodText: row.wod_text ?? undefined,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   }
