@@ -56,6 +56,147 @@ values
   )
 on conflict (id) do nothing;
 
+-- ---------------------------------------------------------------------------
+-- Reference data: categories
+-- ---------------------------------------------------------------------------
+insert into public.categories (id, name, description)
+values
+  ('cccccccc-0000-0000-0000-000000000001', 'Gymnastics',      'Bodyweight and gymnastics-based movements'),
+  ('cccccccc-0000-0000-0000-000000000002', 'Weightlifting',   'Olympic and barbell strength movements'),
+  ('cccccccc-0000-0000-0000-000000000003', 'Monostructural',  'Cyclical cardio movements (running, rowing, etc.)'),
+  ('cccccccc-0000-0000-0000-000000000004', 'Mixed Modal',     'Workouts combining multiple movement categories')
+on conflict (id) do nothing;
+
+-- ---------------------------------------------------------------------------
+-- Reference data: equipment
+-- ---------------------------------------------------------------------------
+insert into public.equipment (id, name, description)
+values
+  ('eeeeeeee-0000-0000-0000-000000000001', 'Barbell',         'Standard 20kg barbell'),
+  ('eeeeeeee-0000-0000-0000-000000000002', 'Kettlebell',      'Cast iron kettlebell (various weights)'),
+  ('eeeeeeee-0000-0000-0000-000000000003', 'Pull-up bar',     'Rig or doorframe pull-up bar'),
+  ('eeeeeeee-0000-0000-0000-000000000004', 'Jump rope',       'Speed or standard jump rope'),
+  ('eeeeeeee-0000-0000-0000-000000000005', 'Box',             'Plyo box (20"/24"/30")'),
+  ('eeeeeeee-0000-0000-0000-000000000006', 'Rowing machine',  'Concept2 or equivalent ergometer')
+on conflict (id) do nothing;
+
+-- ---------------------------------------------------------------------------
+-- Reference data: exercises (one per major category)
+-- ---------------------------------------------------------------------------
+insert into public.exercises (id, name, description, category_id, movement_type, measurement_type, difficulty_level, equipment, is_benchmark)
+values
+  (
+    'ffffffff-0000-0000-0000-000000000001',
+    'Pull-up',
+    'Strict pull-up from dead hang to chin over bar.',
+    'cccccccc-0000-0000-0000-000000000001',
+    'gymnastics',
+    'reps',
+    'intermediate',
+    array['eeeeeeee-0000-0000-0000-000000000003']::uuid[],
+    true
+  ),
+  (
+    'ffffffff-0000-0000-0000-000000000002',
+    'Thruster',
+    'Front squat to push press in one fluid movement.',
+    'cccccccc-0000-0000-0000-000000000002',
+    'weightlifting',
+    'weight',
+    'intermediate',
+    array['eeeeeeee-0000-0000-0000-000000000001']::uuid[],
+    true
+  ),
+  (
+    'ffffffff-0000-0000-0000-000000000003',
+    'Box Jump',
+    'Two-foot takeoff, land on top of box, stand to full extension.',
+    'cccccccc-0000-0000-0000-000000000001',
+    'gymnastics',
+    'reps',
+    'beginner',
+    array['eeeeeeee-0000-0000-0000-000000000005']::uuid[],
+    false
+  ),
+  (
+    'ffffffff-0000-0000-0000-000000000004',
+    'Kettlebell Swing',
+    'Russian or American KB swing — hip hinge power movement.',
+    'cccccccc-0000-0000-0000-000000000002',
+    'weightlifting',
+    'reps',
+    'beginner',
+    array['eeeeeeee-0000-0000-0000-000000000002']::uuid[],
+    false
+  ),
+  (
+    'ffffffff-0000-0000-0000-000000000005',
+    'Double-Under',
+    'Jump rope passing under feet twice per jump.',
+    'cccccccc-0000-0000-0000-000000000003',
+    'monostructural',
+    'reps',
+    'intermediate',
+    array['eeeeeeee-0000-0000-0000-000000000004']::uuid[],
+    false
+  ),
+  (
+    'ffffffff-0000-0000-0000-000000000006',
+    '400m Run',
+    'One lap around a standard track.',
+    'cccccccc-0000-0000-0000-000000000003',
+    'monostructural',
+    'distance',
+    'beginner',
+    array[]::uuid[],
+    false
+  ),
+  (
+    'ffffffff-0000-0000-0000-000000000007',
+    'Deadlift',
+    'Conventional barbell deadlift from the floor.',
+    'cccccccc-0000-0000-0000-000000000002',
+    'weightlifting',
+    'weight',
+    'beginner',
+    array['eeeeeeee-0000-0000-0000-000000000001']::uuid[],
+    true
+  ),
+  (
+    'ffffffff-0000-0000-0000-000000000008',
+    'Push-up',
+    'Strict push-up, chest to deck.',
+    'cccccccc-0000-0000-0000-000000000001',
+    'gymnastics',
+    'reps',
+    'beginner',
+    array[]::uuid[],
+    false
+  ),
+  (
+    'ffffffff-0000-0000-0000-000000000009',
+    'Air Squat',
+    'Bodyweight squat, hip crease below parallel.',
+    'cccccccc-0000-0000-0000-000000000001',
+    'gymnastics',
+    'reps',
+    'beginner',
+    array[]::uuid[],
+    false
+  ),
+  (
+    'ffffffff-0000-0000-0000-000000000010',
+    'Row (Calories)',
+    'Rowing machine for calorie output.',
+    'cccccccc-0000-0000-0000-000000000003',
+    'monostructural',
+    'calories',
+    'beginner',
+    array['eeeeeeee-0000-0000-0000-000000000006']::uuid[],
+    false
+  )
+on conflict (id) do nothing;
+
 -- Sample workout for athlete2
 insert into public.workouts (id, user_id, title, type, performed_at, duration_minutes, rpe, notes)
 values
