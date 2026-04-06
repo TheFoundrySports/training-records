@@ -1,66 +1,25 @@
 -- Seed data for local development only
 -- Creates 2 athlete users and 1 admin, plus sample workouts
--- Run after `supabase db reset`
-
--- Seed users (passwords: Password123!)
--- These are inserted into auth.users directly for local dev
-insert into auth.users (
-  id,
-  email,
-  encrypted_password,
-  email_confirmed_at,
-  created_at,
-  updated_at,
-  raw_app_meta_data,
-  raw_user_meta_data,
-  is_super_admin,
-  role
-) values
-  (
-    '00000000-0000-0000-0000-000000000001',
-    'athlete1@example.com',
-    crypt('Password123!', gen_salt('bf')),
-    now(),
-    now(),
-    now(),
-    '{"provider":"email","providers":["email"]}',
-    '{}',
-    false,
-    'authenticated'
-  ),
-  (
-    '00000000-0000-0000-0000-000000000002',
-    'athlete2@example.com',
-    crypt('Password123!', gen_salt('bf')),
-    now(),
-    now(),
-    now(),
-    '{"provider":"email","providers":["email"]}',
-    '{}',
-    false,
-    'authenticated'
-  ),
-  (
-    '00000000-0000-0000-0000-000000000003',
-    'admin@example.com',
-    crypt('Password123!', gen_salt('bf')),
-    now(),
-    now(),
-    now(),
-    '{"provider":"email","providers":["email"]}',
-    '{}',
-    false,
-    'authenticated'
-  )
-on conflict (id) do nothing;
-
--- Profiles (athlete1 and athlete2 get 'athlete', admin gets 'admin')
-insert into public.profiles (id, role)
-values
-  ('00000000-0000-0000-0000-000000000001', 'athlete'),
-  ('00000000-0000-0000-0000-000000000002', 'athlete'),
-  ('00000000-0000-0000-0000-000000000003', 'admin')
-on conflict (id) do update set role = excluded.role;
+--
+-- IMPORTANT: Do NOT insert into auth.users directly via SQL — Supabase Auth
+-- requires fields like `aud` to be set correctly or login will fail with
+-- "invalid_credentials". Use the Admin API instead:
+--
+--   SERVICE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU"
+--   curl -s -X POST "http://127.0.0.1:54321/auth/v1/admin/users" \
+--     -H "apikey: $SERVICE_KEY" -H "Authorization: Bearer $SERVICE_KEY" \
+--     -H "Content-Type: application/json" \
+--     -d '{"email":"athlete1@example.com","password":"Password123!","email_confirm":true}'
+--
+-- Users are created via scripts/seed-users.sh (run once after supabase db reset).
+-- Passwords: Password123!
+--   athlete1@example.com (role: athlete)
+--   athlete2@example.com (role: athlete)
+--   admin@example.com    (role: admin)
+--
+-- After creating users via the Admin API, update the admin profile:
+--   UPDATE public.profiles SET role = 'admin'
+--   WHERE id = (SELECT id FROM auth.users WHERE email = 'admin@example.com');
 
 -- Sample workouts for athlete1
 insert into public.workouts (id, user_id, title, type, performed_at, duration_minutes, rpe, notes)
