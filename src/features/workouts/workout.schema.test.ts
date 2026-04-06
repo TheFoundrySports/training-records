@@ -69,6 +69,7 @@ describe('workoutSchema', () => {
     })
 
     it('fails when title is missing', () => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { title: _t, ...rest } = validWorkout
       const result = workoutSchema.safeParse(rest)
       expect(result.success).toBe(false)
@@ -93,6 +94,7 @@ describe('workoutSchema', () => {
     })
 
     it('fails when type is missing', () => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { type: _t, ...rest } = validWorkout
       const result = workoutSchema.safeParse(rest)
       expect(result.success).toBe(false)
@@ -137,6 +139,7 @@ describe('workoutSchema', () => {
     })
 
     it('fails when durationMinutes is missing', () => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { durationMinutes: _d, ...rest } = validWorkout
       const result = workoutSchema.safeParse(rest)
       expect(result.success).toBe(false)

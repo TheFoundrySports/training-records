@@ -27,7 +27,11 @@ const MOCK_SESSION = {
 
 describe('API client', () => {
   beforeEach(() => {
-    mockGetSession.mockResolvedValue(MOCK_SESSION as ReturnType<typeof supabase.auth.getSession> extends Promise<infer T> ? T : never)
+    mockGetSession.mockResolvedValue(
+      MOCK_SESSION as ReturnType<typeof supabase.auth.getSession> extends Promise<infer T>
+        ? T
+        : never,
+    )
     vi.stubGlobal('fetch', vi.fn())
   })
 
@@ -47,9 +51,9 @@ describe('API client', () => {
       await apiGet('/workouts')
 
       expect(mockFetch).toHaveBeenCalledOnce()
-      const [_url, options] = mockFetch.mock.calls[0] as [string, RequestInit]
+      const [, options] = mockFetch.mock.calls[0] as [string, RequestInit]
       expect((options.headers as Record<string, string>)['Authorization']).toBe(
-        `Bearer ${MOCK_TOKEN}`
+        `Bearer ${MOCK_TOKEN}`,
       )
     })
 
@@ -62,9 +66,9 @@ describe('API client', () => {
 
       await apiPost('/workouts', { title: 'New workout' })
 
-      const [_url, options] = mockFetch.mock.calls[0] as [string, RequestInit]
+      const [, options] = mockFetch.mock.calls[0] as [string, RequestInit]
       expect((options.headers as Record<string, string>)['Authorization']).toBe(
-        `Bearer ${MOCK_TOKEN}`
+        `Bearer ${MOCK_TOKEN}`,
       )
     })
 
@@ -77,9 +81,9 @@ describe('API client', () => {
 
       await apiPut('/workouts/1', { title: 'Updated' })
 
-      const [_url, options] = mockFetch.mock.calls[0] as [string, RequestInit]
+      const [, options] = mockFetch.mock.calls[0] as [string, RequestInit]
       expect((options.headers as Record<string, string>)['Authorization']).toBe(
-        `Bearer ${MOCK_TOKEN}`
+        `Bearer ${MOCK_TOKEN}`,
       )
     })
 
@@ -92,9 +96,9 @@ describe('API client', () => {
 
       await apiDelete('/workouts/1')
 
-      const [_url, options] = mockFetch.mock.calls[0] as [string, RequestInit]
+      const [, options] = mockFetch.mock.calls[0] as [string, RequestInit]
       expect((options.headers as Record<string, string>)['Authorization']).toBe(
-        `Bearer ${MOCK_TOKEN}`
+        `Bearer ${MOCK_TOKEN}`,
       )
     })
 
@@ -130,7 +134,7 @@ describe('API client', () => {
         vi.fn().mockResolvedValue({
           ok: true,
           json: async () => payload,
-        })
+        }),
       )
 
       const result = await apiGet('/workouts')
@@ -144,7 +148,7 @@ describe('API client', () => {
         vi.fn().mockResolvedValue({
           ok: true,
           json: async () => payload,
-        })
+        }),
       )
 
       const result = await apiPost('/workouts', { title: 'New' })
@@ -167,7 +171,7 @@ describe('API client', () => {
           ok: false,
           status: 404,
           json: async () => errorBody,
-        })
+        }),
       )
 
       await expect(apiGet('/workouts/999')).rejects.toEqual(errorBody)
@@ -182,7 +186,7 @@ describe('API client', () => {
           json: async () => {
             throw new Error('Not JSON')
           },
-        })
+        }),
       )
 
       await expect(apiGet('/workouts')).rejects.toMatchObject({
@@ -199,7 +203,7 @@ describe('API client', () => {
 
       await apiPost('/workouts', { title: 'Test' })
 
-      const [_url, options] = mockFetch.mock.calls[0] as [string, RequestInit]
+      const [, options] = mockFetch.mock.calls[0] as [string, RequestInit]
       expect((options.headers as Record<string, string>)['Content-Type']).toBe('application/json')
     })
   })
