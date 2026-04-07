@@ -6,6 +6,7 @@ import { WorkoutListPage } from '@/features/workouts/pages/WorkoutListPage'
 import { WorkoutDetailPage } from '@/features/workouts/pages/WorkoutDetailPage'
 import { WorkoutFormPage } from '@/features/workouts/pages/WorkoutFormPage'
 import { AIChatPage } from '@/features/ai/AIChatPage'
+import { ExerciseListPage, ExerciseFormPage } from '@/features/exercises/pages'
 
 export const router = createBrowserRouter([
   {
@@ -42,6 +43,18 @@ export const router = createBrowserRouter([
           {
             path: 'ai',
             element: <AIChatPage />,
+          },
+          {
+            path: 'exercises',
+            element: <ExerciseListPage />,
+          },
+          {
+            path: 'exercises/new',
+            element: <ExerciseFormPage />,
+          },
+          {
+            path: 'exercises/:id/edit',
+            element: <ExerciseFormPage />,
           },
         ],
       },

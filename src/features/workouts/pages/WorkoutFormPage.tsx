@@ -1,3 +1,4 @@
+import '../registry/formats/index'
 import { useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router'
 import { useForm } from 'react-hook-form'
@@ -5,6 +6,9 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { workoutSchema, type WorkoutFormValues } from '../workout.schema'
 import { useWorkout } from '../hooks/useWorkouts'
 import { useCreateWorkout, useUpdateWorkout } from '../hooks/useWorkoutMutations'
+import { getFormat } from '../registry/index'
+import { WodFormatSelector } from '../components/WodFormatSelector'
+import type { WodFormat } from '../registry/types'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -44,8 +48,12 @@ export function WorkoutFormPage() {
       notes: '',
       rpe: undefined,
       wodText: '',
+      wodFormat: undefined,
+      payload: undefined,
     },
   })
+
+  const wodFormat = form.watch('wodFormat')
 
   // Populate form when editing and data is loaded
   useEffect(() => {
@@ -58,11 +66,28 @@ export function WorkoutFormPage() {
         notes: existing.notes ?? '',
         rpe: existing.rpe,
         wodText: existing.wodText ?? '',
+        wodFormat: existing.wodFormat as WodFormat | undefined,
+        payload: existing.payload ?? undefined,
       })
     }
   }, [isEdit, existing, form])
 
   async function onSubmit(values: WorkoutFormValues) {
+    // Validate WOD payload if a format is selected
+    if (values.wodFormat) {
+      try {
+        const handler = getFormat(values.wodFormat as WodFormat)
+        const result = handler.schema.safeParse(values.payload)
+        if (!result.success) {
+          form.setError('root', { message: 'WOD payload is invalid' })
+          return
+        }
+      } catch {
+        form.setError('root', { message: 'WOD payload is invalid' })
+        return
+      }
+    }
+
     if (isEdit && id) {
       await updateMutation.mutateAsync({ id, data: values })
       void navigate(`/workouts/${id}`)
@@ -87,16 +112,18 @@ export function WorkoutFormPage() {
     (createMutation.error as { error?: { message?: string } } | null)?.error?.message ??
     (updateMutation.error as { error?: { message?: string } } | null)?.error?.message
 
+  const rootError = form.formState.errors.root?.message
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl">
       <h1 className="text-2xl font-semibold mb-6">{isEdit ? 'Edit Workout' : 'Log Workout'}</h1>
 
-      {mutationError && (
+      {(mutationError ?? rootError) && (
         <div
           role="alert"
           className="mb-4 rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-destructive text-sm"
         >
-          {mutationError}
+          {mutationError ?? rootError}
         </div>
       )}
 
@@ -142,6 +169,41 @@ export function WorkoutFormPage() {
               </FormItem>
             )}
           />
+
+          {/* WOD Format */}
+          <FormField
+            control={form.control}
+            name="wodFormat"
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <WodFormatSelector
+                    value={field.value ?? ''}
+                    onChange={(format) => {
+                      field.onChange(format === '' ? undefined : format)
+                      // Clear payload when format changes
+                      form.setValue('payload', undefined)
+                    }}
+                    disabled={isPending}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Dynamic WOD Format Section */}
+          {wodFormat &&
+            (() => {
+              try {
+                const handler = getFormat(wodFormat as WodFormat)
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const control = form.control as any
+                return <handler.FormSection control={control} name="payload" disabled={isPending} />
+              } catch {
+                return null
+              }
+            })()}
 
           {/* Performed at */}
           <FormField

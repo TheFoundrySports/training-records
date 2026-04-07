@@ -10,6 +10,8 @@ export interface Workout {
   rpe?: number // 1–10
   notes?: string
   wodText?: string
+  wodFormat?: string
+  payload?: Record<string, unknown>
   createdAt: string
   updatedAt: string
 }
@@ -22,6 +24,8 @@ export interface CreateWorkoutInput {
   rpe?: number
   notes?: string
   wodText?: string
+  wodFormat?: string
+  payload?: Record<string, unknown>
 }
 
 export interface UpdateWorkoutInput extends Partial<CreateWorkoutInput> {

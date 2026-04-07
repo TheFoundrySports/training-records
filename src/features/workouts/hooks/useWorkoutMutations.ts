@@ -27,6 +27,8 @@ export function useCreateWorkout() {
           notes: data.notes ?? null,
           rpe: data.rpe ?? null,
           wod_text: data.wodText ?? null,
+          wod_format: data.wodFormat ?? null,
+          payload: data.payload ?? null,
           user_id: user.id,
         })
         .select()
@@ -60,6 +62,8 @@ export function useUpdateWorkout() {
           notes: data.notes ?? null,
           rpe: data.rpe ?? null,
           wod_text: data.wodText ?? null,
+          wod_format: data.wodFormat ?? null,
+          payload: data.payload ?? null,
         })
         .eq('id', id)
         .select()

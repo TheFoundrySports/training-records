@@ -34,6 +34,8 @@ export const workoutSchema = z.object({
     .min(1, 'RPE must be between 1 and 10')
     .max(10, 'RPE must be between 1 and 10')
     .optional(),
+  wodFormat: z.enum(['amrap', 'for_time', 'emom', 'tabata', 'ladder', 'rft']).optional(),
+  payload: z.record(z.string(), z.unknown()).optional(),
 })
 
 export type WorkoutFormValues = z.infer<typeof workoutSchema>

@@ -20,6 +20,11 @@ vi.mock('../hooks/useWorkouts', () => ({
   useWorkout: vi.fn(),
 }))
 
+// Mock useExercises so ExercisePicker (used in AmrapFormSection) doesn't need network
+vi.mock('@/features/exercises/hooks/useExercises', () => ({
+  useExercises: vi.fn(() => ({ data: { data: [] }, isLoading: false })),
+}))
+
 import {
   useCreateWorkout as useCreateWorkoutMock,
   useUpdateWorkout as useUpdateWorkoutMock,
@@ -273,6 +278,24 @@ describe('WorkoutFormPage (create mode)', () => {
     // Mutation should be called — no validation error blocks submission
     await waitFor(() => {
       expect(mutateAsync).toHaveBeenCalled()
+    })
+  })
+
+  it('renders WodFormatSelector in the form', () => {
+    renderCreate()
+    // The WodFormatSelector renders a label "WOD Format"
+    expect(screen.getByLabelText(/wod format/i)).toBeInTheDocument()
+  })
+
+  it('selecting "amrap" shows the AMRAP form section', async () => {
+    const user = userEvent.setup()
+    renderCreate()
+
+    const formatSelect = screen.getByLabelText(/wod format/i)
+    await user.selectOptions(formatSelect, 'amrap')
+
+    await waitFor(() => {
+      expect(screen.getByTestId('wod-form-section-amrap-payload')).toBeInTheDocument()
     })
   })
 })

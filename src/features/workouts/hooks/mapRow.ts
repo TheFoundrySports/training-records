@@ -10,6 +10,8 @@ export function mapRow(row: {
   notes: string | null
   rpe: number | null
   wod_text: string | null
+  wod_format: string | null
+  payload: Record<string, unknown> | null
   created_at: string
   updated_at: string
 }): Workout {
@@ -23,6 +25,8 @@ export function mapRow(row: {
     notes: row.notes ?? undefined,
     rpe: row.rpe ?? undefined,
     wodText: row.wod_text ?? undefined,
+    wodFormat: row.wod_format ?? undefined,
+    payload: row.payload ?? undefined,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   }

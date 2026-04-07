@@ -15,6 +15,9 @@ import {
   DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog'
+import '../registry/formats/index'
+import { getFormat } from '../registry/index'
+import type { WodFormat } from '../registry/types'
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleString(undefined, {
@@ -138,6 +141,27 @@ export function WorkoutDetailPage() {
               </div>
             </>
           )}
+          {workout.wodFormat &&
+            workout.payload &&
+            (() => {
+              try {
+                const handler = getFormat(workout.wodFormat as WodFormat)
+                return (
+                  <>
+                    <Separator className="my-2" />
+                    <div className="py-2">
+                      <p className="text-sm text-muted-foreground mb-1">WOD Format</p>
+                      <p className="text-sm font-medium mb-2">{handler.label}</p>
+                      <pre className="text-xs bg-muted rounded p-2 overflow-auto">
+                        {JSON.stringify(workout.payload, null, 2)}
+                      </pre>
+                    </div>
+                  </>
+                )
+              } catch {
+                return null
+              }
+            })()}
         </CardContent>
       </Card>
 
