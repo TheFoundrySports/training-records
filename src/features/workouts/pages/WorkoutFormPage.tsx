@@ -1,5 +1,5 @@
 import '../registry/formats/index'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -8,6 +8,8 @@ import { useWorkout } from '../hooks/useWorkouts'
 import { useCreateWorkout, useUpdateWorkout } from '../hooks/useWorkoutMutations'
 import { getFormat } from '../registry/index'
 import { WodFormatSelector } from '../components/WodFormatSelector'
+import { PublicWodPickerModal } from '../components/PublicWodPickerModal'
+import type { PublicWodFormFields } from '@/features/public-wods'
 import type { WodFormat } from '../registry/types'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -36,6 +38,19 @@ export function WorkoutFormPage() {
   const updateMutation = useUpdateWorkout()
 
   const isPending = createMutation.isPending || updateMutation.isPending
+
+  const [pickerOpen, setPickerOpen] = useState(false)
+
+  function handlePublicWodSelect(fields: PublicWodFormFields) {
+    form.setValue('title', fields.title)
+    form.setValue('type', fields.type)
+    form.setValue('wodFormat', (fields.wodFormat as WodFormat) ?? undefined)
+    form.setValue('wodText', fields.wodText ?? '')
+    form.setValue('payload', fields.payload ?? undefined)
+    if (fields.durationMinutes != null) {
+      form.setValue('durationMinutes', fields.durationMinutes)
+    }
+  }
 
   const form = useForm<WorkoutFormValues>({
     resolver: zodResolver(workoutSchema),
@@ -116,7 +131,20 @@ export function WorkoutFormPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl">
-      <h1 className="text-2xl font-semibold mb-6">{isEdit ? 'Edit Workout' : 'Log Workout'}</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-semibold">{isEdit ? 'Edit Workout' : 'Log Workout'}</h1>
+        {!isEdit && (
+          <Button type="button" variant="outline" onClick={() => setPickerOpen(true)}>
+            Load Workout
+          </Button>
+        )}
+      </div>
+
+      <PublicWodPickerModal
+        open={pickerOpen}
+        onOpenChange={setPickerOpen}
+        onSelect={handlePublicWodSelect}
+      />
 
       {(mutationError ?? rootError) && (
         <div
