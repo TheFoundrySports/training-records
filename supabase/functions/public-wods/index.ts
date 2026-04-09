@@ -31,20 +31,13 @@ Deno.serve(async (req) => {
   }
 
   const supabaseUrl = Deno.env.get('SUPABASE_URL')!
-  const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+  const anonKey = Deno.env.get('SUPABASE_ANON_KEY')!
 
-  const supabase = createClient(supabaseUrl, serviceRoleKey, {
+  // public_wods are read-only reference data. We use the anon key and let
+  // RLS policies control access — no auth.getUser() needed for reads.
+  const supabase = createClient(supabaseUrl, anonKey, {
     global: { headers: { Authorization: authHeader } },
   })
-
-  // Verify user
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser()
-  if (authError || !user) {
-    return errorResponse('UNAUTHORIZED', 'Invalid or expired token', 401)
-  }
 
   const url = new URL(req.url)
   // Strip function path prefix — e.g. /functions/v1/public-wods[/...] or /public-wods[/...]
