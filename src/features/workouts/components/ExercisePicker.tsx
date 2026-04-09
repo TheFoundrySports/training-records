@@ -71,6 +71,7 @@ export function ExercisePicker({ value, onChange, disabled }: ExercisePickerProp
         autoComplete="off"
         className="h-8 w-full rounded-lg border border-input bg-transparent px-2.5 py-1 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
         aria-label="Exercise"
+        data-testid="exercise-picker-input"
       />
       <datalist id="exercise-options">
         {exercises.map((ex) => (

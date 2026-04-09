@@ -5,12 +5,11 @@ import { test, expect } from './fixtures/pages.fixture'
  *
  * Creates a workout with the "For Time" WOD format and adds a
  * movement manually via the ExercisePicker + repScheme field.
- * Verifies the form saves successfully.
  *
- * Note on ExercisePicker: it is an <input type="text" list="..."> that
- * resolves the exerciseId via exact name match. We use pressSequentially()
- * to trigger the React onChange handler char by char, then wait for the
- * datalist resolution before saving.
+ * ExercisePicker exposes data-testid="exercise-picker-input" so we can
+ * target it precisely within a movement-row and use pressSequentially()
+ * to trigger React's onChange char-by-char, which populates the datalist
+ * and fires onChange(id, name) on exact match.
  */
 test.describe('Workout with WOD format', () => {
   test('selects "For Time" format and movement section appears', async ({
@@ -20,10 +19,9 @@ test.describe('Workout with WOD format', () => {
     await workoutFormPage.gotoNew()
 
     // Select "For Time" format from the native WodFormatSelector <select>
-    const formatSelect = page.getByLabel('WOD Format')
-    await formatSelect.selectOption('for_time')
+    await page.getByLabel('WOD Format').selectOption('for_time')
 
-    // The ForTimeFormSection should now be visible (data-testid includes the field name "payload")
+    // The ForTimeFormSection should now be visible
     await expect(page.getByTestId('wod-form-section-for-time-payload')).toBeVisible()
 
     // "Add movement" button should be visible
@@ -34,8 +32,8 @@ test.describe('Workout with WOD format', () => {
     const row0 = page.getByTestId('movement-row-0')
     await expect(row0).toBeVisible()
 
-    // Exercise picker input should be empty and ready
-    await expect(row0.getByLabel('Exercise')).toBeVisible()
+    // Exercise picker is targetable via data-testid
+    await expect(row0.getByTestId('exercise-picker-input')).toBeVisible()
 
     // Fill rep scheme
     await row0.getByLabel(/rep scheme/i).fill('21-15-9')
@@ -54,40 +52,26 @@ test.describe('Workout with WOD format', () => {
     await page.getByLabel('WOD Format').selectOption('for_time')
     await expect(page.getByTestId('wod-form-section-for-time-payload')).toBeVisible()
 
-    // Add movement
+    // Add a movement row
     await page.getByRole('button', { name: /add movement/i }).click()
     const row0 = page.getByTestId('movement-row-0')
     await expect(row0).toBeVisible()
 
-    // Use pressSequentially to trigger React's onChange on every character,
-    // which in turn calls setSearchQuery and populates the datalist.
-    // Then type the EXACT exercise name to trigger the exact-match onChange(id, name).
-    const exerciseInput = row0.getByLabel('Exercise')
+    // Type the exact exercise name char by char to trigger React's onChange.
+    // The ExercisePicker calls onChange(id, name) when it finds an exact match.
+    const exerciseInput = row0.getByTestId('exercise-picker-input')
     await exerciseInput.pressSequentially('Deadlift', { delay: 50 })
 
-    // Wait for datalist results to load and for the component to set the exerciseId
-    await page.waitForTimeout(500)
-
-    // The input should show the exercise name
+    // Wait for the API search + exact-match resolution to set exerciseId in the form
     await expect(exerciseInput).toHaveValue('Deadlift')
+    // Give the component time to resolve the UUID from the datalist match
+    await page.waitForTimeout(300)
 
     // Rep scheme
     await row0.getByLabel(/rep scheme/i).fill('21-15-9')
 
-    // Try to save — if exerciseId resolved, it succeeds; if not, we get a validation error.
-    // Either way, the form must not crash.
-    await workoutFormPage.save()
-
-    // If save succeeded, we landed on /workouts
-    // If not, we stay on /workouts/new with a validation error
-    const url = page.url()
-    if (url.includes('/workouts/new')) {
-      // Validation error is acceptable when datalist resolution is async in CI
-      // At minimum, we verify the form didn't crash (no unhandled exception)
-      await expect(page.getByRole('heading', { name: /log workout/i })).toBeVisible()
-    } else {
-      await expect(page).toHaveURL('/workouts')
-    }
+    // Save — exerciseId should be resolved; expect navigation to /workouts
+    await workoutFormPage.saveAndExpectSuccess()
   })
 
   test('shows validation error if movements list is empty when format is set', async ({
@@ -104,7 +88,7 @@ test.describe('Workout with WOD format', () => {
     // Attempt to save
     await workoutFormPage.save()
 
-    // Should NOT navigate away — validation prevents it
+    // Should NOT navigate away — Zod validation requires at least 1 movement
     await expect(page).toHaveURL('/workouts/new')
   })
 })
