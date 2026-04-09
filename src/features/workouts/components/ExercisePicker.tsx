@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { useExercises } from '@/features/exercises/hooks/useExercises'
+import { useExercise, useExercises } from '@/features/exercises/hooks/useExercises'
 
 interface ExercisePickerProps {
   value: string
@@ -14,9 +14,16 @@ export function ExercisePicker({ value, onChange, disabled }: ExercisePickerProp
   const { data, isLoading, error } = useExercises({ q: searchQuery || undefined })
   const exercises = useMemo(() => data?.data ?? [], [data])
 
+  // If a UUID is selected but not in the current page, fetch it individually as a fallback.
+  const notFoundInList = Boolean(value) && !exercises.find((e) => e.id === value)
+  const { data: fetchedExercise } = useExercise(notFoundInList ? value : '')
+
   // Derive display value: when a UUID is selected and exercises are loaded, show the resolved name.
-  // Fall back to whatever the user is typing. This avoids useEffect-driven setState cascades.
-  const resolvedName = value ? (exercises.find((e) => e.id === value)?.name ?? '') : ''
+  // Fall back to individually fetched exercise, then whatever the user is typing.
+  // This avoids useEffect-driven setState cascades.
+  const resolvedName = value
+    ? (exercises.find((e) => e.id === value)?.name ?? fetchedExercise?.name ?? '')
+    : ''
   const inputValue = resolvedName || typedValue
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
