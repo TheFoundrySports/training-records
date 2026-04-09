@@ -200,6 +200,105 @@ values
     'beginner',
     array['eeeeeeee-0000-0000-0000-000000000006']::uuid[],
     false
+  ),
+  (
+    'ffffffff-0000-0000-0000-000000000011',
+    'Run',
+    'Running at any distance — track, road, or treadmill.',
+    'cccccccc-0000-0000-0000-000000000003',
+    'monostructural',
+    'distance',
+    'beginner',
+    array[]::uuid[],
+    false
+  ),
+  (
+    'ffffffff-0000-0000-0000-000000000012',
+    'Row',
+    'Rowing machine for distance or time.',
+    'cccccccc-0000-0000-0000-000000000003',
+    'monostructural',
+    'distance',
+    'beginner',
+    array['eeeeeeee-0000-0000-0000-000000000006']::uuid[],
+    false
+  ),
+  (
+    'ffffffff-0000-0000-0000-000000000013',
+    'Hang Power Clean',
+    'Barbell clean from the hang position above the knee.',
+    'cccccccc-0000-0000-0000-000000000002',
+    'weightlifting',
+    'weight',
+    'intermediate',
+    array['eeeeeeee-0000-0000-0000-000000000001']::uuid[],
+    false
+  ),
+  (
+    'ffffffff-0000-0000-0000-000000000014',
+    'Push Jerk',
+    'Barbell push jerk from the rack or clean position.',
+    'cccccccc-0000-0000-0000-000000000002',
+    'weightlifting',
+    'weight',
+    'intermediate',
+    array['eeeeeeee-0000-0000-0000-000000000001']::uuid[],
+    false
+  ),
+  (
+    'ffffffff-0000-0000-0000-000000000015',
+    'Clean and Jerk',
+    'Full clean followed by a jerk overhead.',
+    'cccccccc-0000-0000-0000-000000000002',
+    'weightlifting',
+    'weight',
+    'advanced',
+    array['eeeeeeee-0000-0000-0000-000000000001']::uuid[],
+    true
+  ),
+  (
+    'ffffffff-0000-0000-0000-000000000016',
+    'Power Snatch',
+    'Barbell snatch caught above parallel squat.',
+    'cccccccc-0000-0000-0000-000000000002',
+    'weightlifting',
+    'weight',
+    'advanced',
+    array['eeeeeeee-0000-0000-0000-000000000001']::uuid[],
+    false
+  ),
+  (
+    'ffffffff-0000-0000-0000-000000000017',
+    'Wall Ball',
+    'Squat and throw medicine ball to target.',
+    'cccccccc-0000-0000-0000-000000000004',
+    'gymnastics',
+    'reps',
+    'beginner',
+    array[]::uuid[],
+    false
+  ),
+  (
+    'ffffffff-0000-0000-0000-000000000018',
+    'Clean',
+    'Full squat clean from the floor.',
+    'cccccccc-0000-0000-0000-000000000002',
+    'weightlifting',
+    'weight',
+    'intermediate',
+    array['eeeeeeee-0000-0000-0000-000000000001']::uuid[],
+    false
+  ),
+  (
+    'ffffffff-0000-0000-0000-000000000019',
+    'Ring Dip',
+    'Dip performed on gymnastic rings.',
+    'cccccccc-0000-0000-0000-000000000001',
+    'gymnastics',
+    'reps',
+    'intermediate',
+    array['eeeeeeee-0000-0000-0000-000000000003']::uuid[],
+    false
   )
 on conflict (id) do nothing;
 
@@ -573,7 +672,7 @@ For time:
 - Air Squats: 300 reps
 - Run: 1 mile
 Option to wear a 20lb vest or body armor.$$,
-  '{"rounds": 1, "timeCap": 60, "movements": [{"exerciseId": "", "exerciseName": "Run", "reps": 1, "notes": "1 mile"}, {"exerciseId": "", "exerciseName": "Pull-ups", "reps": 100, "notes": ""}, {"exerciseId": "", "exerciseName": "Push-ups", "reps": 200, "notes": ""}, {"exerciseId": "", "exerciseName": "Air Squats", "reps": 300, "notes": ""}, {"exerciseId": "", "exerciseName": "Run", "reps": 1, "notes": "1 mile"}]}',
+  '{"rounds": 1, "timeCap": 60, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000011", "exerciseName": "Run", "reps": 1, "notes": "1 mile"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000001", "exerciseName": "Pull-ups", "reps": 100, "notes": ""}, {"exerciseId": "ffffffff-0000-0000-0000-000000000008", "exerciseName": "Push-ups", "reps": 200, "notes": ""}, {"exerciseId": "ffffffff-0000-0000-0000-000000000009", "exerciseName": "Air Squats", "reps": 300, "notes": ""}, {"exerciseId": "ffffffff-0000-0000-0000-000000000011", "exerciseName": "Run", "reps": 1, "notes": "1 mile"}]}',
   'Hero',
   '2023-09-01T00:00:00Z'
 ),
@@ -589,7 +688,7 @@ One of the most famous CrossFit benchmark workouts, a couplet of thrusters and p
 21-15-9 reps for time of:
 - Thrusters (95/65 lb)
 - Pull-ups$$,
-  '{"rounds": 1, "timeCap": 10, "movements": [{"exerciseId": "", "exerciseName": "Thrusters", "reps": 21, "notes": "21-15-9, 95/65 lb"}, {"exerciseId": "", "exerciseName": "Pull-ups", "reps": 21, "notes": "21-15-9"}]}',
+  '{"rounds": 1, "timeCap": 10, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000002", "exerciseName": "Thrusters", "reps": 21, "notes": "21-15-9, 95/65 lb"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000001", "exerciseName": "Pull-ups", "reps": 21, "notes": "21-15-9"}]}',
   'Girl',
   '2023-09-05T00:00:00Z'
 ),
@@ -606,7 +705,7 @@ As many rounds as possible in 20 minutes of:
 - Pull-ups: 5 reps
 - Push-ups: 10 reps
 - Air Squats: 15 reps$$,
-  '{"rounds": 1, "timeCap": 20, "movements": [{"exerciseId": "", "exerciseName": "Pull-ups", "reps": 5, "notes": ""}, {"exerciseId": "", "exerciseName": "Push-ups", "reps": 10, "notes": ""}, {"exerciseId": "", "exerciseName": "Air Squats", "reps": 15, "notes": ""}]}',
+  '{"rounds": 1, "timeCap": 20, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000001", "exerciseName": "Pull-ups", "reps": 5, "notes": ""}, {"exerciseId": "ffffffff-0000-0000-0000-000000000008", "exerciseName": "Push-ups", "reps": 10, "notes": ""}, {"exerciseId": "ffffffff-0000-0000-0000-000000000009", "exerciseName": "Air Squats", "reps": 15, "notes": ""}]}',
   'Girl',
   '2023-09-10T00:00:00Z'
 ),
@@ -623,7 +722,7 @@ A hero WOD honoring USAF SSgt Timothy P. Davis, killed in Afghanistan in 2009.
 - Deadlift: 12 reps (155/105 lb)
 - Hang Power Clean: 9 reps (155/105 lb)
 - Push Jerk: 6 reps (155/105 lb)$$,
-  '{"rounds": 5, "timeCap": 20, "movements": [{"exerciseId": "", "exerciseName": "Deadlift", "reps": 12, "notes": "155/105 lb"}, {"exerciseId": "", "exerciseName": "Hang Power Clean", "reps": 9, "notes": "155/105 lb"}, {"exerciseId": "", "exerciseName": "Push Jerk", "reps": 6, "notes": "155/105 lb"}]}',
+  '{"rounds": 5, "timeCap": 20, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000007", "exerciseName": "Deadlift", "reps": 12, "notes": "155/105 lb"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000013", "exerciseName": "Hang Power Clean", "reps": 9, "notes": "155/105 lb"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000014", "exerciseName": "Push Jerk", "reps": 6, "notes": "155/105 lb"}]}',
   'Hero',
   '2023-09-15T00:00:00Z'
 ),
@@ -640,7 +739,7 @@ A classic Girl WOD combining running, kettlebell swings, and pull-ups.
 - Run: 400 meters
 - Kettlebell Swings: 21 reps (53/35 lb)
 - Pull-ups: 12 reps$$,
-  '{"rounds": 3, "timeCap": 15, "movements": [{"exerciseId": "", "exerciseName": "Run", "reps": 1, "notes": "400 meters"}, {"exerciseId": "", "exerciseName": "Kettlebell Swings", "reps": 21, "notes": "53/35 lb"}, {"exerciseId": "", "exerciseName": "Pull-ups", "reps": 12, "notes": ""}]}',
+  '{"rounds": 3, "timeCap": 15, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000011", "exerciseName": "Run", "reps": 1, "notes": "400 meters"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000004", "exerciseName": "Kettlebell Swings", "reps": 21, "notes": "53/35 lb"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000001", "exerciseName": "Pull-ups", "reps": 12, "notes": ""}]}',
   'Girl',
   '2023-09-20T00:00:00Z'
 ),
@@ -655,7 +754,7 @@ A classic Girl WOD combining running, kettlebell swings, and pull-ups.
 Complete 30 clean and jerks for time.
 For time:
 - Clean and Jerk: 30 reps (135/95 lb)$$,
-  '{"rounds": 1, "timeCap": 10, "movements": [{"exerciseId": "", "exerciseName": "Clean and Jerk", "reps": 30, "notes": "135/95 lb"}]}',
+  '{"rounds": 1, "timeCap": 10, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000015", "exerciseName": "Clean and Jerk", "reps": 30, "notes": "135/95 lb"}]}',
   'Girl',
   '2023-10-01T00:00:00Z'
 ),
@@ -670,7 +769,7 @@ For time:
 Complete 30 snatches for time.
 For time:
 - Power Snatch: 30 reps (135/95 lb)$$,
-  '{"rounds": 1, "timeCap": 10, "movements": [{"exerciseId": "", "exerciseName": "Power Snatch", "reps": 30, "notes": "135/95 lb"}]}',
+  '{"rounds": 1, "timeCap": 10, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000016", "exerciseName": "Power Snatch", "reps": 30, "notes": "135/95 lb"}]}',
   'Girl',
   '2023-10-05T00:00:00Z'
 ),
@@ -685,7 +784,7 @@ For time:
 Complete 150 wall-ball shots for time.
 For time:
 - Wall Ball: 150 reps (20/14 lb to 10\'/9\' target)$$,
-  '{"rounds": 1, "timeCap": 15, "movements": [{"exerciseId": "", "exerciseName": "Wall Ball", "reps": 150, "notes": "20/14 lb"}]}',
+  '{"rounds": 1, "timeCap": 15, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000017", "exerciseName": "Wall Ball", "reps": 150, "notes": "20/14 lb"}]}',
   'Girl',
   '2023-10-10T00:00:00Z'
 ),
@@ -701,7 +800,7 @@ Complete 21-15-9 reps of cleans and ring dips for time.
 21-15-9 reps for time of:
 - Clean (135/95 lb)
 - Ring Dip$$,
-  '{"rounds": 1, "timeCap": 15, "movements": [{"exerciseId": "", "exerciseName": "Clean", "reps": 21, "notes": "21-15-9, 135/95 lb"}, {"exerciseId": "", "exerciseName": "Ring Dip", "reps": 21, "notes": "21-15-9"}]}',
+  '{"rounds": 1, "timeCap": 15, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000018", "exerciseName": "Clean", "reps": 21, "notes": "21-15-9, 135/95 lb"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000019", "exerciseName": "Ring Dip", "reps": 21, "notes": "21-15-9"}]}',
   'Girl',
   '2023-10-15T00:00:00Z'
 ),
@@ -718,7 +817,7 @@ For time:
 - Row: 1000 meters
 - Thrusters: 50 reps (45/35 lb)
 - Pull-ups: 30 reps$$,
-  '{"rounds": 1, "timeCap": 15, "movements": [{"exerciseId": "", "exerciseName": "Row", "reps": 1, "notes": "1000 meters"}, {"exerciseId": "", "exerciseName": "Thrusters", "reps": 50, "notes": "45/35 lb"}, {"exerciseId": "", "exerciseName": "Pull-ups", "reps": 30, "notes": ""}]}',
+  '{"rounds": 1, "timeCap": 15, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000012", "exerciseName": "Row", "reps": 1, "notes": "1000 meters"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000002", "exerciseName": "Thrusters", "reps": 50, "notes": "45/35 lb"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000001", "exerciseName": "Pull-ups", "reps": 30, "notes": ""}]}',
   'Girl',
   '2023-10-20T00:00:00Z'
 ),
