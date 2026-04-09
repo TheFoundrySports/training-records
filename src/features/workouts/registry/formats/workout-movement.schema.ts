@@ -4,6 +4,10 @@ export const WorkoutMovementSchema = z.object({
   exerciseId: z.string().uuid(),
   exerciseName: z.string().min(1),
   reps: z.number().int().positive().optional(),
+  repScheme: z
+    .string()
+    .regex(/^\d+(-\d+)+$/, 'Format: 9-7-5')
+    .optional(),
   weight: z.number().positive().optional(),
   weightUnit: z.enum(['kg', 'lbs']).optional(),
   distance: z.number().positive().optional(),

@@ -26,6 +26,7 @@ function MovementRow({ control, name, index, fieldId, disabled, onRemove }: Move
   const exerciseIdPath = `${name}.${index}.exerciseId` as const
   const exerciseNamePath = `${name}.${index}.exerciseName` as const
   const repsPath = `${name}.${index}.reps` as const
+  const repSchemePath = `${name}.${index}.repScheme` as const
   const weightPath = `${name}.${index}.weight` as const
   const weightUnitPath = `${name}.${index}.weightUnit` as const
 
@@ -62,6 +63,24 @@ function MovementRow({ control, name, index, fieldId, disabled, onRemove }: Move
       {/* Hidden inputs to register with RHF */}
       <input type="hidden" {...register(exerciseIdPath)} />
       <input type="hidden" {...register(exerciseNamePath)} />
+
+      {/* Rep Scheme row */}
+      <div className="flex flex-col gap-1">
+        <label
+          htmlFor={`${name}-${index}-repScheme`}
+          className="text-xs font-medium text-muted-foreground"
+        >
+          Rep Scheme (optional, e.g. 9-7-5)
+        </label>
+        <input
+          id={`${name}-${index}-repScheme`}
+          type="text"
+          placeholder="e.g. 9-7-5"
+          disabled={disabled}
+          className={inputClass}
+          {...register(repSchemePath)}
+        />
+      </div>
 
       {/* Reps + Weight row */}
       <div className="grid grid-cols-2 gap-2">
@@ -127,6 +146,7 @@ export function MovementFieldArray({ control, name, disabled }: MovementFieldArr
       exerciseId: '',
       exerciseName: '',
       reps: undefined,
+      repScheme: undefined,
       weight: undefined,
       weightUnit: 'kg',
     })

@@ -550,7 +550,7 @@ Also known as "The Three Bars of Death", a CrossFit benchmark workout featuring 
 - Deadlift (1.5x bodyweight)
 - Bench Press (bodyweight)
 - Clean (0.75x bodyweight)$$,
-  '{"rounds": 1, "timeCap": 40, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000007", "exerciseName": "Deadlift", "reps": 10, "notes": "10-9-8-7-6-5-4-3-2-1, bodyweight scaling"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000020", "exerciseName": "Bench Press", "reps": 10, "notes": "10-9-8-7-6-5-4-3-2-1, bodyweight scaling"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000018", "exerciseName": "Clean", "reps": 10, "notes": "10-9-8-7-6-5-4-3-2-1, bodyweight scaling"}]}',
+  '{"rounds": 1, "timeCap": 40, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000007", "exerciseName": "Deadlift", "reps": 10, "repScheme": "10-9-8-7-6-5-4-3-2-1", "notes": "10-9-8-7-6-5-4-3-2-1, bodyweight scaling"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000020", "exerciseName": "Bench Press", "reps": 10, "repScheme": "10-9-8-7-6-5-4-3-2-1", "notes": "10-9-8-7-6-5-4-3-2-1, bodyweight scaling"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000018", "exerciseName": "Clean", "reps": 10, "repScheme": "10-9-8-7-6-5-4-3-2-1", "notes": "10-9-8-7-6-5-4-3-2-1, bodyweight scaling"}]}',
   'Benchmark',
   '2023-10-21T00:00:00Z'
 ),
@@ -630,7 +630,7 @@ A technical workout featuring ring muscle-ups and squat snatches.
 9-7-5 reps for time of:
 - Ring Muscle-ups
 - Squat Snatch (135/95 lb)$$,
-  '{"rounds": 1, "timeCap": 25, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000022", "exerciseName": "Ring Muscle-up", "reps": 9, "notes": "9-7-5"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000023", "exerciseName": "Squat Snatch", "reps": 9, "notes": "9-7-5, 135/95 lb"}]}',
+  '{"rounds": 1, "timeCap": 25, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000022", "exerciseName": "Ring Muscle-up", "reps": 9, "repScheme": "9-7-5", "notes": "9-7-5"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000023", "exerciseName": "Squat Snatch", "reps": 9, "repScheme": "9-7-5", "notes": "9-7-5, 135/95 lb"}]}',
   'Benchmark',
   '2023-10-26T00:00:00Z'
 ),
@@ -646,7 +646,7 @@ A classic CrossFit workout featuring deadlifts and handstand push-ups.
 21-15-9 reps for time of:
 - Deadlift (225/155 lb)
 - Handstand Push-ups$$,
-  '{"rounds": 1, "timeCap": 20, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000007", "exerciseName": "Deadlift", "reps": 21, "notes": "21-15-9, 225/155 lb"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000024", "exerciseName": "Handstand Push-up", "reps": 21, "notes": "21-15-9"}]}',
+  '{"rounds": 1, "timeCap": 20, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000007", "exerciseName": "Deadlift", "reps": 21, "repScheme": "21-15-9", "notes": "21-15-9, 225/155 lb"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000024", "exerciseName": "Handstand Push-up", "reps": 21, "repScheme": "21-15-9", "notes": "21-15-9"}]}',
   'Benchmark',
   '2023-10-27T00:00:00Z'
 ),
@@ -662,7 +662,7 @@ A couplet of clean and jerks and ring dips.
 21-15-9 reps for time of:
 - Clean and Jerk (135/95 lb)
 - Ring Dips$$,
-  '{"rounds": 1, "timeCap": 20, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000015", "exerciseName": "Clean and Jerk", "reps": 21, "notes": "21-15-9, 135/95 lb"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000019", "exerciseName": "Ring Dip", "reps": 21, "notes": "21-15-9"}]}',
+  '{"rounds": 1, "timeCap": 20, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000015", "exerciseName": "Clean and Jerk", "reps": 21, "repScheme": "21-15-9", "notes": "21-15-9, 135/95 lb"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000019", "exerciseName": "Ring Dip", "reps": 21, "repScheme": "21-15-9", "notes": "21-15-9"}]}',
   'Benchmark',
   '2023-10-28T00:00:00Z'
 ),
@@ -761,7 +761,7 @@ A CrossFit workout alternating between double-unders and sit-ups.
 50-40-30-20-10 reps for time of:
 - Double-unders
 - Sit-ups$$,
-  '{"rounds": 1, "timeCap": 20, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000005", "exerciseName": "Double-Under", "reps": 50, "notes": "50-40-30-20-10"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000026", "exerciseName": "Sit-up", "reps": 50, "notes": "50-40-30-20-10"}]}',
+  '{"rounds": 1, "timeCap": 20, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000005", "exerciseName": "Double-Under", "reps": 50, "repScheme": "50-40-30-20-10", "notes": "50-40-30-20-10"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000026", "exerciseName": "Sit-up", "reps": 50, "repScheme": "50-40-30-20-10", "notes": "50-40-30-20-10"}]}',
   'Benchmark',
   '2023-11-03T00:00:00Z'
 ),
@@ -820,7 +820,7 @@ One of the most famous CrossFit benchmark workouts, a couplet of thrusters and p
 21-15-9 reps for time of:
 - Thrusters (95/65 lb)
 - Pull-ups$$,
-  '{"rounds": 1, "timeCap": 10, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000002", "exerciseName": "Thrusters", "reps": 21, "notes": "21-15-9, 95/65 lb"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000001", "exerciseName": "Pull-ups", "reps": 21, "notes": "21-15-9"}]}',
+  '{"rounds": 1, "timeCap": 10, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000002", "exerciseName": "Thrusters", "reps": 21, "repScheme": "21-15-9", "notes": "21-15-9, 95/65 lb"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000001", "exerciseName": "Pull-ups", "reps": 21, "repScheme": "21-15-9", "notes": "21-15-9"}]}',
   'Girl',
   '2023-09-05T00:00:00Z'
 ),
@@ -932,7 +932,7 @@ Complete 21-15-9 reps of cleans and ring dips for time.
 21-15-9 reps for time of:
 - Clean (135/95 lb)
 - Ring Dip$$,
-  '{"rounds": 1, "timeCap": 15, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000018", "exerciseName": "Clean", "reps": 21, "notes": "21-15-9, 135/95 lb"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000019", "exerciseName": "Ring Dip", "reps": 21, "notes": "21-15-9"}]}',
+  '{"rounds": 1, "timeCap": 15, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000018", "exerciseName": "Clean", "reps": 21, "repScheme": "21-15-9", "notes": "21-15-9, 135/95 lb"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000019", "exerciseName": "Ring Dip", "reps": 21, "repScheme": "21-15-9", "notes": "21-15-9"}]}',
   'Girl',
   '2023-10-15T00:00:00Z'
 ),
@@ -1072,7 +1072,7 @@ For time (descending scheme):
 Round 1: 150 Double-unders, 45 Cal Row, 15 Bar Muscle-ups
 Round 2: 120 Double-unders, 36 Cal Row, 12 Bar Muscle-ups
 Round 3: 90 Double-unders, 27 Cal Row, 9 Bar Muscle-ups$$,
-  '{"rounds": 3, "timeCap": 30, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000005", "exerciseName": "Double-Under", "reps": 150, "notes": "150-120-90 descending"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000010", "exerciseName": "Row (Calories)", "reps": 45, "notes": "45-36-27 descending"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000031", "exerciseName": "Bar Muscle-up", "reps": 15, "notes": "15-12-9 descending"}]}',
+  '{"rounds": 3, "timeCap": 30, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000005", "exerciseName": "Double-Under", "reps": 150, "repScheme": "150-120-90", "notes": "150-120-90 descending"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000010", "exerciseName": "Row (Calories)", "reps": 45, "repScheme": "45-36-27", "notes": "45-36-27 descending"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000031", "exerciseName": "Bar Muscle-up", "reps": 15, "repScheme": "15-12-9", "notes": "15-12-9 descending"}]}',
   'General',
   '2024-04-12T00:00:00Z'
 )
