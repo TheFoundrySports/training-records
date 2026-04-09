@@ -92,7 +92,7 @@ on conflict (id) do nothing;
 insert into public.exercises (id, name, description, category_id, movement_type, measurement_type, difficulty_level, equipment, is_benchmark)
 values
   (
-    'ffffffff-0000-0000-0000-000000000001',
+    '788f8cb1-799c-4bcc-9190-2490fb736639',
     'Pull-up',
     'Strict pull-up from dead hang to chin over bar.',
     'cccccccc-0000-0000-0000-000000000001',
@@ -103,7 +103,7 @@ values
     true
   ),
   (
-    'ffffffff-0000-0000-0000-000000000002',
+    'b3390331-c6d1-4f45-b913-4dfb83013c9d',
     'Thruster',
     'Front squat to push press in one fluid movement.',
     'cccccccc-0000-0000-0000-000000000002',
@@ -114,7 +114,7 @@ values
     true
   ),
   (
-    'ffffffff-0000-0000-0000-000000000003',
+    '0d7f07af-9c67-4f0c-a280-c6c9f577318f',
     'Box Jump',
     'Two-foot takeoff, land on top of box, stand to full extension.',
     'cccccccc-0000-0000-0000-000000000001',
@@ -125,7 +125,7 @@ values
     false
   ),
   (
-    'ffffffff-0000-0000-0000-000000000004',
+    '9fab499e-3629-41d6-a197-6c672c4fd4a7',
     'Kettlebell Swing',
     'Russian or American KB swing — hip hinge power movement.',
     'cccccccc-0000-0000-0000-000000000002',
@@ -136,7 +136,7 @@ values
     false
   ),
   (
-    'ffffffff-0000-0000-0000-000000000005',
+    'cb5d7471-1519-468d-b4e7-1a28172eb6b7',
     'Double-Under',
     'Jump rope passing under feet twice per jump.',
     'cccccccc-0000-0000-0000-000000000003',
@@ -147,7 +147,7 @@ values
     false
   ),
   (
-    'ffffffff-0000-0000-0000-000000000006',
+    '3f040e9e-47fc-4380-a63c-31113a23b826',
     '400m Run',
     'One lap around a standard track.',
     'cccccccc-0000-0000-0000-000000000003',
@@ -158,7 +158,7 @@ values
     false
   ),
   (
-    'ffffffff-0000-0000-0000-000000000007',
+    '8e64d931-c7aa-444a-a179-331ccbc640b2',
     'Deadlift',
     'Conventional barbell deadlift from the floor.',
     'cccccccc-0000-0000-0000-000000000002',
@@ -169,7 +169,7 @@ values
     true
   ),
   (
-    'ffffffff-0000-0000-0000-000000000008',
+    '97b21293-1634-4cb6-8cfe-f3d835d90cec',
     'Push-up',
     'Strict push-up, chest to deck.',
     'cccccccc-0000-0000-0000-000000000001',
@@ -180,7 +180,7 @@ values
     false
   ),
   (
-    'ffffffff-0000-0000-0000-000000000009',
+    '3b50091a-451f-4a55-a66b-b8df21f1a565',
     'Air Squat',
     'Bodyweight squat, hip crease below parallel.',
     'cccccccc-0000-0000-0000-000000000001',
@@ -191,7 +191,7 @@ values
     false
   ),
   (
-    'ffffffff-0000-0000-0000-000000000010',
+    '10d4adf2-dd2c-4440-ba89-e3dee70e55b8',
     'Row (Calories)',
     'Rowing machine for calorie output.',
     'cccccccc-0000-0000-0000-000000000003',
@@ -202,7 +202,7 @@ values
     false
   ),
   (
-    'ffffffff-0000-0000-0000-000000000011',
+    'b9c0810f-dd7e-4bc1-abef-a5f635579c73',
     'Run',
     'Running at any distance — track, road, or treadmill.',
     'cccccccc-0000-0000-0000-000000000003',
@@ -213,7 +213,7 @@ values
     false
   ),
   (
-    'ffffffff-0000-0000-0000-000000000012',
+    '511adc06-ca96-4b71-87c9-82563b8f2fe0',
     'Row',
     'Rowing machine for distance or time.',
     'cccccccc-0000-0000-0000-000000000003',
@@ -224,7 +224,7 @@ values
     false
   ),
   (
-    'ffffffff-0000-0000-0000-000000000013',
+    '28a11eeb-edde-4a59-b5bf-38fb1180a588',
     'Hang Power Clean',
     'Barbell clean from the hang position above the knee.',
     'cccccccc-0000-0000-0000-000000000002',
@@ -235,7 +235,7 @@ values
     false
   ),
   (
-    'ffffffff-0000-0000-0000-000000000014',
+    '08f5503f-1c58-4c8a-9bab-1d9f76886ed6',
     'Push Jerk',
     'Barbell push jerk from the rack or clean position.',
     'cccccccc-0000-0000-0000-000000000002',
@@ -246,7 +246,7 @@ values
     false
   ),
   (
-    'ffffffff-0000-0000-0000-000000000015',
+    '73f1d502-2ede-4619-a87f-a538950adaa7',
     'Clean and Jerk',
     'Full clean followed by a jerk overhead.',
     'cccccccc-0000-0000-0000-000000000002',
@@ -257,7 +257,7 @@ values
     true
   ),
   (
-    'ffffffff-0000-0000-0000-000000000016',
+    'bc7dcd1e-60cc-4b0c-98a2-20b69246b886',
     'Power Snatch',
     'Barbell snatch caught above parallel squat.',
     'cccccccc-0000-0000-0000-000000000002',
@@ -268,7 +268,7 @@ values
     false
   ),
   (
-    'ffffffff-0000-0000-0000-000000000017',
+    '3fef06c8-0e03-4ac0-a6de-f0b1febf0060',
     'Wall Ball',
     'Squat and throw medicine ball to target.',
     'cccccccc-0000-0000-0000-000000000004',
@@ -279,7 +279,7 @@ values
     false
   ),
   (
-    'ffffffff-0000-0000-0000-000000000018',
+    'a2bb5d91-5528-433d-9915-ca31c789a218',
     'Clean',
     'Full squat clean from the floor.',
     'cccccccc-0000-0000-0000-000000000002',
@@ -290,7 +290,7 @@ values
     false
   ),
   (
-    'ffffffff-0000-0000-0000-000000000019',
+    'cca2b5fa-655d-4f6f-854d-4702dc3fb978',
     'Ring Dip',
     'Dip performed on gymnastic rings.',
     'cccccccc-0000-0000-0000-000000000001',
@@ -301,7 +301,7 @@ values
     false
   ),
   (
-    'ffffffff-0000-0000-0000-000000000020',
+    '6c643bf5-7995-4acd-b6c2-3f534a5b47b3',
     'Bench Press',
     'Horizontal barbell press from chest to full arm extension.',
     'cccccccc-0000-0000-0000-000000000002',
@@ -312,7 +312,7 @@ values
     false
   ),
   (
-    'ffffffff-0000-0000-0000-000000000021',
+    '415a665a-9778-415c-9187-6054acf4ff6f',
     'Snatch',
     'Full squat snatch — barbell lifted from floor to overhead in one movement.',
     'cccccccc-0000-0000-0000-000000000002',
@@ -323,7 +323,7 @@ values
     false
   ),
   (
-    'ffffffff-0000-0000-0000-000000000022',
+    '06412fe3-3426-448f-8d92-8901c3c698c0',
     'Ring Muscle-up',
     'Explosive pull to dip transition on gymnastic rings.',
     'cccccccc-0000-0000-0000-000000000001',
@@ -334,7 +334,7 @@ values
     false
   ),
   (
-    'ffffffff-0000-0000-0000-000000000023',
+    '63cc6cb0-cb63-49c8-ab19-7cfab2dc64af',
     'Squat Snatch',
     'Barbell snatch received in a full overhead squat position.',
     'cccccccc-0000-0000-0000-000000000002',
@@ -345,7 +345,7 @@ values
     false
   ),
   (
-    'ffffffff-0000-0000-0000-000000000024',
+    '75b04bd3-f4de-4de5-a854-7d662428a27b',
     'Handstand Push-up',
     'Inverted push-up in a handstand position, head to floor.',
     'cccccccc-0000-0000-0000-000000000001',
@@ -356,7 +356,7 @@ values
     false
   ),
   (
-    'ffffffff-0000-0000-0000-000000000025',
+    '74a0d64f-87a1-4140-88d2-44358591ccf2',
     'Overhead Squat',
     'Barbell squat with the bar held overhead in a wide grip.',
     'cccccccc-0000-0000-0000-000000000002',
@@ -367,7 +367,7 @@ values
     false
   ),
   (
-    'ffffffff-0000-0000-0000-000000000026',
+    '810984bc-0d10-4c58-9af6-57ba66845906',
     'Sit-up',
     'Abdominal sit-up, typically with anchored feet.',
     'cccccccc-0000-0000-0000-000000000001',
@@ -378,7 +378,7 @@ values
     false
   ),
   (
-    'ffffffff-0000-0000-0000-000000000027',
+    'f7f9698b-836d-409e-a9f7-ece785a5ee45',
     'Echo Bike',
     'Air assault bike for calorie output — arms and legs driven simultaneously.',
     'cccccccc-0000-0000-0000-000000000003',
@@ -389,7 +389,7 @@ values
     false
   ),
   (
-    'ffffffff-0000-0000-0000-000000000028',
+    '6aa9902d-4767-4234-ae4c-68418b28a03b',
     'Walking Lunge',
     'Forward lunge stepping continuously — knee touches floor each rep.',
     'cccccccc-0000-0000-0000-000000000001',
@@ -400,7 +400,7 @@ values
     false
   ),
   (
-    'ffffffff-0000-0000-0000-000000000029',
+    'af83add1-e77d-4610-a4c8-3b4bc845eb37',
     'Dumbbell Snatch',
     'Single-arm dumbbell snatch from the floor to overhead in one movement.',
     'cccccccc-0000-0000-0000-000000000002',
@@ -411,7 +411,7 @@ values
     false
   ),
   (
-    'ffffffff-0000-0000-0000-000000000030',
+    '97819520-ca03-489f-b273-e3a7103cf38d',
     'Toes-to-Bar',
     'Hanging from a pull-up bar, raise toes to touch the bar.',
     'cccccccc-0000-0000-0000-000000000001',
@@ -422,7 +422,7 @@ values
     false
   ),
   (
-    'ffffffff-0000-0000-0000-000000000031',
+    '79128db8-d420-4736-abac-aa775e566252',
     'Bar Muscle-up',
     'Explosive pull-up transitioning above the bar to a dip lockout.',
     'cccccccc-0000-0000-0000-000000000001',
@@ -550,7 +550,7 @@ Also known as "The Three Bars of Death", a CrossFit benchmark workout featuring 
 - Deadlift (1.5x bodyweight)
 - Bench Press (bodyweight)
 - Clean (0.75x bodyweight)$$,
-  '{"rounds": 1, "timeCap": 40, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000007", "exerciseName": "Deadlift", "reps": 10, "repScheme": "10-9-8-7-6-5-4-3-2-1", "notes": "10-9-8-7-6-5-4-3-2-1, bodyweight scaling"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000020", "exerciseName": "Bench Press", "reps": 10, "repScheme": "10-9-8-7-6-5-4-3-2-1", "notes": "10-9-8-7-6-5-4-3-2-1, bodyweight scaling"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000018", "exerciseName": "Clean", "reps": 10, "repScheme": "10-9-8-7-6-5-4-3-2-1", "notes": "10-9-8-7-6-5-4-3-2-1, bodyweight scaling"}]}',
+  '{"rounds": 1, "timeCap": 40, "movements": [{"exerciseId": "8e64d931-c7aa-444a-a179-331ccbc640b2", "exerciseName": "Deadlift", "reps": 10, "repScheme": "10-9-8-7-6-5-4-3-2-1", "notes": "10-9-8-7-6-5-4-3-2-1, bodyweight scaling"}, {"exerciseId": "6c643bf5-7995-4acd-b6c2-3f534a5b47b3", "exerciseName": "Bench Press", "reps": 10, "repScheme": "10-9-8-7-6-5-4-3-2-1", "notes": "10-9-8-7-6-5-4-3-2-1, bodyweight scaling"}, {"exerciseId": "a2bb5d91-5528-433d-9915-ca31c789a218", "exerciseName": "Clean", "reps": 10, "repScheme": "10-9-8-7-6-5-4-3-2-1", "notes": "10-9-8-7-6-5-4-3-2-1, bodyweight scaling"}]}',
   'Benchmark',
   '2023-10-21T00:00:00Z'
 ),
@@ -567,7 +567,7 @@ For time:
 - Row: 1000 meters
 - Thrusters: 50 reps (45/35 lb)
 - Pull-ups: 30 reps$$,
-  '{"rounds": 1, "timeCap": 20, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000012", "exerciseName": "Row", "reps": 1, "notes": "1000 meters"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000002", "exerciseName": "Thruster", "reps": 50, "notes": "45/35 lb"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000001", "exerciseName": "Pull-up", "reps": 30, "notes": ""}]}',
+  '{"rounds": 1, "timeCap": 20, "movements": [{"exerciseId": "511adc06-ca96-4b71-87c9-82563b8f2fe0", "exerciseName": "Row", "reps": 1, "notes": "1000 meters"}, {"exerciseId": "b3390331-c6d1-4f45-b913-4dfb83013c9d", "exerciseName": "Thruster", "reps": 50, "notes": "45/35 lb"}, {"exerciseId": "788f8cb1-799c-4bcc-9190-2490fb736639", "exerciseName": "Pull-up", "reps": 30, "notes": ""}]}',
   'Benchmark',
   '2023-10-22T00:00:00Z'
 ),
@@ -582,7 +582,7 @@ For time:
 A simple but challenging benchmark of 30 snatches for time.
 For time:
 - Snatch: 30 reps (135/95 lb)$$,
-  '{"rounds": 1, "timeCap": 10, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000021", "exerciseName": "Snatch", "reps": 30, "notes": "135/95 lb"}]}',
+  '{"rounds": 1, "timeCap": 10, "movements": [{"exerciseId": "415a665a-9778-415c-9187-6054acf4ff6f", "exerciseName": "Snatch", "reps": 30, "notes": "135/95 lb"}]}',
   'Benchmark',
   '2023-10-23T00:00:00Z'
 ),
@@ -599,7 +599,7 @@ A challenging workout with running, box jumps, and wall balls.
 - Run: 400 meters
 - Box Jumps: 30 reps (24/20 inches)
 - Wall Balls: 30 reps (20/14 lb)$$,
-  '{"rounds": 5, "timeCap": 30, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000011", "exerciseName": "Run", "reps": 1, "notes": "400 meters"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000003", "exerciseName": "Box Jump", "reps": 30, "notes": "24/20 in"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000017", "exerciseName": "Wall Ball", "reps": 30, "notes": "20/14 lb"}]}',
+  '{"rounds": 5, "timeCap": 30, "movements": [{"exerciseId": "b9c0810f-dd7e-4bc1-abef-a5f635579c73", "exerciseName": "Run", "reps": 1, "notes": "400 meters"}, {"exerciseId": "0d7f07af-9c67-4f0c-a280-c6c9f577318f", "exerciseName": "Box Jump", "reps": 30, "notes": "24/20 in"}, {"exerciseId": "3fef06c8-0e03-4ac0-a6de-f0b1febf0060", "exerciseName": "Wall Ball", "reps": 30, "notes": "20/14 lb"}]}',
   'Benchmark',
   '2023-10-24T00:00:00Z'
 ),
@@ -614,7 +614,7 @@ A challenging workout with running, box jumps, and wall balls.
 A simple but grueling CrossFit workout of 150 wall balls for time.
 For time:
 - Wall Balls: 150 reps (20/14 lb)$$,
-  '{"rounds": 1, "timeCap": 15, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000017", "exerciseName": "Wall Ball", "reps": 150, "notes": "20/14 lb"}]}',
+  '{"rounds": 1, "timeCap": 15, "movements": [{"exerciseId": "3fef06c8-0e03-4ac0-a6de-f0b1febf0060", "exerciseName": "Wall Ball", "reps": 150, "notes": "20/14 lb"}]}',
   'Benchmark',
   '2023-10-25T00:00:00Z'
 ),
@@ -630,7 +630,7 @@ A technical workout featuring ring muscle-ups and squat snatches.
 9-7-5 reps for time of:
 - Ring Muscle-ups
 - Squat Snatch (135/95 lb)$$,
-  '{"rounds": 1, "timeCap": 25, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000022", "exerciseName": "Ring Muscle-up", "reps": 9, "repScheme": "9-7-5", "notes": "9-7-5"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000023", "exerciseName": "Squat Snatch", "reps": 9, "repScheme": "9-7-5", "notes": "9-7-5, 135/95 lb"}]}',
+  '{"rounds": 1, "timeCap": 25, "movements": [{"exerciseId": "06412fe3-3426-448f-8d92-8901c3c698c0", "exerciseName": "Ring Muscle-up", "reps": 9, "repScheme": "9-7-5", "notes": "9-7-5"}, {"exerciseId": "63cc6cb0-cb63-49c8-ab19-7cfab2dc64af", "exerciseName": "Squat Snatch", "reps": 9, "repScheme": "9-7-5", "notes": "9-7-5, 135/95 lb"}]}',
   'Benchmark',
   '2023-10-26T00:00:00Z'
 ),
@@ -646,7 +646,7 @@ A classic CrossFit workout featuring deadlifts and handstand push-ups.
 21-15-9 reps for time of:
 - Deadlift (225/155 lb)
 - Handstand Push-ups$$,
-  '{"rounds": 1, "timeCap": 20, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000007", "exerciseName": "Deadlift", "reps": 21, "repScheme": "21-15-9", "notes": "21-15-9, 225/155 lb"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000024", "exerciseName": "Handstand Push-up", "reps": 21, "repScheme": "21-15-9", "notes": "21-15-9"}]}',
+  '{"rounds": 1, "timeCap": 20, "movements": [{"exerciseId": "8e64d931-c7aa-444a-a179-331ccbc640b2", "exerciseName": "Deadlift", "reps": 21, "repScheme": "21-15-9", "notes": "21-15-9, 225/155 lb"}, {"exerciseId": "75b04bd3-f4de-4de5-a854-7d662428a27b", "exerciseName": "Handstand Push-up", "reps": 21, "repScheme": "21-15-9", "notes": "21-15-9"}]}',
   'Benchmark',
   '2023-10-27T00:00:00Z'
 ),
@@ -662,7 +662,7 @@ A couplet of clean and jerks and ring dips.
 21-15-9 reps for time of:
 - Clean and Jerk (135/95 lb)
 - Ring Dips$$,
-  '{"rounds": 1, "timeCap": 20, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000015", "exerciseName": "Clean and Jerk", "reps": 21, "repScheme": "21-15-9", "notes": "21-15-9, 135/95 lb"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000019", "exerciseName": "Ring Dip", "reps": 21, "repScheme": "21-15-9", "notes": "21-15-9"}]}',
+  '{"rounds": 1, "timeCap": 20, "movements": [{"exerciseId": "73f1d502-2ede-4619-a87f-a538950adaa7", "exerciseName": "Clean and Jerk", "reps": 21, "repScheme": "21-15-9", "notes": "21-15-9, 135/95 lb"}, {"exerciseId": "cca2b5fa-655d-4f6f-854d-4702dc3fb978", "exerciseName": "Ring Dip", "reps": 21, "repScheme": "21-15-9", "notes": "21-15-9"}]}',
   'Benchmark',
   '2023-10-28T00:00:00Z'
 ),
@@ -678,7 +678,7 @@ A CrossFit workout alternating between running and overhead squats.
 5 rounds for time of:
 - Run: 400 meters
 - Overhead Squats: 15 reps (95/65 lb)$$,
-  '{"rounds": 5, "timeCap": 25, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000011", "exerciseName": "Run", "reps": 1, "notes": "400 meters"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000025", "exerciseName": "Overhead Squat", "reps": 15, "notes": "95/65 lb"}]}',
+  '{"rounds": 5, "timeCap": 25, "movements": [{"exerciseId": "b9c0810f-dd7e-4bc1-abef-a5f635579c73", "exerciseName": "Run", "reps": 1, "notes": "400 meters"}, {"exerciseId": "74a0d64f-87a1-4140-88d2-44358591ccf2", "exerciseName": "Overhead Squat", "reps": 15, "notes": "95/65 lb"}]}',
   'Benchmark',
   '2023-10-29T00:00:00Z'
 ),
@@ -693,7 +693,7 @@ A CrossFit workout alternating between running and overhead squats.
 A CrossFit benchmark workout of 30 clean and jerks for time.
 For time:
 - Clean and Jerk: 30 reps (135/95 lb)$$,
-  '{"rounds": 1, "timeCap": 10, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000015", "exerciseName": "Clean and Jerk", "reps": 30, "notes": "135/95 lb"}]}',
+  '{"rounds": 1, "timeCap": 10, "movements": [{"exerciseId": "73f1d502-2ede-4619-a87f-a538950adaa7", "exerciseName": "Clean and Jerk", "reps": 30, "notes": "135/95 lb"}]}',
   'Benchmark',
   '2023-10-30T00:00:00Z'
 ),
@@ -710,7 +710,7 @@ Every minute on the minute for 30 minutes:
 - Pull-ups: 5 reps
 - Push-ups: 10 reps
 - Air Squats: 15 reps$$,
-  '{"rounds": 1, "timeCap": 30, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000001", "exerciseName": "Pull-up", "reps": 5, "notes": "EMOM 30 min"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000008", "exerciseName": "Push-up", "reps": 10, "notes": "EMOM 30 min"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000009", "exerciseName": "Air Squat", "reps": 15, "notes": "EMOM 30 min"}]}',
+  '{"rounds": 1, "timeCap": 30, "movements": [{"exerciseId": "788f8cb1-799c-4bcc-9190-2490fb736639", "exerciseName": "Pull-up", "reps": 5, "notes": "EMOM 30 min"}, {"exerciseId": "97b21293-1634-4cb6-8cfe-f3d835d90cec", "exerciseName": "Push-up", "reps": 10, "notes": "EMOM 30 min"}, {"exerciseId": "3b50091a-451f-4a55-a66b-b8df21f1a565", "exerciseName": "Air Squat", "reps": 15, "notes": "EMOM 30 min"}]}',
   'Benchmark',
   '2023-10-31T00:00:00Z'
 ),
@@ -728,7 +728,7 @@ Five rounds of a bodyweight circuit with 3-minute rests.
 - Push-ups: 30 reps
 - Sit-ups: 40 reps
 - Air Squats: 50 reps$$,
-  '{"rounds": 5, "timeCap": 40, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000001", "exerciseName": "Pull-up", "reps": 20, "notes": "3 min rest between rounds"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000008", "exerciseName": "Push-up", "reps": 30, "notes": ""}, {"exerciseId": "ffffffff-0000-0000-0000-000000000026", "exerciseName": "Sit-up", "reps": 40, "notes": ""}, {"exerciseId": "ffffffff-0000-0000-0000-000000000009", "exerciseName": "Air Squat", "reps": 50, "notes": ""}]}',
+  '{"rounds": 5, "timeCap": 40, "movements": [{"exerciseId": "788f8cb1-799c-4bcc-9190-2490fb736639", "exerciseName": "Pull-up", "reps": 20, "notes": "3 min rest between rounds"}, {"exerciseId": "97b21293-1634-4cb6-8cfe-f3d835d90cec", "exerciseName": "Push-up", "reps": 30, "notes": ""}, {"exerciseId": "810984bc-0d10-4c58-9af6-57ba66845906", "exerciseName": "Sit-up", "reps": 40, "notes": ""}, {"exerciseId": "3b50091a-451f-4a55-a66b-b8df21f1a565", "exerciseName": "Air Squat", "reps": 50, "notes": ""}]}',
   'Benchmark',
   '2023-11-01T00:00:00Z'
 ),
@@ -745,7 +745,7 @@ A challenging workout with running, kettlebell swings, and pull-ups.
 - Run: 800 meters
 - Kettlebell Swings: 30 reps (70/53 lb)
 - Pull-ups: 30 reps$$,
-  '{"rounds": 5, "timeCap": 35, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000011", "exerciseName": "Run", "reps": 1, "notes": "800 meters"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000004", "exerciseName": "Kettlebell Swing", "reps": 30, "notes": "70/53 lb"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000001", "exerciseName": "Pull-up", "reps": 30, "notes": ""}]}',
+  '{"rounds": 5, "timeCap": 35, "movements": [{"exerciseId": "b9c0810f-dd7e-4bc1-abef-a5f635579c73", "exerciseName": "Run", "reps": 1, "notes": "800 meters"}, {"exerciseId": "9fab499e-3629-41d6-a197-6c672c4fd4a7", "exerciseName": "Kettlebell Swing", "reps": 30, "notes": "70/53 lb"}, {"exerciseId": "788f8cb1-799c-4bcc-9190-2490fb736639", "exerciseName": "Pull-up", "reps": 30, "notes": ""}]}',
   'Benchmark',
   '2023-11-02T00:00:00Z'
 ),
@@ -761,7 +761,7 @@ A CrossFit workout alternating between double-unders and sit-ups.
 50-40-30-20-10 reps for time of:
 - Double-unders
 - Sit-ups$$,
-  '{"rounds": 1, "timeCap": 20, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000005", "exerciseName": "Double-Under", "reps": 50, "repScheme": "50-40-30-20-10", "notes": "50-40-30-20-10"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000026", "exerciseName": "Sit-up", "reps": 50, "repScheme": "50-40-30-20-10", "notes": "50-40-30-20-10"}]}',
+  '{"rounds": 1, "timeCap": 20, "movements": [{"exerciseId": "cb5d7471-1519-468d-b4e7-1a28172eb6b7", "exerciseName": "Double-Under", "reps": 50, "repScheme": "50-40-30-20-10", "notes": "50-40-30-20-10"}, {"exerciseId": "810984bc-0d10-4c58-9af6-57ba66845906", "exerciseName": "Sit-up", "reps": 50, "repScheme": "50-40-30-20-10", "notes": "50-40-30-20-10"}]}',
   'Benchmark',
   '2023-11-03T00:00:00Z'
 ),
@@ -777,7 +777,7 @@ An AMRAP workout with running and pull-ups.
 As many rounds as possible in 20 minutes of:
 - Run: 400 meters
 - Max pull-ups$$,
-  '{"rounds": 1, "timeCap": 20, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000011", "exerciseName": "Run", "reps": 1, "notes": "400 meters"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000001", "exerciseName": "Pull-up", "reps": 1, "notes": "max reps"}]}',
+  '{"rounds": 1, "timeCap": 20, "movements": [{"exerciseId": "b9c0810f-dd7e-4bc1-abef-a5f635579c73", "exerciseName": "Run", "reps": 1, "notes": "400 meters"}, {"exerciseId": "788f8cb1-799c-4bcc-9190-2490fb736639", "exerciseName": "Pull-up", "reps": 1, "notes": "max reps"}]}',
   'Benchmark',
   '2023-11-04T00:00:00Z'
 ),
@@ -804,7 +804,7 @@ For time:
 - Air Squats: 300 reps
 - Run: 1 mile
 Option to wear a 20lb vest or body armor.$$,
-  '{"rounds": 1, "timeCap": 60, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000011", "exerciseName": "Run", "reps": 1, "notes": "1 mile"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000001", "exerciseName": "Pull-ups", "reps": 100, "notes": ""}, {"exerciseId": "ffffffff-0000-0000-0000-000000000008", "exerciseName": "Push-ups", "reps": 200, "notes": ""}, {"exerciseId": "ffffffff-0000-0000-0000-000000000009", "exerciseName": "Air Squats", "reps": 300, "notes": ""}, {"exerciseId": "ffffffff-0000-0000-0000-000000000011", "exerciseName": "Run", "reps": 1, "notes": "1 mile"}]}',
+  '{"rounds": 1, "timeCap": 60, "movements": [{"exerciseId": "b9c0810f-dd7e-4bc1-abef-a5f635579c73", "exerciseName": "Run", "reps": 1, "notes": "1 mile"}, {"exerciseId": "788f8cb1-799c-4bcc-9190-2490fb736639", "exerciseName": "Pull-ups", "reps": 100, "notes": ""}, {"exerciseId": "97b21293-1634-4cb6-8cfe-f3d835d90cec", "exerciseName": "Push-ups", "reps": 200, "notes": ""}, {"exerciseId": "3b50091a-451f-4a55-a66b-b8df21f1a565", "exerciseName": "Air Squats", "reps": 300, "notes": ""}, {"exerciseId": "b9c0810f-dd7e-4bc1-abef-a5f635579c73", "exerciseName": "Run", "reps": 1, "notes": "1 mile"}]}',
   'Hero',
   '2023-09-01T00:00:00Z'
 ),
@@ -820,7 +820,7 @@ One of the most famous CrossFit benchmark workouts, a couplet of thrusters and p
 21-15-9 reps for time of:
 - Thrusters (95/65 lb)
 - Pull-ups$$,
-  '{"rounds": 1, "timeCap": 10, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000002", "exerciseName": "Thrusters", "reps": 21, "repScheme": "21-15-9", "notes": "21-15-9, 95/65 lb"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000001", "exerciseName": "Pull-ups", "reps": 21, "repScheme": "21-15-9", "notes": "21-15-9"}]}',
+  '{"rounds": 1, "timeCap": 10, "movements": [{"exerciseId": "b3390331-c6d1-4f45-b913-4dfb83013c9d", "exerciseName": "Thrusters", "reps": 21, "repScheme": "21-15-9", "notes": "21-15-9, 95/65 lb"}, {"exerciseId": "788f8cb1-799c-4bcc-9190-2490fb736639", "exerciseName": "Pull-ups", "reps": 21, "repScheme": "21-15-9", "notes": "21-15-9"}]}',
   'Girl',
   '2023-09-05T00:00:00Z'
 ),
@@ -837,7 +837,7 @@ As many rounds as possible in 20 minutes of:
 - Pull-ups: 5 reps
 - Push-ups: 10 reps
 - Air Squats: 15 reps$$,
-  '{"rounds": 1, "timeCap": 20, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000001", "exerciseName": "Pull-ups", "reps": 5, "notes": ""}, {"exerciseId": "ffffffff-0000-0000-0000-000000000008", "exerciseName": "Push-ups", "reps": 10, "notes": ""}, {"exerciseId": "ffffffff-0000-0000-0000-000000000009", "exerciseName": "Air Squats", "reps": 15, "notes": ""}]}',
+  '{"rounds": 1, "timeCap": 20, "movements": [{"exerciseId": "788f8cb1-799c-4bcc-9190-2490fb736639", "exerciseName": "Pull-ups", "reps": 5, "notes": ""}, {"exerciseId": "97b21293-1634-4cb6-8cfe-f3d835d90cec", "exerciseName": "Push-ups", "reps": 10, "notes": ""}, {"exerciseId": "3b50091a-451f-4a55-a66b-b8df21f1a565", "exerciseName": "Air Squats", "reps": 15, "notes": ""}]}',
   'Girl',
   '2023-09-10T00:00:00Z'
 ),
@@ -854,7 +854,7 @@ A hero WOD honoring USAF SSgt Timothy P. Davis, killed in Afghanistan in 2009.
 - Deadlift: 12 reps (155/105 lb)
 - Hang Power Clean: 9 reps (155/105 lb)
 - Push Jerk: 6 reps (155/105 lb)$$,
-  '{"rounds": 5, "timeCap": 20, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000007", "exerciseName": "Deadlift", "reps": 12, "notes": "155/105 lb"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000013", "exerciseName": "Hang Power Clean", "reps": 9, "notes": "155/105 lb"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000014", "exerciseName": "Push Jerk", "reps": 6, "notes": "155/105 lb"}]}',
+  '{"rounds": 5, "timeCap": 20, "movements": [{"exerciseId": "8e64d931-c7aa-444a-a179-331ccbc640b2", "exerciseName": "Deadlift", "reps": 12, "notes": "155/105 lb"}, {"exerciseId": "28a11eeb-edde-4a59-b5bf-38fb1180a588", "exerciseName": "Hang Power Clean", "reps": 9, "notes": "155/105 lb"}, {"exerciseId": "08f5503f-1c58-4c8a-9bab-1d9f76886ed6", "exerciseName": "Push Jerk", "reps": 6, "notes": "155/105 lb"}]}',
   'Hero',
   '2023-09-15T00:00:00Z'
 ),
@@ -871,7 +871,7 @@ A classic Girl WOD combining running, kettlebell swings, and pull-ups.
 - Run: 400 meters
 - Kettlebell Swings: 21 reps (53/35 lb)
 - Pull-ups: 12 reps$$,
-  '{"rounds": 3, "timeCap": 15, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000011", "exerciseName": "Run", "reps": 1, "notes": "400 meters"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000004", "exerciseName": "Kettlebell Swings", "reps": 21, "notes": "53/35 lb"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000001", "exerciseName": "Pull-ups", "reps": 12, "notes": ""}]}',
+  '{"rounds": 3, "timeCap": 15, "movements": [{"exerciseId": "b9c0810f-dd7e-4bc1-abef-a5f635579c73", "exerciseName": "Run", "reps": 1, "notes": "400 meters"}, {"exerciseId": "9fab499e-3629-41d6-a197-6c672c4fd4a7", "exerciseName": "Kettlebell Swings", "reps": 21, "notes": "53/35 lb"}, {"exerciseId": "788f8cb1-799c-4bcc-9190-2490fb736639", "exerciseName": "Pull-ups", "reps": 12, "notes": ""}]}',
   'Girl',
   '2023-09-20T00:00:00Z'
 ),
@@ -886,7 +886,7 @@ A classic Girl WOD combining running, kettlebell swings, and pull-ups.
 Complete 30 clean and jerks for time.
 For time:
 - Clean and Jerk: 30 reps (135/95 lb)$$,
-  '{"rounds": 1, "timeCap": 10, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000015", "exerciseName": "Clean and Jerk", "reps": 30, "notes": "135/95 lb"}]}',
+  '{"rounds": 1, "timeCap": 10, "movements": [{"exerciseId": "73f1d502-2ede-4619-a87f-a538950adaa7", "exerciseName": "Clean and Jerk", "reps": 30, "notes": "135/95 lb"}]}',
   'Girl',
   '2023-10-01T00:00:00Z'
 ),
@@ -901,7 +901,7 @@ For time:
 Complete 30 snatches for time.
 For time:
 - Power Snatch: 30 reps (135/95 lb)$$,
-  '{"rounds": 1, "timeCap": 10, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000016", "exerciseName": "Power Snatch", "reps": 30, "notes": "135/95 lb"}]}',
+  '{"rounds": 1, "timeCap": 10, "movements": [{"exerciseId": "bc7dcd1e-60cc-4b0c-98a2-20b69246b886", "exerciseName": "Power Snatch", "reps": 30, "notes": "135/95 lb"}]}',
   'Girl',
   '2023-10-05T00:00:00Z'
 ),
@@ -916,7 +916,7 @@ For time:
 Complete 150 wall-ball shots for time.
 For time:
 - Wall Ball: 150 reps (20/14 lb to 10\'/9\' target)$$,
-  '{"rounds": 1, "timeCap": 15, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000017", "exerciseName": "Wall Ball", "reps": 150, "notes": "20/14 lb"}]}',
+  '{"rounds": 1, "timeCap": 15, "movements": [{"exerciseId": "3fef06c8-0e03-4ac0-a6de-f0b1febf0060", "exerciseName": "Wall Ball", "reps": 150, "notes": "20/14 lb"}]}',
   'Girl',
   '2023-10-10T00:00:00Z'
 ),
@@ -932,7 +932,7 @@ Complete 21-15-9 reps of cleans and ring dips for time.
 21-15-9 reps for time of:
 - Clean (135/95 lb)
 - Ring Dip$$,
-  '{"rounds": 1, "timeCap": 15, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000018", "exerciseName": "Clean", "reps": 21, "repScheme": "21-15-9", "notes": "21-15-9, 135/95 lb"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000019", "exerciseName": "Ring Dip", "reps": 21, "repScheme": "21-15-9", "notes": "21-15-9"}]}',
+  '{"rounds": 1, "timeCap": 15, "movements": [{"exerciseId": "a2bb5d91-5528-433d-9915-ca31c789a218", "exerciseName": "Clean", "reps": 21, "repScheme": "21-15-9", "notes": "21-15-9, 135/95 lb"}, {"exerciseId": "cca2b5fa-655d-4f6f-854d-4702dc3fb978", "exerciseName": "Ring Dip", "reps": 21, "repScheme": "21-15-9", "notes": "21-15-9"}]}',
   'Girl',
   '2023-10-15T00:00:00Z'
 ),
@@ -949,7 +949,7 @@ For time:
 - Row: 1000 meters
 - Thrusters: 50 reps (45/35 lb)
 - Pull-ups: 30 reps$$,
-  '{"rounds": 1, "timeCap": 15, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000012", "exerciseName": "Row", "reps": 1, "notes": "1000 meters"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000002", "exerciseName": "Thrusters", "reps": 50, "notes": "45/35 lb"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000001", "exerciseName": "Pull-ups", "reps": 30, "notes": ""}]}',
+  '{"rounds": 1, "timeCap": 15, "movements": [{"exerciseId": "511adc06-ca96-4b71-87c9-82563b8f2fe0", "exerciseName": "Row", "reps": 1, "notes": "1000 meters"}, {"exerciseId": "b3390331-c6d1-4f45-b913-4dfb83013c9d", "exerciseName": "Thrusters", "reps": 50, "notes": "45/35 lb"}, {"exerciseId": "788f8cb1-799c-4bcc-9190-2490fb736639", "exerciseName": "Pull-ups", "reps": 30, "notes": ""}]}',
   'Girl',
   '2023-10-20T00:00:00Z'
 ),
@@ -972,7 +972,7 @@ As many rounds as possible in 20 minutes of:
 - Pull-ups: 5 reps
 - Push-ups: 10 reps
 - Air Squats: 15 reps$$,
-  '{"rounds": 1, "timeCap": 20, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000001", "exerciseName": "Pull-up", "reps": 5, "notes": ""}, {"exerciseId": "ffffffff-0000-0000-0000-000000000008", "exerciseName": "Push-up", "reps": 10, "notes": ""}, {"exerciseId": "ffffffff-0000-0000-0000-000000000009", "exerciseName": "Air Squat", "reps": 15, "notes": ""}]}',
+  '{"rounds": 1, "timeCap": 20, "movements": [{"exerciseId": "788f8cb1-799c-4bcc-9190-2490fb736639", "exerciseName": "Pull-up", "reps": 5, "notes": ""}, {"exerciseId": "97b21293-1634-4cb6-8cfe-f3d835d90cec", "exerciseName": "Push-up", "reps": 10, "notes": ""}, {"exerciseId": "3b50091a-451f-4a55-a66b-b8df21f1a565", "exerciseName": "Air Squat", "reps": 15, "notes": ""}]}',
   'Benchmark',
   '2024-05-09T00:00:00Z'
 ),
@@ -988,7 +988,7 @@ EMOM alternating between box jumps and Echo bike calories.
 Every minute on the minute for 20 minutes (alternating):
 - Box Jumps: 12 reps (24/20 inch)
 - Echo Bike: 12 calories$$,
-  '{"rounds": 1, "timeCap": 20, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000003", "exerciseName": "Box Jump", "reps": 12, "notes": "24/20 inch, odd minutes"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000027", "exerciseName": "Echo Bike", "reps": 12, "notes": "calories, even minutes"}]}',
+  '{"rounds": 1, "timeCap": 20, "movements": [{"exerciseId": "0d7f07af-9c67-4f0c-a280-c6c9f577318f", "exerciseName": "Box Jump", "reps": 12, "notes": "24/20 inch, odd minutes"}, {"exerciseId": "f7f9698b-836d-409e-a9f7-ece785a5ee45", "exerciseName": "Echo Bike", "reps": 12, "notes": "calories, even minutes"}]}',
   'General',
   '2024-05-07T00:00:00Z'
 ),
@@ -1021,7 +1021,7 @@ A unique effort focusing on static holds to challenge muscle stamina and mental 
 5 rounds:
 - Power Snatch: 5 reps (weight of choice)
 - Row: 400/500 meters$$,
-  '{"rounds": 5, "timeCap": 25, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000016", "exerciseName": "Power Snatch", "reps": 5, "notes": "weight of choice"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000012", "exerciseName": "Row", "reps": 1, "notes": "400/500 meters"}]}',
+  '{"rounds": 5, "timeCap": 25, "movements": [{"exerciseId": "bc7dcd1e-60cc-4b0c-98a2-20b69246b886", "exerciseName": "Power Snatch", "reps": 5, "notes": "weight of choice"}, {"exerciseId": "511adc06-ca96-4b71-87c9-82563b8f2fe0", "exerciseName": "Row", "reps": 1, "notes": "400/500 meters"}]}',
   'General',
   '2024-05-10T00:00:00Z'
 ),
@@ -1037,7 +1037,7 @@ A unique effort focusing on static holds to challenge muscle stamina and mental 
 5 rounds:
 - Run: 350 meters
 - Walking Lunge: 50 meters$$,
-  '{"rounds": 5, "timeCap": 20, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000011", "exerciseName": "Run", "reps": 1, "notes": "350 meters"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000028", "exerciseName": "Walking Lunge", "reps": 50, "notes": "50 meters"}]}',
+  '{"rounds": 5, "timeCap": 20, "movements": [{"exerciseId": "b9c0810f-dd7e-4bc1-abef-a5f635579c73", "exerciseName": "Run", "reps": 1, "notes": "350 meters"}, {"exerciseId": "6aa9902d-4767-4234-ae4c-68418b28a03b", "exerciseName": "Walking Lunge", "reps": 50, "notes": "50 meters"}]}',
   'General',
   '2024-04-14T00:00:00Z'
 ),
@@ -1055,7 +1055,7 @@ As many rounds as possible in 10 minutes of:
 - Dumbbell Snatch (Right): 10 reps (35/50 lb)
 - Toes-to-bar: 10 reps
 - Dumbbell Snatch (Left): 10 reps (35/50 lb)$$,
-  '{"rounds": 1, "timeCap": 10, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000008", "exerciseName": "Push-up", "reps": 10, "notes": ""}, {"exerciseId": "ffffffff-0000-0000-0000-000000000029", "exerciseName": "Dumbbell Snatch", "reps": 10, "notes": "35/50 lb right"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000030", "exerciseName": "Toes-to-Bar", "reps": 10, "notes": ""}, {"exerciseId": "ffffffff-0000-0000-0000-000000000029", "exerciseName": "Dumbbell Snatch", "reps": 10, "notes": "35/50 lb left"}]}',
+  '{"rounds": 1, "timeCap": 10, "movements": [{"exerciseId": "97b21293-1634-4cb6-8cfe-f3d835d90cec", "exerciseName": "Push-up", "reps": 10, "notes": ""}, {"exerciseId": "af83add1-e77d-4610-a4c8-3b4bc845eb37", "exerciseName": "Dumbbell Snatch", "reps": 10, "notes": "35/50 lb right"}, {"exerciseId": "97819520-ca03-489f-b273-e3a7103cf38d", "exerciseName": "Toes-to-Bar", "reps": 10, "notes": ""}, {"exerciseId": "af83add1-e77d-4610-a4c8-3b4bc845eb37", "exerciseName": "Dumbbell Snatch", "reps": 10, "notes": "35/50 lb left"}]}',
   'General',
   '2024-04-15T00:00:00Z'
 ),
@@ -1072,7 +1072,7 @@ For time (descending scheme):
 Round 1: 150 Double-unders, 45 Cal Row, 15 Bar Muscle-ups
 Round 2: 120 Double-unders, 36 Cal Row, 12 Bar Muscle-ups
 Round 3: 90 Double-unders, 27 Cal Row, 9 Bar Muscle-ups$$,
-  '{"rounds": 3, "timeCap": 30, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000005", "exerciseName": "Double-Under", "reps": 150, "repScheme": "150-120-90", "notes": "150-120-90 descending"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000010", "exerciseName": "Row (Calories)", "reps": 45, "repScheme": "45-36-27", "notes": "45-36-27 descending"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000031", "exerciseName": "Bar Muscle-up", "reps": 15, "repScheme": "15-12-9", "notes": "15-12-9 descending"}]}',
+  '{"rounds": 3, "timeCap": 30, "movements": [{"exerciseId": "cb5d7471-1519-468d-b4e7-1a28172eb6b7", "exerciseName": "Double-Under", "reps": 150, "repScheme": "150-120-90", "notes": "150-120-90 descending"}, {"exerciseId": "10d4adf2-dd2c-4440-ba89-e3dee70e55b8", "exerciseName": "Row (Calories)", "reps": 45, "repScheme": "45-36-27", "notes": "45-36-27 descending"}, {"exerciseId": "79128db8-d420-4736-abac-aa775e566252", "exerciseName": "Bar Muscle-up", "reps": 15, "repScheme": "15-12-9", "notes": "15-12-9 descending"}]}',
   'General',
   '2024-04-12T00:00:00Z'
 )

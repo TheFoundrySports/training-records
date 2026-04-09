@@ -8,6 +8,7 @@ import { MovementFieldArray } from './MovementFieldArray'
 // Mock useExercises so ExercisePicker doesn't need network
 vi.mock('@/features/exercises/hooks/useExercises', () => ({
   useExercises: vi.fn(() => ({ data: { data: [] }, isLoading: false })),
+  useExercise: vi.fn(() => ({ data: null, isLoading: false })),
 }))
 
 function TestWrapper({ defaultMovements = [] }: { defaultMovements?: unknown[] }) {
