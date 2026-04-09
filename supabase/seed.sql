@@ -488,7 +488,7 @@ Focused leg and glute workout to build strength and size.
   'CrossFit - Linda',
   'crossfit',
   40,
-  NULL,
+  'for_time',
   $$CrossFit - Linda
 Also known as "The Three Bars of Death", a CrossFit benchmark workout featuring three barbell movements.
 10-9-8-7-6-5-4-3-2-1 reps for time of:
@@ -505,7 +505,7 @@ Also known as "The Three Bars of Death", a CrossFit benchmark workout featuring 
   'CrossFit - Jackie',
   'crossfit',
   20,
-  NULL,
+  'for_time',
   $$CrossFit - Jackie
 A CrossFit classic combining rowing, thrusters, and pull-ups for time.
 For time:
@@ -522,7 +522,7 @@ For time:
   'CrossFit - Isabel',
   'crossfit',
   15,
-  NULL,
+  'for_time',
   $$CrossFit - Isabel
 A simple but challenging benchmark of 30 snatches for time.
 For time:
@@ -537,7 +537,7 @@ For time:
   'CrossFit - Kelly',
   'crossfit',
   30,
-  NULL,
+  'for_time',
   $$CrossFit - Kelly
 A challenging workout with running, box jumps, and wall balls.
 5 rounds for time of:
@@ -554,7 +554,7 @@ A challenging workout with running, box jumps, and wall balls.
   'CrossFit - Karen',
   'crossfit',
   15,
-  NULL,
+  'for_time',
   $$CrossFit - Karen
 A simple but grueling CrossFit workout of 150 wall balls for time.
 For time:
@@ -569,7 +569,7 @@ For time:
   'CrossFit - Amanda',
   'crossfit',
   25,
-  NULL,
+  'for_time',
   $$CrossFit - Amanda
 A technical workout featuring ring muscle-ups and squat snatches.
 9-7-5 reps for time of:
@@ -585,7 +585,7 @@ A technical workout featuring ring muscle-ups and squat snatches.
   'CrossFit - Diane',
   'crossfit',
   20,
-  NULL,
+  'for_time',
   $$CrossFit - Diane
 A classic CrossFit workout featuring deadlifts and handstand push-ups.
 21-15-9 reps for time of:
@@ -601,7 +601,7 @@ A classic CrossFit workout featuring deadlifts and handstand push-ups.
   'CrossFit - Elizabeth',
   'crossfit',
   20,
-  NULL,
+  'for_time',
   $$CrossFit - Elizabeth
 A couplet of clean and jerks and ring dips.
 21-15-9 reps for time of:
@@ -617,7 +617,7 @@ A couplet of clean and jerks and ring dips.
   'CrossFit - Nancy',
   'crossfit',
   25,
-  NULL,
+  'for_time',
   $$CrossFit - Nancy
 A CrossFit workout alternating between running and overhead squats.
 5 rounds for time of:
@@ -633,7 +633,7 @@ A CrossFit workout alternating between running and overhead squats.
   'CrossFit - Grace',
   'crossfit',
   15,
-  NULL,
+  'for_time',
   $$CrossFit - Grace
 A CrossFit benchmark workout of 30 clean and jerks for time.
 For time:
@@ -648,7 +648,7 @@ For time:
   'CrossFit - Chelsea',
   'crossfit',
   30,
-  NULL,
+  'emom',
   $$CrossFit - Chelsea
 An EMOM workout for 30 minutes featuring pull-ups, push-ups, and squats.
 Every minute on the minute for 30 minutes:
@@ -665,7 +665,7 @@ Every minute on the minute for 30 minutes:
   'CrossFit - Barbara',
   'crossfit',
   40,
-  NULL,
+  'for_time',
   $$CrossFit - Barbara
 Five rounds of a bodyweight circuit with 3-minute rests.
 5 rounds for time (3 min rest between rounds):
@@ -683,7 +683,7 @@ Five rounds of a bodyweight circuit with 3-minute rests.
   'CrossFit - Eva',
   'crossfit',
   35,
-  NULL,
+  'for_time',
   $$CrossFit - Eva
 A challenging workout with running, kettlebell swings, and pull-ups.
 5 rounds for time of:
@@ -700,7 +700,7 @@ A challenging workout with running, kettlebell swings, and pull-ups.
   'CrossFit - Annie',
   'crossfit',
   20,
-  NULL,
+  'for_time',
   $$CrossFit - Annie
 A CrossFit workout alternating between double-unders and sit-ups.
 50-40-30-20-10 reps for time of:
@@ -716,7 +716,7 @@ A CrossFit workout alternating between double-unders and sit-ups.
   'CrossFit - Nicole',
   'crossfit',
   20,
-  NULL,
+  'amrap',
   $$CrossFit - Nicole
 An AMRAP workout with running and pull-ups.
 As many rounds as possible in 20 minutes of:

@@ -62,7 +62,7 @@ export function WorkoutFormPage() {
       ...form.getValues(),
       title: fields.title,
       type: fields.type,
-      wodFormat: (fields.wodFormat as WodFormat) ?? undefined,
+      wodFormat: (fields.wodFormat ?? undefined) as WodFormat | undefined,
       wodText: fields.wodText ?? '',
       ...(fields.durationMinutes != null ? { durationMinutes: fields.durationMinutes } : {}),
       payload: (fields.payload ?? undefined) as WorkoutFormValues['payload'],
