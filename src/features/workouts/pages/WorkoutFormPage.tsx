@@ -41,24 +41,6 @@ export function WorkoutFormPage() {
 
   const [pickerOpen, setPickerOpen] = useState(false)
 
-  function handlePublicWodSelect(fields: PublicWodFormFields) {
-    form.setValue('title', fields.title)
-    form.setValue('type', fields.type)
-    form.setValue('wodText', fields.wodText ?? '')
-    if (fields.durationMinutes != null) {
-      form.setValue('durationMinutes', fields.durationMinutes)
-    }
-    // Set wodFormat first so the FormSection (and its useFieldArray) mounts.
-    // Then set payload in the next tick — after React re-renders — so that
-    // useFieldArray is already registered when RHF processes the movements array.
-    form.setValue('wodFormat', (fields.wodFormat as WodFormat) ?? undefined)
-    if (fields.payload != null) {
-      setTimeout(() => {
-        form.setValue('payload', fields.payload ?? undefined, { shouldValidate: false })
-      }, 0)
-    }
-  }
-
   const form = useForm<WorkoutFormValues>({
     resolver: zodResolver(workoutSchema),
     defaultValues: {
@@ -75,6 +57,19 @@ export function WorkoutFormPage() {
     },
   })
 
+  function handlePublicWodSelect(fields: PublicWodFormFields) {
+    form.reset({
+      ...form.getValues(),
+      title: fields.title,
+      type: fields.type,
+      wodFormat: (fields.wodFormat as WodFormat) ?? undefined,
+      wodText: fields.wodText ?? '',
+      ...(fields.durationMinutes != null ? { durationMinutes: fields.durationMinutes } : {}),
+      payload: (fields.payload ?? undefined) as WorkoutFormValues['payload'],
+    })
+  }
+
+  // eslint-disable-next-line react-hooks/incompatible-library
   const wodFormat = form.watch('wodFormat')
 
   // Populate form when editing and data is loaded
