@@ -60,9 +60,18 @@ function MovementRow({ control, name, index, fieldId, disabled, onRemove }: Move
         }}
         disabled={disabled}
       />
-      {/* Hidden inputs to register with RHF */}
-      <input type="hidden" {...register(exerciseIdPath)} />
-      <input type="hidden" {...register(exerciseNamePath)} />
+      {/* Hidden inputs to register with RHF — value must be explicit so RHF reads
+          the store value on submit rather than the empty DOM default */}
+      <Controller
+        control={control}
+        name={exerciseIdPath}
+        render={({ field }) => <input type="hidden" {...field} value={field.value ?? ''} />}
+      />
+      <Controller
+        control={control}
+        name={exerciseNamePath}
+        render={({ field }) => <input type="hidden" {...field} value={field.value ?? ''} />}
+      />
 
       {/* Rep Scheme row */}
       <Controller

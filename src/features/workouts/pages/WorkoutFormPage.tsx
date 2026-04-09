@@ -96,10 +96,13 @@ export function WorkoutFormPage() {
         const handler = getFormat(values.wodFormat as WodFormat)
         const result = handler.schema.safeParse(values.payload)
         if (!result.success) {
+          console.error('Zod validation errors:', JSON.stringify(result.error.issues, null, 2))
+          console.error('Payload being validated:', JSON.stringify(values.payload, null, 2))
           form.setError('root', { message: 'WOD payload is invalid' })
           return
         }
-      } catch {
+      } catch (e) {
+        console.error('Schema validation threw:', e)
         form.setError('root', { message: 'WOD payload is invalid' })
         return
       }
