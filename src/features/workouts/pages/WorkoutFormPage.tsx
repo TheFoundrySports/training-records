@@ -44,11 +44,18 @@ export function WorkoutFormPage() {
   function handlePublicWodSelect(fields: PublicWodFormFields) {
     form.setValue('title', fields.title)
     form.setValue('type', fields.type)
-    form.setValue('wodFormat', (fields.wodFormat as WodFormat) ?? undefined)
     form.setValue('wodText', fields.wodText ?? '')
-    form.setValue('payload', fields.payload ?? undefined)
     if (fields.durationMinutes != null) {
       form.setValue('durationMinutes', fields.durationMinutes)
+    }
+    // Set wodFormat first so the FormSection (and its useFieldArray) mounts.
+    // Then set payload in the next tick — after React re-renders — so that
+    // useFieldArray is already registered when RHF processes the movements array.
+    form.setValue('wodFormat', (fields.wodFormat as WodFormat) ?? undefined)
+    if (fields.payload != null) {
+      setTimeout(() => {
+        form.setValue('payload', fields.payload ?? undefined, { shouldValidate: false })
+      }, 0)
     }
   }
 

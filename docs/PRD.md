@@ -6,10 +6,10 @@
 | Field       | Value                                                                |
 | ----------- | -------------------------------------------------------------------- |
 | **Title**   | Training Records — initial product requirements (workouts / fitness) |
-| **Version** | 0.5                                                                  |
-| **Date**    | 2026-04-04                                                           |
+| **Version** | 0.6                                                                  |
+| **Date**    | 2026-04-06                                                           |
 | **Author**  | Francisco José Seva Mora                                             |
-| **Status**  | Draft — BaaS/Supabase + MVP testing requirements recorded            |
+| **Status**  | Draft — BaaS/Supabase + MVP testing; iteration 2 CrossFit / WOD authoring requirements drafted |
 
 
 **Related links**
@@ -49,6 +49,8 @@ People who train regularly often lack a **single, dependable place** to track **
 - **G8:** The app will process the data and provide important information that will help to improve next training.
 - **G9:** The workouts could be generated automatically by the app using AI.
 - **G10:** There will be only two types of users in the MVP, atlethe and administrator
+- **G11:** The product will support **many workout formats** over time; **each format may need its own interaction model** (fields, validation, scoring, display)—not a single rigid form for every type.
+- **G12:** The **codebase** shall make it **straightforward for developers to add new workout types** using a **documented extensibility pattern** (see **NFR-006** in [§8](./PRD.md#ref-prd-section-8) and [Workout type extensibility](./PRD.md#ref-prd-workout-type-extensibility) in [§10](./PRD.md#ref-prd-section-10)) so new types do not require rewriting core flows.
 
 ### Non-goals (this PRD)
 
@@ -82,6 +84,7 @@ People who train regularly often lack a **single, dependable place** to track **
 - **US-4:** As a user, I want to **edit or delete** a record I am allowed to change, so that I can correct mistakes.
 - **US-5:** As a user, I want the UI to be **usable with a keyboard and screen reader** for primary flows, so that I am not excluded.
 - **US-6:** As a user, I want to be able to explain what type of workout I want to create it using AI.
+- **US-7:** As an athlete, I want to **pick a workout format** (e.g. AMRAP vs For Time vs EMOM) and see **inputs and scoring that fit that format**, so that what I log matches the WOD.
 
 ---
 
@@ -102,6 +105,16 @@ People who train regularly often lack a **single, dependable place** to track **
 - Deep integration with **Strava, Apple Health, Garmin**, etc. — **Phase 2+**.
 - Offline-first or PWA — **later**.
 
+### In scope — iteration 2 (CrossFit WOD authoring; planned)
+
+This subsection records **planned** scope for a second iteration. It **does not remove** MVP requirements above; it **adds** product and engineering expectations. Details may be refined in [docs/ARCHITECTURE.md](ARCHITECTURE.md) when implemented.
+
+- **Free-text WOD capture:** A **long text** field to paste a workout; the system shall **store and display** it. **Structured parsing** from pasted text (rules or AI) is **optional / later** unless promoted.
+- **Structured CrossFit-style builder:** Athletes compose WODs from a **shared exercise library** (select movements, prescriptions, format)—aligned with the domain described in `docs/oldcode/foundry-workouts/` (types, movements, score semantics).
+- **Exercise catalog (administrator):** **Create, update, and delete** exercises and related **reference data** (e.g. categories, equipment) per agreed rules; **athletes** **read** the catalog and use it to build WODs (not author catalog entries), unless a future change explicitly widens permissions.
+- **Many workout types, different approaches:** The product will **add more workout formats over time**. **Different types may require different approaches**—for example distinct **UI sections**, **validation**, **score fields**, or **API payload shape**—so the system must **not** assume one generic form or one fixed schema fits every format for all time.
+- **Developer extensibility (mandatory):** Implementation shall follow an **explicit pattern** so developers can **extend** the app with **new workout types** in a controlled way (see **FR-008**, **FR-009**, **NFR-006**, and [Workout type extensibility](./PRD.md#ref-prd-workout-type-extensibility) in §10).
+
 ---
 
 ## 7. Functional requirements
@@ -116,9 +129,13 @@ People who train regularly often lack a **single, dependable place** to track **
 | **FR-005** | The system shall **persist** data in **Supabase PostgreSQL** via the Edge Function REST API (`/api/v1/`*). A documented mock/fixture layer (`supabase/seed.sql`) may be used for local development only — not production.                                                                                                   |
 | **FR-006** | The system shall provide **navigation** between list, detail, and forms without losing essential context (e.g. return to list after save).                                                                                                                                                                                  |
 | **FR-007** | The system shall provide a chat where the user should be able to describe the type of workout that want to generate using AI so it can be saved and added to the day).                                                                                                                                                      |
+| **FR-008** | The system shall support **multiple workout formats** (existing and **future**). **Different workout types may require different user flows, validation, scoring capture, and presentation**; the product shall not rely on a single universal form or a single fixed field set for every type without an extension mechanism. |
+| **FR-009** | The system shall allow **new workout types to be introduced** as the product evolves (including types not listed at initial delivery). Adding a type shall be possible **without replacing the entire workout model** each time; how types are **registered or configured** (e.g. data-driven catalog vs versioned code modules) is an implementation choice recorded in [docs/ARCHITECTURE.md](ARCHITECTURE.md). |
 
 
 ---
+
+<a id="ref-prd-section-8"></a>
 
 ## 8. Non-functional requirements (NFRs)
 
@@ -130,6 +147,7 @@ People who train regularly often lack a **single, dependable place** to track **
 | **NFR-003** | Browser support | Latest two versions of evergreen browsers (Chrome, Firefox, Safari, Edge) unless otherwise agreed.                                         |
 | **NFR-004** | Security        | No secrets in client bundle; **HTTPS** in deployed environments; follow secure defaults for auth tokens (details depend on auth provider). |
 | **NFR-005** | Maintainability | **TypeScript** strictness as per repo config; components colocated and styled with **Tailwind** utilities consistently.                    |
+| **NFR-006** | Extensibility   | Workout **formats** shall be implemented using a **documented extension pattern** (e.g. **registry**, **strategy**, or **plugin-style** modules per type) so developers can **add or adjust a workout type** by implementing agreed **contracts** (types, validation entry points, optional UI slots) **without** copying unrelated routing, auth, or API plumbing. The pattern and extension points shall be described in [docs/ARCHITECTURE.md](ARCHITECTURE.md) and kept aligned with **FR-008** and **FR-009**. |
 
 
 ---
@@ -167,12 +185,25 @@ BaaS platform choice and rationale: *[§18](./PRD.md#ref-prd-section-18).*
 | TypeScript types | Generated from Supabase schema via `supabase gen types typescript`; committed to `src/types/supabase.ts`.                            |
 
 
+<a id="ref-prd-workout-type-extensibility"></a>
+
+### Workout type extensibility (iteration 2+)
+
+This subsection turns **G12**, **FR-008**, **FR-009**, and **NFR-006** into engineering intent (exact libraries stay **open**).
+
+- **Problem:** Workout **formats** (AMRAP, For Time, EMOM, Tabata, ladders, chipper-style, future types) differ in **scoring**, **time domains**, and **prescription**; a single mega-form becomes unmaintainable.
+- **Requirement:** The codebase shall isolate **per-type behaviour** behind a small set of **extension points**—for example a **registry** mapping type id → **handlers** (validation/schema, optional React **form sections**, score normalization for display/API)—so a new type is added by **new module(s) + registration**, not by editing unrelated screens.
+- **Documentation:** [docs/ARCHITECTURE.md](ARCHITECTURE.md) shall name the chosen pattern, folder layout, and how **server-side** validation (Edge Functions / Zod) stays consistent with the client.
+- **Non-prescriptive:** The PRD does not mandate a specific design pattern name; it mandates **discoverability** and **low coupling** for new workout types.
+
+
 ### Open decisions (record outcome in this doc when closed)
 
 
-| Topic                        | Options / notes |
-| ---------------------------- | --------------- |
-| No open decisions right now. |                 |
+| Topic | Options / notes |
+| ----- | --------------- |
+| **Workout type registration** | **Data-driven** (rows in DB, admin-editable metadata) vs **code-first** (enum + registered modules per release) vs **hybrid** (catalog in DB, behaviour in code). Record decision when iteration 2 implementation starts. |
+| **Shared vs per-type API payloads** | Single `workouts` resource with **discriminated** `type` + `payload` JSON vs separate sub-resources; affects OpenAPI and migrations. |
 
 
 Intent in this PRD is captured here; **as-built** design lives in [docs/ARCHITECTURE.md](ARCHITECTURE.md).
@@ -244,6 +275,8 @@ This subsection defines **what “tested enough for MVP” means**: required too
 | **FR-007** AI chat/generate | Client or handler tests with **mocked** generate response (**TR-006**); no E2E dependency on OpenAI for MVP. |
 | **NFR-001** Accessibility | Manual a11y pass in **M4**; automated UI tests use semantic queries (`getByRole`, labels) where practical — optional axe tooling is **not** mandatory for MVP. |
 
+**Iteration 2 (when in scope):** **FR-008** and **FR-009** shall have automated coverage for **per-type validation** and **routing to the correct UI** where applicable; **NFR-006** shall be evidenced by **ARCHITECTURE.md** describing the extension pattern and at least one **worked example** of adding a type without touching unrelated modules.
+
 #### Definitions
 
 | Term | Definition (MVP) |
@@ -277,6 +310,12 @@ This subsection defines **what “tested enough for MVP” means**: required too
 - Deployed to **staging** (or agreed environment) with environment variables documented.
 - [docs/ARCHITECTURE.md](ARCHITECTURE.md) updated to match implementation.
 
+### Definition of done (iteration 2 — CrossFit WOD authoring and workout types)
+
+- **FR-008** and **FR-009** implemented: multiple workout formats with **type-appropriate** flows (not a single rigid form for every format).
+- **NFR-006** satisfied: **documented** developer extension pattern (registry / strategy / plugin-style) and **ARCHITECTURE.md** updated with extension points and a **concrete example** of adding a new workout type.
+- Iteration 2 scope in [§6](./PRD.md#6-scope) (free-text capture, structured builder, admin exercise catalog) delivered per agreed priority; **paste parsing** remains optional unless promoted.
+
 ---
 
 ## 13. Risks, assumptions, dependencies
@@ -289,6 +328,7 @@ This subsection defines **what “tested enough for MVP” means**: required too
 | **Risk**       | Supabase Edge Function cold-start latency may affect perceived performance — **mitigation:** keep functions lightweight; monitor with Supabase logs.    |
 | **Dependency** | Supabase project creation and environment variables (`SUPABASE_URL`, `SUPABASE_ANON_KEY`, `OPENAI_API_KEY`) must be set before integration work begins. |
 | **Dependency** | Design approval for key screens.                                                                                                                        |
+| **Risk** | **Workout type proliferation** without a clear extension pattern leads to **conditional spaghetti** in forms and APIs — **mitigation:** **NFR-006** and early **ARCHITECTURE.md** alignment with **FR-008** / **FR-009**. |
 
 
 ---
