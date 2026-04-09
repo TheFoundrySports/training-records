@@ -376,6 +376,61 @@ values
     'beginner',
     array[]::uuid[],
     false
+  ),
+  (
+    'ffffffff-0000-0000-0000-000000000027',
+    'Echo Bike',
+    'Air assault bike for calorie output — arms and legs driven simultaneously.',
+    'cccccccc-0000-0000-0000-000000000003',
+    'monostructural',
+    'calories',
+    'beginner',
+    array[]::uuid[],
+    false
+  ),
+  (
+    'ffffffff-0000-0000-0000-000000000028',
+    'Walking Lunge',
+    'Forward lunge stepping continuously — knee touches floor each rep.',
+    'cccccccc-0000-0000-0000-000000000001',
+    'gymnastics',
+    'reps',
+    'beginner',
+    array[]::uuid[],
+    false
+  ),
+  (
+    'ffffffff-0000-0000-0000-000000000029',
+    'Dumbbell Snatch',
+    'Single-arm dumbbell snatch from the floor to overhead in one movement.',
+    'cccccccc-0000-0000-0000-000000000002',
+    'weightlifting',
+    'weight',
+    'intermediate',
+    array[]::uuid[],
+    false
+  ),
+  (
+    'ffffffff-0000-0000-0000-000000000030',
+    'Toes-to-Bar',
+    'Hanging from a pull-up bar, raise toes to touch the bar.',
+    'cccccccc-0000-0000-0000-000000000001',
+    'gymnastics',
+    'reps',
+    'intermediate',
+    array[]::uuid[],
+    false
+  ),
+  (
+    'ffffffff-0000-0000-0000-000000000031',
+    'Bar Muscle-up',
+    'Explosive pull-up transitioning above the bar to a dip lockout.',
+    'cccccccc-0000-0000-0000-000000000001',
+    'gymnastics',
+    'reps',
+    'advanced',
+    array[]::uuid[],
+    false
   )
 on conflict (id) do nothing;
 
@@ -910,14 +965,14 @@ For time:
   'CrossFit - Cindy (250509)',
   'crossfit',
   20,
-  NULL,
+  'amrap',
   $$CrossFit - Cindy (250509)
 A classic benchmark, perfect preparation for Murph with pull-ups, push-ups, and air squats.
 As many rounds as possible in 20 minutes of:
 - Pull-ups: 5 reps
 - Push-ups: 10 reps
 - Air Squats: 15 reps$$,
-  NULL,
+  '{"rounds": 1, "timeCap": 20, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000001", "exerciseName": "Pull-up", "reps": 5, "notes": ""}, {"exerciseId": "ffffffff-0000-0000-0000-000000000008", "exerciseName": "Push-up", "reps": 10, "notes": ""}, {"exerciseId": "ffffffff-0000-0000-0000-000000000009", "exerciseName": "Air Squat", "reps": 15, "notes": ""}]}',
   'Benchmark',
   '2024-05-09T00:00:00Z'
 ),
@@ -927,13 +982,13 @@ As many rounds as possible in 20 minutes of:
   'Box Jumps & Echo Bike (250507)',
   'crossfit',
   20,
-  NULL,
+  'emom',
   $$Box Jumps & Echo Bike (250507)
 EMOM alternating between box jumps and Echo bike calories.
 Every minute on the minute for 20 minutes (alternating):
 - Box Jumps: 12 reps (24/20 inch)
 - Echo Bike: 12 calories$$,
-  NULL,
+  '{"rounds": 1, "timeCap": 20, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000003", "exerciseName": "Box Jump", "reps": 12, "notes": "24/20 inch, odd minutes"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000027", "exerciseName": "Echo Bike", "reps": 12, "notes": "calories, even minutes"}]}',
   'General',
   '2024-05-07T00:00:00Z'
 ),
@@ -943,7 +998,7 @@ Every minute on the minute for 20 minutes (alternating):
   'Static Hold Challenge (250512)',
   'crossfit',
   20,
-  NULL,
+  'for_time',
   $$Static Hold Challenge (250512)
 A unique effort focusing on static holds to challenge muscle stamina and mental fortitude.
 - Handstand Hold: 30 seconds
@@ -960,13 +1015,13 @@ A unique effort focusing on static holds to challenge muscle stamina and mental 
   'Power Snatch & Row (250510)',
   'crossfit',
   25,
-  NULL,
+  'rft',
   $$Power Snatch & Row (250510)
 5 rounds of power snatches and rowing with rest intervals.
 5 rounds:
 - Power Snatch: 5 reps (weight of choice)
 - Row: 400/500 meters$$,
-  NULL,
+  '{"rounds": 5, "timeCap": 25, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000016", "exerciseName": "Power Snatch", "reps": 5, "notes": "weight of choice"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000012", "exerciseName": "Row", "reps": 1, "notes": "400/500 meters"}]}',
   'General',
   '2024-05-10T00:00:00Z'
 ),
@@ -976,13 +1031,13 @@ A unique effort focusing on static holds to challenge muscle stamina and mental 
   'Run & Walking Lunge Challenge (250414)',
   'crossfit',
   20,
-  NULL,
+  'rft',
   $$Run & Walking Lunge Challenge (250414)
 5 rounds of running and walking lunges for full leg conditioning.
 5 rounds:
 - Run: 350 meters
 - Walking Lunge: 50 meters$$,
-  NULL,
+  '{"rounds": 5, "timeCap": 20, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000011", "exerciseName": "Run", "reps": 1, "notes": "350 meters"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000028", "exerciseName": "Walking Lunge", "reps": 50, "notes": "50 meters"}]}',
   'General',
   '2024-04-14T00:00:00Z'
 ),
@@ -992,7 +1047,7 @@ A unique effort focusing on static holds to challenge muscle stamina and mental 
   'Push-up, DB Snatch & TTB Challenge (250415)',
   'crossfit',
   10,
-  NULL,
+  'amrap',
   $$Push-up, DB Snatch & TTB Challenge (250415)
 A 10-minute AMRAP combining push-ups, dumbbell snatches, and toes-to-bars.
 As many rounds as possible in 10 minutes of:
@@ -1000,7 +1055,7 @@ As many rounds as possible in 10 minutes of:
 - Dumbbell Snatch (Right): 10 reps (35/50 lb)
 - Toes-to-bar: 10 reps
 - Dumbbell Snatch (Left): 10 reps (35/50 lb)$$,
-  NULL,
+  '{"rounds": 1, "timeCap": 10, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000008", "exerciseName": "Push-up", "reps": 10, "notes": ""}, {"exerciseId": "ffffffff-0000-0000-0000-000000000029", "exerciseName": "Dumbbell Snatch", "reps": 10, "notes": "35/50 lb right"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000030", "exerciseName": "Toes-to-Bar", "reps": 10, "notes": ""}, {"exerciseId": "ffffffff-0000-0000-0000-000000000029", "exerciseName": "Dumbbell Snatch", "reps": 10, "notes": "35/50 lb left"}]}',
   'General',
   '2024-04-15T00:00:00Z'
 ),
@@ -1010,14 +1065,14 @@ As many rounds as possible in 10 minutes of:
   'Double-Under, Row & Bar Muscle-Up Challenge (250412)',
   'crossfit',
   30,
-  NULL,
+  'for_time',
   $$Double-Under, Row & Bar Muscle-Up Challenge (250412)
 A descending rep scheme triplet testing gymnastics and endurance.
 For time (descending scheme):
 Round 1: 150 Double-unders, 45 Cal Row, 15 Bar Muscle-ups
 Round 2: 120 Double-unders, 36 Cal Row, 12 Bar Muscle-ups
 Round 3: 90 Double-unders, 27 Cal Row, 9 Bar Muscle-ups$$,
-  NULL,
+  '{"rounds": 3, "timeCap": 30, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000005", "exerciseName": "Double-Under", "reps": 150, "notes": "150-120-90 descending"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000010", "exerciseName": "Row (Calories)", "reps": 45, "notes": "45-36-27 descending"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000031", "exerciseName": "Bar Muscle-up", "reps": 15, "notes": "15-12-9 descending"}]}',
   'General',
   '2024-04-12T00:00:00Z'
 )
