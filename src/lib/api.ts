@@ -41,40 +41,44 @@ async function handleResponse<T>(response: Response): Promise<T> {
   return response.json() as Promise<T>
 }
 
-export async function apiGet<T>(path: string): Promise<T> {
+async function fetchWithAuth<T>(url: string, init: RequestInit): Promise<T> {
   const headers = await getAuthHeader()
-  const response = await fetch(`${API_BASE}${path}`, {
-    method: 'GET',
-    headers,
-  })
+  const response = await fetch(url, { ...init, headers })
+
+  if (response.status === 401) {
+    const { data, error } = await supabase.auth.refreshSession()
+    if (error || !data.session) {
+      return handleResponse<T>(response)
+    }
+    const retryHeaders = {
+      ...headers,
+      Authorization: `Bearer ${data.session.access_token}`,
+    }
+    const retryResponse = await fetch(url, { ...init, headers: retryHeaders })
+    return handleResponse<T>(retryResponse)
+  }
+
   return handleResponse<T>(response)
+}
+
+export async function apiGet<T>(path: string): Promise<T> {
+  return fetchWithAuth<T>(`${API_BASE}${path}`, { method: 'GET' })
 }
 
 export async function apiPost<T>(path: string, body: unknown): Promise<T> {
-  const headers = await getAuthHeader()
-  const response = await fetch(`${API_BASE}${path}`, {
+  return fetchWithAuth<T>(`${API_BASE}${path}`, {
     method: 'POST',
-    headers,
     body: JSON.stringify(body),
   })
-  return handleResponse<T>(response)
 }
 
 export async function apiPut<T>(path: string, body: unknown): Promise<T> {
-  const headers = await getAuthHeader()
-  const response = await fetch(`${API_BASE}${path}`, {
+  return fetchWithAuth<T>(`${API_BASE}${path}`, {
     method: 'PUT',
-    headers,
     body: JSON.stringify(body),
   })
-  return handleResponse<T>(response)
 }
 
 export async function apiDelete<T = void>(path: string): Promise<T> {
-  const headers = await getAuthHeader()
-  const response = await fetch(`${API_BASE}${path}`, {
-    method: 'DELETE',
-    headers,
-  })
-  return handleResponse<T>(response)
+  return fetchWithAuth<T>(`${API_BASE}${path}`, { method: 'DELETE' })
 }
