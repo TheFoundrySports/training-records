@@ -299,6 +299,83 @@ values
     'intermediate',
     array['eeeeeeee-0000-0000-0000-000000000003']::uuid[],
     false
+  ),
+  (
+    'ffffffff-0000-0000-0000-000000000020',
+    'Bench Press',
+    'Horizontal barbell press from chest to full arm extension.',
+    'cccccccc-0000-0000-0000-000000000002',
+    'weightlifting',
+    'weight',
+    'beginner',
+    array[]::uuid[],
+    false
+  ),
+  (
+    'ffffffff-0000-0000-0000-000000000021',
+    'Snatch',
+    'Full squat snatch — barbell lifted from floor to overhead in one movement.',
+    'cccccccc-0000-0000-0000-000000000002',
+    'weightlifting',
+    'weight',
+    'advanced',
+    array[]::uuid[],
+    false
+  ),
+  (
+    'ffffffff-0000-0000-0000-000000000022',
+    'Ring Muscle-up',
+    'Explosive pull to dip transition on gymnastic rings.',
+    'cccccccc-0000-0000-0000-000000000001',
+    'gymnastics',
+    'reps',
+    'advanced',
+    array[]::uuid[],
+    false
+  ),
+  (
+    'ffffffff-0000-0000-0000-000000000023',
+    'Squat Snatch',
+    'Barbell snatch received in a full overhead squat position.',
+    'cccccccc-0000-0000-0000-000000000002',
+    'weightlifting',
+    'weight',
+    'advanced',
+    array[]::uuid[],
+    false
+  ),
+  (
+    'ffffffff-0000-0000-0000-000000000024',
+    'Handstand Push-up',
+    'Inverted push-up in a handstand position, head to floor.',
+    'cccccccc-0000-0000-0000-000000000001',
+    'gymnastics',
+    'reps',
+    'intermediate',
+    array[]::uuid[],
+    false
+  ),
+  (
+    'ffffffff-0000-0000-0000-000000000025',
+    'Overhead Squat',
+    'Barbell squat with the bar held overhead in a wide grip.',
+    'cccccccc-0000-0000-0000-000000000002',
+    'weightlifting',
+    'weight',
+    'intermediate',
+    array[]::uuid[],
+    false
+  ),
+  (
+    'ffffffff-0000-0000-0000-000000000026',
+    'Sit-up',
+    'Abdominal sit-up, typically with anchored feet.',
+    'cccccccc-0000-0000-0000-000000000001',
+    'gymnastics',
+    'reps',
+    'beginner',
+    array[]::uuid[],
+    false
   )
 on conflict (id) do nothing;
 
@@ -418,7 +495,7 @@ Also known as "The Three Bars of Death", a CrossFit benchmark workout featuring 
 - Deadlift (1.5x bodyweight)
 - Bench Press (bodyweight)
 - Clean (0.75x bodyweight)$$,
-  NULL,
+  '{"rounds": 1, "timeCap": 40, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000007", "exerciseName": "Deadlift", "reps": 10, "notes": "10-9-8-7-6-5-4-3-2-1, bodyweight scaling"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000020", "exerciseName": "Bench Press", "reps": 10, "notes": "10-9-8-7-6-5-4-3-2-1, bodyweight scaling"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000018", "exerciseName": "Clean", "reps": 10, "notes": "10-9-8-7-6-5-4-3-2-1, bodyweight scaling"}]}',
   'Benchmark',
   '2023-10-21T00:00:00Z'
 ),
@@ -435,7 +512,7 @@ For time:
 - Row: 1000 meters
 - Thrusters: 50 reps (45/35 lb)
 - Pull-ups: 30 reps$$,
-  NULL,
+  '{"rounds": 1, "timeCap": 20, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000012", "exerciseName": "Row", "reps": 1, "notes": "1000 meters"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000002", "exerciseName": "Thruster", "reps": 50, "notes": "45/35 lb"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000001", "exerciseName": "Pull-up", "reps": 30, "notes": ""}]}',
   'Benchmark',
   '2023-10-22T00:00:00Z'
 ),
@@ -450,7 +527,7 @@ For time:
 A simple but challenging benchmark of 30 snatches for time.
 For time:
 - Snatch: 30 reps (135/95 lb)$$,
-  NULL,
+  '{"rounds": 1, "timeCap": 10, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000021", "exerciseName": "Snatch", "reps": 30, "notes": "135/95 lb"}]}',
   'Benchmark',
   '2023-10-23T00:00:00Z'
 ),
@@ -467,7 +544,7 @@ A challenging workout with running, box jumps, and wall balls.
 - Run: 400 meters
 - Box Jumps: 30 reps (24/20 inches)
 - Wall Balls: 30 reps (20/14 lb)$$,
-  NULL,
+  '{"rounds": 5, "timeCap": 30, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000011", "exerciseName": "Run", "reps": 1, "notes": "400 meters"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000003", "exerciseName": "Box Jump", "reps": 30, "notes": "24/20 in"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000017", "exerciseName": "Wall Ball", "reps": 30, "notes": "20/14 lb"}]}',
   'Benchmark',
   '2023-10-24T00:00:00Z'
 ),
@@ -482,7 +559,7 @@ A challenging workout with running, box jumps, and wall balls.
 A simple but grueling CrossFit workout of 150 wall balls for time.
 For time:
 - Wall Balls: 150 reps (20/14 lb)$$,
-  NULL,
+  '{"rounds": 1, "timeCap": 15, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000017", "exerciseName": "Wall Ball", "reps": 150, "notes": "20/14 lb"}]}',
   'Benchmark',
   '2023-10-25T00:00:00Z'
 ),
@@ -498,7 +575,7 @@ A technical workout featuring ring muscle-ups and squat snatches.
 9-7-5 reps for time of:
 - Ring Muscle-ups
 - Squat Snatch (135/95 lb)$$,
-  NULL,
+  '{"rounds": 1, "timeCap": 25, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000022", "exerciseName": "Ring Muscle-up", "reps": 9, "notes": "9-7-5"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000023", "exerciseName": "Squat Snatch", "reps": 9, "notes": "9-7-5, 135/95 lb"}]}',
   'Benchmark',
   '2023-10-26T00:00:00Z'
 ),
@@ -514,7 +591,7 @@ A classic CrossFit workout featuring deadlifts and handstand push-ups.
 21-15-9 reps for time of:
 - Deadlift (225/155 lb)
 - Handstand Push-ups$$,
-  NULL,
+  '{"rounds": 1, "timeCap": 20, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000007", "exerciseName": "Deadlift", "reps": 21, "notes": "21-15-9, 225/155 lb"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000024", "exerciseName": "Handstand Push-up", "reps": 21, "notes": "21-15-9"}]}',
   'Benchmark',
   '2023-10-27T00:00:00Z'
 ),
@@ -530,7 +607,7 @@ A couplet of clean and jerks and ring dips.
 21-15-9 reps for time of:
 - Clean and Jerk (135/95 lb)
 - Ring Dips$$,
-  NULL,
+  '{"rounds": 1, "timeCap": 20, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000015", "exerciseName": "Clean and Jerk", "reps": 21, "notes": "21-15-9, 135/95 lb"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000019", "exerciseName": "Ring Dip", "reps": 21, "notes": "21-15-9"}]}',
   'Benchmark',
   '2023-10-28T00:00:00Z'
 ),
@@ -546,7 +623,7 @@ A CrossFit workout alternating between running and overhead squats.
 5 rounds for time of:
 - Run: 400 meters
 - Overhead Squats: 15 reps (95/65 lb)$$,
-  NULL,
+  '{"rounds": 5, "timeCap": 25, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000011", "exerciseName": "Run", "reps": 1, "notes": "400 meters"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000025", "exerciseName": "Overhead Squat", "reps": 15, "notes": "95/65 lb"}]}',
   'Benchmark',
   '2023-10-29T00:00:00Z'
 ),
@@ -561,7 +638,7 @@ A CrossFit workout alternating between running and overhead squats.
 A CrossFit benchmark workout of 30 clean and jerks for time.
 For time:
 - Clean and Jerk: 30 reps (135/95 lb)$$,
-  NULL,
+  '{"rounds": 1, "timeCap": 10, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000015", "exerciseName": "Clean and Jerk", "reps": 30, "notes": "135/95 lb"}]}',
   'Benchmark',
   '2023-10-30T00:00:00Z'
 ),
@@ -578,7 +655,7 @@ Every minute on the minute for 30 minutes:
 - Pull-ups: 5 reps
 - Push-ups: 10 reps
 - Air Squats: 15 reps$$,
-  NULL,
+  '{"rounds": 1, "timeCap": 30, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000001", "exerciseName": "Pull-up", "reps": 5, "notes": "EMOM 30 min"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000008", "exerciseName": "Push-up", "reps": 10, "notes": "EMOM 30 min"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000009", "exerciseName": "Air Squat", "reps": 15, "notes": "EMOM 30 min"}]}',
   'Benchmark',
   '2023-10-31T00:00:00Z'
 ),
@@ -596,7 +673,7 @@ Five rounds of a bodyweight circuit with 3-minute rests.
 - Push-ups: 30 reps
 - Sit-ups: 40 reps
 - Air Squats: 50 reps$$,
-  NULL,
+  '{"rounds": 5, "timeCap": 40, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000001", "exerciseName": "Pull-up", "reps": 20, "notes": "3 min rest between rounds"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000008", "exerciseName": "Push-up", "reps": 30, "notes": ""}, {"exerciseId": "ffffffff-0000-0000-0000-000000000026", "exerciseName": "Sit-up", "reps": 40, "notes": ""}, {"exerciseId": "ffffffff-0000-0000-0000-000000000009", "exerciseName": "Air Squat", "reps": 50, "notes": ""}]}',
   'Benchmark',
   '2023-11-01T00:00:00Z'
 ),
@@ -613,7 +690,7 @@ A challenging workout with running, kettlebell swings, and pull-ups.
 - Run: 800 meters
 - Kettlebell Swings: 30 reps (70/53 lb)
 - Pull-ups: 30 reps$$,
-  NULL,
+  '{"rounds": 5, "timeCap": 35, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000011", "exerciseName": "Run", "reps": 1, "notes": "800 meters"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000004", "exerciseName": "Kettlebell Swing", "reps": 30, "notes": "70/53 lb"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000001", "exerciseName": "Pull-up", "reps": 30, "notes": ""}]}',
   'Benchmark',
   '2023-11-02T00:00:00Z'
 ),
@@ -629,7 +706,7 @@ A CrossFit workout alternating between double-unders and sit-ups.
 50-40-30-20-10 reps for time of:
 - Double-unders
 - Sit-ups$$,
-  NULL,
+  '{"rounds": 1, "timeCap": 20, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000005", "exerciseName": "Double-Under", "reps": 50, "notes": "50-40-30-20-10"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000026", "exerciseName": "Sit-up", "reps": 50, "notes": "50-40-30-20-10"}]}',
   'Benchmark',
   '2023-11-03T00:00:00Z'
 ),
@@ -645,7 +722,7 @@ An AMRAP workout with running and pull-ups.
 As many rounds as possible in 20 minutes of:
 - Run: 400 meters
 - Max pull-ups$$,
-  NULL,
+  '{"rounds": 1, "timeCap": 20, "movements": [{"exerciseId": "ffffffff-0000-0000-0000-000000000011", "exerciseName": "Run", "reps": 1, "notes": "400 meters"}, {"exerciseId": "ffffffff-0000-0000-0000-000000000001", "exerciseName": "Pull-up", "reps": 1, "notes": "max reps"}]}',
   'Benchmark',
   '2023-11-04T00:00:00Z'
 ),
