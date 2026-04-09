@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useMemo } from 'react'
 import { useExercises } from '@/features/exercises/hooks/useExercises'
 
 interface ExercisePickerProps {
@@ -8,29 +8,20 @@ interface ExercisePickerProps {
 }
 
 export function ExercisePicker({ value, onChange, disabled }: ExercisePickerProps) {
-  const [inputValue, setInputValue] = useState('')
+  const [typedValue, setTypedValue] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
 
-  const { data } = useExercises({ q: searchQuery || undefined })
-  const exercises = data?.data ?? []
+  const { data, isLoading, error } = useExercises({ q: searchQuery || undefined })
+  const exercises = useMemo(() => data?.data ?? [], [data])
 
-  // When value changes externally, update display name
-  useEffect(() => {
-    if (value) {
-      const match = exercises.find((e) => e.id === value)
-      if (match) {
-        setInputValue(match.name)
-      }
-    } else {
-      setInputValue('')
-    }
-    // Only run when value changes — intentionally excluding exercises to avoid overwriting user input
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value])
+  // Derive display value: when a UUID is selected and exercises are loaded, show the resolved name.
+  // Fall back to whatever the user is typing. This avoids useEffect-driven setState cascades.
+  const resolvedName = value ? (exercises.find((e) => e.id === value)?.name ?? '') : ''
+  const inputValue = resolvedName || typedValue
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const val = e.target.value
-    setInputValue(val)
+    setTypedValue(val)
     setSearchQuery(val)
 
     // Check if user typed exact match
@@ -45,7 +36,7 @@ export function ExercisePicker({ value, onChange, disabled }: ExercisePickerProp
     const val = (e.target as HTMLInputElement).value
     const match = exercises.find((ex) => ex.name === val)
     if (match) {
-      setInputValue(match.name)
+      setTypedValue(match.name)
       setSearchQuery('')
       onChange(match.id, match.name)
     }
@@ -67,7 +58,9 @@ export function ExercisePicker({ value, onChange, disabled }: ExercisePickerProp
         onChange={handleChange}
         onInput={handleInput}
         disabled={disabled}
-        placeholder="Search exercises…"
+        placeholder={
+          isLoading && exercises.length === 0 ? 'Loading exercises…' : 'Search exercises…'
+        }
         autoComplete="off"
         className="h-8 w-full rounded-lg border border-input bg-transparent px-2.5 py-1 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
         aria-label="Exercise"
@@ -77,6 +70,7 @@ export function ExercisePicker({ value, onChange, disabled }: ExercisePickerProp
           <option key={ex.id} value={ex.name} />
         ))}
       </datalist>
+      {error && <p className="text-xs text-destructive">Failed to load exercises</p>}
     </div>
   )
 }
