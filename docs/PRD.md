@@ -344,7 +344,6 @@ This subsection defines **what “tested enough for MVP” means**: required too
 ## 16. Component library decision (MVP)
 
 ### Decision
-
 - Use **Tailwind CSS for styling**
 - Use **Radix UI primitives via shadcn/ui for component implementation**
 
