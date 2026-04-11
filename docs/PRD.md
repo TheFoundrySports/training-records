@@ -2,15 +2,13 @@
 
 ## 1. Document control
 
-
-| Field       | Value                                                                |
-| ----------- | -------------------------------------------------------------------- |
-| **Title**   | Training Records — initial product requirements (workouts / fitness) |
-| **Version** | 0.5                                                                  |
-| **Date**    | 2026-04-04                                                           |
-| **Author**  | Francisco José Seva Mora                                             |
-| **Status**  | Draft — BaaS/Supabase + MVP testing requirements recorded            |
-
+| Field       | Value                                                                                                                                           |
+| ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Title**   | Training Records — initial product requirements (workouts / fitness)                                                                            |
+| **Version** | 0.7                                                                                                                                             |
+| **Date**    | 2026-04-12                                                                                                                                      |
+| **Author**  | Francisco José Seva Mora                                                                                                                        |
+| **Status**  | Draft — BaaS/Supabase + MVP testing; iteration 2 CrossFit / WOD authoring requirements drafted; iteration 3 Calendar / Training Planner drafted |
 
 **Related links**
 
@@ -49,6 +47,9 @@ People who train regularly often lack a **single, dependable place** to track **
 - **G8:** The app will process the data and provide important information that will help to improve next training.
 - **G9:** The workouts could be generated automatically by the app using AI.
 - **G10:** There will be only two types of users in the MVP, atlethe and administrator
+- **G11:** The product will support **many workout formats** over time; **each format may need its own interaction model** (fields, validation, scoring, display)—not a single rigid form for every type.
+- **G12:** The **codebase** shall make it **straightforward for developers to add new workout types** using a **documented extensibility pattern** (see **NFR-006** in [§8](./PRD.md#ref-prd-section-8) and [Workout type extensibility](./PRD.md#ref-prd-workout-type-extensibility) in [§10](./PRD.md#ref-prd-section-10)) so new types do not require rewriting core flows.
+- **G13:** The user shall be able to **see all workouts — past and planned — on a calendar view**, navigable by day, week, and month, with **date-range filtering**, so that training load and future planning are visible at a glance.
 
 ### Non-goals (this PRD)
 
@@ -62,13 +63,11 @@ People who train regularly often lack a **single, dependable place** to track **
 
 ## 4. Users and stakeholders
 
-
 | Role                                | Needs                                                         |
 | ----------------------------------- | ------------------------------------------------------------- |
 | **End user (athlete / individual)** | Log and review own workouts; add notes or tags where allowed. |
 | **Coach / trainer** (optional)      | View an athlete’s log when permissions allow.                 |
 | **Administrator**                   | Configure users/roles or shared programs (scope TBD for MVP). |
-
 
 **Approvers:** product owner / sponsor — TBD.
 
@@ -82,6 +81,10 @@ People who train regularly often lack a **single, dependable place** to track **
 - **US-4:** As a user, I want to **edit or delete** a record I am allowed to change, so that I can correct mistakes.
 - **US-5:** As a user, I want the UI to be **usable with a keyboard and screen reader** for primary flows, so that I am not excluded.
 - **US-6:** As a user, I want to be able to explain what type of workout I want to create it using AI.
+- **US-7:** As an athlete, I want to **pick a workout format** (e.g. AMRAP vs For Time vs EMOM) and see **inputs and scoring that fit that format**, so that what I log matches the WOD.
+- **US-8:** As an athlete, I want to **see all my workouts on a calendar** (day / week / month views), so that I can understand my training density and spot gaps or overloads.
+- **US-9:** As an athlete, I want to **plan a future workout on a specific date** from the calendar view, so that I can schedule upcoming training sessions without leaving the calendar context.
+- **US-10:** As an athlete, I want to **filter the calendar by a custom date range**, so that I can review a specific training block (e.g. last 4 weeks, a competition prep cycle).
 
 ---
 
@@ -102,41 +105,63 @@ People who train regularly often lack a **single, dependable place** to track **
 - Deep integration with **Strava, Apple Health, Garmin**, etc. — **Phase 2+**.
 - Offline-first or PWA — **later**.
 
+### In scope — iteration 2 (CrossFit WOD authoring; planned)
+
+This subsection records **planned** scope for a second iteration. It **does not remove** MVP requirements above; it **adds** product and engineering expectations. Details may be refined in [docs/ARCHITECTURE.md](ARCHITECTURE.md) when implemented.
+
+- **Free-text WOD capture:** A **long text** field to paste a workout; the system shall **store and display** it. **Structured parsing** from pasted text (rules or AI) is **optional / later** unless promoted.
+- **Structured CrossFit-style builder:** Athletes compose WODs from a **shared exercise library** (select movements, prescriptions, format)—aligned with the domain described in `docs/oldcode/foundry-workouts/` (types, movements, score semantics).
+- **Exercise catalog (administrator):** **Create, update, and delete** exercises and related **reference data** (e.g. categories, equipment) per agreed rules; **athletes** **read** the catalog and use it to build WODs (not author catalog entries), unless a future change explicitly widens permissions.
+- **Many workout types, different approaches:** The product will **add more workout formats over time**. **Different types may require different approaches**—for example distinct **UI sections**, **validation**, **score fields**, or **API payload shape**—so the system must **not** assume one generic form or one fixed schema fits every format for all time.
+- **Developer extensibility (mandatory):** Implementation shall follow an **explicit pattern** so developers can **extend** the app with **new workout types** in a controlled way (see **FR-008**, **FR-009**, **NFR-006**, and [Workout type extensibility](./PRD.md#ref-prd-workout-type-extensibility) in §10).
+
+### In scope — iteration 3 (Calendar / Training Planner)
+
+This subsection records **planned** scope for a third iteration. It **does not remove** prior requirements; it **adds** a calendar-centric view of all workouts (past and future). Details may be refined in [docs/ARCHITECTURE.md](ARCHITECTURE.md) when implemented.
+
+- **Calendar page (`/calendar`):** A dedicated page showing workouts plotted on a calendar. The default landing is the **current week**. No date boundaries — athletes can navigate freely into the past (history) and future (planning).
+- **Three view modes:** The user can switch between **Day**, **Week**, and **Month** views. Each view shows workout entries on their `performedAt` date; future-dated workouts are visually distinguished (e.g. muted or labelled "Planned").
+- **Date-range filter:** A date picker or range control lets the user jump to or filter by an arbitrary range (e.g. "last 4 weeks", "this training block"). The URL shall reflect the active range so links are shareable.
+- **Entry interaction:**
+  - Clicking a past workout navigates to its **detail page**.
+  - Clicking a future workout navigates to its **detail page** (read) or **edit form** (owner only).
+  - Clicking an **empty day/slot** opens the **create workout form** pre-filled with that date.
+- **No new data model required:** The calendar reads from the existing `workouts` resource via `GET /api/v1/workouts?fromDate=&toDate=`. No new backend endpoints are required for MVP of this view.
+- **Responsive:** Day and week views are usable on mobile; month view may degrade gracefully (compact dots / count per day) on small viewports.
+
+| ID         | Requirement                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **FR-001** | The system shall display a **paginated or scrollable list** of workout records available to the signed-in user. Authentication is required; unauthenticated access is not permitted (Supabase Auth + RLS enforce this).                                                                                                                                                                                                                                                                                                                                            |
+| **FR-002** | The system shall provide a **detail view** for a single workout record, including at minimum: **title or activity label**, **date and time (or date only)**, **duration** (or distance where relevant), and **notes or tags** as applicable. Optional fields (e.g. **perceived intensity / RPE**) may be added when agreed.                                                                                                                                                                                                                                        |
+| **FR-003** | The system shall allow **creating** a workout record with required field validation; invalid submissions show **inline or summary errors**.                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| **FR-004** | The system shall allow **editing** and **deleting** a record when the user has permission. Permission rules for MVP: **athletes** may only modify their own records (enforced by Supabase RLS `user_id = auth.uid()`); **administrators** have read access to all records but do not bypass write restrictions.                                                                                                                                                                                                                                                    |
+| **FR-005** | The system shall **persist** data in **Supabase PostgreSQL** via the Edge Function REST API (`/api/v1/`\*). A documented mock/fixture layer (`supabase/seed.sql`) may be used for local development only — not production.                                                                                                                                                                                                                                                                                                                                         |
+| **FR-006** | The system shall provide **navigation** between list, detail, and forms without losing essential context (e.g. return to list after save).                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| **FR-007** | The system shall provide a chat where the user should be able to describe the type of workout that want to generate using AI so it can be saved and added to the day).                                                                                                                                                                                                                                                                                                                                                                                             |
+| **FR-008** | The system shall support **multiple workout formats** (existing and **future**). **Different workout types may require different user flows, validation, scoring capture, and presentation**; the product shall not rely on a single universal form or a single fixed field set for every type without an extension mechanism.                                                                                                                                                                                                                                     |
+| **FR-009** | The system shall allow **new workout types to be introduced** as the product evolves (including types not listed at initial delivery). Adding a type shall be possible **without replacing the entire workout model** each time; how types are **registered or configured** (e.g. data-driven catalog vs versioned code modules) is an implementation choice recorded in [docs/ARCHITECTURE.md](ARCHITECTURE.md).                                                                                                                                                  |
+| **FR-010** | The system shall provide a **Calendar page** (`/calendar`) where the authenticated user can view all their workouts — past and future-planned — plotted on a calendar. The page shall support **Day**, **Week**, and **Month** view modes, a **date-range filter**, and navigation to adjacent periods. Clicking a workout entry shall navigate to its detail or edit page; clicking an empty date slot shall open the create form pre-filled with that date. The URL shall encode the active view mode and date range so the state is bookmarkable and shareable. |
+
 ---
 
-## 7. Functional requirements
-
-
-| ID         | Requirement                                                                                                                                                                                                                                                                                                                 |
-| ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **FR-001** | The system shall display a **paginated or scrollable list** of workout records available to the signed-in user. Authentication is required; unauthenticated access is not permitted (Supabase Auth + RLS enforce this).                                                                                                     |
-| **FR-002** | The system shall provide a **detail view** for a single workout record, including at minimum: **title or activity label**, **date and time (or date only)**, **duration** (or distance where relevant), and **notes or tags** as applicable. Optional fields (e.g. **perceived intensity / RPE**) may be added when agreed. |
-| **FR-003** | The system shall allow **creating** a workout record with required field validation; invalid submissions show **inline or summary errors**.                                                                                                                                                                                 |
-| **FR-004** | The system shall allow **editing** and **deleting** a record when the user has permission. Permission rules for MVP: **athletes** may only modify their own records (enforced by Supabase RLS `user_id = auth.uid()`); **administrators** have read access to all records but do not bypass write restrictions.             |
-| **FR-005** | The system shall **persist** data in **Supabase PostgreSQL** via the Edge Function REST API (`/api/v1/`*). A documented mock/fixture layer (`supabase/seed.sql`) may be used for local development only — not production.                                                                                                   |
-| **FR-006** | The system shall provide **navigation** between list, detail, and forms without losing essential context (e.g. return to list after save).                                                                                                                                                                                  |
-| **FR-007** | The system shall provide a chat where the user should be able to describe the type of workout that want to generate using AI so it can be saved and added to the day).                                                                                                                                                      |
-
-
----
+<a id="ref-prd-section-8"></a>
 
 ## 8. Non-functional requirements (NFRs)
 
-
-| ID          | Area            | Requirement                                                                                                                                |
-| ----------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| **NFR-001** | Accessibility   | Primary flows meet **WCAG 2.2 Level AA** intent for components built in-house (focus order, labels, contrast).                             |
-| **NFR-002** | Performance     | Initial route interactive on mid-tier hardware; specific metrics (LCP, bundle budget) to be set when hosting target is chosen.             |
-| **NFR-003** | Browser support | Latest two versions of evergreen browsers (Chrome, Firefox, Safari, Edge) unless otherwise agreed.                                         |
-| **NFR-004** | Security        | No secrets in client bundle; **HTTPS** in deployed environments; follow secure defaults for auth tokens (details depend on auth provider). |
-| **NFR-005** | Maintainability | **TypeScript** strictness as per repo config; components colocated and styled with **Tailwind** utilities consistently.                    |
-
+| ID          | Area            | Requirement                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| ----------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **NFR-001** | Accessibility   | Primary flows meet **WCAG 2.2 Level AA** intent for components built in-house (focus order, labels, contrast).                                                                                                                                                                                                                                                                                                                                                                                                      |
+| **NFR-002** | Performance     | Initial route interactive on mid-tier hardware; specific metrics (LCP, bundle budget) to be set when hosting target is chosen.                                                                                                                                                                                                                                                                                                                                                                                      |
+| **NFR-003** | Browser support | Latest two versions of evergreen browsers (Chrome, Firefox, Safari, Edge) unless otherwise agreed.                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| **NFR-004** | Security        | No secrets in client bundle; **HTTPS** in deployed environments; follow secure defaults for auth tokens (details depend on auth provider).                                                                                                                                                                                                                                                                                                                                                                          |
+| **NFR-005** | Maintainability | **TypeScript** strictness as per repo config; components colocated and styled with **Tailwind** utilities consistently.                                                                                                                                                                                                                                                                                                                                                                                             |
+| **NFR-006** | Extensibility   | Workout **formats** shall be implemented using a **documented extension pattern** (e.g. **registry**, **strategy**, or **plugin-style** modules per type) so developers can **add or adjust a workout type** by implementing agreed **contracts** (types, validation entry points, optional UI slots) **without** copying unrelated routing, auth, or API plumbing. The pattern and extension points shall be described in [docs/ARCHITECTURE.md](ARCHITECTURE.md) and kept aligned with **FR-008** and **FR-009**. |
 
 ---
 
 ## 9. UX and design
 
-- **Key screens:** list (index), detail, create/edit form, empty state, error state.
+- **Key screens:** list (index), detail, create/edit form, **calendar (day/week/month)**, empty state, error state.
 - **Design system:** **Tailwind CSS** for layout and tokens; **shadcn/ui** (Radix UI primitives) for accessible component implementation — decision recorded in §16. **Forms** use **React Hook Form** + **Zod** per §10.
 
 ---
@@ -145,35 +170,43 @@ People who train regularly often lack a **single, dependable place** to track **
 
 ## 10. Technical approach (fixed stack + open choices)
 
-BaaS platform choice and rationale: *[§18](./PRD.md#ref-prd-section-18).*
+BaaS platform choice and rationale: _[§18](./PRD.md#ref-prd-section-18)._
 
 ### Decided
 
-
-| Area             | Decision                                                                                                                             |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| UI               | **React**                                                                                                                            |
-| Language         | **TypeScript**                                                                                                                       |
-| Styling          | **Tailwind CSS**                                                                                                                     |
-| React framework  | Vite + React SPA                                                                                                                     |
-| State            | Local state + **TanStack Query** for server/async state vs minimal global store (**Zustand**) if needed.                             |
+| Area             | Decision                                                                                                                                                                                                                                                                                                                                                                |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
+| UI               | **React**                                                                                                                                                                                                                                                                                                                                                               |
+| Language         | **TypeScript**                                                                                                                                                                                                                                                                                                                                                          |
+| Styling          | **Tailwind CSS**                                                                                                                                                                                                                                                                                                                                                        |
+| React framework  | Vite + React SPA                                                                                                                                                                                                                                                                                                                                                        |
+| State            | Local state + **TanStack Query** for server/async state vs minimal global store (**Zustand**) if needed.                                                                                                                                                                                                                                                                |
 | Forms            | **React Hook Form** with **Zod** schemas and **`@hookform/resolvers`** (zod adapter); fields composed with shadcn/ui **Form** primitives. Chosen for **React 19** + Vite SPA: maintained peer support, fewer unnecessary re-renders (uncontrolled registration by default), and alignment with shadcn/ui patterns. Trivial two-field surfaces may use local state only. |
-| Routing          | React Router                                                                                                                         |
-| API              | REST with **OpenAPI** contract                                                                                                       |
-| Testing          | **Vitest** + React Testing Library; **Playwright** for critical E2E after the write path (see [§12.1](./PRD.md#ref-prd-section-testing)). |
-| Auth             | **Supabase Auth** — JWT (access token + refresh token). Role stored as `role` custom claim (`athlete` | `admin`).                    |
-| BaaS / backend   | **Supabase** (BaaS) — PostgreSQL + PostgREST (REST + OpenAPI) + Edge Functions + Auth; full rationale in [§18](./PRD.md#ref-prd-section-18).                        |
-| API URL pattern  | **Edge Functions as gateway** — SPA calls `/api/v1/`* via Supabase Edge Functions; PostgREST (`/rest/v1/`) is used server-side only. |
-| TypeScript types | Generated from Supabase schema via `supabase gen types typescript`; committed to `src/types/supabase.ts`.                            |
+| Routing          | React Router                                                                                                                                                                                                                                                                                                                                                            |
+| API              | REST with **OpenAPI** contract                                                                                                                                                                                                                                                                                                                                          |
+| Testing          | **Vitest** + React Testing Library; **Playwright** for critical E2E after the write path (see [§12.1](./PRD.md#ref-prd-section-testing)).                                                                                                                                                                                                                               |
+| Auth             | **Supabase Auth** — JWT (access token + refresh token). Role stored as `role` custom claim (`athlete`                                                                                                                                                                                                                                                                   | `admin`). |
+| BaaS / backend   | **Supabase** (BaaS) — PostgreSQL + PostgREST (REST + OpenAPI) + Edge Functions + Auth; full rationale in [§18](./PRD.md#ref-prd-section-18).                                                                                                                                                                                                                            |
+| API URL pattern  | **Edge Functions as gateway** — SPA calls `/api/v1/`\* via Supabase Edge Functions; PostgREST (`/rest/v1/`) is used server-side only.                                                                                                                                                                                                                                   |
+| TypeScript types | Generated from Supabase schema via `supabase gen types typescript`; committed to `src/types/supabase.ts`.                                                                                                                                                                                                                                                               |
 
+<a id="ref-prd-workout-type-extensibility"></a>
+
+### Workout type extensibility (iteration 2+)
+
+This subsection turns **G12**, **FR-008**, **FR-009**, and **NFR-006** into engineering intent (exact libraries stay **open**).
+
+- **Problem:** Workout **formats** (AMRAP, For Time, EMOM, Tabata, ladders, chipper-style, future types) differ in **scoring**, **time domains**, and **prescription**; a single mega-form becomes unmaintainable.
+- **Requirement:** The codebase shall isolate **per-type behaviour** behind a small set of **extension points**—for example a **registry** mapping type id → **handlers** (validation/schema, optional React **form sections**, score normalization for display/API)—so a new type is added by **new module(s) + registration**, not by editing unrelated screens.
+- **Documentation:** [docs/ARCHITECTURE.md](ARCHITECTURE.md) shall name the chosen pattern, folder layout, and how **server-side** validation (Edge Functions / Zod) stays consistent with the client.
+- **Non-prescriptive:** The PRD does not mandate a specific design pattern name; it mandates **discoverability** and **low coupling** for new workout types.
 
 ### Open decisions (record outcome in this doc when closed)
 
-
-| Topic                        | Options / notes |
-| ---------------------------- | --------------- |
-| No open decisions right now. |                 |
-
+| Topic                               | Options / notes                                                                                                                                                                                                           |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Workout type registration**       | **Data-driven** (rows in DB, admin-editable metadata) vs **code-first** (enum + registered modules per release) vs **hybrid** (catalog in DB, behaviour in code). Record decision when iteration 2 implementation starts. |
+| **Shared vs per-type API payloads** | Single `workouts` resource with **discriminated** `type` + `payload` JSON vs separate sub-resources; affects OpenAPI and migrations.                                                                                      |
 
 Intent in this PRD is captured here; **as-built** design lives in [docs/ARCHITECTURE.md](ARCHITECTURE.md).
 
@@ -197,14 +230,12 @@ Intent in this PRD is captured here; **as-built** design lives in [docs/ARCHITEC
 
 ## 12. Milestones and release criteria
 
-
-| Milestone           | Outcome                                                                                    |
-| ------------------- | ------------------------------------------------------------------------------------------ |
-| **M1 — Skeleton**   | Repo runs locally; app shell, routing placeholder, Tailwind configured; TypeScript passes. |
-| **M2 — Read path**  | List + detail backed by API or agreed mock; loading and error states.                      |
-| **M3 — Write path** | Create + edit + delete per permissions; validation UX complete.                            |
+| Milestone           | Outcome                                                                                                                                                                                                     |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **M1 — Skeleton**   | Repo runs locally; app shell, routing placeholder, Tailwind configured; TypeScript passes.                                                                                                                  |
+| **M2 — Read path**  | List + detail backed by API or agreed mock; loading and error states.                                                                                                                                       |
+| **M3 — Write path** | Create + edit + delete per permissions; validation UX complete.                                                                                                                                             |
 | **M4 — Hardening**  | A11y pass on primary flows; automated SPA tests green in CI when a pipeline exists; Playwright smoke (post–write path) green; deployment story documented; manual Supabase/RLS checks documented per §12.1. |
-
 
 <a id="ref-prd-section-testing"></a>
 
@@ -220,40 +251,42 @@ This subsection defines **what “tested enough for MVP” means**: required too
 
 #### Test requirements (MVP)
 
-| ID        | Requirement |
-| --------- | ----------- |
-| **TR-001** | The SPA shall use **Vitest** and **React Testing Library** as the default automated test stack for unit and component/integration-style tests. |
-| **TR-002** | Automated tests shall cover **workout validation** (e.g. Zod schemas aligned with API fields: required properties, `type` enum, dates, numeric bounds) and **standard API error shape** handling (`{ "error": { "code", "message", "details" } }`). |
-| **TR-003** | Automated tests shall cover the **HTTP client** behaviour relevant to MVP: correct `/api/v1/` usage, **`Authorization: Bearer`** on authenticated calls, and parsing of success and error responses (using **mocks** — no production Supabase or OpenAI in unit/component test runs). |
-| **TR-004** | Automated **UI tests** shall exercise **primary flows** with **mocked** auth session and **mocked** API: unauthenticated users cannot access protected views; **list** and **detail** show loading, empty, and error states as designed; **create/edit** surfaces show validation feedback and invoke create/update with valid payloads. |
+| ID         | Requirement                                                                                                                                                                                                                                                                                                                                                                         |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **TR-001** | The SPA shall use **Vitest** and **React Testing Library** as the default automated test stack for unit and component/integration-style tests.                                                                                                                                                                                                                                      |
+| **TR-002** | Automated tests shall cover **workout validation** (e.g. Zod schemas aligned with API fields: required properties, `type` enum, dates, numeric bounds) and **standard API error shape** handling (`{ "error": { "code", "message", "details" } }`).                                                                                                                                 |
+| **TR-003** | Automated tests shall cover the **HTTP client** behaviour relevant to MVP: correct `/api/v1/` usage, **`Authorization: Bearer`** on authenticated calls, and parsing of success and error responses (using **mocks** — no production Supabase or OpenAI in unit/component test runs).                                                                                               |
+| **TR-004** | Automated **UI tests** shall exercise **primary flows** with **mocked** auth session and **mocked** API: unauthenticated users cannot access protected views; **list** and **detail** show loading, empty, and error states as designed; **create/edit** surfaces show validation feedback and invoke create/update with valid payloads.                                            |
 | **TR-005** | **Playwright** shall run at least **one smoke end-to-end spec** after **M3 (write path)** is implemented: **sign-in** → **create workout** → **workout appears in list** (extend with **edit/delete** when low cost). E2E runs against **local Supabase with seed data** or a **documented staging** project — **deterministic** test data, **no** live OpenAI calls in CI for MVP. |
-| **TR-006** | **AI workout generation** (**FR-007**, `POST /api/v1/ai/workouts/generate`): automated tests shall use a **mocked LLM/HTTP response** only; **secrets** stay out of client bundles (**NFR-004**) and **CI must not depend** on a paid or rate-limited live model for MVP gates. |
-| **TR-007** | **Supabase RLS and roles** (**FR-004**, Architecture): MVP shall include a **documented manual verification** procedure (two athletes, one admin, expected allow/deny matrix) plus **optional SQL snippets** reviewers can run to confirm isolation and admin read rules. Automated policy tests in CI are **not** required for MVP. |
-| **TR-008** | When **continuous integration** exists for the repository, **SPA automated tests** (`npm test` or equivalent) shall run on every merge request / main pipeline; Playwright runs when the E2E spec and environment are **stable** (typically from **M3** onward). |
+| **TR-006** | **AI workout generation** (**FR-007**, `POST /api/v1/ai/workouts/generate`): automated tests shall use a **mocked LLM/HTTP response** only; **secrets** stay out of client bundles (**NFR-004**) and **CI must not depend** on a paid or rate-limited live model for MVP gates.                                                                                                     |
+| **TR-007** | **Supabase RLS and roles** (**FR-004**, Architecture): MVP shall include a **documented manual verification** procedure (two athletes, one admin, expected allow/deny matrix) plus **optional SQL snippets** reviewers can run to confirm isolation and admin read rules. Automated policy tests in CI are **not** required for MVP.                                                |
+| **TR-008** | When **continuous integration** exists for the repository, **SPA automated tests** (`npm test` or equivalent) shall run on every merge request / main pipeline; Playwright runs when the E2E spec and environment are **stable** (typically from **M3** onward).                                                                                                                    |
 
 #### Traceability (functional requirements → minimum verification)
 
-| Functional area | Minimum verification (MVP) |
-| ----------------- | --------------------------- |
-| **FR-001** List | UI tests (mocked API): loading, empty, error, list with rows; E2E smoke includes list after create. |
-| **FR-002** Detail | UI tests: detail from mocked `GET /workouts/{id}`; E2E optional if already covered by navigation from list. |
-| **FR-003** Create | Zod/client tests + UI validation; E2E create path in smoke spec. |
-| **FR-004** Edit/delete + permissions | UI tests with mocked API; **TR-007** manual RLS matrix; E2E edit/delete if cheap. |
-| **FR-005** Persistence | E2E smoke against real DB (local/staging); client tests remain mocked. |
-| **FR-006** Navigation | Assert return to list after save in UI or E2E (at least one layer). |
-| **FR-007** AI chat/generate | Client or handler tests with **mocked** generate response (**TR-006**); no E2E dependency on OpenAI for MVP. |
-| **NFR-001** Accessibility | Manual a11y pass in **M4**; automated UI tests use semantic queries (`getByRole`, labels) where practical — optional axe tooling is **not** mandatory for MVP. |
+| Functional area                      | Minimum verification (MVP)                                                                                                                                     |
+| ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **FR-001** List                      | UI tests (mocked API): loading, empty, error, list with rows; E2E smoke includes list after create.                                                            |
+| **FR-002** Detail                    | UI tests: detail from mocked `GET /workouts/{id}`; E2E optional if already covered by navigation from list.                                                    |
+| **FR-003** Create                    | Zod/client tests + UI validation; E2E create path in smoke spec.                                                                                               |
+| **FR-004** Edit/delete + permissions | UI tests with mocked API; **TR-007** manual RLS matrix; E2E edit/delete if cheap.                                                                              |
+| **FR-005** Persistence               | E2E smoke against real DB (local/staging); client tests remain mocked.                                                                                         |
+| **FR-006** Navigation                | Assert return to list after save in UI or E2E (at least one layer).                                                                                            |
+| **FR-007** AI chat/generate          | Client or handler tests with **mocked** generate response (**TR-006**); no E2E dependency on OpenAI for MVP.                                                   |
+| **NFR-001** Accessibility            | Manual a11y pass in **M4**; automated UI tests use semantic queries (`getByRole`, labels) where practical — optional axe tooling is **not** mandatory for MVP. |
+
+**Iteration 2 (when in scope):** **FR-008** and **FR-009** shall have automated coverage for **per-type validation** and **routing to the correct UI** where applicable; **NFR-006** shall be evidenced by **ARCHITECTURE.md** describing the extension pattern and at least one **worked example** of adding a type without touching unrelated modules.
 
 #### Definitions
 
-| Term | Definition (MVP) |
-| ---- | ------------------ |
-| **Unit test** | Tests **pure logic** with no browser DOM: schemas, mappers, small utilities. |
-| **Component / UI test** | **Vitest + React Testing Library** tests that render components in **jsdom** with **mocked** auth and network. |
-| **Integration test (frontend)** | Tests that combine **hooks + UI** (e.g. TanStack Query with mocked `fetch` or MSW) without a real Supabase project. |
-| **End-to-end (E2E) test** | **Playwright** tests against a **running app** and **real auth + database** (local or staging), using **seeded** users and data. |
-| **Smoke test** | **Minimal** E2E path proving the app is **not fundamentally broken** (auth + one CRUD vertical slice). |
-| **Manual verification** | A **documented checklist** (and optional SQL) performed by a human, recorded for audits and releases. |
+| Term                            | Definition (MVP)                                                                                                                 |
+| ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| **Unit test**                   | Tests **pure logic** with no browser DOM: schemas, mappers, small utilities.                                                     |
+| **Component / UI test**         | **Vitest + React Testing Library** tests that render components in **jsdom** with **mocked** auth and network.                   |
+| **Integration test (frontend)** | Tests that combine **hooks + UI** (e.g. TanStack Query with mocked `fetch` or MSW) without a real Supabase project.              |
+| **End-to-end (E2E) test**       | **Playwright** tests against a **running app** and **real auth + database** (local or staging), using **seeded** users and data. |
+| **Smoke test**                  | **Minimal** E2E path proving the app is **not fundamentally broken** (auth + one CRUD vertical slice).                           |
+| **Manual verification**         | A **documented checklist** (and optional SQL) performed by a human, recorded for audits and releases.                            |
 
 #### Out of scope for MVP automated testing
 
@@ -262,12 +295,12 @@ This subsection defines **what “tested enough for MVP” means**: required too
 
 #### Alignment with milestones
 
-| Milestone | Testing expectation |
-| --------- | ------------------- |
-| **M1** | Vitest + RTL **wired** (config, scripts, optional empty passing test). |
-| **M2** | **TR-002–TR-004** for **read path** (list, detail, states). |
-| **M3** | **TR-004** for write path; implement **TR-005** Playwright smoke. |
-| **M4** | **TR-007** documented; **TR-008** CI green; a11y pass per **NFR-001**. |
+| Milestone | Testing expectation                                                    |
+| --------- | ---------------------------------------------------------------------- |
+| **M1**    | Vitest + RTL **wired** (config, scripts, optional empty passing test). |
+| **M2**    | **TR-002–TR-004** for **read path** (list, detail, states).            |
+| **M3**    | **TR-004** for write path; implement **TR-005** Playwright smoke.      |
+| **M4**    | **TR-007** documented; **TR-008** CI green; a11y pass per **NFR-001**. |
 
 ### Definition of done (MVP)
 
@@ -277,19 +310,24 @@ This subsection defines **what “tested enough for MVP” means**: required too
 - Deployed to **staging** (or agreed environment) with environment variables documented.
 - [docs/ARCHITECTURE.md](ARCHITECTURE.md) updated to match implementation.
 
+### Definition of done (iteration 2 — CrossFit WOD authoring and workout types)
+
+- **FR-008** and **FR-009** implemented: multiple workout formats with **type-appropriate** flows (not a single rigid form for every format).
+- **NFR-006** satisfied: **documented** developer extension pattern (registry / strategy / plugin-style) and **ARCHITECTURE.md** updated with extension points and a **concrete example** of adding a new workout type.
+- Iteration 2 scope in [§6](./PRD.md#6-scope) (free-text capture, structured builder, admin exercise catalog) delivered per agreed priority; **paste parsing** remains optional unless promoted.
+
 ---
 
 ## 13. Risks, assumptions, dependencies
 
-
-| Type           | Item                                                                                                                                                    |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Assumption** | A single user or small group for MVP unless multi-tenant coaching product is required from day one.                                                     |
-| **Risk**       | ~~Late auth/backend decisions block integration~~ — **mitigated:** Supabase Auth + PostgREST + Edge Functions decided; see §10 and ARCHITECTURE.md.     |
-| **Risk**       | Supabase Edge Function cold-start latency may affect perceived performance — **mitigation:** keep functions lightweight; monitor with Supabase logs.    |
-| **Dependency** | Supabase project creation and environment variables (`SUPABASE_URL`, `SUPABASE_ANON_KEY`, `OPENAI_API_KEY`) must be set before integration work begins. |
-| **Dependency** | Design approval for key screens.                                                                                                                        |
-
+| Type           | Item                                                                                                                                                                                                                      |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Assumption** | A single user or small group for MVP unless multi-tenant coaching product is required from day one.                                                                                                                       |
+| **Risk**       | ~~Late auth/backend decisions block integration~~ — **mitigated:** Supabase Auth + PostgREST + Edge Functions decided; see §10 and ARCHITECTURE.md.                                                                       |
+| **Risk**       | Supabase Edge Function cold-start latency may affect perceived performance — **mitigation:** keep functions lightweight; monitor with Supabase logs.                                                                      |
+| **Dependency** | Supabase project creation and environment variables (`SUPABASE_URL`, `SUPABASE_ANON_KEY`, `OPENAI_API_KEY`) must be set before integration work begins.                                                                   |
+| **Dependency** | Design approval for key screens.                                                                                                                                                                                          |
+| **Risk**       | **Workout type proliferation** without a clear extension pattern leads to **conditional spaghetti** in forms and APIs — **mitigation:** **NFR-006** and early **ARCHITECTURE.md** alignment with **FR-008** / **FR-009**. |
 
 ---
 
@@ -513,7 +551,7 @@ All errors should follow:
 
 - The MVP requires a **REST API with an OpenAPI 3.x contract**. **PostgREST** exposes an auto-generated REST surface and OpenAPI spec from the database schema.
 - **Relational PostgreSQL** matches structured workout fields and supports **future analytics** and **wearable-derived structured data** (for example heart rate and zones) better than a document-only store.
-- **Edge Functions** implement `POST /api/v1/ai/workouts/generate` and the **Edge gateway** pattern (SPA → `/api/v1/`*, PostgREST `/rest/v1/` server-side only), as recorded in §10 and §17.
+- **Edge Functions** implement `POST /api/v1/ai/workouts/generate` and the **Edge gateway** pattern (SPA → `/api/v1/`\*, PostgREST `/rest/v1/` server-side only), as recorded in §10 and §17.
 - **Supabase Auth** and **Row Level Security (RLS)** align with the **Athlete** and **Administrator** roles and per-user data isolation.
 
 ### Alternatives considered (summary)
@@ -524,4 +562,3 @@ All errors should follow:
 ### Reference
 
 - As-built stack, diagrams, and extended rationale: [docs/ARCHITECTURE.md](ARCHITECTURE.md).
-

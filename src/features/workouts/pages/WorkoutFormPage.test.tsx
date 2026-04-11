@@ -20,7 +20,15 @@ vi.mock('../hooks/useWorkouts', () => ({
   useWorkout: vi.fn(),
 }))
 
-import { useCreateWorkout as useCreateWorkoutMock, useUpdateWorkout as useUpdateWorkoutMock } from '../hooks/useWorkoutMutations'
+// Mock useExercises so ExercisePicker (used in AmrapFormSection) doesn't need network
+vi.mock('@/features/exercises/hooks/useExercises', () => ({
+  useExercises: vi.fn(() => ({ data: { data: [] }, isLoading: false })),
+}))
+
+import {
+  useCreateWorkout as useCreateWorkoutMock,
+  useUpdateWorkout as useUpdateWorkoutMock,
+} from '../hooks/useWorkoutMutations'
 import { useWorkout as useWorkoutMock } from '../hooks/useWorkouts'
 
 const mockCreate = vi.mocked(useCreateWorkoutMock)
@@ -73,7 +81,7 @@ function renderCreate() {
           <Route path="/workouts" element={<div>Workouts list</div>} />
         </Routes>
       </MemoryRouter>
-    </QueryClientProvider>
+    </QueryClientProvider>,
   )
 }
 
@@ -92,6 +100,7 @@ describe('WorkoutFormPage (create mode)', () => {
     expect(screen.getByLabelText(/date/i)).toBeInTheDocument()
     expect(screen.getByLabelText(/duration/i)).toBeInTheDocument()
     expect(screen.getByLabelText(/notes/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/wod text/i)).toBeInTheDocument()
     expect(screen.getByLabelText(/rpe/i)).toBeInTheDocument()
   })
 
@@ -185,7 +194,7 @@ describe('WorkoutFormPage (create mode)', () => {
         expect.objectContaining({
           title: 'Test WOD',
           durationMinutes: 45,
-        })
+        }),
       )
     })
   })
@@ -216,5 +225,77 @@ describe('WorkoutFormPage (create mode)', () => {
 
     const saveBtn = screen.getByRole('button', { name: /saving/i })
     expect(saveBtn).toBeDisabled()
+  })
+
+  it('wod_text textarea renders', () => {
+    renderCreate()
+    expect(screen.getByLabelText(/wod text/i)).toBeInTheDocument()
+  })
+
+  it('submitting with wodText sends it in the request body', async () => {
+    const user = userEvent.setup()
+    const mutateAsync = vi.fn().mockResolvedValue({})
+    mockCreate.mockReturnValue(makeCreateMutation({ mutateAsync }))
+    renderCreate()
+
+    await user.clear(screen.getByLabelText(/title/i))
+    await user.type(screen.getByLabelText(/title/i), 'WOD with text')
+
+    const durationInput = screen.getByLabelText(/duration/i)
+    await user.clear(durationInput)
+    await user.type(durationInput, '30')
+
+    const wodTextarea = screen.getByLabelText(/wod text/i)
+    await user.type(wodTextarea, '3 rounds: 10 pull-ups, 20 push-ups')
+
+    await user.click(screen.getByRole('button', { name: /save/i }))
+
+    await waitFor(() => {
+      expect(mutateAsync).toHaveBeenCalledWith(
+        expect.objectContaining({
+          wodText: '3 rounds: 10 pull-ups, 20 push-ups',
+        }),
+      )
+    })
+  })
+
+  it('submitting without wodText passes with no validation error', async () => {
+    const user = userEvent.setup()
+    const mutateAsync = vi.fn().mockResolvedValue({})
+    mockCreate.mockReturnValue(makeCreateMutation({ mutateAsync }))
+    renderCreate()
+
+    await user.clear(screen.getByLabelText(/title/i))
+    await user.type(screen.getByLabelText(/title/i), 'No WOD text')
+
+    const durationInput = screen.getByLabelText(/duration/i)
+    await user.clear(durationInput)
+    await user.type(durationInput, '30')
+
+    // Leave wodText empty and submit
+    await user.click(screen.getByRole('button', { name: /save/i }))
+
+    // Mutation should be called — no validation error blocks submission
+    await waitFor(() => {
+      expect(mutateAsync).toHaveBeenCalled()
+    })
+  })
+
+  it('renders WodFormatSelector in the form', () => {
+    renderCreate()
+    // The WodFormatSelector renders a label "WOD Format"
+    expect(screen.getByLabelText(/wod format/i)).toBeInTheDocument()
+  })
+
+  it('selecting "amrap" shows the AMRAP form section', async () => {
+    const user = userEvent.setup()
+    renderCreate()
+
+    const formatSelect = screen.getByLabelText(/wod format/i)
+    await user.selectOptions(formatSelect, 'amrap')
+
+    await waitFor(() => {
+      expect(screen.getByTestId('wod-form-section-amrap-payload')).toBeInTheDocument()
+    })
   })
 })

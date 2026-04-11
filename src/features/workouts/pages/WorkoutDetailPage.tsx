@@ -15,6 +15,9 @@ import {
   DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog'
+import '../registry/formats/index'
+import { getFormat } from '../registry/index'
+import type { WodFormat } from '../registry/types'
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleString(undefined, {
@@ -61,10 +64,18 @@ export function WorkoutDetailPage() {
     const isNotFound = errorCode === 'NOT_FOUND' || errorCode === 'PGRST116'
     return (
       <div className="container mx-auto px-4 py-8 max-w-2xl">
-        <Button variant="outline" onClick={() => void navigate('/workouts')} className="mb-6" aria-label="Back to workouts">
+        <Button
+          variant="outline"
+          onClick={() => void navigate('/workouts')}
+          className="mb-6"
+          aria-label="Back to workouts"
+        >
           &larr; Back to workouts
         </Button>
-        <div role="alert" className="rounded-xl border border-destructive/30 bg-destructive/10 p-6 text-destructive text-center">
+        <div
+          role="alert"
+          className="rounded-xl border border-destructive/30 bg-destructive/10 p-6 text-destructive text-center"
+        >
           <p className="text-lg font-medium">
             {isNotFound ? 'Workout not found' : 'Failed to load workout'}
           </p>
@@ -90,7 +101,12 @@ export function WorkoutDetailPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl">
-      <Button variant="outline" onClick={() => void navigate('/workouts')} className="mb-6" aria-label="Back to workouts">
+      <Button
+        variant="outline"
+        onClick={() => void navigate('/workouts')}
+        className="mb-6"
+        aria-label="Back to workouts"
+      >
         &larr; Back to workouts
       </Button>
 
@@ -106,9 +122,7 @@ export function WorkoutDetailPage() {
         <CardContent className="divide-y">
           <DetailRow label="Date" value={formatDate(workout.performedAt)} />
           <DetailRow label="Duration" value={`${workout.durationMinutes} minutes`} />
-          {workout.rpe !== undefined && (
-            <DetailRow label="RPE" value={`${workout.rpe} / 10`} />
-          )}
+          {workout.rpe !== undefined && <DetailRow label="RPE" value={`${workout.rpe} / 10`} />}
           {workout.notes && (
             <>
               <Separator className="my-2" />
@@ -118,15 +132,42 @@ export function WorkoutDetailPage() {
               </div>
             </>
           )}
+          {workout.wodText && (
+            <>
+              <Separator className="my-2" />
+              <div className="py-2">
+                <p className="text-sm text-muted-foreground mb-1">WOD Text</p>
+                <p className="text-sm whitespace-pre-wrap">{workout.wodText}</p>
+              </div>
+            </>
+          )}
+          {workout.wodFormat &&
+            workout.payload &&
+            (() => {
+              try {
+                const handler = getFormat(workout.wodFormat as WodFormat)
+                return (
+                  <>
+                    <Separator className="my-2" />
+                    <div className="py-2">
+                      <p className="text-sm text-muted-foreground mb-1">WOD Format</p>
+                      <p className="text-sm font-medium mb-2">{handler.label}</p>
+                      <pre className="text-xs bg-muted rounded p-2 overflow-auto">
+                        {JSON.stringify(workout.payload, null, 2)}
+                      </pre>
+                    </div>
+                  </>
+                )
+              } catch {
+                return null
+              }
+            })()}
         </CardContent>
       </Card>
 
       {isOwner && (
         <div className="flex gap-3 mt-6">
-          <Button
-            variant="outline"
-            onClick={() => void navigate(`/workouts/${workout.id}/edit`)}
-          >
+          <Button variant="outline" onClick={() => void navigate(`/workouts/${workout.id}/edit`)}>
             Edit
           </Button>
           <Button variant="destructive" onClick={() => setDeleteOpen(true)}>
