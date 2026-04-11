@@ -57,15 +57,24 @@ test.describe('Workout with WOD format', () => {
     const row0 = page.getByTestId('movement-row-0')
     await expect(row0).toBeVisible()
 
-    // Type the exact exercise name char by char to trigger React's onChange.
-    // The ExercisePicker calls onChange(id, name) when it finds an exact match.
+    // Type into the ExercisePicker to trigger the API search (setSearchQuery).
     const exerciseInput = row0.getByTestId('exercise-picker-input')
-    await exerciseInput.pressSequentially('Deadlift', { delay: 50 })
+    await exerciseInput.fill('Deadlift')
 
-    // Wait for the API search + exact-match resolution to set exerciseId in the form
-    await expect(exerciseInput).toHaveValue('Deadlift')
-    // Give the component time to resolve the UUID from the datalist match
-    await page.waitForTimeout(300)
+    // Wait for the datalist to be populated — means the API returned results.
+    await expect(page.locator('#exercise-options option[value="Deadlift"]')).toBeAttached({
+      timeout: 10_000,
+    })
+
+    // Now dispatch a native input event so React's onInput handler fires and
+    // picks up the exact match, setting exerciseId in the form store.
+    await exerciseInput.dispatchEvent('input')
+
+    // Confirm the hidden exerciseId has been set to a UUID.
+    await expect(row0.locator('[data-testid="exercise-id-0"]')).toHaveValue(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/,
+      { timeout: 5_000 },
+    )
 
     // Rep scheme
     await row0.getByLabel(/rep scheme/i).fill('21-15-9')

@@ -65,7 +65,14 @@ function MovementRow({ control, name, index, fieldId, disabled, onRemove }: Move
       <Controller
         control={control}
         name={exerciseIdPath}
-        render={({ field }) => <input type="hidden" {...field} value={field.value ?? ''} />}
+        render={({ field }) => (
+          <input
+            type="hidden"
+            {...field}
+            value={field.value ?? ''}
+            data-testid={`exercise-id-${index}`}
+          />
+        )}
       />
       <Controller
         control={control}
