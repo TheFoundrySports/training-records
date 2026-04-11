@@ -39,3 +39,23 @@ export function buildCalendarDays(year: number, month: number, workouts: Workout
     }
   })
 }
+
+/**
+ * Build exactly 7 CalendarDay objects for the week containing anchorDate (Mon–Sun).
+ * isCurrentMonth is set to true for all cells (meaningless in week context).
+ */
+export function buildWeekDays(anchorDate: Date, workouts: Workout[]): CalendarDay[] {
+  const weekStart = startOfWeek(anchorDate, { weekStartsOn: 1 })
+  const weekEnd = endOfWeek(anchorDate, { weekStartsOn: 1 })
+  const days = eachDayOfInterval({ start: weekStart, end: weekEnd })
+  const byDay = groupByDay(workouts)
+
+  return days.map((date) => {
+    const key = format(date, 'yyyy-MM-dd')
+    return {
+      date,
+      isCurrentMonth: true,
+      workouts: byDay.get(key) ?? [],
+    }
+  })
+}
