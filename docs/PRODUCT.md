@@ -23,7 +23,7 @@ Workout history is often fragmented across notes apps, chats, and multiple tools
 - **Workout list** — browse sessions relevant to the user with clear loading and empty states.
 - **Session detail** — view activity, date/time, duration (or distance), notes, tags, and related metadata.
 - **Create / edit / delete** — add and maintain records with validation and permission-aware actions (exact rules per release; see PRD).
-- **Training calendar** — month grid of workouts with navigation and links into list/detail flows ([spec](features/calendar.md)).
+- **Training calendar** — month, week, and day views of workouts with URL-driven `view` and `date`, navigation, and links into list/detail flows ([spec](features/calendar.md)).
 
 Feature-level specs may live under [docs/features/](features/) as they are added.
 
