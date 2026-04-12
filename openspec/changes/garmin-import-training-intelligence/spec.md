@@ -91,12 +91,12 @@ The function MUST store one row in `training_evaluations` linked to `garmin_acti
 
 The evaluation response MUST include:
 
-| Field                      | Type           | Values                          |
-| -------------------------- | -------------- | ------------------------------- |
-| `summary`                  | string         | Narrative of the session        |
-| `readiness_level`          | enum           | `low` \| `medium` \| `high`     |
-| `next_training_suggestion` | string         | Actionable recommendation       |
-| `adaptation_warning`       | string \| null | Present only when warning fires |
+| Field                     | Type           | Values                                                 |
+| ------------------------- | -------------- | ------------------------------------------------------ |
+| `summary`                 | string         | Narrative of the session                               |
+| `readiness_level`         | enum           | `excellent` \| `good` \| `moderate` \| `low` \| `rest` |
+| `next_session_suggestion` | string         | Actionable recommendation                              |
+| `adaptation_warning`      | string \| null | Present only when warning fires                        |
 
 #### Scenario: Successful AI evaluation
 

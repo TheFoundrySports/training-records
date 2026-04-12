@@ -9,7 +9,9 @@ interface AIEvaluationCardProps {
   isEvaluating: boolean
   evaluation: TrainingEvaluation | null
   adaptationWarning: string | null
+  evaluationError?: string | null
   onGenerateEvaluation?: () => void
+  onRetry?: () => void
 }
 
 const READINESS_STYLES: Record<
@@ -36,7 +38,9 @@ export function AIEvaluationCard({
   isEvaluating,
   evaluation,
   adaptationWarning,
+  evaluationError,
   onGenerateEvaluation,
+  onRetry,
 }: AIEvaluationCardProps) {
   if (garminActivityId === null) return null
 
@@ -80,7 +84,18 @@ export function AIEvaluationCard({
           </div>
         )}
 
-        {!isEvaluating && evaluation === null && (
+        {!isEvaluating && evaluation === null && evaluationError && (
+          <div className="flex flex-col items-start gap-3">
+            <p className="text-sm text-destructive font-medium">AI evaluation failed. Try again.</p>
+            {onRetry && (
+              <Button variant="destructive" size="sm" onClick={onRetry}>
+                Retry
+              </Button>
+            )}
+          </div>
+        )}
+
+        {!isEvaluating && evaluation === null && !evaluationError && (
           <div className="flex flex-col items-start gap-3">
             <p className="text-sm text-muted-foreground">Evaluation not yet generated.</p>
             {onGenerateEvaluation && (

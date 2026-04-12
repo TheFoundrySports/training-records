@@ -23,12 +23,14 @@ export interface GarminActivity {
   updatedAt: string
 }
 
+export type ReadinessLevel = 'excellent' | 'good' | 'moderate' | 'low' | 'rest'
+
 export interface TrainingEvaluation {
   id: string
   garminActivityId: string
   userId: string
   summary: string
-  readinessLevel: 'excellent' | 'good' | 'moderate' | 'low' | 'rest'
+  readinessLevel: ReadinessLevel
   nextSessionSuggestion: string
   adaptationWarning: string | null
   createdAt: string

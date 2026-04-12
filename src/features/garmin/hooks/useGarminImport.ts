@@ -1,81 +1,66 @@
-import { useState } from 'react'
+import { useMutation } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import type { ImportResult, TrainingEvaluation } from '../garmin.types'
 
 export function useGarminImport() {
-  const [isImporting, setIsImporting] = useState(false)
-  const [isEvaluating, setIsEvaluating] = useState(false)
-  const [importResult, setImportResult] = useState<ImportResult | null>(null)
-  const [evaluation, setEvaluation] = useState<TrainingEvaluation | null>(null)
-  const [error, setError] = useState<string | null>(null)
+  const evaluateMutation = useMutation({
+    mutationFn: async (garminActivityId: string): Promise<TrainingEvaluation | null> => {
+      const { data, error } = await supabase.functions.invoke<TrainingEvaluation>(
+        'training-evaluation',
+        { body: { garmin_activity_id: garminActivityId } },
+      )
 
-  async function importAndEvaluate(file: File, workoutId: string) {
-    setError(null)
-    setImportResult(null)
-    setEvaluation(null)
+      if (error) {
+        throw new Error(error.message)
+      }
 
-    // Step 1: Import the .fit file
-    setIsImporting(true)
-    let result: ImportResult
-    try {
+      return data ?? null
+    },
+  })
+
+  const importMutation = useMutation({
+    mutationFn: async ({
+      file,
+      workoutId,
+    }: {
+      file: File
+      workoutId: string
+    }): Promise<ImportResult> => {
       const formData = new FormData()
       formData.append('file', file)
       formData.append('workout_id', workoutId)
 
-      const { data, error: importError } = await supabase.functions.invoke<ImportResult>(
-        'garmin-import',
-        { body: formData },
-      )
+      const { data, error } = await supabase.functions.invoke<ImportResult>('garmin-import', {
+        body: formData,
+      })
 
-      if (importError) {
-        throw new Error(importError.message)
+      if (error) {
+        throw new Error(error.message)
       }
 
       if (!data) {
         throw new Error('No data returned from garmin-import')
       }
 
-      result = data
-      setImportResult(result)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to import Garmin activity')
-      setIsImporting(false)
-      return
-    } finally {
-      setIsImporting(false)
-    }
+      return data
+    },
+    onSuccess: (result) => {
+      // Chain: trigger evaluation after successful import
+      evaluateMutation.mutate(result.garminActivityId)
+    },
+  })
 
-    // Step 2: Generate AI evaluation
-    setIsEvaluating(true)
-    try {
-      const { data: evalData, error: evalError } =
-        await supabase.functions.invoke<TrainingEvaluation>('training-evaluation', {
-          body: { garmin_activity_id: result.garminActivityId },
-        })
-
-      if (evalError) {
-        // Evaluation failure is non-fatal — import already succeeded
-        console.warn('Training evaluation failed:', evalError.message)
-        return
-      }
-
-      if (evalData) {
-        setEvaluation(evalData)
-      }
-    } catch (err) {
-      // Non-fatal: evaluation failure doesn't undo the import
-      console.warn('Training evaluation error:', err)
-    } finally {
-      setIsEvaluating(false)
-    }
+  function importAndEvaluate(file: File, workoutId: string) {
+    importMutation.mutate({ file, workoutId })
   }
 
   return {
     importAndEvaluate,
-    isImporting,
-    isEvaluating,
-    importResult,
-    evaluation,
-    error,
+    isImporting: importMutation.isPending,
+    isEvaluating: evaluateMutation.isPending,
+    importResult: importMutation.data ?? null,
+    evaluation: evaluateMutation.data ?? null,
+    error: importMutation.error?.message ?? null,
+    evaluationError: evaluateMutation.error?.message ?? null,
   }
 }
