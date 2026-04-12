@@ -2,13 +2,13 @@
 
 ## 1. Document control
 
-| Field       | Value                                                                                                                                           |
-| ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Title**   | Training Records — initial product requirements (workouts / fitness)                                                                            |
-| **Version** | 0.7                                                                                                                                             |
-| **Date**    | 2026-04-12                                                                                                                                      |
-| **Author**  | Francisco José Seva Mora                                                                                                                        |
-| **Status**  | Draft — BaaS/Supabase + MVP testing; iteration 2 CrossFit / WOD authoring requirements drafted; iteration 3 Calendar / Training Planner drafted |
+| Field       | Value                                                                                                                                                                                                      |
+| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Title**   | Training Records — initial product requirements (workouts / fitness)                                                                                                                                       |
+| **Version** | 0.8                                                                                                                                                                                                        |
+| **Date**    | 2026-04-12                                                                                                                                                                                                 |
+| **Author**  | Francisco José Seva Mora                                                                                                                                                                                   |
+| **Status**  | Draft — BaaS/Supabase + MVP testing; iteration 2 CrossFit / WOD authoring requirements drafted; iteration 3 Calendar / Training Planner drafted; iteration 4 Garmin Import + Training Intelligence drafted |
 
 **Related links**
 
@@ -50,14 +50,17 @@ People who train regularly often lack a **single, dependable place** to track **
 - **G11:** The product will support **many workout formats** over time; **each format may need its own interaction model** (fields, validation, scoring, display)—not a single rigid form for every type.
 - **G12:** The **codebase** shall make it **straightforward for developers to add new workout types** using a **documented extensibility pattern** (see **NFR-006** in [§8](./PRD.md#ref-prd-section-8) and [Workout type extensibility](./PRD.md#ref-prd-workout-type-extensibility) in [§10](./PRD.md#ref-prd-section-10)) so new types do not require rewriting core flows.
 - **G13:** The user shall be able to **see all workouts — past and planned — on a calendar view**, navigable by day, week, and month, with **date-range filtering**, so that training load and future planning are visible at a glance.
+- **G14:** The user shall be able to **import wearable data from a Garmin device** (`.fit` file upload for MVP; Garmin Connect API as stretch goal) and link it to a planned or unplanned workout, so that real physiological data is stored alongside the workout record.
+- **G15:** The app shall display **training intelligence widgets** — a curated set of 5–7 key metrics derived from imported Garmin data (e.g. avg heart rate, HR zone distribution, training load, VO2max estimate, recovery time) — prominently on the workout detail page, so the athlete gets actionable insight at a glance.
+- **G16:** The app shall deliver an **AI-generated training evaluation** for each workout with imported data, structured into four components: training summary, readiness level, next training suggestion, and adaptation warning (when recovery time conflicts with a planned workout).
 
 ### Non-goals (this PRD)
 
 - **NG1:** Full **gym or studio management** (billing, class scheduling, member CRM)—out of scope unless explicitly added later.
 - **NG2:** **Nutrition tracking**, sleep, or body metrics as first-class features—out of scope for MVP (may link externally later).
 - **NG3:** Native mobile apps—web-first only.
-- **NG4:** Replacing dedicated **wearable or device ecosystems** as the system of record—integration may come later; MVP may be standalone.
-- **NG5:** Complex logic to process data from garmin
+- ~~**NG4:** Replacing dedicated **wearable or device ecosystems** as the system of record—integration may come later; MVP may be standalone.~~ _(removed in v0.8 — Garmin import promoted to iteration 4)_
+- ~~**NG5:** Complex logic to process data from garmin~~ _(removed in v0.8 — training intelligence and AI evaluation promoted to iteration 4)_
 
 ---
 
@@ -85,6 +88,12 @@ People who train regularly often lack a **single, dependable place** to track **
 - **US-8:** As an athlete, I want to **see all my workouts on a calendar** (day / week / month views), so that I can understand my training density and spot gaps or overloads.
 - **US-9:** As an athlete, I want to **plan a future workout on a specific date** from the calendar view, so that I can schedule upcoming training sessions without leaving the calendar context.
 - **US-10:** As an athlete, I want to **filter the calendar by a custom date range**, so that I can review a specific training block (e.g. last 4 weeks, a competition prep cycle).
+- **US-11:** As an athlete, I want to **upload a `.fit` file from my Garmin device** after finishing a workout, so that my physiological data (heart rate, zones, training load, etc.) is stored alongside the workout record.
+- **US-12:** As an athlete, I want to **see key training metrics** (avg HR, HR zone breakdown, training load, recovery time, VO2max estimate) prominently on the workout detail page, so I can understand the physiological impact at a glance.
+- **US-13:** As an athlete, I want to **see an AI-generated training summary** for each workout with Garmin data, so I understand what the session actually demanded of my body.
+- **US-14:** As an athlete, I want to **receive an adaptation warning** when my recovery time from a completed workout conflicts with a planned upcoming workout, so I can adjust my schedule proactively.
+- **US-15:** As an athlete, I want the app to **suggest the next training session** based on my current readiness and training history, so I can make smarter decisions about what to do next.
+- **US-16:** As an athlete, I want to **link a Garmin import to an existing planned workout or save it as a new standalone record**, so that my log stays accurate whether or not I followed the plan.
 
 ---
 
@@ -102,7 +111,7 @@ People who train regularly often lack a **single, dependable place** to track **
 ### Out of scope (deferred)
 
 - Advanced analytics dashboards (PR charts, periodisation views) — **Phase 2** unless promoted.
-- Deep integration with **Strava, Apple Health, Garmin**, etc. — **Phase 2+**.
+- Deep integration with **Strava, Apple Health** — **Phase 2+**. **Garmin `.fit` upload** is now **in scope for iteration 4**; Garmin Connect OAuth is a **stretch goal for iteration 4**.
 - Offline-first or PWA — **later**.
 
 ### In scope — iteration 2 (CrossFit WOD authoring; planned)
@@ -129,18 +138,36 @@ This subsection records **planned** scope for a third iteration. It **does not r
 - **No new data model required:** The calendar reads from the existing `workouts` resource via `GET /api/v1/workouts?fromDate=&toDate=`. No new backend endpoints are required for MVP of this view.
 - **Responsive:** Day and week views are usable on mobile; month view may degrade gracefully (compact dots / count per day) on small viewports.
 
-| ID         | Requirement                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **FR-001** | The system shall display a **paginated or scrollable list** of workout records available to the signed-in user. Authentication is required; unauthenticated access is not permitted (Supabase Auth + RLS enforce this).                                                                                                                                                                                                                                                                                                                                            |
-| **FR-002** | The system shall provide a **detail view** for a single workout record, including at minimum: **title or activity label**, **date and time (or date only)**, **duration** (or distance where relevant), and **notes or tags** as applicable. Optional fields (e.g. **perceived intensity / RPE**) may be added when agreed.                                                                                                                                                                                                                                        |
-| **FR-003** | The system shall allow **creating** a workout record with required field validation; invalid submissions show **inline or summary errors**.                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| **FR-004** | The system shall allow **editing** and **deleting** a record when the user has permission. Permission rules for MVP: **athletes** may only modify their own records (enforced by Supabase RLS `user_id = auth.uid()`); **administrators** have read access to all records but do not bypass write restrictions.                                                                                                                                                                                                                                                    |
-| **FR-005** | The system shall **persist** data in **Supabase PostgreSQL** via the Edge Function REST API (`/api/v1/`\*). A documented mock/fixture layer (`supabase/seed.sql`) may be used for local development only — not production.                                                                                                                                                                                                                                                                                                                                         |
-| **FR-006** | The system shall provide **navigation** between list, detail, and forms without losing essential context (e.g. return to list after save).                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| **FR-007** | The system shall provide a chat where the user should be able to describe the type of workout that want to generate using AI so it can be saved and added to the day).                                                                                                                                                                                                                                                                                                                                                                                             |
-| **FR-008** | The system shall support **multiple workout formats** (existing and **future**). **Different workout types may require different user flows, validation, scoring capture, and presentation**; the product shall not rely on a single universal form or a single fixed field set for every type without an extension mechanism.                                                                                                                                                                                                                                     |
-| **FR-009** | The system shall allow **new workout types to be introduced** as the product evolves (including types not listed at initial delivery). Adding a type shall be possible **without replacing the entire workout model** each time; how types are **registered or configured** (e.g. data-driven catalog vs versioned code modules) is an implementation choice recorded in [docs/ARCHITECTURE.md](ARCHITECTURE.md).                                                                                                                                                  |
-| **FR-010** | The system shall provide a **Calendar page** (`/calendar`) where the authenticated user can view all their workouts — past and future-planned — plotted on a calendar. The page shall support **Day**, **Week**, and **Month** view modes, a **date-range filter**, and navigation to adjacent periods. Clicking a workout entry shall navigate to its detail or edit page; clicking an empty date slot shall open the create form pre-filled with that date. The URL shall encode the active view mode and date range so the state is bookmarkable and shareable. |
+### In scope — iteration 4 (Garmin Import + Training Intelligence)
+
+This subsection records **planned** scope for a fourth iteration. It **does not remove** prior requirements; it **adds** wearable data import and AI-driven training intelligence. Details may be refined in [docs/ARCHITECTURE.md](ARCHITECTURE.md) when implemented.
+
+- **Garmin `.fit` file upload (MVP):** Athletes can upload a `.fit` file from any Garmin device after finishing a workout. The server parses the file and extracts key metrics.
+- **Garmin Connect OAuth (stretch goal):** Automatic pull of the latest activity via the official Garmin Connect API. Not required for MVP; implement only if `.fit` upload is shipped and time allows.
+- **Data storage:** Raw parsed data stored as `jsonb`; key typed metrics (avg HR, zone distribution, training load, recovery time, VO2max estimate, etc.) stored in their own typed columns for efficient querying and display.
+- **Import linking:** The athlete can link a Garmin import to an existing planned workout (if one exists for that date) or save it as a standalone unplanned record.
+- **Training intelligence widgets:** 5–7 key metrics displayed prominently on the workout detail page — less is more; only the most actionable metrics are surfaced.
+- **AI training evaluation:** After import, the server calls a lightweight LLM (Gemini Flash or GPT-4o-mini) and returns a structured JSON evaluation validated with Zod: `training_summary`, `readiness_level`, `next_training_suggestion`, `adaptation_warning`.
+- **Adaptation warning:** When the computed `recovery_time_hours` from a completed workout conflicts with the next planned workout's `performedAt`, the app displays a prominent warning on both the completed workout detail and the calendar.
+
+| ID         | Requirement                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **FR-001** | The system shall display a **paginated or scrollable list** of workout records available to the signed-in user. Authentication is required; unauthenticated access is not permitted (Supabase Auth + RLS enforce this).                                                                                                                                                                                                                                                                                                                                                                                             |
+| **FR-002** | The system shall provide a **detail view** for a single workout record, including at minimum: **title or activity label**, **date and time (or date only)**, **duration** (or distance where relevant), and **notes or tags** as applicable. Optional fields (e.g. **perceived intensity / RPE**) may be added when agreed.                                                                                                                                                                                                                                                                                         |
+| **FR-003** | The system shall allow **creating** a workout record with required field validation; invalid submissions show **inline or summary errors**.                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| **FR-004** | The system shall allow **editing** and **deleting** a record when the user has permission. Permission rules for MVP: **athletes** may only modify their own records (enforced by Supabase RLS `user_id = auth.uid()`); **administrators** have read access to all records but do not bypass write restrictions.                                                                                                                                                                                                                                                                                                     |
+| **FR-005** | The system shall **persist** data in **Supabase PostgreSQL** via the Edge Function REST API (`/api/v1/`\*). A documented mock/fixture layer (`supabase/seed.sql`) may be used for local development only — not production.                                                                                                                                                                                                                                                                                                                                                                                          |
+| **FR-006** | The system shall provide **navigation** between list, detail, and forms without losing essential context (e.g. return to list after save).                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| **FR-007** | The system shall provide a chat where the user should be able to describe the type of workout that want to generate using AI so it can be saved and added to the day).                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| **FR-008** | The system shall support **multiple workout formats** (existing and **future**). **Different workout types may require different user flows, validation, scoring capture, and presentation**; the product shall not rely on a single universal form or a single fixed field set for every type without an extension mechanism.                                                                                                                                                                                                                                                                                      |
+| **FR-009** | The system shall allow **new workout types to be introduced** as the product evolves (including types not listed at initial delivery). Adding a type shall be possible **without replacing the entire workout model** each time; how types are **registered or configured** (e.g. data-driven catalog vs versioned code modules) is an implementation choice recorded in [docs/ARCHITECTURE.md](ARCHITECTURE.md).                                                                                                                                                                                                   |
+| **FR-010** | The system shall provide a **Calendar page** (`/calendar`) where the authenticated user can view all their workouts — past and future-planned — plotted on a calendar. The page shall support **Day**, **Week**, and **Month** view modes, a **date-range filter**, and navigation to adjacent periods. Clicking a workout entry shall navigate to its detail or edit page; clicking an empty date slot shall open the create form pre-filled with that date. The URL shall encode the active view mode and date range so the state is bookmarkable and shareable.                                                  |
+| **FR-011** | The system shall allow an authenticated athlete to **upload a `.fit` file** from a Garmin device (max 25 MB, MIME-type validated server-side) and associate the import with a workout record (planned or new standalone). The file shall be stored in a **private Supabase Storage bucket** and never exposed to unauthenticated clients.                                                                                                                                                                                                                                                                           |
+| **FR-012** | The system shall **parse the uploaded `.fit` file** server-side and persist the extracted data in two ways: (a) raw parsed payload as **`jsonb`** for forward-compatibility; (b) key typed columns (`avg_heart_rate`, `max_heart_rate`, `hr_zone_1_pct`–`hr_zone_5_pct`, `training_load`, `recovery_time_hours`, `vo2max_estimate`, `total_calories`, `active_duration_seconds`) for efficient querying and display.                                                                                                                                                                                                |
+| **FR-013** | The workout detail page shall display a **training intelligence widget section** showing 5–7 key metrics derived from the imported Garmin data: average heart rate, HR zone distribution (stacked bar or pie), training load score, estimated recovery time, VO2max estimate, total calories, and active duration. The widget section shall only appear when Garmin data has been imported for that workout.                                                                                                                                                                                                        |
+| **FR-014** | After a successful Garmin import, the system shall call a lightweight LLM (Gemini Flash or GPT-4o-mini — model choice recorded in §10 open decisions) from a Supabase Edge Function and persist a **structured AI training evaluation**. The LLM response schema (validated with **Zod**) shall contain: `training_summary` (string), `readiness_level` (`low` \| `moderate` \| `high`), `next_training_suggestion` (string), `adaptation_warning` (string \| null). If the LLM call fails or returns an invalid schema, the system shall store a null evaluation and surface a non-blocking error state in the UI. |
+| **FR-015** | When the computed `recovery_time_hours` from a completed workout's Garmin data conflicts with the `performedAt` of the athlete's **next planned workout**, the system shall display a prominent **adaptation warning** on the completed workout detail page (and optionally on the calendar chip). The warning shall include the conflicting planned workout's title and date.                                                                                                                                                                                                                                      |
+| **FR-016** | The system shall display the **next training suggestion** (from the AI evaluation, FR-014) as an actionable card on the workout detail page. The card shall include a CTA that pre-fills the create workout form with the suggested workout description and the next available date after the computed recovery window.                                                                                                                                                                                                                                                                                             |
 
 ---
 
@@ -156,12 +183,16 @@ This subsection records **planned** scope for a third iteration. It **does not r
 | **NFR-004** | Security        | No secrets in client bundle; **HTTPS** in deployed environments; follow secure defaults for auth tokens (details depend on auth provider).                                                                                                                                                                                                                                                                                                                                                                          |
 | **NFR-005** | Maintainability | **TypeScript** strictness as per repo config; components colocated and styled with **Tailwind** utilities consistently.                                                                                                                                                                                                                                                                                                                                                                                             |
 | **NFR-006** | Extensibility   | Workout **formats** shall be implemented using a **documented extension pattern** (e.g. **registry**, **strategy**, or **plugin-style** modules per type) so developers can **add or adjust a workout type** by implementing agreed **contracts** (types, validation entry points, optional UI slots) **without** copying unrelated routing, auth, or API plumbing. The pattern and extension points shall be described in [docs/ARCHITECTURE.md](ARCHITECTURE.md) and kept aligned with **FR-008** and **FR-009**. |
+| **NFR-007** | AI reliability  | LLM responses for training evaluation (**FR-014**) shall be validated against a **Zod schema** before persistence. An invalid or unparseable response must not crash the import flow; the evaluation shall be stored as `null` and the UI shall surface a non-blocking warning. The system must not depend on a live LLM call as a gate for CI.                                                                                                                                                                     |
+| **NFR-008** | File security   | Uploaded `.fit` files shall be stored in a **private Supabase Storage bucket** (no public access). File size is capped at **25 MB**. MIME type is validated server-side; client-side filtering is a UX hint only. Files are accessible only to the owning athlete and admins via signed URLs.                                                                                                                                                                                                                       |
 
 ---
 
 ## 9. UX and design
 
-- **Key screens:** list (index), detail, create/edit form, **calendar (day/week/month)**, empty state, error state.
+- **Key screens:** list (index), detail, create/edit form, **calendar (day/week/month)**, **workout detail with training intelligence widgets**, **AI evaluation card**, **adaptation warning**, empty state, error state.
+- **Training intelligence widgets:** Displayed as a dedicated section on the workout detail page when Garmin data is present. Shows avg HR, HR zone distribution (visual bar), training load score, recovery time countdown, VO2max estimate, calories, and active duration. Metrics are presented as cards — prominently sized, not buried in a table.
+- **AI evaluation card:** Four structured sub-sections — Training Summary (prose), Readiness Level (color-coded badge: low/moderate/high), Next Training Suggestion (actionable text + CTA button), Adaptation Warning (highlighted alert if recovery conflict detected).
 - **Design system:** **Tailwind CSS** for layout and tokens; **shadcn/ui** (Radix UI primitives) for accessible component implementation — decision recorded in §16. **Forms** use **React Hook Form** + **Zod** per §10.
 
 ---
@@ -203,10 +234,12 @@ This subsection turns **G12**, **FR-008**, **FR-009**, and **NFR-006** into engi
 
 ### Open decisions (record outcome in this doc when closed)
 
-| Topic                               | Options / notes                                                                                                                                                                                                           |
-| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Workout type registration**       | **Data-driven** (rows in DB, admin-editable metadata) vs **code-first** (enum + registered modules per release) vs **hybrid** (catalog in DB, behaviour in code). Record decision when iteration 2 implementation starts. |
-| **Shared vs per-type API payloads** | Single `workouts` resource with **discriminated** `type` + `payload` JSON vs separate sub-resources; affects OpenAPI and migrations.                                                                                      |
+| Topic                                | Options / notes                                                                                                                                                                                                           |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Workout type registration**        | **Data-driven** (rows in DB, admin-editable metadata) vs **code-first** (enum + registered modules per release) vs **hybrid** (catalog in DB, behaviour in code). Record decision when iteration 2 implementation starts. |
+| **Shared vs per-type API payloads**  | Single `workouts` resource with **discriminated** `type` + `payload` JSON vs separate sub-resources; affects OpenAPI and migrations.                                                                                      |
+| **AI model for training evaluation** | **Gemini Flash** (low cost, Google ecosystem) vs **GPT-4o-mini** (OpenAI, already in use for AI generation) vs **Groq Llama 3** (fast, free tier). Decision before iteration 4 implementation begins.                     |
+| **Garmin Connect API feasibility**   | Official Garmin Connect API requires OAuth approval. Evaluate feasibility as a stretch goal for iteration 4; `.fit` file upload is the MVP path regardless.                                                               |
 
 Intent in this PRD is captured here; **as-built** design lives in [docs/ARCHITECTURE.md](ARCHITECTURE.md).
 
@@ -218,12 +251,15 @@ Intent in this PRD is captured here; **as-built** design lives in [docs/ARCHITEC
 
 - **WorkoutRecord** (or **TrainingSession**): id, title/activity, startedAt or performedOn, duration (or distance), optional intensity/RPE, notes, tags, attachments (optional, later), owner/user id, timestamps.
 - **User** (if multi-user): id, role, link to coach or group (TBD).
+- **GarminActivity** (iteration 4): id, workout_id (FK), raw_fit_data (jsonb), avg_heart_rate, max_heart_rate, hr_zone_1_pct–hr_zone_5_pct, training_load, recovery_time_hours, vo2max_estimate, total_calories, active_duration_seconds, fit_file_path (Storage reference), imported_at.
+- **TrainingEvaluation** (iteration 4): id, workout_id (FK), training_summary (text), readiness_level (`low` | `moderate` | `high`), next_training_suggestion (text), adaptation_warning (text | null), evaluated_at, model_used.
 
 ### Integrations
 
 - **Auth / IdP:** **Supabase Auth** — email/password for MVP; JWT issued by Supabase, consumed by Edge Functions and the React SPA.
 - **AI:** **OpenAI** (or compatible LLM) called server-side from a Supabase Edge Function; API key stored as a Supabase secret, never in the client bundle.
-- **Wearables / Apple Health / Strava / Garmin:** Phase 2+ unless explicitly promoted to MVP.
+- **AI training evaluation (iteration 4):** Lightweight LLM (Gemini Flash, GPT-4o-mini, or Groq Llama 3 — TBD) called after Garmin import; response validated with Zod before persistence.
+- **Wearables — Garmin (iteration 4):** `.fit` file upload (MVP); Garmin Connect OAuth API (stretch goal). Apple Health / Strava remain Phase 2+.
 - **Export:** CSV or PDF — Phase 2 unless required for MVP.
 
 ---
@@ -316,18 +352,32 @@ This subsection defines **what “tested enough for MVP” means**: required too
 - **NFR-006** satisfied: **documented** developer extension pattern (registry / strategy / plugin-style) and **ARCHITECTURE.md** updated with extension points and a **concrete example** of adding a new workout type.
 - Iteration 2 scope in [§6](./PRD.md#6-scope) (free-text capture, structured builder, admin exercise catalog) delivered per agreed priority; **paste parsing** remains optional unless promoted.
 
+### Definition of done (iteration 4 — Garmin Import + Training Intelligence)
+
+- **FR-011** implemented: `.fit` file upload, private storage, file size and MIME validation.
+- **FR-012** implemented: server-side parsing, raw `jsonb` + typed columns persisted.
+- **FR-013** implemented: training intelligence widgets rendered on workout detail when data is present.
+- **FR-014** implemented: AI evaluation triggered after import, Zod-validated, non-blocking on failure.
+- **FR-015** implemented: adaptation warning shown when recovery conflicts with next planned workout.
+- **FR-016** implemented: next training suggestion card with CTA to pre-fill create form.
+- **NFR-007** satisfied: Zod validation in place; LLM failure handled gracefully (null evaluation, UI warning).
+- **NFR-008** satisfied: private bucket, 25 MB cap, server-side MIME validation.
+- **ARCHITECTURE.md** updated with Garmin import flow and AI evaluation pipeline.
+
 ---
 
 ## 13. Risks, assumptions, dependencies
 
-| Type           | Item                                                                                                                                                                                                                      |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Assumption** | A single user or small group for MVP unless multi-tenant coaching product is required from day one.                                                                                                                       |
-| **Risk**       | ~~Late auth/backend decisions block integration~~ — **mitigated:** Supabase Auth + PostgREST + Edge Functions decided; see §10 and ARCHITECTURE.md.                                                                       |
-| **Risk**       | Supabase Edge Function cold-start latency may affect perceived performance — **mitigation:** keep functions lightweight; monitor with Supabase logs.                                                                      |
-| **Dependency** | Supabase project creation and environment variables (`SUPABASE_URL`, `SUPABASE_ANON_KEY`, `OPENAI_API_KEY`) must be set before integration work begins.                                                                   |
-| **Dependency** | Design approval for key screens.                                                                                                                                                                                          |
-| **Risk**       | **Workout type proliferation** without a clear extension pattern leads to **conditional spaghetti** in forms and APIs — **mitigation:** **NFR-006** and early **ARCHITECTURE.md** alignment with **FR-008** / **FR-009**. |
+| Type           | Item                                                                                                                                                                                                                                                                                                              |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Assumption** | A single user or small group for MVP unless multi-tenant coaching product is required from day one.                                                                                                                                                                                                               |
+| **Risk**       | ~~Late auth/backend decisions block integration~~ — **mitigated:** Supabase Auth + PostgREST + Edge Functions decided; see §10 and ARCHITECTURE.md.                                                                                                                                                               |
+| **Risk**       | Supabase Edge Function cold-start latency may affect perceived performance — **mitigation:** keep functions lightweight; monitor with Supabase logs.                                                                                                                                                              |
+| **Dependency** | Supabase project creation and environment variables (`SUPABASE_URL`, `SUPABASE_ANON_KEY`, `OPENAI_API_KEY`) must be set before integration work begins.                                                                                                                                                           |
+| **Dependency** | Design approval for key screens.                                                                                                                                                                                                                                                                                  |
+| **Risk**       | **Workout type proliferation** without a clear extension pattern leads to **conditional spaghetti** in forms and APIs — **mitigation:** **NFR-006** and early **ARCHITECTURE.md** alignment with **FR-008** / **FR-009**.                                                                                         |
+| **Risk**       | **LLM response inconsistency** — the AI evaluation model may return malformed JSON or hallucinate invalid `readiness_level` values — **mitigation:** strict Zod schema validation on every response; null-fallback with non-blocking UI error; no CI dependency on live model calls (**NFR-007**).                |
+| **Risk**       | **Garmin `.fit` file parsing complexity** — `.fit` is a binary protocol with device-specific quirks; the FIT SDK or `fit-file-parser` npm package may not cover all Garmin Fenix 7X fields — **mitigation:** extract only the 7–8 key metrics needed for iteration 4; store raw `jsonb` for future extensibility. |
 
 ---
 
@@ -453,6 +503,23 @@ This subsection defines **what “tested enough for MVP” means**: required too
   - Accepts natural language prompt
   - Returns structured workout proposal
   - Does NOT persist automatically
+
+---
+
+**Garmin Import (iteration 4)**
+
+- `POST /api/v1/workouts/{id}/garmin-import`
+  - Accepts multipart/form-data with `.fit` file
+  - Parses file, persists raw + typed metrics
+  - Triggers AI evaluation asynchronously (or inline)
+  - Returns created `GarminActivity` record
+- `GET /api/v1/workouts/{id}/garmin-data`
+  - Returns parsed Garmin metrics for a workout
+- `POST /api/v1/workouts/{id}/evaluate`
+  - Triggers AI training evaluation (idempotent — re-runs if called again)
+  - Returns created/updated `TrainingEvaluation` record
+- `GET /api/v1/workouts/{id}/evaluation`
+  - Returns the stored AI training evaluation for a workout
 
 ---
 
