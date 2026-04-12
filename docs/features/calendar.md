@@ -15,7 +15,7 @@ The calendar feature provides **month**, **week**, and **day** views of the auth
 
 ### REQ-CV-01: URL State
 
-The system MUST encode calendar state as `?view=month|week|day` (default: `month`) and `?date=YYYY-MM-DD` (default: today). The old `?year` and `?month` params are no longer valid.
+The system MUST encode calendar state as `?view=month|week|day` (default: `month`) and `?date=YYYY-MM-DD` (default: today). Legacy `?year` and `?month` are not read; `parseCalendarParams` in `src/features/calendar/utils/calendarParams.ts` ignores them and falls back to today when `?date` is absent or invalid.
 
 #### Scenarios
 
@@ -61,7 +61,7 @@ The system MUST render a vertical list of all workouts for the anchor date. An e
 - GIVEN a workout is listed in day view / WHEN the user clicks it / THEN they navigate to `/workouts/{workoutId}`
 - GIVEN the day view is displayed for 2026-04-10 / WHEN the user clicks "Add workout" / THEN they navigate to `/workouts/new?date=2026-04-10`
 - GIVEN the user is viewing 2026-04-10 / WHEN they click "Next" / THEN `?date` updates to `2026-04-11` and the day view shows Apr 11
-- GIVEN `?view=day&date=2026-12-31` (a future date) with a workout / WHEN the day view renders / THEN the workout displays a "Planned" badge
+- GIVEN `?view=day&date=2026-12-31` (a future date) with a workout / WHEN the day view renders / THEN a **Planning mode** badge appears above the list (`DayView.tsx`)
 
 ### REQ-CV-05: Hook Generalization
 
@@ -88,7 +88,7 @@ The system MUST provide `useWorkoutsByDateRange(start: Date, end: Date)` as the 
 | Types          | `src/features/calendar/calendar.types.ts` — `CalendarDay`, `CalendarView = 'month' \| 'week' \| 'day'`.                                                                                                                                                                |
 | Public API     | `src/features/calendar/index.ts` exports `CalendarPage`, `CalendarDay`, `CalendarView`, `WeekGrid`, `DayView`, `useWorkoutsByDateRange`, `parseCalendarParams`, `buildCalendarSearch`.                                                                                 |
 | Routing / nav  | `src/app/router.tsx` (child route `calendar`); `src/app/AppShell.tsx` nav link **Calendar** → `/calendar`.                                                                                                                                                             |
-| Tests          | Colocated `*.test.ts` / `*.test.tsx` next to the modules above (26 test files, 255 tests).                                                                                                                                                                             |
+| Tests          | Colocated `*.test.ts` / `*.test.tsx` under `src/features/calendar/` (11 files). Filter with `npm test -- --run src/features/calendar` per `package.json` scripts.                                                                                                    |
 
 ## Configuration
 
@@ -97,7 +97,7 @@ No feature-specific environment variables. Uses the shared Supabase client from 
 ## Design Decisions
 
 - **Unified anchor model:** Single `anchorDate: Date` + `view: CalendarView` drive all three views. All navigation, title computation, and range queries derive from these two values. This replaces the previous `?year&month` model.
-- **Additive refactor:** Existing month view components (`CalendarGrid`, `CalendarCell`, `WorkoutChip`) remain unchanged. New components (`WeekGrid`, `DayView`) are added alongside. `CalendarPage` becomes a thin orchestrator.
+- **Additive refactor:** `CalendarGrid` and `WorkoutChip` stay focused on month/week chip UI; `CalendarCell` gains optional `disableOutOfMonthClick` for week columns. New components `WeekGrid` and `DayView` sit alongside. `CalendarPage` orchestrates view + range + header.
 - **`disableOutOfMonthClick` prop on CalendarCell:** `CalendarCell` gains an optional `disableOutOfMonthClick?: boolean` (default `true`) to preserve month-view behavior while allowing week-view cells to fire click events on all days regardless of month membership.
 - **`useWorkoutsByMonth` kept as wrapper:** The old hook is preserved to avoid breaking any consumer that hasn't migrated. It delegates to `useWorkoutsByDateRange` internally. Can be deleted in a follow-up.
 - **`buildWeekDays` separate from `buildCalendarDays`:** The month builder is month-coupled (empty cells, 5–6 row grid). Adding a `view` branch would violate SRP. A ~8 LOC `buildWeekDays` function reuses `groupByDay` and is the right tool.
@@ -106,5 +106,6 @@ No feature-specific environment variables. Uses the shared Supabase client from 
 
 ## Changelog
 
+- **2026-04-12** — Doc pass: `PRODUCT.md` / `ARCHITECTURE.md` summaries aligned with week/day views; spec fixes for legacy URL params, future-day badge copy (**Planning mode**), test file count (11), and `CalendarCell` / additive-refactor wording.
 - **2026-04-12** — Added Week view, Day view, and View Mode Switcher (REQ-CV-01 through REQ-CV-05). URL state migrated from `?year&month` to `?view&date`. New components: `WeekGrid`, `DayView`. New utilities: `calendarParams.ts`, `buildWeekDays`, `computeWeekBoundaries`, `computeDayBoundaries`. New hook: `useWorkoutsByDateRange`. Closes issues #3, #4, #5.
 - **2026-04-12** — Initial spec added to match the `src/features/calendar/` month-view implementation and routing/nav updates.

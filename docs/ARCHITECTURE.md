@@ -147,11 +147,11 @@ training-records/
 │   │   │   ├── exercise.schema.ts
 │   │   │   ├── exercise.types.ts
 │   │   │   └── index.ts
-│   │   ├── calendar/        # CalendarPage, month grid, useWorkoutsByMonth
-│   │   │   ├── components/  # CalendarHeader, CalendarGrid, CalendarCell, WorkoutChip
-│   │   │   ├── hooks/       # useWorkoutsByMonth
+│   │   ├── calendar/        # CalendarPage; month/week/day; URL calendarParams
+│   │   │   ├── components/  # CalendarHeader, CalendarGrid, WeekGrid, DayView, CalendarCell, WorkoutChip
+│   │   │   ├── hooks/       # useWorkoutsByDateRange (+ useWorkoutsByMonth wrapper)
 │   │   │   ├── pages/
-│   │   │   ├── utils/       # buildCalendarDays
+│   │   │   ├── utils/       # buildCalendarDays, buildWeekDays, calendarParams
 │   │   │   ├── calendar.types.ts
 │   │   │   └── index.ts
 │   │   └── ai/              # AIChatPage, useGenerateWorkout
@@ -184,7 +184,7 @@ training-records/
 | `src/features/workouts/registry/`   | Code-first WOD format registry — each format self-registers with schema + `FormSection`   |
 | `src/features/workouts/components/` | `WodFormatSelector`, `ExercisePicker`, `MovementFieldArray` — dynamic WOD form components |
 | `src/features/exercises/`           | Exercise catalog — list and create/edit exercises; calls `exercises` Edge Function        |
-| `src/features/calendar/`            | Month training calendar — TanStack Query + Supabase `workouts` read; `date-fns` grid      |
+| `src/features/calendar/`            | Training calendar (month/week/day) — URL `view`+`date`; `useWorkoutsByDateRange`; Supabase `workouts`; `date-fns` |
 | `src/features/ai/`                  | AI-powered workout generation — calls `ai-generate` Edge Function                         |
 | `src/lib/supabase.ts`               | Single Supabase JS client instance (singleton)                                            |
 | `src/lib/api.ts`                    | Fetch wrapper for raw HTTP calls with `Authorization: Bearer` header                      |
