@@ -1,53 +1,81 @@
 import { useSearchParams } from 'react-router'
-import { useWorkoutsByMonth } from '../hooks/useWorkoutsByMonth'
+import { addDays, addMonths, addWeeks, subDays, subMonths, subWeeks } from 'date-fns'
+import {
+  useWorkoutsByDateRange,
+  computeMonthBoundaries,
+  computeWeekBoundaries,
+  computeDayBoundaries,
+} from '../hooks/useWorkoutsByMonth'
+import { parseCalendarParams, buildCalendarSearch } from '../utils/calendarParams'
 import { CalendarHeader } from '../components/CalendarHeader'
 import { CalendarGrid } from '../components/CalendarGrid'
+import { WeekGrid } from '../components/WeekGrid'
+import { DayView } from '../components/DayView'
+import type { CalendarView } from '../calendar.types'
 
 export function CalendarPage() {
   const [searchParams, setSearchParams] = useSearchParams()
+  const { view, anchorDate } = parseCalendarParams(searchParams)
 
-  const today = new Date()
-  const year = searchParams.has('year')
-    ? parseInt(searchParams.get('year')!, 10)
-    : today.getFullYear()
-  const month = searchParams.has('month')
-    ? parseInt(searchParams.get('month')!, 10)
-    : today.getMonth() + 1
+  // Compute date range based on current view
+  const range =
+    view === 'week'
+      ? computeWeekBoundaries(anchorDate)
+      : view === 'day'
+        ? computeDayBoundaries(anchorDate)
+        : computeMonthBoundaries(anchorDate.getFullYear(), anchorDate.getMonth() + 1)
 
-  const { data: workouts = [], isLoading } = useWorkoutsByMonth(year, month)
+  const { data: workouts = [], isLoading } = useWorkoutsByDateRange(range.start, range.end)
+
+  function navigate(newView: CalendarView, newDate: Date) {
+    setSearchParams(buildCalendarSearch(newView, newDate))
+  }
 
   function handlePrev() {
-    if (month === 1) {
-      setSearchParams({ year: String(year - 1), month: '12' })
-    } else {
-      setSearchParams({ year: String(year), month: String(month - 1) })
-    }
+    if (view === 'month') navigate(view, subMonths(anchorDate, 1))
+    else if (view === 'week') navigate(view, subWeeks(anchorDate, 1))
+    else navigate(view, subDays(anchorDate, 1))
   }
 
   function handleNext() {
-    if (month === 12) {
-      setSearchParams({ year: String(year + 1), month: '1' })
-    } else {
-      setSearchParams({ year: String(year), month: String(month + 1) })
-    }
+    if (view === 'month') navigate(view, addMonths(anchorDate, 1))
+    else if (view === 'week') navigate(view, addWeeks(anchorDate, 1))
+    else navigate(view, addDays(anchorDate, 1))
   }
 
   function handleToday() {
-    const now = new Date()
-    setSearchParams({ year: String(now.getFullYear()), month: String(now.getMonth() + 1) })
+    navigate(view, new Date())
+  }
+
+  function handleViewChange(newView: CalendarView) {
+    navigate(newView, anchorDate)
   }
 
   return (
     <div className="container mx-auto px-4 py-6">
       <h1 className="text-2xl font-bold mb-6">Training Calendar</h1>
       <CalendarHeader
-        year={year}
-        month={month}
+        view={view}
+        anchorDate={anchorDate}
         onPrev={handlePrev}
         onNext={handleNext}
         onToday={handleToday}
+        onViewChange={handleViewChange}
       />
-      <CalendarGrid year={year} month={month} workouts={workouts} isLoading={isLoading} />
+      {view === 'month' && (
+        <CalendarGrid
+          year={anchorDate.getFullYear()}
+          month={anchorDate.getMonth() + 1}
+          workouts={workouts}
+          isLoading={isLoading}
+        />
+      )}
+      {view === 'week' && (
+        <WeekGrid anchorDate={anchorDate} workouts={workouts} isLoading={isLoading} />
+      )}
+      {view === 'day' && (
+        <DayView anchorDate={anchorDate} workouts={workouts} isLoading={isLoading} />
+      )}
     </div>
   )
 }

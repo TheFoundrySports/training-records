@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import type { UseQueryResult } from '@tanstack/react-query'
+import { startOfWeek, endOfWeek, startOfDay, endOfDay } from 'date-fns'
 import { supabase } from '@/lib/supabase'
 import { mapRow } from '@/features/workouts/hooks/mapRow'
 import type { Workout } from '@/features/workouts/workout.types'
@@ -12,12 +13,25 @@ export function computeMonthBoundaries(year: number, month: number): { start: Da
   return { start, end }
 }
 
-export function useWorkoutsByMonth(year: number, month: number): UseQueryResult<Workout[]> {
-  return useQuery({
-    queryKey: ['workouts', 'calendar', year, month],
-    queryFn: async () => {
-      const { start, end } = computeMonthBoundaries(year, month)
+/** Week boundaries — Mon–Sun, weekStartsOn: 1 */
+export function computeWeekBoundaries(anchorDate: Date): { start: Date; end: Date } {
+  const start = startOfWeek(anchorDate, { weekStartsOn: 1 })
+  const end = endOfWeek(anchorDate, { weekStartsOn: 1 })
+  return { start, end }
+}
 
+/** Day boundaries — 00:00:00.000 to 23:59:59.999 */
+export function computeDayBoundaries(anchorDate: Date): { start: Date; end: Date } {
+  const start = startOfDay(anchorDate)
+  const end = endOfDay(anchorDate)
+  return { start, end }
+}
+
+/** Generic date-range query — shared by all three views */
+export function useWorkoutsByDateRange(start: Date, end: Date): UseQueryResult<Workout[]> {
+  return useQuery({
+    queryKey: ['workouts', 'calendar', start.toISOString(), end.toISOString()],
+    queryFn: async () => {
       const { data, error } = await supabase
         .from('workouts')
         .select('*')
@@ -40,4 +54,10 @@ export function useWorkoutsByMonth(year: number, month: number): UseQueryResult<
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
   })
+}
+
+/** Thin wrapper kept for backward compatibility */
+export function useWorkoutsByMonth(year: number, month: number): UseQueryResult<Workout[]> {
+  const { start, end } = computeMonthBoundaries(year, month)
+  return useWorkoutsByDateRange(start, end)
 }

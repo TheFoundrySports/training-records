@@ -114,15 +114,17 @@ training-records/
 ├── .github/workflows/       # CI (GitHub Actions)
 ├── docs/                    # Project documentation
 │   ├── PRD.md
+│   ├── PRODUCT.md
 │   ├── ARCHITECTURE.md      # This file
 │   ├── STANDARDS.md
-│   └── rls-verification.md
+│   ├── rls-verification.md
+│   └── features/            # Per-feature specs (e.g. calendar.md)
 ├── e2e/                     # Playwright smoke tests
 │   └── smoke.spec.ts
 ├── src/
 │   ├── app/                 # App shell, router, global providers
 │   │   ├── AppShell.tsx
-│   │   ├── Router.tsx
+│   │   ├── router.tsx
 │   │   └── main.tsx
 │   ├── components/
 │   │   └── ui/              # shadcn/ui components (button, card, dialog, form, …)
@@ -144,6 +146,13 @@ training-records/
 │   │   │   ├── pages/       # ExerciseListPage, ExerciseFormPage
 │   │   │   ├── exercise.schema.ts
 │   │   │   ├── exercise.types.ts
+│   │   │   └── index.ts
+│   │   ├── calendar/        # CalendarPage, month grid, useWorkoutsByMonth
+│   │   │   ├── components/  # CalendarHeader, CalendarGrid, CalendarCell, WorkoutChip
+│   │   │   ├── hooks/       # useWorkoutsByMonth
+│   │   │   ├── pages/
+│   │   │   ├── utils/       # buildCalendarDays
+│   │   │   ├── calendar.types.ts
 │   │   │   └── index.ts
 │   │   └── ai/              # AIChatPage, useGenerateWorkout
 │   ├── lib/
@@ -175,6 +184,7 @@ training-records/
 | `src/features/workouts/registry/`   | Code-first WOD format registry — each format self-registers with schema + `FormSection`   |
 | `src/features/workouts/components/` | `WodFormatSelector`, `ExercisePicker`, `MovementFieldArray` — dynamic WOD form components |
 | `src/features/exercises/`           | Exercise catalog — list and create/edit exercises; calls `exercises` Edge Function        |
+| `src/features/calendar/`            | Month training calendar — TanStack Query + Supabase `workouts` read; `date-fns` grid      |
 | `src/features/ai/`                  | AI-powered workout generation — calls `ai-generate` Edge Function                         |
 | `src/lib/supabase.ts`               | Single Supabase JS client instance (singleton)                                            |
 | `src/lib/api.ts`                    | Fetch wrapper for raw HTTP calls with `Authorization: Bearer` header                      |
@@ -282,6 +292,7 @@ Adding a new format requires only: creating a new file in `registry/formats/`, i
 | Component library     | shadcn/ui (`@base-ui/react` + Radix UI)          |
 | Forms                 | React Hook Form v7 + Zod v4                      |
 | State / data fetching | TanStack Query v5                                |
+| Date utilities        | date-fns v4                                      |
 | Routing               | React Router v7                                  |
 | Auth                  | Supabase Auth (JWT)                              |
 | BaaS                  | Supabase (PostgreSQL, PostgREST, Edge Functions) |

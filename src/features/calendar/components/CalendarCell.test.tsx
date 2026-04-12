@@ -47,6 +47,70 @@ function renderCell(day: CalendarDay, onEmptyClick = vi.fn()) {
   )
 }
 
+function renderCellWithProps(
+  day: CalendarDay,
+  onEmptyClick = vi.fn(),
+  disableOutOfMonthClick?: boolean,
+) {
+  return render(
+    <MemoryRouter>
+      <CalendarCell
+        day={day}
+        onEmptyClick={onEmptyClick}
+        disableOutOfMonthClick={disableOutOfMonthClick}
+      />
+    </MemoryRouter>,
+  )
+}
+
+describe('CalendarCell — disableOutOfMonthClick prop', () => {
+  it('disableOutOfMonthClick=false: clicking out-of-month empty day fires onEmptyClick', async () => {
+    const user = userEvent.setup()
+    const onEmptyClick = vi.fn()
+    const day = makeDay({ isCurrentMonth: false, workouts: [] })
+
+    renderCellWithProps(day, onEmptyClick, false)
+
+    // Should now have role=button since disableOutOfMonthClick=false
+    const cell = screen.getByRole('button')
+    await user.click(cell)
+
+    expect(onEmptyClick).toHaveBeenCalledOnce()
+    expect(onEmptyClick).toHaveBeenCalledWith(day.date)
+  })
+
+  it('disableOutOfMonthClick=true (default): out-of-month day is NOT clickable', async () => {
+    const user = userEvent.setup()
+    const onEmptyClick = vi.fn()
+    const day = makeDay({ isCurrentMonth: false, workouts: [] })
+
+    renderCellWithProps(day, onEmptyClick, true)
+
+    expect(screen.queryByRole('button')).not.toBeInTheDocument()
+    const cell = screen.getByText(day.date.getDate().toString()).closest('div')!
+    await user.click(cell)
+    expect(onEmptyClick).not.toHaveBeenCalled()
+  })
+
+  it('disableOutOfMonthClick=false: out-of-month day with workouts is NOT role=button', () => {
+    const workout = {
+      id: 'w1',
+      userId: 'u1',
+      title: 'Test',
+      type: 'crossfit' as const,
+      performedAt: '2026-04-15T10:00:00.000Z',
+      durationMinutes: 45,
+      createdAt: '2026-04-15T10:00:00.000Z',
+      updatedAt: '2026-04-15T10:00:00.000Z',
+    }
+    const day = makeDay({ isCurrentMonth: false, workouts: [workout] })
+    renderCellWithProps(day, vi.fn(), false)
+    // Cell has workouts — should not be button even with disableOutOfMonthClick=false
+    const cellDiv = screen.getByText(day.date.getDate().toString()).closest('div')!
+    expect(cellDiv.getAttribute('role')).not.toBe('button')
+  })
+})
+
 describe('CalendarCell', () => {
   beforeEach(() => {
     mockNavigate.mockClear()
