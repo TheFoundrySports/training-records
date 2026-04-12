@@ -3,12 +3,14 @@ import { LoginPage } from '../pages/login.page'
 import { WorkoutsPage } from '../pages/workouts.page'
 import { WorkoutFormPage } from '../pages/workout-form.page'
 import { WorkoutDetailPage } from '../pages/workout-detail.page'
+import { GarminImportPage } from '../pages/garmin-import.page'
 
 type Pages = {
   loginPage: LoginPage
   workoutsPage: WorkoutsPage
   workoutFormPage: WorkoutFormPage
   workoutDetailPage: WorkoutDetailPage
+  garminImportPage: GarminImportPage
 }
 
 /**
@@ -27,6 +29,9 @@ export const test = base.extend<Pages>({
   },
   workoutDetailPage: async ({ page }, use) => {
     await use(new WorkoutDetailPage(page))
+  },
+  garminImportPage: async ({ page }, use) => {
+    await use(new GarminImportPage(page))
   },
 })
 

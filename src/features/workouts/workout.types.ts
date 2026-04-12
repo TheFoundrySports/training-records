@@ -12,6 +12,7 @@ export interface Workout {
   wodText?: string
   wodFormat?: string
   payload?: Record<string, unknown>
+  garminActivityId?: string | null
   createdAt: string
   updatedAt: string
 }
