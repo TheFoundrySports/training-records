@@ -1,0 +1,63 @@
+schema: spec-driven
+
+context: |
+  Tech stack: React 19 SPA + TypeScript 5.x + Vite 8 + Tailwind CSS v4 + shadcn/ui (base-ui/react)
+  Backend: Supabase (PostgreSQL + PostgREST + Auth JWT + Edge Functions/Deno)
+  Forms: React Hook Form v7 + Zod v4 | Data fetching: TanStack Query v5
+  Routing: React Router v7 | Testing: Vitest v4 + RTL (unit) + Playwright (E2E)
+  Architecture: Feature-based SPA (src/features/), WOD format registry pattern
+  CI: GitHub Actions | Branching: feat/<slug> → develop → main
+
+specs:
+  - feature: auth
+    path: openspec/specs/auth/spec.md
+    status: complete
+    last_updated: '2026-04-12'
+  - feature: workouts
+    path: openspec/specs/workouts/spec.md
+    status: complete
+    last_updated: '2026-04-12'
+  - feature: exercises
+    path: openspec/specs/exercises/spec.md
+    status: complete
+    last_updated: '2026-04-12'
+  - feature: public-wods
+    path: openspec/specs/public-wods/spec.md
+    status: complete
+    last_updated: '2026-04-12'
+  - feature: ai
+    path: openspec/specs/ai/spec.md
+    status: complete
+    last_updated: '2026-04-12'
+  - feature: calendar
+    path: openspec/specs/calendar/spec.md
+    status: complete
+    last_updated: '2026-04-12'
+    source: docs/features/calendar.md
+
+rules:
+  proposal:
+    - Include rollback plan for risky changes
+    - Identify affected features/ modules and Supabase resources (migrations, edge functions, RLS)
+  specs:
+    - Use Given/When/Then format for scenarios
+    - Use RFC 2119 keywords (MUST, SHALL, SHOULD, MAY)
+  design:
+    - Include sequence diagrams for complex flows involving Supabase or Edge Functions
+    - Document architecture decisions with rationale
+  tasks:
+    - Group tasks by phase (infrastructure, implementation, testing)
+    - Use hierarchical numbering (1.1, 1.2, etc.)
+    - Keep tasks small enough to complete in one session
+  apply:
+    - Follow existing code patterns and conventions (feature-based structure, hooks, RHF+Zod forms)
+    - Load relevant coding skills for the project stack
+    - Never use `any` — prefer `unknown` for unknown types
+    - Use `const` arrow functions, prefix events with handle/on, booleans with is
+  verify:
+    - Run `npm test -- --run` for unit tests
+    - Run `npm run test:e2e` for E2E (requires running app)
+    - Compare implementation against every spec scenario
+  archive:
+    - Warn before merging destructive deltas (large removals)
+    - Sync delta specs to docs/features/ after archiving
