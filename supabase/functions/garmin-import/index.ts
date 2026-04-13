@@ -182,19 +182,27 @@ Deno.serve(async (req) => {
   let fitData: Record<string, unknown>
   try {
     fitData = await parseFitFile(fileBuffer)
+    console.log('[garmin-import] parsed fitData keys:', Object.keys(fitData))
   } catch (err) {
+    console.error('[garmin-import] parseFitFile threw:', err)
     return errorResponse('UNPROCESSABLE_ENTITY', 'invalid_fit_file', 422, {
-      error: 'invalid_fit_file',
+      reason: 'parse_failed',
+      detail: String(err),
     })
   }
 
   // Extract session metrics
-  const sessions = fitData.sessions as Record<string, unknown>[] | undefined
+  // In cascade mode, fit-file-parser nests sessions under fitData.activity.sessions
+  const activity = fitData.activity as Record<string, unknown> | undefined
+  const sessions = activity?.sessions as Record<string, unknown>[] | undefined
   const session = sessions?.[0]
+  console.log('[garmin-import] sessions count:', sessions?.length ?? 0)
 
   if (!session) {
+    console.error('[garmin-import] no session found. fitData keys:', Object.keys(fitData))
     return errorResponse('UNPROCESSABLE_ENTITY', 'invalid_fit_file', 422, {
-      error: 'invalid_fit_file',
+      reason: 'no_session',
+      fitDataKeys: Object.keys(fitData),
     })
   }
 
@@ -202,8 +210,10 @@ Deno.serve(async (req) => {
   try {
     metrics = extractMetrics(session)
   } catch (err) {
+    console.error('[garmin-import] extractMetrics threw:', err)
     return errorResponse('UNPROCESSABLE_ENTITY', 'invalid_fit_file', 422, {
-      error: 'invalid_fit_file',
+      reason: 'extract_failed',
+      detail: String(err),
     })
   }
 
