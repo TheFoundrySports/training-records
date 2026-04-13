@@ -192,8 +192,8 @@ Deno.serve(async (req) => {
 
   // Extract session metrics
   // In cascade mode, fit-file-parser nests sessions under fitData.activity.sessions
-  const activity = fitData.activity as Record<string, unknown> | undefined
-  const sessions = activity?.sessions as Record<string, unknown>[] | undefined
+  const fitActivity = fitData.activity as Record<string, unknown> | undefined
+  const sessions = fitActivity?.sessions as Record<string, unknown>[] | undefined
   const session = sessions?.[0]
   console.log('[garmin-import] sessions count:', sessions?.length ?? 0)
 
