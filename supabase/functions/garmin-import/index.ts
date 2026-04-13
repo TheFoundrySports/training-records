@@ -25,25 +25,19 @@ function jsonResponse(data: unknown, status = 200) {
 }
 
 /**
- * Promisify the fit-file-parser callback API.
- * The parser emits 'data' event with parsed FIT data or 'error' on failure.
+ * Parse a .fit file buffer using fit-file-parser's async API.
  */
-function parseFitFile(buffer: ArrayBuffer): Promise<Record<string, unknown>> {
-  return new Promise((resolve, reject) => {
-    const parser = new FitParser({
-      force: true,
-      speedUnit: 'km/h',
-      lengthUnit: 'm',
-      temperatureUnit: 'celsius',
-      elapsedRecordField: true,
-      mode: 'cascade',
-    })
-
-    parser.on('data', (data: Record<string, unknown>) => resolve(data))
-    parser.on('error', (err: Error) => reject(err))
-
-    parser.parse(buffer)
+async function parseFitFile(buffer: ArrayBuffer): Promise<Record<string, unknown>> {
+  const parser = new FitParser({
+    force: true,
+    speedUnit: 'km/h',
+    lengthUnit: 'm',
+    temperatureUnit: 'celsius',
+    elapsedRecordField: true,
+    mode: 'cascade',
   })
+
+  return (await parser.parseAsync(buffer)) as Record<string, unknown>
 }
 
 /**

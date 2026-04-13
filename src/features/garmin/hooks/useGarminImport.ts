@@ -1,6 +1,20 @@
 import { useMutation } from '@tanstack/react-query'
+import { FunctionsHttpError } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
 import type { ImportResult, TrainingEvaluation } from '../garmin.types'
+
+async function extractFunctionError(error: unknown): Promise<string> {
+  if (error instanceof FunctionsHttpError) {
+    try {
+      const body = await error.context.json()
+      return body?.error?.message ?? body?.error ?? JSON.stringify(body)
+    } catch {
+      return error.message
+    }
+  }
+  if (error instanceof Error) return error.message
+  return String(error)
+}
 
 export function useGarminImport() {
   const evaluateMutation = useMutation({
@@ -11,7 +25,8 @@ export function useGarminImport() {
       )
 
       if (error) {
-        throw new Error(error.message)
+        const message = await extractFunctionError(error)
+        throw new Error(message)
       }
 
       return data ?? null
@@ -35,7 +50,8 @@ export function useGarminImport() {
       })
 
       if (error) {
-        throw new Error(error.message)
+        const message = await extractFunctionError(error)
+        throw new Error(message)
       }
 
       if (!data) {
