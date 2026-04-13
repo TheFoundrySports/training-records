@@ -1,12 +1,7 @@
 // @ts-nocheck — Deno global types not available in editor
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import FitParser from 'npm:fit-file-parser'
 import type { GarminMetrics } from '../_shared/garmin-schemas.ts'
-
-// Lazy import to avoid boot failure if esm.sh is unavailable at startup
-async function loadFitParser() {
-  const mod = await import('https://esm.sh/fit-file-parser')
-  return mod.default
-}
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -33,7 +28,6 @@ function jsonResponse(data: unknown, status = 200) {
  * Parse a .fit file buffer using fit-file-parser's async API.
  */
 async function parseFitFile(buffer: ArrayBuffer): Promise<Record<string, unknown>> {
-  const FitParser = await loadFitParser()
   const parser = new FitParser({
     force: true,
     speedUnit: 'km/h',
@@ -42,7 +36,6 @@ async function parseFitFile(buffer: ArrayBuffer): Promise<Record<string, unknown
     elapsedRecordField: true,
     mode: 'cascade',
   })
-
   return (await parser.parseAsync(buffer)) as Record<string, unknown>
 }
 
