@@ -12,6 +12,7 @@ export function mapRow(row: {
   wod_text: string | null
   wod_format: string | null
   payload: Record<string, unknown> | null
+  garmin_activity_id?: string | null
   created_at: string
   updated_at: string
 }): Workout {
@@ -27,6 +28,7 @@ export function mapRow(row: {
     wodText: row.wod_text ?? undefined,
     wodFormat: row.wod_format ?? undefined,
     payload: row.payload ?? undefined,
+    garminActivityId: row.garmin_activity_id ?? null,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   }

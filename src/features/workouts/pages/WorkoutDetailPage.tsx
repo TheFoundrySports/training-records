@@ -18,6 +18,16 @@ import {
 import '../registry/formats/index'
 import { getFormat } from '../registry/index'
 import type { WodFormat } from '../registry/types'
+import {
+  useGarminActivity,
+  useTrainingEvaluation,
+  useNextWorkout,
+  useAdaptationWarning,
+  GarminImportTrigger,
+  TrainingMetricsPanel,
+  AIEvaluationCard,
+} from '@/features/garmin'
+import type { TrainingEvaluation, ImportResult } from '@/features/garmin'
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleString(undefined, {
@@ -45,6 +55,29 @@ export function WorkoutDetailPage() {
   const { data: workout, isLoading, isError, error } = useWorkout(id ?? '')
   const deleteMutation = useDeleteWorkout()
   const [deleteOpen, setDeleteOpen] = useState(false)
+  const [liveEvaluation, setLiveEvaluation] = useState<TrainingEvaluation | null>(null)
+
+  const { data: garminActivity } = useGarminActivity(id)
+  const { data: storedEvaluation, isLoading: isEvaluationLoading } = useTrainingEvaluation(
+    garminActivity?.id,
+  )
+  const { data: nextWorkout } = useNextWorkout(workout?.performedAt)
+  const adaptationWarning = useAdaptationWarning(
+    garminActivity?.metrics.recoveryTimeHours ?? null,
+    workout?.performedAt ?? '',
+    nextWorkout?.performedAt ?? null,
+  )
+
+  // Prefer freshly generated evaluation over stored one
+  const evaluation = liveEvaluation ?? storedEvaluation ?? null
+
+  function handleImportComplete(result: ImportResult, newEvaluation: TrainingEvaluation | null) {
+    if (newEvaluation) {
+      setLiveEvaluation(newEvaluation)
+    }
+    // garminActivity query will refetch on next render cycle
+    void result
+  }
 
   if (isLoading) {
     return (
@@ -166,13 +199,30 @@ export function WorkoutDetailPage() {
       </Card>
 
       {isOwner && (
-        <div className="flex gap-3 mt-6">
+        <div className="flex flex-wrap gap-3 mt-6">
           <Button variant="outline" onClick={() => void navigate(`/workouts/${workout.id}/edit`)}>
             Edit
           </Button>
           <Button variant="destructive" onClick={() => setDeleteOpen(true)}>
             Delete
           </Button>
+          <GarminImportTrigger
+            workoutId={workout.id}
+            hasExistingImport={garminActivity !== null && garminActivity !== undefined}
+            onImportComplete={handleImportComplete}
+          />
+        </div>
+      )}
+
+      {garminActivity && (
+        <div className="mt-6 space-y-4">
+          <TrainingMetricsPanel metrics={garminActivity.metrics} />
+          <AIEvaluationCard
+            garminActivityId={garminActivity.id}
+            isEvaluating={isEvaluationLoading}
+            evaluation={evaluation}
+            adaptationWarning={adaptationWarning}
+          />
         </div>
       )}
 

@@ -153,10 +153,123 @@ export type Database = {
           },
         ]
       }
+      garmin_activities: {
+        Row: {
+          avg_heart_rate: number | null
+          calories: number | null
+          created_at: string
+          elapsed_time_seconds: number | null
+          file_path: string
+          hr_zone_1_seconds: number
+          hr_zone_2_seconds: number
+          hr_zone_3_seconds: number
+          hr_zone_4_seconds: number
+          hr_zone_5_seconds: number
+          id: string
+          max_heart_rate: number | null
+          recovery_time_hours: number | null
+          training_load: number | null
+          updated_at: string
+          user_id: string
+          vo2max: number | null
+          workout_id: string
+        }
+        Insert: {
+          avg_heart_rate?: number | null
+          calories?: number | null
+          created_at?: string
+          elapsed_time_seconds?: number | null
+          file_path: string
+          hr_zone_1_seconds?: number
+          hr_zone_2_seconds?: number
+          hr_zone_3_seconds?: number
+          hr_zone_4_seconds?: number
+          hr_zone_5_seconds?: number
+          id?: string
+          max_heart_rate?: number | null
+          recovery_time_hours?: number | null
+          training_load?: number | null
+          updated_at?: string
+          user_id: string
+          vo2max?: number | null
+          workout_id: string
+        }
+        Update: {
+          avg_heart_rate?: number | null
+          calories?: number | null
+          created_at?: string
+          elapsed_time_seconds?: number | null
+          file_path?: string
+          hr_zone_1_seconds?: number
+          hr_zone_2_seconds?: number
+          hr_zone_3_seconds?: number
+          hr_zone_4_seconds?: number
+          hr_zone_5_seconds?: number
+          id?: string
+          max_heart_rate?: number | null
+          recovery_time_hours?: number | null
+          training_load?: number | null
+          updated_at?: string
+          user_id?: string
+          vo2max?: number | null
+          workout_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'garmin_activities_workout_id_fkey'
+            columns: ['workout_id']
+            isOneToOne: false
+            referencedRelation: 'workouts'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      training_evaluations: {
+        Row: {
+          adaptation_warning: string | null
+          created_at: string
+          garmin_activity_id: string
+          id: string
+          next_session_suggestion: string
+          readiness_level: string
+          summary: string
+          user_id: string
+        }
+        Insert: {
+          adaptation_warning?: string | null
+          created_at?: string
+          garmin_activity_id: string
+          id?: string
+          next_session_suggestion: string
+          readiness_level: string
+          summary: string
+          user_id: string
+        }
+        Update: {
+          adaptation_warning?: string | null
+          created_at?: string
+          garmin_activity_id?: string
+          id?: string
+          next_session_suggestion?: string
+          readiness_level?: string
+          summary?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'training_evaluations_garmin_activity_id_fkey'
+            columns: ['garmin_activity_id']
+            isOneToOne: true
+            referencedRelation: 'garmin_activities'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       workouts: {
         Row: {
           created_at: string
           duration_minutes: number
+          garmin_activity_id: string | null
           id: string
           notes: string | null
           payload: Json | null
@@ -172,6 +285,7 @@ export type Database = {
         Insert: {
           created_at?: string
           duration_minutes: number
+          garmin_activity_id?: string | null
           id?: string
           notes?: string | null
           payload?: Json | null
@@ -187,6 +301,7 @@ export type Database = {
         Update: {
           created_at?: string
           duration_minutes?: number
+          garmin_activity_id?: string | null
           id?: string
           notes?: string | null
           payload?: Json | null
@@ -199,7 +314,15 @@ export type Database = {
           wod_format?: string | null
           wod_text?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: 'workouts_garmin_activity_id_fkey'
+            columns: ['garmin_activity_id']
+            isOneToOne: false
+            referencedRelation: 'garmin_activities'
+            referencedColumns: ['id']
+          },
+        ]
       }
     }
     Views: {
