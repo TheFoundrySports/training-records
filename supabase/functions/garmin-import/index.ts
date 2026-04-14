@@ -67,7 +67,7 @@ function extractMetrics(session: Record<string, unknown>): GarminMetrics {
   const tss = (session.training_stress_score as number | undefined) ?? null
 
   return {
-    elapsedTimeSeconds: (session.total_elapsed_time as number) ?? 0,
+    elapsedTimeSeconds: Math.round((session.total_elapsed_time as number) ?? 0),
     avgHeartRate: (session.avg_heart_rate as number | undefined) ?? null,
     maxHeartRate: (session.max_heart_rate as number | undefined) ?? null,
     trainingLoad: tss,
