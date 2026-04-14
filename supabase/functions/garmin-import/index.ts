@@ -53,32 +53,62 @@ function deriveRecoveryHours(tss: number | null | undefined): number | null {
 }
 
 /**
+ * Derive recovery time from Training Effect (TE, scale 1.0–5.0).
+ * Fallback when TSS is absent (e.g. CrossFit activities).
+ * Mirrors deriveRecoveryHoursFromTrainingEffect in src/features/garmin/garmin.utils.ts.
+ *
+ * TE < 1.0         → null   (invalid / absent)
+ * TE 1.0–1.9       → 12h   (Recovery / Easy)
+ * TE 2.0–2.9       → 24h   (Aerobic)
+ * TE 3.0–3.9       → 36h   (Tempo)
+ * TE 4.0–4.9       → 48h   (Threshold)
+ * TE ≥ 5.0         → 60h   (Overreaching)
+ */
+function deriveRecoveryHoursFromTrainingEffect(effect: number | null | undefined): number | null {
+  if (effect == null || effect < 1.0) return null
+  if (effect < 2.0) return 12
+  if (effect < 3.0) return 24
+  if (effect < 4.0) return 36
+  if (effect < 5.0) return 48
+  return 60
+}
+
+/**
  * Extract GarminMetrics from parsed FIT session data.
  */
-function extractMetrics(session: Record<string, unknown>): GarminMetrics {
-  const hrZones = Array.isArray(session.time_in_hr_zone)
-    ? (session.time_in_hr_zone as number[])
+function extractMetrics(
+  session: Record<string, unknown>,
+  timeInZone: Record<string, unknown>[],
+): GarminMetrics {
+  // time_in_zone lives at fitData.time_in_zone (top level), not inside the session.
+  // The entry with reference_mesg === 18 is the whole-activity summary.
+  // The array has 7 elements: [below_z1, z1, z2, z3, z4, z5, above_z5] — all in seconds.
+  const activityZoneEntry = timeInZone.find((z) => z.reference_mesg === 18) as
+    | Record<string, unknown>
+    | undefined
+  const hrZones = Array.isArray(activityZoneEntry?.time_in_hr_zone)
+    ? (activityZoneEntry!.time_in_hr_zone as number[])
     : []
 
-  // time_in_hr_zone values are in milliseconds per the spike findings
-  const zoneSeconds = (idx: number): number =>
-    hrZones[idx] != null ? Math.round(hrZones[idx] / 1000) : 0
+  // Zones are 1-indexed in the array (index 0 = below zone 1, indices 1-5 = zones 1-5)
+  const zoneSeconds = (idx: number): number => (hrZones[idx] != null ? Math.round(hrZones[idx]) : 0)
 
   const tss = (session.training_stress_score as number | undefined) ?? null
+  const te = (session.total_training_effect as number | undefined) ?? null
 
   return {
     elapsedTimeSeconds: Math.round((session.total_elapsed_time as number) ?? 0),
     avgHeartRate: (session.avg_heart_rate as number | undefined) ?? null,
     maxHeartRate: (session.max_heart_rate as number | undefined) ?? null,
     trainingLoad: tss,
-    recoveryTimeHours: deriveRecoveryHours(tss),
+    recoveryTimeHours: deriveRecoveryHours(tss) ?? deriveRecoveryHoursFromTrainingEffect(te),
     calories: (session.total_calories as number | undefined) ?? null,
     vo2max: (session.estimated_vo2_max as number | undefined) ?? null,
-    hrZone1Seconds: zoneSeconds(0),
-    hrZone2Seconds: zoneSeconds(1),
-    hrZone3Seconds: zoneSeconds(2),
-    hrZone4Seconds: zoneSeconds(3),
-    hrZone5Seconds: zoneSeconds(4),
+    hrZone1Seconds: zoneSeconds(1),
+    hrZone2Seconds: zoneSeconds(2),
+    hrZone3Seconds: zoneSeconds(3),
+    hrZone4Seconds: zoneSeconds(4),
+    hrZone5Seconds: zoneSeconds(5),
   }
 }
 
@@ -181,7 +211,6 @@ Deno.serve(async (req) => {
   let fitData: Record<string, unknown>
   try {
     fitData = await parseFitFile(fileBuffer)
-    console.log('[garmin-import] parsed fitData keys:', Object.keys(fitData))
   } catch (err) {
     console.error('[garmin-import] parseFitFile threw:', err)
     return errorResponse('UNPROCESSABLE_ENTITY', 'invalid_fit_file', 422, {
@@ -195,7 +224,6 @@ Deno.serve(async (req) => {
   const fitActivity = fitData.activity as Record<string, unknown> | undefined
   const sessions = fitActivity?.sessions as Record<string, unknown>[] | undefined
   const session = sessions?.[0]
-  console.log('[garmin-import] sessions count:', sessions?.length ?? 0)
 
   if (!session) {
     console.error('[garmin-import] no session found. fitData keys:', Object.keys(fitData))
@@ -205,9 +233,13 @@ Deno.serve(async (req) => {
     })
   }
 
+  const timeInZone = Array.isArray(fitData.time_in_zone)
+    ? (fitData.time_in_zone as Record<string, unknown>[])
+    : []
+
   let metrics: GarminMetrics
   try {
-    metrics = extractMetrics(session)
+    metrics = extractMetrics(session, timeInZone)
   } catch (err) {
     console.error('[garmin-import] extractMetrics threw:', err)
     return errorResponse('UNPROCESSABLE_ENTITY', 'invalid_fit_file', 422, {
@@ -254,5 +286,5 @@ Deno.serve(async (req) => {
     return errorResponse('INTERNAL_ERROR', 'Failed to link activity to workout', 500, updateError)
   }
 
-  return jsonResponse({ garmin_activity_id: activity.id, metrics }, 201)
+  return jsonResponse({ garminActivityId: activity.id, metrics }, 201)
 })

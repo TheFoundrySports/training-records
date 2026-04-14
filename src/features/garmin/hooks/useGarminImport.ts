@@ -16,10 +16,33 @@ async function extractFunctionError(error: unknown): Promise<string> {
   return String(error)
 }
 
+export type EvaluationApiResponse = {
+  evaluation: {
+    id: string
+    summary: string
+    readiness_level: string
+    next_session_suggestion: string
+    adaptation_warning: string | null
+  }
+}
+
+export function mapEvaluation(raw: EvaluationApiResponse): TrainingEvaluation {
+  return {
+    id: raw.evaluation.id,
+    garminActivityId: '',
+    userId: '',
+    summary: raw.evaluation.summary,
+    readinessLevel: raw.evaluation.readiness_level as TrainingEvaluation['readinessLevel'],
+    nextSessionSuggestion: raw.evaluation.next_session_suggestion,
+    adaptationWarning: raw.evaluation.adaptation_warning,
+    createdAt: new Date().toISOString(),
+  }
+}
+
 export function useGarminImport() {
   const evaluateMutation = useMutation({
     mutationFn: async (garminActivityId: string): Promise<TrainingEvaluation | null> => {
-      const { data, error } = await supabase.functions.invoke<TrainingEvaluation>(
+      const { data, error } = await supabase.functions.invoke<EvaluationApiResponse>(
         'training-evaluation',
         { body: { garmin_activity_id: garminActivityId } },
       )
@@ -29,7 +52,7 @@ export function useGarminImport() {
         throw new Error(message)
       }
 
-      return data ?? null
+      return data ? mapEvaluation(data) : null
     },
   })
 

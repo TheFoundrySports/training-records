@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import type { GarminActivity, GarminMetrics } from '../garmin.types'
 
-function mapGarminActivityRow(row: {
+export function mapGarminActivityRow(row: {
   id: string
   workout_id: string
   user_id: string
@@ -14,12 +14,14 @@ function mapGarminActivityRow(row: {
   recovery_time_hours: number | null
   calories: number | null
   vo2max: number | null
-  time_in_hr_zone: number[]
+  hr_zone_1_seconds: number
+  hr_zone_2_seconds: number
+  hr_zone_3_seconds: number
+  hr_zone_4_seconds: number
+  hr_zone_5_seconds: number
   created_at: string
   updated_at: string
 }): GarminActivity {
-  const zones = row.time_in_hr_zone ?? []
-
   const metrics: GarminMetrics = {
     elapsedTimeSeconds: row.elapsed_time_seconds,
     avgHeartRate: row.avg_heart_rate,
@@ -28,11 +30,11 @@ function mapGarminActivityRow(row: {
     recoveryTimeHours: row.recovery_time_hours,
     calories: row.calories,
     vo2max: row.vo2max,
-    hrZone1Seconds: Math.round((zones[0] ?? 0) / 1000),
-    hrZone2Seconds: Math.round((zones[1] ?? 0) / 1000),
-    hrZone3Seconds: Math.round((zones[2] ?? 0) / 1000),
-    hrZone4Seconds: Math.round((zones[3] ?? 0) / 1000),
-    hrZone5Seconds: Math.round((zones[4] ?? 0) / 1000),
+    hrZone1Seconds: row.hr_zone_1_seconds ?? 0,
+    hrZone2Seconds: row.hr_zone_2_seconds ?? 0,
+    hrZone3Seconds: row.hr_zone_3_seconds ?? 0,
+    hrZone4Seconds: row.hr_zone_4_seconds ?? 0,
+    hrZone5Seconds: row.hr_zone_5_seconds ?? 0,
   }
 
   return {

@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest'
-import { extractMetricsFromFitSession, deriveRecoveryHours, type FitSession } from '../garmin.utils'
+import {
+  extractMetricsFromFitSession,
+  deriveRecoveryHours,
+  deriveRecoveryHoursFromTrainingEffect,
+  type FitSession,
+} from '../garmin.utils'
 
 // ── deriveRecoveryHours ──────────────────────────────────────────────────────
 
@@ -28,6 +33,51 @@ describe('deriveRecoveryHours', () => {
     expect(deriveRecoveryHours(300)).toBe(72)
     expect(deriveRecoveryHours(400)).toBe(72)
     expect(deriveRecoveryHours(999)).toBe(72)
+  })
+})
+
+// ── deriveRecoveryHoursFromTrainingEffect ────────────────────────────────────
+
+describe('deriveRecoveryHoursFromTrainingEffect', () => {
+  it('returns null for null', () => {
+    expect(deriveRecoveryHoursFromTrainingEffect(null)).toBeNull()
+  })
+
+  it('returns null for undefined', () => {
+    expect(deriveRecoveryHoursFromTrainingEffect(undefined)).toBeNull()
+  })
+
+  it('returns null for effect < 1.0 (below threshold)', () => {
+    expect(deriveRecoveryHoursFromTrainingEffect(0.9)).toBeNull()
+    expect(deriveRecoveryHoursFromTrainingEffect(0.0)).toBeNull()
+  })
+
+  it('returns 12 for TE 1.0 (lower bucket boundary)', () => {
+    expect(deriveRecoveryHoursFromTrainingEffect(1.0)).toBe(12)
+  })
+
+  it('returns 12 for TE 1.5 (mid-bucket)', () => {
+    expect(deriveRecoveryHoursFromTrainingEffect(1.5)).toBe(12)
+  })
+
+  it('returns 24 for TE 2.0 (bucket boundary)', () => {
+    expect(deriveRecoveryHoursFromTrainingEffect(2.0)).toBe(24)
+  })
+
+  it('returns 36 for TE 3.0 (bucket boundary)', () => {
+    expect(deriveRecoveryHoursFromTrainingEffect(3.0)).toBe(36)
+  })
+
+  it('returns 48 for TE 4.0 (bucket boundary)', () => {
+    expect(deriveRecoveryHoursFromTrainingEffect(4.0)).toBe(48)
+  })
+
+  it('returns 60 for TE 5.0 (overreaching boundary)', () => {
+    expect(deriveRecoveryHoursFromTrainingEffect(5.0)).toBe(60)
+  })
+
+  it('returns 60 for TE > 5.0 (above scale)', () => {
+    expect(deriveRecoveryHoursFromTrainingEffect(6.0)).toBe(60)
   })
 })
 
@@ -112,5 +162,24 @@ describe('extractMetricsFromFitSession', () => {
   it('sets elapsedTimeSeconds to 0 when total_elapsed_time is absent', () => {
     const session: FitSession = {}
     expect(extractMetricsFromFitSession(session).elapsedTimeSeconds).toBe(0)
+  })
+
+  it('uses TE fallback when TSS is absent (te=3.5 → 36h)', () => {
+    const session: FitSession = { total_elapsed_time: 1800, total_training_effect: 3.5 }
+    expect(extractMetricsFromFitSession(session).recoveryTimeHours).toBe(36)
+  })
+
+  it('prefers TSS over TE when both are present (tss=100 → 24h)', () => {
+    const session: FitSession = {
+      total_elapsed_time: 1800,
+      training_stress_score: 100,
+      total_training_effect: 3.5,
+    }
+    expect(extractMetricsFromFitSession(session).recoveryTimeHours).toBe(24)
+  })
+
+  it('returns null when both TSS and TE are absent', () => {
+    const session: FitSession = { total_elapsed_time: 1800 }
+    expect(extractMetricsFromFitSession(session).recoveryTimeHours).toBeNull()
   })
 })

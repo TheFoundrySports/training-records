@@ -47,6 +47,7 @@ export interface FitSession {
   avg_heart_rate?: number
   max_heart_rate?: number
   training_stress_score?: number
+  total_training_effect?: number
   total_calories?: number
   estimated_vo2_max?: number
   time_in_hr_zone?: number[]
@@ -65,6 +66,29 @@ export function deriveRecoveryHours(tss: number | null | undefined): number | nu
 }
 
 /**
+ * Derive recovery time from Training Effect (TE, scale 1.0–5.0).
+ * Used as fallback when training_stress_score is absent (e.g. CrossFit).
+ * Mirrors logic in supabase/functions/garmin-import/index.ts.
+ *
+ * TE < 1.0         → null   (invalid / absent)
+ * TE 1.0–1.9       → 12h   (Recovery / Easy)
+ * TE 2.0–2.9       → 24h   (Aerobic)
+ * TE 3.0–3.9       → 36h   (Tempo)
+ * TE 4.0–4.9       → 48h   (Threshold)
+ * TE ≥ 5.0         → 60h   (Overreaching)
+ */
+export function deriveRecoveryHoursFromTrainingEffect(
+  effect: number | null | undefined,
+): number | null {
+  if (effect == null || effect < 1.0) return null
+  if (effect < 2.0) return 12
+  if (effect < 3.0) return 24
+  if (effect < 4.0) return 36
+  if (effect < 5.0) return 48
+  return 60
+}
+
+/**
  * Extract GarminMetrics from a parsed FIT session object.
  * Mirrors extractMetrics in supabase/functions/garmin-import/index.ts.
  *
@@ -77,13 +101,14 @@ export function extractMetricsFromFitSession(session: FitSession): GarminMetrics
     hrZones[idx] != null ? Math.round(hrZones[idx] / 1000) : 0
 
   const tss = session.training_stress_score ?? null
+  const te = session.total_training_effect ?? null
 
   return {
     elapsedTimeSeconds: session.total_elapsed_time ?? 0,
     avgHeartRate: session.avg_heart_rate ?? null,
     maxHeartRate: session.max_heart_rate ?? null,
     trainingLoad: tss,
-    recoveryTimeHours: deriveRecoveryHours(tss),
+    recoveryTimeHours: deriveRecoveryHours(tss) ?? deriveRecoveryHoursFromTrainingEffect(te),
     calories: session.total_calories ?? null,
     vo2max: session.estimated_vo2_max ?? null,
     hrZone1Seconds: zoneSeconds(0),
