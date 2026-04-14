@@ -240,6 +240,7 @@ Deno.serve(async (req) => {
     .single()
 
   if (insertError || !activity) {
+    console.error('[garmin-import] insertError:', JSON.stringify(insertError))
     return errorResponse('INTERNAL_ERROR', 'Failed to save activity', 500, insertError)
   }
 
