@@ -1,15 +1,19 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { mapRow } from './mapRow'
+import type { WorkoutType } from '../workout.types'
 
-export function useWorkouts() {
+export function useWorkouts(options: { type?: WorkoutType | 'all' } = {}) {
   return useQuery({
-    queryKey: ['workouts'],
+    queryKey: ['workouts', options.type ?? 'all'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('workouts')
-        .select('*')
-        .order('performed_at', { ascending: false })
+      let query = supabase.from('workouts').select('*').order('performed_at', { ascending: false })
+
+      if (options.type && options.type !== 'all') {
+        query = query.eq('type', options.type)
+      }
+
+      const { data, error } = await query
 
       if (error) {
         throw {
@@ -30,11 +34,7 @@ export function useWorkout(id: string) {
   return useQuery({
     queryKey: ['workouts', id],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('workouts')
-        .select('*')
-        .eq('id', id)
-        .single()
+      const { data, error } = await supabase.from('workouts').select('*').eq('id', id).single()
 
       if (error) {
         throw {

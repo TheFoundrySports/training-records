@@ -6,22 +6,22 @@ const corsHeaders = {
 }
 
 function errorResponse(code: string, message: string, status: number, details: unknown = {}) {
-  return new Response(
-    JSON.stringify({ error: { code, message, details } }),
-    { status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-  )
+  return new Response(JSON.stringify({ error: { code, message, details } }), {
+    status,
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+  })
 }
 
 function jsonResponse(data: unknown, status = 200) {
-  return new Response(
-    JSON.stringify(data),
-    { status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-  )
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+  })
 }
 
 interface WorkoutProposal {
   title: string
-  type: 'crossfit' | 'functional'
+  type: 'crossfit' | 'functional' | 'bjj'
   performedAt: string
   durationMinutes: number
   notes: string
@@ -51,14 +51,17 @@ Deno.serve(async (req) => {
     global: { headers: { Authorization: authHeader } },
   })
 
-  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser()
   if (authError || !user) {
     return errorResponse('UNAUTHORIZED', 'Invalid or expired token', 401)
   }
 
   let prompt: string
   try {
-    const body = await req.json() as { prompt?: string }
+    const body = (await req.json()) as { prompt?: string }
     prompt = body.prompt ?? ''
   } catch {
     return errorResponse('BAD_REQUEST', 'Invalid JSON body', 400)
@@ -99,7 +102,7 @@ Do not include any explanation, only the JSON object.`
     const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${openaiApiKey}`,
+        Authorization: `Bearer ${openaiApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -118,7 +121,7 @@ Do not include any explanation, only the JSON object.`
       return errorResponse('AI_ERROR', `OpenAI API error: ${openaiResponse.status}`, 502, err)
     }
 
-    const openaiData = await openaiResponse.json() as {
+    const openaiData = (await openaiResponse.json()) as {
       choices: Array<{ message: { content: string } }>
     }
 

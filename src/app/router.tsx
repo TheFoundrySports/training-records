@@ -6,11 +6,13 @@ import { LoginPage } from '@/features/auth/LoginPage'
 import { WorkoutListPage } from '@/features/workouts/pages/WorkoutListPage'
 import { WorkoutDetailPage } from '@/features/workouts/pages/WorkoutDetailPage'
 import { WorkoutFormPage } from '@/features/workouts/pages/WorkoutFormPage'
+import { WorkoutTypePicker } from '@/features/workouts/components/WorkoutTypePicker'
 import { AIChatPage } from '@/features/ai/AIChatPage'
 import { ExerciseListPage, ExerciseFormPage } from '@/features/exercises/pages'
 import { CalendarPage } from '@/features/calendar'
 import { BJJTechniqueListPage } from '@/features/admin/bjj-techniques/pages/BJJTechniqueListPage'
 import { BJJTechniqueFormPage } from '@/features/admin/bjj-techniques/pages/BJJTechniqueFormPage'
+import { BJJWorkoutFormPage } from '@/features/bjj/pages/BJJWorkoutFormPage'
 
 export const router = createBrowserRouter([
   {
@@ -34,7 +36,15 @@ export const router = createBrowserRouter([
           },
           {
             path: 'workouts/new',
+            element: <WorkoutTypePicker />,
+          },
+          {
+            path: 'workouts/new/crossfit',
             element: <WorkoutFormPage />,
+          },
+          {
+            path: 'bjj/new',
+            element: <BJJWorkoutFormPage />,
           },
           {
             path: 'workouts/:id',
