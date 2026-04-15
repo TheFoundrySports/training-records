@@ -1,4 +1,4 @@
-export type WorkoutType = 'crossfit' | 'functional'
+export type WorkoutType = 'crossfit' | 'functional' | 'bjj'
 
 export interface Workout {
   id: string
