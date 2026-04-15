@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/features/auth/AuthContext'
 
 export function AppShell() {
-  const { user } = useAuth()
+  const { user, role } = useAuth()
 
   async function handleLogout() {
     await supabase.auth.signOut()
@@ -35,6 +35,14 @@ export function AppShell() {
               >
                 Calendar
               </Link>
+              {role === 'admin' && (
+                <Link
+                  to="/admin/bjj-techniques"
+                  className="text-foreground/60 transition-colors hover:text-foreground"
+                >
+                  BJJ Techniques
+                </Link>
+              )}
             </nav>
           </div>
           <div className="flex items-center gap-3">

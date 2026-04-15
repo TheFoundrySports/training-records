@@ -1,6 +1,7 @@
 import { createBrowserRouter, Navigate } from 'react-router'
 import { AppShell } from './AppShell'
 import { ProtectedRoute } from '@/features/auth/ProtectedRoute'
+import { AdminRoute } from '@/features/auth/AdminRoute'
 import { LoginPage } from '@/features/auth/LoginPage'
 import { WorkoutListPage } from '@/features/workouts/pages/WorkoutListPage'
 import { WorkoutDetailPage } from '@/features/workouts/pages/WorkoutDetailPage'
@@ -8,6 +9,8 @@ import { WorkoutFormPage } from '@/features/workouts/pages/WorkoutFormPage'
 import { AIChatPage } from '@/features/ai/AIChatPage'
 import { ExerciseListPage, ExerciseFormPage } from '@/features/exercises/pages'
 import { CalendarPage } from '@/features/calendar'
+import { BJJTechniqueListPage } from '@/features/admin/bjj-techniques/pages/BJJTechniqueListPage'
+import { BJJTechniqueFormPage } from '@/features/admin/bjj-techniques/pages/BJJTechniqueFormPage'
 
 export const router = createBrowserRouter([
   {
@@ -60,6 +63,30 @@ export const router = createBrowserRouter([
           {
             path: 'calendar',
             element: <CalendarPage />,
+          },
+          {
+            path: 'admin/bjj-techniques',
+            element: (
+              <AdminRoute>
+                <BJJTechniqueListPage />
+              </AdminRoute>
+            ),
+          },
+          {
+            path: 'admin/bjj-techniques/new',
+            element: (
+              <AdminRoute>
+                <BJJTechniqueFormPage />
+              </AdminRoute>
+            ),
+          },
+          {
+            path: 'admin/bjj-techniques/:id/edit',
+            element: (
+              <AdminRoute>
+                <BJJTechniqueFormPage />
+              </AdminRoute>
+            ),
           },
         ],
       },
