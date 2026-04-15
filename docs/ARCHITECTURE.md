@@ -107,6 +107,107 @@ create table public.exercises (
 );
 ```
 
+---
+
+## BJJ Extension Data Model (Iteration 5)
+
+### `workouts.type` extension
+
+The `type` CHECK constraint is extended to include `'bjj'`:
+
+```sql
+ALTER TABLE public.workouts DROP CONSTRAINT workouts_type_check;
+ALTER TABLE public.workouts ADD CONSTRAINT workouts_type_check
+  CHECK (type IN ('crossfit', 'functional', 'bjj'));
+```
+
+### `bjj_techniques`
+
+Admin-managed technique catalog (name, description, category, optional YouTube reference).
+
+```sql
+CREATE TABLE public.bjj_techniques (
+  id          uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
+  name        text        NOT NULL UNIQUE,
+  description text,
+  category    text        CHECK (category IN ('guard', 'takedown', 'submission', 'escape', 'transition', 'other')),
+  youtube_url text,
+  created_at  timestamptz NOT NULL DEFAULT now(),
+  updated_at  timestamptz NOT NULL DEFAULT now()
+);
+```
+
+**RLS summary:**
+
+| Operation                | Policy                         |
+| ------------------------ | ------------------------------ |
+| SELECT                   | Any `authenticated` user       |
+| INSERT / UPDATE / DELETE | `profiles.role = 'admin'` only |
+
+### `bjj_sections`
+
+Ordered sections within a single BJJ workout. Each section has a goal and optional free-text + AI-enhanced description.
+
+```sql
+CREATE TABLE public.bjj_sections (
+  id               uuid    PRIMARY KEY DEFAULT gen_random_uuid(),
+  workout_id       uuid    NOT NULL REFERENCES public.workouts(id) ON DELETE CASCADE,
+  section_number   integer NOT NULL CHECK (section_number >= 1),
+  goal             text    NOT NULL,
+  raw_description  text,
+  ai_description   text,
+  duration_minutes integer CHECK (duration_minutes BETWEEN 1 AND 300),
+  created_at       timestamptz NOT NULL DEFAULT now(),
+  UNIQUE (workout_id, section_number)
+);
+```
+
+**RLS summary:**
+
+| Operation                         | Policy                                                    |
+| --------------------------------- | --------------------------------------------------------- |
+| SELECT / INSERT / UPDATE / DELETE | Row owner only — via `workouts.user_id = auth.uid()` JOIN |
+
+### `bjj_section_techniques`
+
+Junction table linking a section to one or more techniques from the catalog.
+
+```sql
+CREATE TABLE public.bjj_section_techniques (
+  section_id   uuid NOT NULL REFERENCES public.bjj_sections(id) ON DELETE CASCADE,
+  technique_id uuid NOT NULL REFERENCES public.bjj_techniques(id) ON DELETE CASCADE,
+  PRIMARY KEY (section_id, technique_id)
+);
+```
+
+**RLS summary:**
+
+| Operation                | Policy                                                                                        |
+| ------------------------ | --------------------------------------------------------------------------------------------- |
+| SELECT / INSERT / DELETE | Row owner only — via `bjj_sections.workout_id → workouts.user_id = auth.uid()` two-level JOIN |
+
+### Cascade delete behaviour
+
+Deleting a `workouts` row cascades to → `bjj_sections` → `bjj_section_techniques`. No orphan data is possible.
+
+### Atomic save: `bjj_create_workout` RPC
+
+BJJ workout creation (workout + sections + technique links) is wrapped in a single PostgreSQL transaction via a `SECURITY DEFINER` RPC function. The client calls `supabase.rpc('bjj_create_workout', {...})` — never parallel PostgREST calls — to prevent partial inserts (Risk R2 from proposal).
+
+```sql
+-- Signature (simplified)
+CREATE OR REPLACE FUNCTION public.bjj_create_workout(
+  p_title        text,
+  p_performed_at timestamptz,
+  p_duration_min integer,
+  p_notes        text,
+  p_rpe          integer,
+  p_sections     bjj_section_input[]   -- custom composite type
+)
+RETURNS uuid   -- returns new workout.id
+LANGUAGE plpgsql SECURITY DEFINER;
+```
+
 ## Directory Structure
 
 ```
@@ -129,9 +230,9 @@ training-records/
 │   ├── components/
 │   │   └── ui/              # shadcn/ui components (button, card, dialog, form, …)
 │   ├── features/
-│   │   ├── auth/            # LoginPage, AuthContext, ProtectedRoute
-│   │   ├── workouts/        # WorkoutListPage, WorkoutDetailPage, WorkoutFormPage
-│   │   │   ├── components/  # WodFormatSelector, ExercisePicker, MovementFieldArray
+│   │   ├── auth/            # LoginPage, AuthContext, ProtectedRoute, AdminRoute
+│   │   ├── workouts/        # WorkoutListPage, WorkoutDetailPage, WorkoutFormPage, WorkoutTypePicker
+│   │   │   ├── components/  # WodFormatSelector, ExercisePicker, MovementFieldArray, WorkoutTypePicker
 │   │   │   ├── hooks/       # useWorkouts, useWorkoutMutations, mapRow
 │   │   │   ├── pages/
 │   │   │   ├── registry/    # Code-first WOD format registry
@@ -141,6 +242,27 @@ training-records/
 │   │   │   │   └── types.ts
 │   │   │   ├── workout.schema.ts
 │   │   │   └── workout.types.ts
+│   │   ├── bjj/             # BJJ training modality (iteration 5)
+│   │   │   ├── bjj.types.ts             # BJJTechnique, BJJSection, BJJWorkout domain types
+│   │   │   ├── bjj.schema.ts            # bjjTechniqueSchema, bjjSectionSchema, bjjWorkoutSchema
+│   │   │   ├── pages/
+│   │   │   │   └── BJJWorkoutFormPage.tsx   # Section-based workout creation form
+│   │   │   ├── hooks/
+│   │   │   │   ├── useBJJTechniques.ts      # TanStack Query: fetch/search technique catalog
+│   │   │   │   ├── useBJJWorkoutMutations.ts # Mutation: calls bjj_create_workout RPC
+│   │   │   │   ├── useBJJSectionAI.ts       # Mutation: calls bjj-section-ai Edge Function
+│   │   │   │   └── mapRow.ts                # DB → domain mappers for BJJ tables
+│   │   │   └── components/
+│   │   │       ├── BJJSectionEditor.tsx     # Single section card (goal, description, technique picker)
+│   │   │       ├── BJJWorkoutDetail.tsx     # Detail view: sections, techniques, AI/raw toggle
+│   │   │       └── TechniqueSearch.tsx      # Combobox: ILIKE search + multi-select for techniques
+│   │   ├── admin/           # Admin features (iteration 5+)
+│   │   │   └── bjj-techniques/
+│   │   │       ├── pages/
+│   │   │       │   ├── BJJTechniqueListPage.tsx  # Table: name, category, youtube_url, edit/delete
+│   │   │       │   └── BJJTechniqueFormPage.tsx  # Add/edit technique (create + edit modes)
+│   │   │       └── hooks/
+│   │   │           └── useBJJTechniqueMutations.ts  # create, update, delete mutations
 │   │   ├── exercises/       # Exercise catalog (types, schema, hooks, pages)
 │   │   │   ├── hooks/       # useExercises, useExerciseMutations, mapExerciseRow
 │   │   │   ├── pages/       # ExerciseListPage, ExerciseFormPage
@@ -164,6 +286,7 @@ training-records/
 ├── supabase/
 │   ├── functions/
 │   │   ├── ai-generate/     # Edge Function: AI workout generation (OpenAI + mock)
+│   │   ├── bjj-section-ai/  # Edge Function: AI section enhancement (iteration 5)
 │   │   ├── exercises/       # Edge Function: REST CRUD for exercises, categories, equipment
 │   │   └── workouts/        # Edge Function: CRUD gateway (future use)
 │   ├── migrations/          # Versioned SQL migrations
@@ -177,28 +300,31 @@ training-records/
 
 ### Frontend (React SPA)
 
-| Module                              | Responsibility                                                                            |
-| ----------------------------------- | ----------------------------------------------------------------------------------------- |
-| `src/features/auth/`                | Email/password login, JWT session via Supabase Auth, `AuthContext`, `ProtectedRoute`      |
-| `src/features/workouts/`            | List, detail, create, and edit workout records; RHF+Zod form validation                   |
-| `src/features/workouts/registry/`   | Code-first WOD format registry — each format self-registers with schema + `FormSection`   |
-| `src/features/workouts/components/` | `WodFormatSelector`, `ExercisePicker`, `MovementFieldArray` — dynamic WOD form components |
-| `src/features/exercises/`           | Exercise catalog — list and create/edit exercises; calls `exercises` Edge Function        |
-| `src/features/calendar/`            | Training calendar (month/week/day) — URL `view`+`date`; `useWorkoutsByDateRange`; Supabase `workouts`; `date-fns` |
-| `src/features/ai/`                  | AI-powered workout generation — calls `ai-generate` Edge Function                         |
-| `src/lib/supabase.ts`               | Single Supabase JS client instance (singleton)                                            |
-| `src/lib/api.ts`                    | Fetch wrapper for raw HTTP calls with `Authorization: Bearer` header                      |
-| `src/types/supabase.ts`             | Auto-generated TypeScript types from live DB schema                                       |
+| Module                               | Responsibility                                                                                                      |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------- |
+| `src/features/auth/`                 | Email/password login, JWT session via Supabase Auth, `AuthContext`, `ProtectedRoute`, `AdminRoute`                  |
+| `src/features/workouts/`             | List, detail, create, and edit workout records; RHF+Zod form validation; two-step type picker                       |
+| `src/features/workouts/registry/`    | Code-first WOD format registry — each format self-registers with schema + `FormSection`                             |
+| `src/features/workouts/components/`  | `WodFormatSelector`, `ExercisePicker`, `MovementFieldArray`, `WorkoutTypePicker`                                    |
+| `src/features/bjj/`                  | BJJ workout creation form, section editing, technique search combobox, detail view, AI enhancement hook, DB mappers |
+| `src/features/admin/bjj-techniques/` | Admin CRUD for the BJJ technique catalog — list page, form page, mutations hook                                     |
+| `src/features/exercises/`            | Exercise catalog — list and create/edit exercises; calls `exercises` Edge Function                                  |
+| `src/features/calendar/`             | Training calendar (month/week/day) — URL `view`+`date`; `useWorkoutsByDateRange`; Supabase `workouts`; `date-fns`   |
+| `src/features/ai/`                   | AI-powered workout generation — calls `ai-generate` Edge Function                                                   |
+| `src/lib/supabase.ts`                | Single Supabase JS client instance (singleton)                                                                      |
+| `src/lib/api.ts`                     | Fetch wrapper for raw HTTP calls with `Authorization: Bearer` header                                                |
+| `src/types/supabase.ts`              | Auto-generated TypeScript types from live DB schema                                                                 |
 
 ### Backend (Supabase)
 
-| Component                         | Responsibility                                                                            |
-| --------------------------------- | ----------------------------------------------------------------------------------------- |
-| `supabase/migrations/`            | All schema changes and RLS policies as versioned SQL                                      |
-| `supabase/functions/ai-generate/` | Accepts a prompt, calls OpenAI (or returns a mock), returns a structured workout proposal |
-| `supabase/functions/exercises/`   | REST CRUD for exercises, categories, and equipment; admin-guarded write operations        |
-| `supabase/functions/workouts/`    | CRUD gateway (reserved for future `/api/v1/` migration)                                   |
-| `supabase/seed.sql`               | Dev fixtures: 3 users (`athlete1`, `athlete2`, `admin`) + sample workouts                 |
+| Component                            | Responsibility                                                                                                                                           |
+| ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `supabase/migrations/`               | All schema changes and RLS policies as versioned SQL                                                                                                     |
+| `supabase/functions/ai-generate/`    | Accepts a prompt, calls OpenAI (or returns a mock), returns a structured workout proposal                                                                |
+| `supabase/functions/bjj-section-ai/` | Accepts section goal + raw description; retrieves matching techniques via ILIKE; calls GPT-4o-mini; returns enhanced description + matched technique IDs |
+| `supabase/functions/exercises/`      | REST CRUD for exercises, categories, and equipment; admin-guarded write operations                                                                       |
+| `supabase/functions/workouts/`       | CRUD gateway (reserved for future `/api/v1/` migration)                                                                                                  |
+| `supabase/seed.sql`                  | Dev fixtures: 3 users (`athlete1`, `athlete2`, `admin`) + sample workouts                                                                                |
 
 ## Interfaces
 
@@ -214,14 +340,15 @@ See [docs/rls-verification.md](rls-verification.md) for full policy definitions 
 
 ### Edge Functions
 
-| Function      | Method                | Description                                                       |
-| ------------- | --------------------- | ----------------------------------------------------------------- |
-| `ai-generate` | POST                  | Accepts `{ prompt: string }`, returns `WorkoutProposal`           |
-| `exercises`   | GET/POST              | List all exercises or create one; admin guard on writes           |
-| `exercises`   | GET/PUT/DELETE `/:id` | Fetch, update, or delete a single exercise; admin guard on writes |
-| `exercises`   | GET                   | `/categories` — list all categories                               |
-| `exercises`   | GET                   | `/equipment` — list all equipment types                           |
-| `workouts`    | ALL                   | CRUD gateway (not yet used by the SPA)                            |
+| Function         | Method                | Description                                                                                       |
+| ---------------- | --------------------- | ------------------------------------------------------------------------------------------------- |
+| `ai-generate`    | POST                  | Accepts `{ prompt: string }`, returns `WorkoutProposal`                                           |
+| `exercises`      | GET/POST              | List all exercises or create one; admin guard on writes                                           |
+| `exercises`      | GET/PUT/DELETE `/:id` | Fetch, update, or delete a single exercise; admin guard on writes                                 |
+| `exercises`      | GET                   | `/categories` — list all categories                                                               |
+| `exercises`      | GET                   | `/equipment` — list all equipment types                                                           |
+| `workouts`       | ALL                   | CRUD gateway (not yet used by the SPA)                                                            |
+| `bjj-section-ai` | POST                  | Accepts section goal + raw description; returns AI-enhanced description and matched technique IDs |
 
 All Edge Functions validate the JWT before processing:
 
@@ -232,6 +359,41 @@ const {
 } = await supabase.auth.getUser(req.headers.get('Authorization')?.replace('Bearer ', '') ?? '')
 if (error || !user) return new Response('Unauthorized', { status: 401 })
 ```
+
+### `bjj-section-ai` Edge Function (Iteration 5)
+
+**File:** `supabase/functions/bjj-section-ai/index.ts`
+
+Stateless function — takes raw section text, retrieves matching techniques from the DB via ILIKE, calls GPT-4o-mini, and returns an enriched description. The client persists the result (updates form state; optionally patches DB after save). AI enhancement is **opt-in only** — never called automatically on form submit or page load.
+
+**Request:**
+
+```json
+{
+  "section_goal": "string", // required
+  "raw_description": "string" // required, min 10 chars
+}
+```
+
+**Response (200):**
+
+```json
+{
+  "ai_description": "string", // 2–4 sentence enhanced description
+  "matched_technique_ids": ["uuid"] // subset of bjj_techniques.id
+}
+```
+
+**Error responses:**
+
+| Code | Condition                                               |
+| ---- | ------------------------------------------------------- |
+| 400  | Missing required fields or `raw_description` < 10 chars |
+| 401  | Missing or invalid JWT                                  |
+| 422  | OpenAI returned invalid response shape                  |
+| 502  | OpenAI API error or empty response                      |
+
+**Mock fallback:** When `OPENAI_API_KEY` is absent, returns a deterministic mock response (consistent with `ai-generate` and `training-evaluation` patterns). CI never depends on a live OpenAI key.
 
 ## WOD Format Registry
 

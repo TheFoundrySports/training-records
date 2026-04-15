@@ -2,13 +2,13 @@
 
 ## 1. Document control
 
-| Field       | Value                                                                                                                                                                                                      |
-| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Title**   | Training Records — initial product requirements (workouts / fitness)                                                                                                                                       |
-| **Version** | 0.8                                                                                                                                                                                                        |
-| **Date**    | 2026-04-12                                                                                                                                                                                                 |
-| **Author**  | Francisco José Seva Mora                                                                                                                                                                                   |
-| **Status**  | Draft — BaaS/Supabase + MVP testing; iteration 2 CrossFit / WOD authoring requirements drafted; iteration 3 Calendar / Training Planner drafted; iteration 4 Garmin Import + Training Intelligence drafted |
+| Field       | Value                                                                                                                                                                                                                                         |
+| ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Title**   | Training Records — initial product requirements (workouts / fitness)                                                                                                                                                                          |
+| **Version** | 0.9                                                                                                                                                                                                                                           |
+| **Date**    | 2026-04-15                                                                                                                                                                                                                                    |
+| **Author**  | Francisco José Seva Mora                                                                                                                                                                                                                      |
+| **Status**  | Draft — BaaS/Supabase + MVP testing; iteration 2 CrossFit / WOD authoring requirements drafted; iteration 3 Calendar / Training Planner drafted; iteration 4 Garmin Import + Training Intelligence drafted; iteration 5 BJJ Extension drafted |
 
 **Related links**
 
@@ -364,6 +364,67 @@ This subsection defines **what “tested enough for MVP” means**: required too
 - **NFR-007** satisfied: Zod validation in place; LLM failure handled gracefully (null evaluation, UI warning).
 - **NFR-008** satisfied: private bucket, 25 MB cap, server-side MIME validation.
 - **ARCHITECTURE.md** updated with Garmin import flow and AI evaluation pipeline.
+
+### Definition of done (iteration 5 — BJJ Extension)
+
+- **Phase 0** complete: `docs/PRD.md`, `docs/PRODUCT.md`, and `docs/ARCHITECTURE.md` updated before any code changes.
+- **Phase 1** complete: DB migration applied (`workouts.type` extended; `bjj_techniques`, `bjj_sections`, `bjj_section_techniques` created with RLS); TypeScript types and Zod schemas in place.
+- **Phase 2** complete: Admin CRUD at `/admin/bjj-techniques` (list + form + mutations); role guard active; AppShell nav updated.
+- **Phase 3** complete: Two-step type picker at `/workouts/new`; `BJJWorkoutFormPage` at `/bjj/new`; atomic save via `bjj_create_workout` RPC; navigation to detail on success.
+- **Phase 4** complete: `bjj-section-ai` Edge Function deployed; `useBJJSectionAI` hook integrated; "Enhance with AI" opt-in per section; mock fallback when `OPENAI_API_KEY` absent.
+- **Phase 5** complete: `WorkoutDetailPage` renders BJJ sections discriminated by type; `WorkoutListPage` has type filter; calendar integration verified.
+- **NFR-BJJ-001 (Atomic save)** satisfied: BJJ workout creation uses a Postgres RPC (`bjj_create_workout`) — no partial inserts possible.
+- **NFR-BJJ-002 (RLS ownership)** satisfied: `bjj_sections` and `bjj_section_techniques` RLS policies enforce row-level ownership via `workouts.user_id = auth.uid()`; `bjj_techniques` RLS enforces admin-only writes.
+- **NFR-BJJ-003 (Opt-in AI)** satisfied: `bjj-section-ai` is never invoked on the save critical path; it is only called by explicit user action.
+- **NFR-BJJ-004 (Zero regression)** satisfied: CrossFit/functional workout creation, editing, and display are unaffected; Playwright smoke passes.
+- **ARCHITECTURE.md** updated with BJJ data model, Edge Function contract, and feature directory structure.
+
+---
+
+## In scope — iteration 5 (BJJ Extension)
+
+This subsection records **planned** scope for the fifth iteration. It **does not remove** prior requirements; it **adds** Brazilian Jiu-Jitsu as a first-class training modality. Details are fully specified in [docs/ARCHITECTURE.md](ARCHITECTURE.md).
+
+### Goals
+
+- **G-BJJ-1:** Athletes who cross-train BJJ can log structured sessions using a section-based model.
+- **G-BJJ-2:** Admins can maintain a curated BJJ technique library with YouTube video references.
+- **G-BJJ-3:** The AI coach can enhance section descriptions by matching logged text to known techniques.
+- **G-BJJ-4:** BJJ workouts appear in the existing workout list and training calendar without breaking CrossFit flows.
+
+### In scope
+
+- `workouts.type` extended to include `'bjj'` (DB constraint + TypeScript union + Zod enum).
+- Three new DB tables: `bjj_techniques` (admin-managed catalog), `bjj_sections` (per-workout sections), `bjj_section_techniques` (section-to-technique junction). Full RLS on all three.
+- Admin UI at `/admin/bjj-techniques` for technique CRUD (name, description, category, youtube_url); role-guarded.
+- Two-step workout creation: step-1 type picker at `/workouts/new` → existing CrossFit form (unchanged) or new BJJ form.
+- `BJJWorkoutFormPage` at `/bjj/new` with dynamic section list (React Hook Form `useFieldArray`); `TechniqueSearch` combobox per section.
+- Atomic BJJ workout save via PostgreSQL RPC `bjj_create_workout` — no partial inserts.
+- `bjj-section-ai` Supabase Edge Function: opt-in per-section AI enhancement (ILIKE technique retrieval + GPT-4o-mini); mock fallback for local dev.
+- Workout detail page extended to render BJJ sections when `workout.type === 'bjj'` (discriminated render, separate `BJJWorkoutDetail` component).
+- `WorkoutListPage` type filter extended to include `'bjj'`.
+- Calendar integration: BJJ workouts appear automatically (no calendar logic changes required).
+- PRD, PRODUCT.md, and ARCHITECTURE.md updated as Phase 0 prerequisite.
+
+### Out of scope (this iteration)
+
+- pgvector / semantic search — ILIKE with trigram index is sufficient for MVP technique retrieval.
+- YouTube playlist bulk-seeding of techniques — admin manual entry only.
+- Garmin integration for BJJ sessions — Garmin does not produce structured BJJ session data.
+- BJJ workout editing (`/bjj/:id/edit`) — create-only for MVP.
+- AI chat (`/ai`) extended with BJJ suggestions.
+- Public BJJ WOD library (analogous to `public_wods`).
+- Mobile-specific optimizations.
+- BJJ training evaluations / readiness scoring.
+
+### Key NFRs (BJJ-specific)
+
+| ID              | Requirement                                                                                                                                                                                                                                |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **NFR-BJJ-001** | **Atomic save** — BJJ workout insertion (workout + sections + technique links) MUST be wrapped in a single PostgreSQL transaction via `bjj_create_workout` RPC. Sequential PostgREST calls from the client are not acceptable.             |
+| **NFR-BJJ-002** | **RLS ownership** — `bjj_sections` and `bjj_section_techniques` MUST enforce row-level ownership via a JOIN through `workouts.user_id = auth.uid()`. `bjj_techniques` SELECT is open to `authenticated`; writes are admin-only.            |
+| **NFR-BJJ-003** | **Opt-in AI** — The `bjj-section-ai` Edge Function MUST NOT be called automatically on form submit or page load. It is only invoked by explicit user action (button click). AI latency must never block data persistence.                  |
+| **NFR-BJJ-004** | **Zero regression** — The CrossFit/functional workout creation, editing, and display paths MUST remain functionally identical after this iteration. A Playwright smoke test must pass end-to-end for both CrossFit and BJJ creation flows. |
 
 ---
 
