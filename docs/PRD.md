@@ -94,6 +94,10 @@ People who train regularly often lack a **single, dependable place** to track **
 - **US-14:** As an athlete, I want to **receive an adaptation warning** when my recovery time from a completed workout conflicts with a planned upcoming workout, so I can adjust my schedule proactively.
 - **US-15:** As an athlete, I want the app to **suggest the next training session** based on my current readiness and training history, so I can make smarter decisions about what to do next.
 - **US-16:** As an athlete, I want to **link a Garmin import to an existing planned workout or save it as a new standalone record**, so that my log stays accurate whether or not I followed the plan.
+- **US-17:** As an athlete, I want to **log a Brazilian Jiu-Jitsu training session** structured into sections (each with a goal and technique descriptions), so that my BJJ training is recorded with the same rigour as my CrossFit sessions.
+- **US-18:** As an athlete, I want to **search and attach known BJJ techniques** to each section of my workout, so that my log is precise and consistent with the official technique library.
+- **US-19:** As an athlete, I want to **use AI to enhance my section description** based on the techniques I described, so that my notes are clearer and reference the correct terminology.
+- **US-20:** As an administrator, I want to **manage the BJJ technique library** (add, edit, delete techniques with descriptions and YouTube links), so that athletes have a curated and accurate reference.
 
 ---
 
@@ -150,28 +154,71 @@ This subsection records **planned** scope for a fourth iteration. It **does not 
 - **AI training evaluation:** After import, the server calls a lightweight LLM (Gemini Flash or GPT-4o-mini) and returns a structured JSON evaluation validated with Zod: `training_summary`, `readiness_level`, `next_training_suggestion`, `adaptation_warning`.
 - **Adaptation warning:** When the computed `recovery_time_hours` from a completed workout conflicts with the next planned workout's `performedAt`, the app displays a prominent warning on both the completed workout detail and the calendar.
 
-| ID         | Requirement                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **FR-001** | The system shall display a **paginated or scrollable list** of workout records available to the signed-in user. Authentication is required; unauthenticated access is not permitted (Supabase Auth + RLS enforce this).                                                                                                                                                                                                                                                                                                                                                                                             |
-| **FR-002** | The system shall provide a **detail view** for a single workout record, including at minimum: **title or activity label**, **date and time (or date only)**, **duration** (or distance where relevant), and **notes or tags** as applicable. Optional fields (e.g. **perceived intensity / RPE**) may be added when agreed.                                                                                                                                                                                                                                                                                         |
-| **FR-003** | The system shall allow **creating** a workout record with required field validation; invalid submissions show **inline or summary errors**.                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| **FR-004** | The system shall allow **editing** and **deleting** a record when the user has permission. Permission rules for MVP: **athletes** may only modify their own records (enforced by Supabase RLS `user_id = auth.uid()`); **administrators** have read access to all records but do not bypass write restrictions.                                                                                                                                                                                                                                                                                                     |
-| **FR-005** | The system shall **persist** data in **Supabase PostgreSQL** via the Edge Function REST API (`/api/v1/`\*). A documented mock/fixture layer (`supabase/seed.sql`) may be used for local development only — not production.                                                                                                                                                                                                                                                                                                                                                                                          |
-| **FR-006** | The system shall provide **navigation** between list, detail, and forms without losing essential context (e.g. return to list after save).                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| **FR-007** | The system shall provide a chat where the user should be able to describe the type of workout that want to generate using AI so it can be saved and added to the day).                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| **FR-008** | The system shall support **multiple workout formats** (existing and **future**). **Different workout types may require different user flows, validation, scoring capture, and presentation**; the product shall not rely on a single universal form or a single fixed field set for every type without an extension mechanism.                                                                                                                                                                                                                                                                                      |
-| **FR-009** | The system shall allow **new workout types to be introduced** as the product evolves (including types not listed at initial delivery). Adding a type shall be possible **without replacing the entire workout model** each time; how types are **registered or configured** (e.g. data-driven catalog vs versioned code modules) is an implementation choice recorded in [docs/ARCHITECTURE.md](ARCHITECTURE.md).                                                                                                                                                                                                   |
-| **FR-010** | The system shall provide a **Calendar page** (`/calendar`) where the authenticated user can view all their workouts — past and future-planned — plotted on a calendar. The page shall support **Day**, **Week**, and **Month** view modes, a **date-range filter**, and navigation to adjacent periods. Clicking a workout entry shall navigate to its detail or edit page; clicking an empty date slot shall open the create form pre-filled with that date. The URL shall encode the active view mode and date range so the state is bookmarkable and shareable.                                                  |
-| **FR-011** | The system shall allow an authenticated athlete to **upload a `.fit` file** from a Garmin device (max 25 MB, MIME-type validated server-side) and associate the import with a workout record (planned or new standalone). The file shall be stored in a **private Supabase Storage bucket** and never exposed to unauthenticated clients.                                                                                                                                                                                                                                                                           |
-| **FR-012** | The system shall **parse the uploaded `.fit` file** server-side and persist the extracted data in two ways: (a) raw parsed payload as **`jsonb`** for forward-compatibility; (b) key typed columns (`avg_heart_rate`, `max_heart_rate`, `hr_zone_1_pct`–`hr_zone_5_pct`, `training_load`, `recovery_time_hours`, `vo2max_estimate`, `total_calories`, `active_duration_seconds`) for efficient querying and display.                                                                                                                                                                                                |
-| **FR-013** | The workout detail page shall display a **training intelligence widget section** showing 5–7 key metrics derived from the imported Garmin data: average heart rate, HR zone distribution (stacked bar or pie), training load score, estimated recovery time, VO2max estimate, total calories, and active duration. The widget section shall only appear when Garmin data has been imported for that workout.                                                                                                                                                                                                        |
-| **FR-014** | After a successful Garmin import, the system shall call a lightweight LLM (Gemini Flash or GPT-4o-mini — model choice recorded in §10 open decisions) from a Supabase Edge Function and persist a **structured AI training evaluation**. The LLM response schema (validated with **Zod**) shall contain: `training_summary` (string), `readiness_level` (`low` \| `moderate` \| `high`), `next_training_suggestion` (string), `adaptation_warning` (string \| null). If the LLM call fails or returns an invalid schema, the system shall store a null evaluation and surface a non-blocking error state in the UI. |
-| **FR-015** | When the computed `recovery_time_hours` from a completed workout's Garmin data conflicts with the `performedAt` of the athlete's **next planned workout**, the system shall display a prominent **adaptation warning** on the completed workout detail page (and optionally on the calendar chip). The warning shall include the conflicting planned workout's title and date.                                                                                                                                                                                                                                      |
-| **FR-016** | The system shall display the **next training suggestion** (from the AI evaluation, FR-014) as an actionable card on the workout detail page. The card shall include a CTA that pre-fills the create workout form with the suggested workout description and the next available date after the computed recovery window.                                                                                                                                                                                                                                                                                             |
+### In scope — iteration 5 (BJJ Extension)
+
+This subsection records **planned** scope for the fifth iteration. It **does not remove** prior requirements; it **adds** Brazilian Jiu-Jitsu as a first-class training modality. Details are fully specified in [docs/ARCHITECTURE.md](ARCHITECTURE.md).
+
+#### Goals
+
+- **G-BJJ-1:** Athletes who cross-train BJJ can log structured sessions using a section-based model.
+- **G-BJJ-2:** Admins can maintain a curated BJJ technique library with YouTube video references.
+- **G-BJJ-3:** The AI coach can enhance section descriptions by matching logged text to known techniques.
+- **G-BJJ-4:** BJJ workouts appear in the existing workout list and training calendar without breaking CrossFit flows.
+
+#### In scope
+
+- `workouts.type` extended to include `'bjj'` (DB constraint + TypeScript union + Zod enum).
+- Three new DB tables: `bjj_techniques` (admin-managed catalog), `bjj_sections` (per-workout sections), `bjj_section_techniques` (section-to-technique junction). Full RLS on all three.
+- Admin UI at `/admin/bjj-techniques` for technique CRUD (name, description, category, youtube_url); role-guarded.
+- Two-step workout creation: step-1 type picker at `/workouts/new` → existing CrossFit form (unchanged) or new BJJ form.
+- `BJJWorkoutFormPage` at `/bjj/new` with dynamic section list (React Hook Form `useFieldArray`); `TechniqueSearch` combobox per section.
+- Atomic BJJ workout save via PostgreSQL RPC `bjj_create_workout` — no partial inserts.
+- `bjj-section-ai` Supabase Edge Function: opt-in per-section AI enhancement (ILIKE technique retrieval + GPT-4o-mini); mock fallback for local dev.
+- Workout detail page extended to render BJJ sections when `workout.type === 'bjj'` (discriminated render, separate `BJJWorkoutDetail` component).
+- `WorkoutListPage` type filter extended to include `'bjj'`.
+- Calendar integration: BJJ workouts appear automatically (no calendar logic changes required).
+- PRD, PRODUCT.md, and ARCHITECTURE.md updated as Phase 0 prerequisite.
+
+#### Out of scope (this iteration)
+
+- pgvector / semantic search — ILIKE with trigram index is sufficient for MVP technique retrieval.
+- YouTube playlist bulk-seeding of techniques — admin manual entry only.
+- Garmin integration for BJJ sessions — Garmin does not produce structured BJJ session data.
+- BJJ workout editing (`/bjj/:id/edit`) — create-only for MVP.
+- AI chat (`/ai`) extended with BJJ suggestions.
+- Public BJJ WOD library (analogous to `public_wods`).
+- Mobile-specific optimizations.
+- BJJ training evaluations / readiness scoring.
+
+#### Key NFRs (BJJ-specific)
+
+| ID              | Requirement                                                                                                                                                                                                                                |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **NFR-BJJ-001** | **Atomic save** — BJJ workout insertion (workout + sections + technique links) MUST be wrapped in a single PostgreSQL transaction via `bjj_create_workout` RPC. Sequential PostgREST calls from the client are not acceptable.             |
+| **NFR-BJJ-002** | **RLS ownership** — `bjj_sections` and `bjj_section_techniques` MUST enforce row-level ownership via a JOIN through `workouts.user_id = auth.uid()`. `bjj_techniques` SELECT is open to `authenticated`; writes are admin-only.            |
+| **NFR-BJJ-003** | **Opt-in AI** — The `bjj-section-ai` Edge Function MUST NOT be called automatically on form submit or page load. It is only invoked by explicit user action (button click). AI latency must never block data persistence.                  |
+| **NFR-BJJ-004** | **Zero regression** — The CrossFit/functional workout creation, editing, and display paths MUST remain functionally identical after this iteration. A Playwright smoke test must pass end-to-end for both CrossFit and BJJ creation flows. |
+
+| ID         | Requirement                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------- | -------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **FR-001** | The system shall display a **paginated or scrollable list** of workout records available to the signed-in user. Authentication is required; unauthenticated access is not permitted (Supabase Auth + RLS enforce this).                                                                                                                                                                                                                                                                                                                                            |
+| **FR-002** | The system shall provide a **detail view** for a single workout record, including at minimum: **title or activity label**, **date and time (or date only)**, **duration** (or distance where relevant), and **notes or tags** as applicable. Optional fields (e.g. **perceived intensity / RPE**) may be added when agreed.                                                                                                                                                                                                                                        |
+| **FR-003** | The system shall allow **creating** a workout record with required field validation; invalid submissions show **inline or summary errors**.                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| **FR-004** | The system shall allow **editing** and **deleting** a record when the user has permission. Permission rules for MVP: **athletes** may only modify their own records (enforced by Supabase RLS `user_id = auth.uid()`); **administrators** have read access to all records but do not bypass write restrictions.                                                                                                                                                                                                                                                    |
+| **FR-005** | The system shall **persist** data in **Supabase PostgreSQL** via the Edge Function REST API (`/api/v1/`). A documented mock/fixture layer (`supabase/seed.sql`) may be used for local development only — not production.                                                                                                                                                                                                                                                                                                                                           |
+| **FR-006** | The system shall provide **navigation** between list, detail, and forms without losing essential context (e.g. return to list after save).                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| **FR-007** | The system shall provide a chat where the user should be able to describe the type of workout that want to generate using AI so it can be saved and added to the day).                                                                                                                                                                                                                                                                                                                                                                                             |
+| **FR-008** | The system shall support **multiple workout formats** (existing and **future**). **Different workout types may require different user flows, validation, scoring capture, and presentation**; the product shall not rely on a single universal form or a single fixed field set for every type without an extension mechanism.                                                                                                                                                                                                                                     |
+| **FR-009** | The system shall allow **new workout types to be introduced** as the product evolves (including types not listed at initial delivery). Adding a type shall be possible **without replacing the entire workout model** each time; how types are **registered or configured** (e.g. data-driven catalog vs versioned code modules) is an implementation choice recorded in [docs/ARCHITECTURE.md](ARCHITECTURE.md).                                                                                                                                                  |
+| **FR-010** | The system shall provide a **Calendar page** (`/calendar`) where the authenticated user can view all their workouts — past and future-planned — plotted on a calendar. The page shall support **Day**, **Week**, and **Month** view modes, a **date-range filter**, and navigation to adjacent periods. Clicking a workout entry shall navigate to its detail or edit page; clicking an empty date slot shall open the create form pre-filled with that date. The URL shall encode the active view mode and date range so the state is bookmarkable and shareable. |
+| **FR-011** | The system shall allow an authenticated athlete to **upload a `.fit` file** from a Garmin device (max 25 MB, MIME-type validated server-side) and associate the import with a workout record (planned or new standalone). The file shall be stored in a **private Supabase Storage bucket** and never exposed to unauthenticated clients.                                                                                                                                                                                                                          |
+| **FR-012** | The system shall **parse the uploaded `.fit` file** server-side and persist the extracted data in two ways: (a) raw parsed payload as `**jsonb`\*\* for forward-compatibility; (b) key typed columns (`avg_heart_rate`, `max_heart_rate`, `hr_zone_1_pct`–`hr_zone_5_pct`, `training_load`, `recovery_time_hours`, `vo2max_estimate`, `total_calories`, `active_duration_seconds`) for efficient querying and display.                                                                                                                                             |
+| **FR-013** | The workout detail page shall display a **training intelligence widget section** showing 5–7 key metrics derived from the imported Garmin data: average heart rate, HR zone distribution (stacked bar or pie), training load score, estimated recovery time, VO2max estimate, total calories, and active duration. The widget section shall only appear when Garmin data has been imported for that workout.                                                                                                                                                       |
+| **FR-014** | After a successful Garmin import, the system shall call a lightweight LLM (Gemini Flash or GPT-4o-mini — model choice recorded in §10 open decisions) from a Supabase Edge Function and persist a **structured AI training evaluation**. The LLM response schema (validated with **Zod**) shall contain: `training_summary` (string), `readiness_level` (`low`                                                                                                                                                                                                     | `moderate` | `high`), `next_training_suggestion` (string), `adaptation_warning` (string | null). If the LLM call fails or returns an invalid schema, the system shall store a null evaluation and surface a non-blocking error state in the UI. |
+| **FR-015** | When the computed `recovery_time_hours` from a completed workout's Garmin data conflicts with the `performedAt` of the athlete's **next planned workout**, the system shall display a prominent **adaptation warning** on the completed workout detail page (and optionally on the calendar chip). The warning shall include the conflicting planned workout's title and date.                                                                                                                                                                                     |
+| **FR-016** | The system shall display the **next training suggestion** (from the AI evaluation, FR-014) as an actionable card on the workout detail page. The card shall include a CTA that pre-fills the create workout form with the suggested workout description and the next available date after the computed recovery window.                                                                                                                                                                                                                                            |
 
 ---
-
-<a id="ref-prd-section-8"></a>
 
 ## 8. Non-functional requirements (NFRs)
 
@@ -193,11 +240,9 @@ This subsection records **planned** scope for a fourth iteration. It **does not 
 - **Key screens:** list (index), detail, create/edit form, **calendar (day/week/month)**, **workout detail with training intelligence widgets**, **AI evaluation card**, **adaptation warning**, empty state, error state.
 - **Training intelligence widgets:** Displayed as a dedicated section on the workout detail page when Garmin data is present. Shows avg HR, HR zone distribution (visual bar), training load score, recovery time countdown, VO2max estimate, calories, and active duration. Metrics are presented as cards — prominently sized, not buried in a table.
 - **AI evaluation card:** Four structured sub-sections — Training Summary (prose), Readiness Level (color-coded badge: low/moderate/high), Next Training Suggestion (actionable text + CTA button), Adaptation Warning (highlighted alert if recovery conflict detected).
-- **Design system:** **Tailwind CSS** for layout and tokens; **shadcn/ui** (Radix UI primitives) for accessible component implementation — decision recorded in §16. **Forms** use **React Hook Form** + **Zod** per §10.
+- **Design system:** **Tailwind CSS** for layout and tokens; **shadcn/ui** (Radix UI primitives) for accessible component implementation — decision recorded in §15. **Forms** use **React Hook Form** + **Zod** per §10.
 
 ---
-
-<a id="ref-prd-section-10"></a>
 
 ## 10. Technical approach (fixed stack + open choices)
 
@@ -205,23 +250,21 @@ BaaS platform choice and rationale: _[§18](./PRD.md#ref-prd-section-18)._
 
 ### Decided
 
-| Area             | Decision                                                                                                                                                                                                                                                                                                                                                                |
-| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
-| UI               | **React**                                                                                                                                                                                                                                                                                                                                                               |
-| Language         | **TypeScript**                                                                                                                                                                                                                                                                                                                                                          |
-| Styling          | **Tailwind CSS**                                                                                                                                                                                                                                                                                                                                                        |
-| React framework  | Vite + React SPA                                                                                                                                                                                                                                                                                                                                                        |
-| State            | Local state + **TanStack Query** for server/async state vs minimal global store (**Zustand**) if needed.                                                                                                                                                                                                                                                                |
-| Forms            | **React Hook Form** with **Zod** schemas and **`@hookform/resolvers`** (zod adapter); fields composed with shadcn/ui **Form** primitives. Chosen for **React 19** + Vite SPA: maintained peer support, fewer unnecessary re-renders (uncontrolled registration by default), and alignment with shadcn/ui patterns. Trivial two-field surfaces may use local state only. |
-| Routing          | React Router                                                                                                                                                                                                                                                                                                                                                            |
-| API              | REST with **OpenAPI** contract                                                                                                                                                                                                                                                                                                                                          |
-| Testing          | **Vitest** + React Testing Library; **Playwright** for critical E2E after the write path (see [§12.1](./PRD.md#ref-prd-section-testing)).                                                                                                                                                                                                                               |
-| Auth             | **Supabase Auth** — JWT (access token + refresh token). Role stored as `role` custom claim (`athlete`                                                                                                                                                                                                                                                                   | `admin`). |
-| BaaS / backend   | **Supabase** (BaaS) — PostgreSQL + PostgREST (REST + OpenAPI) + Edge Functions + Auth; full rationale in [§18](./PRD.md#ref-prd-section-18).                                                                                                                                                                                                                            |
-| API URL pattern  | **Edge Functions as gateway** — SPA calls `/api/v1/`\* via Supabase Edge Functions; PostgREST (`/rest/v1/`) is used server-side only.                                                                                                                                                                                                                                   |
-| TypeScript types | Generated from Supabase schema via `supabase gen types typescript`; committed to `src/types/supabase.ts`.                                                                                                                                                                                                                                                               |
-
-<a id="ref-prd-workout-type-extensibility"></a>
+| Area             | Decision                                                                                                                                                                                                                                                                                                                                                                  |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
+| UI               | **React**                                                                                                                                                                                                                                                                                                                                                                 |
+| Language         | **TypeScript**                                                                                                                                                                                                                                                                                                                                                            |
+| Styling          | **Tailwind CSS**                                                                                                                                                                                                                                                                                                                                                          |
+| React framework  | Vite + React SPA                                                                                                                                                                                                                                                                                                                                                          |
+| State            | Local state + **TanStack Query** for server/async state vs minimal global store (**Zustand**) if needed.                                                                                                                                                                                                                                                                  |
+| Forms            | **React Hook Form** with **Zod** schemas and `**@hookform/resolvers`** (zod adapter); fields composed with shadcn/ui **Form** primitives. Chosen for **React 19\*\* + Vite SPA: maintained peer support, fewer unnecessary re-renders (uncontrolled registration by default), and alignment with shadcn/ui patterns. Trivial two-field surfaces may use local state only. |
+| Routing          | React Router                                                                                                                                                                                                                                                                                                                                                              |
+| API              | REST with **OpenAPI** contract                                                                                                                                                                                                                                                                                                                                            |
+| Testing          | **Vitest** + React Testing Library; **Playwright** for critical E2E after the write path (see [§12.1](./PRD.md#ref-prd-section-testing)).                                                                                                                                                                                                                                 |
+| Auth             | **Supabase Auth** — JWT (access token + refresh token). Role stored as `role` custom claim (`athlete`                                                                                                                                                                                                                                                                     | `admin`). |
+| BaaS / backend   | **Supabase** (BaaS) — PostgreSQL + PostgREST (REST + OpenAPI) + Edge Functions + Auth; full rationale in [§18](./PRD.md#ref-prd-section-18).                                                                                                                                                                                                                              |
+| API URL pattern  | **Edge Functions as gateway** — SPA calls `/api/v1/` via Supabase Edge Functions; PostgREST (`/rest/v1/`) is used server-side only.                                                                                                                                                                                                                                       |
+| TypeScript types | Generated from Supabase schema via `supabase gen types typescript`; committed to `src/types/supabase.ts`.                                                                                                                                                                                                                                                                 |
 
 ### Workout type extensibility (iteration 2+)
 
@@ -274,8 +317,6 @@ Intent in this PRD is captured here; **as-built** design lives in [docs/ARCHITEC
 | **M3 — Write path** | Create + edit + delete per permissions; validation UX complete.                                                                                                                                             |
 | **M4 — Hardening**  | A11y pass on primary flows; automated SPA tests green in CI when a pipeline exists; Playwright smoke (post–write path) green; deployment story documented; manual Supabase/RLS checks documented per §12.1. |
 
-<a id="ref-prd-section-testing"></a>
-
 ### Testing and verification (MVP)
 
 This subsection defines **what “tested enough for MVP” means**: required tooling, **minimum automated coverage**, **manual backend verification**, and **definitions**. It is **requirements documentation only** — implementation details and file paths may be recorded in [docs/ARCHITECTURE.md](ARCHITECTURE.md) when the codebase exists.
@@ -292,7 +333,7 @@ This subsection defines **what “tested enough for MVP” means**: required too
 | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **TR-001** | The SPA shall use **Vitest** and **React Testing Library** as the default automated test stack for unit and component/integration-style tests.                                                                                                                                                                                                                                      |
 | **TR-002** | Automated tests shall cover **workout validation** (e.g. Zod schemas aligned with API fields: required properties, `type` enum, dates, numeric bounds) and **standard API error shape** handling (`{ "error": { "code", "message", "details" } }`).                                                                                                                                 |
-| **TR-003** | Automated tests shall cover the **HTTP client** behaviour relevant to MVP: correct `/api/v1/` usage, **`Authorization: Bearer`** on authenticated calls, and parsing of success and error responses (using **mocks** — no production Supabase or OpenAI in unit/component test runs).                                                                                               |
+| **TR-003** | Automated tests shall cover the **HTTP client** behaviour relevant to MVP: correct `/api/v1/` usage, `**Authorization: Bearer`** on authenticated calls, and parsing of success and error responses (using **mocks\*\* — no production Supabase or OpenAI in unit/component test runs).                                                                                             |
 | **TR-004** | Automated **UI tests** shall exercise **primary flows** with **mocked** auth session and **mocked** API: unauthenticated users cannot access protected views; **list** and **detail** show loading, empty, and error states as designed; **create/edit** surfaces show validation feedback and invoke create/update with valid payloads.                                            |
 | **TR-005** | **Playwright** shall run at least **one smoke end-to-end spec** after **M3 (write path)** is implemented: **sign-in** → **create workout** → **workout appears in list** (extend with **edit/delete** when low cost). E2E runs against **local Supabase with seed data** or a **documented staging** project — **deterministic** test data, **no** live OpenAI calls in CI for MVP. |
 | **TR-006** | **AI workout generation** (**FR-007**, `POST /api/v1/ai/workouts/generate`): automated tests shall use a **mocked LLM/HTTP response** only; **secrets** stay out of client bundles (**NFR-004**) and **CI must not depend** on a paid or rate-limited live model for MVP gates.                                                                                                     |
@@ -381,53 +422,6 @@ This subsection defines **what “tested enough for MVP” means**: required too
 
 ---
 
-## In scope — iteration 5 (BJJ Extension)
-
-This subsection records **planned** scope for the fifth iteration. It **does not remove** prior requirements; it **adds** Brazilian Jiu-Jitsu as a first-class training modality. Details are fully specified in [docs/ARCHITECTURE.md](ARCHITECTURE.md).
-
-### Goals
-
-- **G-BJJ-1:** Athletes who cross-train BJJ can log structured sessions using a section-based model.
-- **G-BJJ-2:** Admins can maintain a curated BJJ technique library with YouTube video references.
-- **G-BJJ-3:** The AI coach can enhance section descriptions by matching logged text to known techniques.
-- **G-BJJ-4:** BJJ workouts appear in the existing workout list and training calendar without breaking CrossFit flows.
-
-### In scope
-
-- `workouts.type` extended to include `'bjj'` (DB constraint + TypeScript union + Zod enum).
-- Three new DB tables: `bjj_techniques` (admin-managed catalog), `bjj_sections` (per-workout sections), `bjj_section_techniques` (section-to-technique junction). Full RLS on all three.
-- Admin UI at `/admin/bjj-techniques` for technique CRUD (name, description, category, youtube_url); role-guarded.
-- Two-step workout creation: step-1 type picker at `/workouts/new` → existing CrossFit form (unchanged) or new BJJ form.
-- `BJJWorkoutFormPage` at `/bjj/new` with dynamic section list (React Hook Form `useFieldArray`); `TechniqueSearch` combobox per section.
-- Atomic BJJ workout save via PostgreSQL RPC `bjj_create_workout` — no partial inserts.
-- `bjj-section-ai` Supabase Edge Function: opt-in per-section AI enhancement (ILIKE technique retrieval + GPT-4o-mini); mock fallback for local dev.
-- Workout detail page extended to render BJJ sections when `workout.type === 'bjj'` (discriminated render, separate `BJJWorkoutDetail` component).
-- `WorkoutListPage` type filter extended to include `'bjj'`.
-- Calendar integration: BJJ workouts appear automatically (no calendar logic changes required).
-- PRD, PRODUCT.md, and ARCHITECTURE.md updated as Phase 0 prerequisite.
-
-### Out of scope (this iteration)
-
-- pgvector / semantic search — ILIKE with trigram index is sufficient for MVP technique retrieval.
-- YouTube playlist bulk-seeding of techniques — admin manual entry only.
-- Garmin integration for BJJ sessions — Garmin does not produce structured BJJ session data.
-- BJJ workout editing (`/bjj/:id/edit`) — create-only for MVP.
-- AI chat (`/ai`) extended with BJJ suggestions.
-- Public BJJ WOD library (analogous to `public_wods`).
-- Mobile-specific optimizations.
-- BJJ training evaluations / readiness scoring.
-
-### Key NFRs (BJJ-specific)
-
-| ID              | Requirement                                                                                                                                                                                                                                |
-| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **NFR-BJJ-001** | **Atomic save** — BJJ workout insertion (workout + sections + technique links) MUST be wrapped in a single PostgreSQL transaction via `bjj_create_workout` RPC. Sequential PostgREST calls from the client are not acceptable.             |
-| **NFR-BJJ-002** | **RLS ownership** — `bjj_sections` and `bjj_section_techniques` MUST enforce row-level ownership via a JOIN through `workouts.user_id = auth.uid()`. `bjj_techniques` SELECT is open to `authenticated`; writes are admin-only.            |
-| **NFR-BJJ-003** | **Opt-in AI** — The `bjj-section-ai` Edge Function MUST NOT be called automatically on form submit or page load. It is only invoked by explicit user action (button click). AI latency must never block data persistence.                  |
-| **NFR-BJJ-004** | **Zero regression** — The CrossFit/functional workout creation, editing, and display paths MUST remain functionally identical after this iteration. A Playwright smoke test must pass end-to-end for both CrossFit and BJJ creation flows. |
-
----
-
 ## 13. Risks, assumptions, dependencies
 
 | Type           | Item                                                                                                                                                                                                                                                                                                              |
@@ -451,7 +445,7 @@ This subsection records **planned** scope for the fifth iteration. It **does not
 
 ---
 
-## 16. Component library decision (MVP)
+## 15. Component library decision (MVP)
 
 ### Decision
 
@@ -473,7 +467,7 @@ This subsection records **planned** scope for the fifth iteration. It **does not
 ### Implementation guidelines
 
 - Use **shadcn/ui** as the base component layer.
-- Use **React Hook Form** + **Zod** + **`@hookform/resolvers`** with shadcn/ui **Form** components for create/edit and other non-trivial forms (see §10). Prefer **`register`** for native inputs; use **`Controller`** when a control cannot forward a ref. Very small forms may omit RHF in favor of local state.
+- Use **React Hook Form** + **Zod** + `**@hookform/resolvers`** with shadcn/ui **Form** components for create/edit and other non-trivial forms (see §10). Prefer `**register`** for native inputs; use `**Controller**` when a control cannot forward a ref. Very small forms may omit RHF in favor of local state.
 - Use **Radix primitives** for:
   - Dialogs (modals)
   - Dropdown menus
@@ -503,7 +497,7 @@ This subsection records **planned** scope for the fifth iteration. It **does not
 
 ---
 
-## 15. Appendix (optional)
+## 16. Appendix (optional)
 
 - Glossary: **Workout record** — a single entry representing one **training session** (workout): exercise or session type, when it happened, duration or load, and optional notes—**not** a workplace training course or HR certification.
 
@@ -600,7 +594,7 @@ This subsection records **planned** scope for the fifth iteration. It **does not
 {
   "id": "string",
   "title": "string",
-  "type": "crossfit | functional",
+  "type": "crossfit | functional | bjj",
   "performedAt": "ISO8601 datetime",
   "durationMinutes": 0,
   "notes": "string",
@@ -662,8 +656,6 @@ All errors should follow:
 
 ---
 
-<a id="ref-prd-section-18"></a>
-
 ## 18. BaaS / backend platform decision (MVP)
 
 ### Decision
@@ -680,7 +672,7 @@ All errors should follow:
 
 - The MVP requires a **REST API with an OpenAPI 3.x contract**. **PostgREST** exposes an auto-generated REST surface and OpenAPI spec from the database schema.
 - **Relational PostgreSQL** matches structured workout fields and supports **future analytics** and **wearable-derived structured data** (for example heart rate and zones) better than a document-only store.
-- **Edge Functions** implement `POST /api/v1/ai/workouts/generate` and the **Edge gateway** pattern (SPA → `/api/v1/`\*, PostgREST `/rest/v1/` server-side only), as recorded in §10 and §17.
+- **Edge Functions** implement `POST /api/v1/ai/workouts/generate` and the **Edge gateway** pattern (SPA → `/api/v1/`, PostgREST `/rest/v1/` server-side only), as recorded in §10 and §17.
 - **Supabase Auth** and **Row Level Security (RLS)** align with the **Athlete** and **Administrator** roles and per-user data isolation.
 
 ### Alternatives considered (summary)
