@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router'
@@ -21,10 +21,10 @@ function makeWorkout(overrides: Partial<Workout> = {}): Workout {
     userId: 'u1',
     title: 'Morning WOD',
     type: 'crossfit',
-    performedAt: '2026-04-15T10:00:00.000Z',
+    performedAt: '2025-06-15T10:00:00.000Z',
     durationMinutes: 45,
-    createdAt: '2026-04-15T10:00:00.000Z',
-    updatedAt: '2026-04-15T10:00:00.000Z',
+    createdAt: '2025-06-15T10:00:00.000Z',
+    updatedAt: '2025-06-15T10:00:00.000Z',
     ...overrides,
   }
 }
@@ -87,5 +87,40 @@ describe('WorkoutChip', () => {
     await user.click(chip)
 
     expect(mockNavigate).toHaveBeenCalledWith('/workouts/xyz-999')
+  })
+
+  describe('planned state (future performedAt)', () => {
+    beforeEach(() => {
+      vi.useFakeTimers()
+      vi.setSystemTime(new Date(2026, 0, 1)) // freeze: Jan 1, 2026
+    })
+
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    it('does NOT render Planned badge for past workout', () => {
+      renderChip(makeWorkout({ performedAt: '2025-06-15T10:00:00.000Z' }))
+      expect(screen.queryByText('Planned')).not.toBeInTheDocument()
+    })
+
+    it('renders Planned badge for future workout', () => {
+      renderChip(makeWorkout({ performedAt: '2026-12-01T10:00:00.000Z' }))
+      expect(screen.getByText('Planned')).toBeInTheDocument()
+    })
+
+    it('applies muted/dashed style classes for future workout', () => {
+      renderChip(makeWorkout({ performedAt: '2026-12-01T10:00:00.000Z' }))
+      const btn = screen.getByRole('button')
+      expect(btn.className).toMatch(/opacity-70/)
+      expect(btn.className).toMatch(/border-dashed/)
+    })
+
+    it('has correct aria-label for planned workout', () => {
+      renderChip(makeWorkout({ performedAt: '2026-12-01T10:00:00.000Z', title: 'Future WOD' }))
+      expect(
+        screen.getByRole('button', { name: 'View planned workout: Future WOD' }),
+      ).toBeInTheDocument()
+    })
   })
 })
