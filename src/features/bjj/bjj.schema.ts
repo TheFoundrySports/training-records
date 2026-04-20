@@ -1,0 +1,48 @@
+import { z } from 'zod'
+
+// ── Canonical category list ──────────────────────────────
+export const BJJ_CATEGORIES = [
+  'guard',
+  'takedown',
+  'submission',
+  'escape',
+  'transition',
+  'other',
+] as const
+
+// ── Technique (admin form) ───────────────────────────────
+export const bjjTechniqueSchema = z.object({
+  name: z.string().min(1, 'Name is required').max(200),
+  description: z.string().max(2000).optional(),
+  category: z.enum(BJJ_CATEGORIES).optional(),
+  youtubeUrl: z.string().url('Must be a valid URL').optional().or(z.literal('')),
+})
+export type BJJTechniqueFormValues = z.infer<typeof bjjTechniqueSchema>
+
+// ── Section (used inside BJJ workout form) ───────────────
+export const bjjSectionSchema = z.object({
+  goal: z.string().min(1, 'Goal is required').max(300),
+  rawDescription: z.string().max(2000).optional(),
+  durationMinutes: z.number().int().min(1).max(300).optional(),
+  /** Array of technique IDs selected via TechniqueSearch */
+  techniqueIds: z.array(z.string().uuid()).default([]),
+})
+export type BJJSectionFormValues = z.infer<typeof bjjSectionSchema>
+
+// ── BJJ Workout form ─────────────────────────────────────
+export const bjjWorkoutSchema = z.object({
+  title: z.string().min(1, 'Title is required').max(200),
+  performedAt: z
+    .string()
+    .transform((val) => {
+      // Reuse existing normalizeDateTime logic
+      if (/[Z+-]\d*(\d{2}:\d{2})?$/.test(val)) return val
+      return val.length === 16 ? `${val}:00.000Z` : `${val}.000Z`
+    })
+    .pipe(z.string().datetime({ message: 'Invalid date' })),
+  durationMinutes: z.number().int().min(1).max(300),
+  notes: z.string().max(2000).optional(),
+  rpe: z.number().int().min(1).max(10).optional(),
+  sections: z.array(bjjSectionSchema).min(1, 'At least one section is required'),
+})
+export type BJJWorkoutFormValues = z.infer<typeof bjjWorkoutSchema>

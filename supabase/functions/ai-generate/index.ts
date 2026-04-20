@@ -21,7 +21,7 @@ function jsonResponse(data: unknown, status = 200) {
 
 interface WorkoutProposal {
   title: string
-  type: 'crossfit' | 'functional'
+  type: 'crossfit' | 'functional' | 'bjj'
   performedAt: string
   durationMinutes: number
   notes: string

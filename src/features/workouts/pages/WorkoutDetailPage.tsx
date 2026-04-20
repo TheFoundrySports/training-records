@@ -18,6 +18,7 @@ import {
 import '../registry/formats/index'
 import { getFormat } from '../registry/index'
 import type { WodFormat } from '../registry/types'
+import { BJJWorkoutDetail } from '@/features/bjj/components/BJJWorkoutDetail'
 import {
   useGarminActivity,
   useTrainingEvaluation,
@@ -123,6 +124,23 @@ export function WorkoutDetailPage() {
   }
 
   if (!workout) return null
+
+  // Discriminated rendering by workout type
+  if (workout.type === 'bjj') {
+    return (
+      <div className="container mx-auto px-4 py-8 max-w-2xl">
+        <Button
+          variant="outline"
+          onClick={() => void navigate('/workouts')}
+          className="mb-6"
+          aria-label="Back to workouts"
+        >
+          &larr; Back to workouts
+        </Button>
+        <BJJWorkoutDetail workoutId={workout.id} workout={workout} />
+      </div>
+    )
+  }
 
   const isOwner = workout.userId === user?.id
 

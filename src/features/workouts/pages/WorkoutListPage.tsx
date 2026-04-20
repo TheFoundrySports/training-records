@@ -1,9 +1,19 @@
+import { useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { useWorkouts } from '../hooks/useWorkouts'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
-import type { Workout } from '../workout.types'
+import type { Workout, WorkoutType } from '../workout.types'
+
+type FilterType = 'all' | WorkoutType
+
+const FILTER_OPTIONS: { label: string; value: FilterType }[] = [
+  { label: 'All', value: 'all' },
+  { label: 'CrossFit', value: 'crossfit' },
+  { label: 'Functional', value: 'functional' },
+  { label: 'BJJ', value: 'bjj' },
+]
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString(undefined, {
@@ -37,11 +47,29 @@ function LoadingSkeleton() {
   return (
     <div role="status" aria-label="Loading workouts" className="space-y-3">
       {[1, 2, 3].map((i) => (
-        <div
-          key={i}
-          className="h-20 rounded-xl bg-muted animate-pulse"
-          aria-hidden="true"
-        />
+        <div key={i} className="h-20 rounded-xl bg-muted animate-pulse" aria-hidden="true" />
+      ))}
+    </div>
+  )
+}
+
+function TypeFilter({ value, onChange }: { value: FilterType; onChange: (v: FilterType) => void }) {
+  return (
+    <div role="group" aria-label="Filter workouts by type" className="flex flex-wrap gap-1 mb-6">
+      {FILTER_OPTIONS.map((opt) => (
+        <button
+          key={opt.value}
+          type="button"
+          onClick={() => onChange(opt.value)}
+          aria-pressed={value === opt.value}
+          className={`px-3 py-1 rounded-full text-sm border transition-colors ${
+            value === opt.value
+              ? 'bg-primary text-primary-foreground border-primary'
+              : 'border-input hover:bg-accent'
+          }`}
+        >
+          {opt.label}
+        </button>
       ))}
     </div>
   )
@@ -49,7 +77,8 @@ function LoadingSkeleton() {
 
 export function WorkoutListPage() {
   const navigate = useNavigate()
-  const { data: workouts, isLoading, isError, error } = useWorkouts()
+  const [filter, setFilter] = useState<FilterType>('all')
+  const { data: workouts, isLoading, isError, error } = useWorkouts({ type: filter })
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl">
@@ -58,13 +87,19 @@ export function WorkoutListPage() {
         <Button onClick={() => void navigate('/workouts/new')}>Log workout</Button>
       </div>
 
+      <TypeFilter value={filter} onChange={setFilter} />
+
       {isLoading && <LoadingSkeleton />}
 
       {isError && (
-        <div role="alert" className="rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-destructive">
+        <div
+          role="alert"
+          className="rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-destructive"
+        >
           <p className="font-medium">Failed to load workouts</p>
           <p className="text-sm mt-1 text-destructive/80">
-            {(error as { error?: { message?: string } })?.error?.message ?? 'An unexpected error occurred. Please try again.'}
+            {(error as { error?: { message?: string } })?.error?.message ??
+              'An unexpected error occurred. Please try again.'}
           </p>
         </div>
       )}
