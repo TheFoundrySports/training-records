@@ -1,6 +1,6 @@
 import '../registry/formats/index'
 import { useEffect, useState } from 'react'
-import { useParams, useNavigate } from 'react-router'
+import { useParams, useNavigate, useLocation } from 'react-router'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { workoutSchema, type WorkoutFormValues } from '../workout.schema'
@@ -30,6 +30,7 @@ import {
 export function WorkoutFormPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const location = useLocation()
   const isEdit = Boolean(id)
 
   const { data: existing, isLoading: loadingExisting } = useWorkout(id ?? '')
@@ -88,6 +89,15 @@ export function WorkoutFormPage() {
       })
     }
   }, [isEdit, existing, form])
+
+  // Pre-fill form from AI navigation state (create mode only)
+  useEffect(() => {
+    const prefill = (location.state as { prefill?: WorkoutFormValues } | null)?.prefill
+    if (!isEdit && prefill) {
+      form.reset(prefill)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // run once on mount only — location.state is stable
 
   async function onSubmit(values: WorkoutFormValues) {
     // Validate WOD payload if a format is selected

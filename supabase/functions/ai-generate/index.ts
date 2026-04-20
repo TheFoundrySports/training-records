@@ -6,17 +6,17 @@ const corsHeaders = {
 }
 
 function errorResponse(code: string, message: string, status: number, details: unknown = {}) {
-  return new Response(
-    JSON.stringify({ error: { code, message, details } }),
-    { status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-  )
+  return new Response(JSON.stringify({ error: { code, message, details } }), {
+    status,
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+  })
 }
 
 function jsonResponse(data: unknown, status = 200) {
-  return new Response(
-    JSON.stringify(data),
-    { status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-  )
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+  })
 }
 
 interface WorkoutProposal {
@@ -26,6 +26,8 @@ interface WorkoutProposal {
   durationMinutes: number
   notes: string
   rpe: number
+  wodFormat?: 'amrap' | 'for_time' | 'emom' | 'tabata' | 'ladder' | 'rft'
+  wodText?: string
 }
 
 Deno.serve(async (req) => {
@@ -51,14 +53,17 @@ Deno.serve(async (req) => {
     global: { headers: { Authorization: authHeader } },
   })
 
-  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser()
   if (authError || !user) {
     return errorResponse('UNAUTHORIZED', 'Invalid or expired token', 401)
   }
 
   let prompt: string
   try {
-    const body = await req.json() as { prompt?: string }
+    const body = (await req.json()) as { prompt?: string }
     prompt = body.prompt ?? ''
   } catch {
     return errorResponse('BAD_REQUEST', 'Invalid JSON body', 400)
@@ -79,6 +84,8 @@ Deno.serve(async (req) => {
       durationMinutes: 45,
       notes: `Generated from prompt: ${prompt}`,
       rpe: 7,
+      wodFormat: 'amrap',
+      wodText: `20 min AMRAP: 10 pull-ups, 20 push-ups, 30 air squats. Generated from: ${prompt}`,
     }
     return jsonResponse(mockWorkout)
   }
@@ -91,15 +98,17 @@ Return ONLY a JSON object with these fields:
 - type: "crossfit" | "functional"
 - performedAt: ISO8601 datetime string (today's date and time)
 - durationMinutes: number (integer 1-300)
-- notes: string (workout description with exercises, reps, sets)
+- notes: string (brief coach notes or context)
 - rpe: number (integer 1-10, expected perceived exertion)
+- wodFormat: one of "amrap" | "for_time" | "emom" | "tabata" | "ladder" | "rft" or omit if unclear
+- wodText: string (full human-readable workout description with exercises, reps, sets, weights)
 
 Do not include any explanation, only the JSON object.`
 
     const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${openaiApiKey}`,
+        Authorization: `Bearer ${openaiApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -118,7 +127,7 @@ Do not include any explanation, only the JSON object.`
       return errorResponse('AI_ERROR', `OpenAI API error: ${openaiResponse.status}`, 502, err)
     }
 
-    const openaiData = await openaiResponse.json() as {
+    const openaiData = (await openaiResponse.json()) as {
       choices: Array<{ message: { content: string } }>
     }
 

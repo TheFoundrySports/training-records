@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { WorkoutFormPage } from './WorkoutFormPage'
 import type { useCreateWorkout, useUpdateWorkout } from '../hooks/useWorkoutMutations'
 import type { useWorkout } from '../hooks/useWorkouts'
+import type { WorkoutFormValues } from '../workout.schema'
 
 // Mock mutation hooks
 vi.mock('../hooks/useWorkoutMutations', () => ({
@@ -83,6 +84,31 @@ function renderCreate() {
       </MemoryRouter>
     </QueryClientProvider>,
   )
+}
+
+function renderCreateWithPrefill(prefill: WorkoutFormValues) {
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <MemoryRouter initialEntries={[{ pathname: '/workouts/new', state: { prefill } }]}>
+        <Routes>
+          <Route path="/workouts/new" element={<WorkoutFormPage />} />
+          <Route path="/workouts" element={<div>Workouts list</div>} />
+        </Routes>
+      </MemoryRouter>
+    </QueryClientProvider>,
+  )
+}
+
+const samplePrefill: WorkoutFormValues = {
+  title: 'AI Generated WOD',
+  type: 'crossfit',
+  performedAt: '2026-04-15T10:00',
+  durationMinutes: 45,
+  notes: 'Generated from prompt',
+  rpe: 7,
+  wodFormat: 'amrap',
+  wodText: '20 min AMRAP: 10 pull-ups, 20 push-ups',
 }
 
 describe('WorkoutFormPage (create mode)', () => {
@@ -296,6 +322,18 @@ describe('WorkoutFormPage (create mode)', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('wod-form-section-amrap-payload')).toBeInTheDocument()
+    })
+  })
+
+  it('pre-fills form fields from location.state.prefill', async () => {
+    renderCreateWithPrefill(samplePrefill)
+
+    await waitFor(() => {
+      expect(screen.getByLabelText(/title/i)).toHaveValue('AI Generated WOD')
+      expect(screen.getByLabelText(/duration/i)).toHaveValue(45)
+      expect(screen.getByLabelText(/wod text/i)).toHaveValue(
+        '20 min AMRAP: 10 pull-ups, 20 push-ups',
+      )
     })
   })
 })
