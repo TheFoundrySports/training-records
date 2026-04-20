@@ -8,7 +8,10 @@ function toSnakeCase(input: CreateExerciseInput | UpdateExerciseInput): Record<s
   if ('name' in input && input.name !== undefined) body.name = input.name
   if ('description' in input && input.description !== undefined)
     body.description = input.description
-  if ('categoryId' in input && input.categoryId !== undefined) body.category_id = input.categoryId
+  if ('categoryId' in input && input.categoryId !== undefined) {
+    // Empty string is not a valid uuid; omit clears optional category, null clears on update.
+    body.category_id = input.categoryId.trim() === '' ? null : input.categoryId
+  }
   if ('movementType' in input && input.movementType !== undefined)
     body.movement_type = input.movementType
   if ('measurementType' in input && input.measurementType !== undefined)

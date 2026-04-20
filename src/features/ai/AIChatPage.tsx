@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router'
 import { useGenerateWorkout } from './useGenerateWorkout'
-import { useCreateWorkout } from '@/features/workouts/hooks/useWorkoutMutations'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -12,12 +11,10 @@ function ProposalCard({
   proposal,
   onSave,
   onDiscard,
-  isSaving,
 }: {
   proposal: WorkoutProposal
   onSave: () => void
   onDiscard: () => void
-  isSaving: boolean
 }) {
   return (
     <Card className="mt-6">
@@ -47,10 +44,8 @@ function ProposalCard({
           </div>
         )}
         <div className="flex gap-3 pt-2">
-          <Button onClick={onSave} disabled={isSaving}>
-            {isSaving ? 'Saving…' : 'Save workout'}
-          </Button>
-          <Button variant="outline" onClick={onDiscard} disabled={isSaving}>
+          <Button onClick={onSave}>Save workout</Button>
+          <Button variant="outline" onClick={onDiscard}>
             Try again
           </Button>
         </div>
@@ -65,13 +60,9 @@ export function AIChatPage() {
   const [proposal, setProposal] = useState<WorkoutProposal | null>(null)
 
   const generateMutation = useGenerateWorkout()
-  const createMutation = useCreateWorkout()
 
-  const generateError =
-    (generateMutation.error as { error?: { message?: string } } | null)?.error?.message
-
-  const createError =
-    (createMutation.error as { error?: { message?: string } } | null)?.error?.message
+  const generateError = (generateMutation.error as { error?: { message?: string } } | null)?.error
+    ?.message
 
   async function handleGenerate() {
     if (!prompt.trim()) return
@@ -79,16 +70,18 @@ export function AIChatPage() {
     setProposal(result)
   }
 
-  async function handleSave() {
+  function handleSave() {
     if (!proposal) return
-    await createMutation.mutateAsync(proposal)
-    void navigate('/workouts')
+    const prefill: WorkoutProposal = {
+      ...proposal,
+      performedAt: proposal.performedAt.slice(0, 16),
+    }
+    void navigate('/workouts/new', { state: { prefill } })
   }
 
   function handleDiscard() {
     setProposal(null)
     generateMutation.reset()
-    createMutation.reset()
     setPrompt('')
   }
 
@@ -99,9 +92,12 @@ export function AIChatPage() {
         Describe the workout you want to do and AI will generate a structured workout for you.
       </p>
 
-      {(generateError || createError) && (
-        <div role="alert" className="mb-4 rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-destructive text-sm">
-          {generateError ?? createError}
+      {generateError && (
+        <div
+          role="alert"
+          className="mb-4 rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-destructive text-sm"
+        >
+          {generateError}
         </div>
       )}
 
@@ -123,12 +119,7 @@ export function AIChatPage() {
       </div>
 
       {proposal && (
-        <ProposalCard
-          proposal={proposal}
-          onSave={() => void handleSave()}
-          onDiscard={handleDiscard}
-          isSaving={createMutation.isPending}
-        />
+        <ProposalCard proposal={proposal} onSave={handleSave} onDiscard={handleDiscard} />
       )}
     </div>
   )

@@ -5,27 +5,17 @@ import { MemoryRouter, Route, Routes } from 'react-router'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AIChatPage } from './AIChatPage'
 import type { useGenerateWorkout } from './useGenerateWorkout'
-import type { useCreateWorkout } from '@/features/workouts/hooks/useWorkoutMutations'
 import type { WorkoutProposal } from './useGenerateWorkout'
 
 vi.mock('./useGenerateWorkout', () => ({
   useGenerateWorkout: vi.fn(),
 }))
 
-vi.mock('@/features/workouts/hooks/useWorkoutMutations', () => ({
-  useCreateWorkout: vi.fn(),
-  useUpdateWorkout: vi.fn(),
-  useDeleteWorkout: vi.fn(),
-}))
-
 import { useGenerateWorkout as useGenerateMock } from './useGenerateWorkout'
-import { useCreateWorkout as useCreateMock } from '@/features/workouts/hooks/useWorkoutMutations'
 
 const mockGenerate = vi.mocked(useGenerateMock)
-const mockCreate = vi.mocked(useCreateMock)
 
 type GenerateResult = ReturnType<typeof useGenerateWorkout>
-type CreateResult = ReturnType<typeof useCreateWorkout>
 
 function makeGenerateMutation(overrides: Partial<GenerateResult> = {}): GenerateResult {
   return {
@@ -36,17 +26,6 @@ function makeGenerateMutation(overrides: Partial<GenerateResult> = {}): Generate
     reset: vi.fn(),
     ...overrides,
   } as unknown as GenerateResult
-}
-
-function makeCreateMutation(overrides: Partial<CreateResult> = {}): CreateResult {
-  return {
-    mutateAsync: vi.fn().mockResolvedValue({}),
-    isPending: false,
-    isError: false,
-    error: null,
-    reset: vi.fn(),
-    ...overrides,
-  } as unknown as CreateResult
 }
 
 const sampleProposal: WorkoutProposal = {
@@ -66,16 +45,16 @@ function renderPage() {
         <Routes>
           <Route path="/ai" element={<AIChatPage />} />
           <Route path="/workouts" element={<div>Workouts list</div>} />
+          <Route path="/workouts/new" element={<div>Workout form</div>} />
         </Routes>
       </MemoryRouter>
-    </QueryClientProvider>
+    </QueryClientProvider>,
   )
 }
 
 describe('AIChatPage', () => {
   beforeEach(() => {
     mockGenerate.mockReturnValue(makeGenerateMutation())
-    mockCreate.mockReturnValue(makeCreateMutation())
   })
 
   it('renders the prompt textarea and Generate button', () => {
@@ -137,12 +116,10 @@ describe('AIChatPage', () => {
     })
   })
 
-  it('calls createWorkout and navigates to /workouts when saving proposal', async () => {
+  it('navigates to /workouts/new with prefill state when saving proposal', async () => {
     const user = userEvent.setup()
     const mutateAsync = vi.fn().mockResolvedValue(sampleProposal)
-    const createMutateAsync = vi.fn().mockResolvedValue({})
     mockGenerate.mockReturnValue(makeGenerateMutation({ mutateAsync }))
-    mockCreate.mockReturnValue(makeCreateMutation({ mutateAsync: createMutateAsync }))
     renderPage()
 
     await user.type(screen.getByRole('textbox', { name: /workout prompt/i }), 'crossfit workout')
@@ -152,11 +129,7 @@ describe('AIChatPage', () => {
     await user.click(screen.getByRole('button', { name: /save workout/i }))
 
     await waitFor(() => {
-      expect(createMutateAsync).toHaveBeenCalledWith(sampleProposal)
-    })
-
-    await waitFor(() => {
-      expect(screen.getByText('Workouts list')).toBeInTheDocument()
+      expect(screen.getByText('Workout form')).toBeInTheDocument()
     })
   })
 
@@ -181,7 +154,7 @@ describe('AIChatPage', () => {
       makeGenerateMutation({
         error: { error: { code: 'AI_ERROR', message: 'OpenAI API error' } } as unknown as Error,
         isError: true,
-      })
+      }),
     )
     renderPage()
 
