@@ -1,7 +1,12 @@
 ---
-description: Create or update a feature spec in docs/features/
-disable-model-invocation: true
-argument-hint: "<feature-name>"
+name: document-feature
+description: >
+  Create or update a feature spec in docs/features/.
+  Trigger: When user wants to document a specific feature.
+license: MIT
+metadata:
+  author: gentleman-programming
+  version: "1.0"
 ---
 
 # Document Feature Workflow

@@ -1,7 +1,12 @@
 ---
-description: Review changes and prepare for merge request
-disable-model-invocation: true
-argument-hint: "[#ticket] [!pr]"
+name: review
+description: >
+  Review changes and prepare for merge request.
+  Trigger: When user wants to review code before creating an MR.
+license: MIT
+metadata:
+  author: gentleman-programming
+  version: "1.0"
 ---
 
 # Code Review Workflow

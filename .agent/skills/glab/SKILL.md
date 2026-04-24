@@ -1,5 +1,8 @@
 ---
-description: Use GitLab CLI (glab) to manage merge requests, issues, and CI/CD
+name: glab
+description: >
+  Use GitLab CLI (glab) to manage merge requests, issues, and CI/CD.
+  Trigger: When user wants to manage GitLab MRs, issues, or pipelines.
 ---
 
 # GitLab CLI (glab)

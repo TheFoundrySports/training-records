@@ -1,1 +1,1 @@
-../../../../.agent/workflows/document-feature.md
+../../../.agent/workflows/document-feature.md

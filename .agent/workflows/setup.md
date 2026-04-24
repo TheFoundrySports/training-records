@@ -1,6 +1,12 @@
 ---
-description: Interactive setup wizard to configure agent context and copy templates to user environment
-disable-model-invocation: true
+name: setup
+description: >
+  Interactive setup wizard to configure agent context and copy templates.
+  Trigger: When user wants to set up a new project or environment.
+license: MIT
+metadata:
+  author: gentleman-programming
+  version: "1.0"
 ---
 
 # Setup Workflow

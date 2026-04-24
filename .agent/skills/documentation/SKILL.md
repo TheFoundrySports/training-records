@@ -1,5 +1,8 @@
 ---
-description: Expert knowledge for writing, reviewing, and maintaining project documentation in docs/
+name: documentation
+description: >
+  Expert knowledge for writing, reviewing, and maintaining project documentation in docs/.
+  Trigger: When user wants to write or update project documentation.
 ---
 
 # Documentation Skill

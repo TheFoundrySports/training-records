@@ -1,1 +1,1 @@
-../../../../.agent/workflows/create-mr.md
+../../../.agent/workflows/create-mr.md

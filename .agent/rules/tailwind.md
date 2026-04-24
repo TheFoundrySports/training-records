@@ -1,9 +1,9 @@
 ---
-description: Tailwind CSS styling rules — utility classes, BEM naming, mobile-first approach.
-globs: "**/*.html, **/*.twig, **/*.vue, **/*.tsx, **/*.jsx, **/*.css"
-alwaysApply: false
-paths:
-  - "**/*.html"
+name: tailwind
+description: >
+  Tailwind CSS styling rules - utility classes, BEM naming, mobile-first approach.
+  Applies to Tailwind files.
+---
   - "**/*.twig"
   - "**/*.vue"
   - "**/*.tsx"

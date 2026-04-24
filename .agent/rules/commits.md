@@ -1,6 +1,8 @@
 ---
-description: Git commit message format — include ticket number, consistent style, branch check.
-alwaysApply: true
+name: commits
+description: >
+  Git commit message format - include ticket number, consistent style, branch check.
+  Always applies to all commits.
 ---
 
 # Commit Rules
@@ -14,3 +16,9 @@ alwaysApply: true
 - Always use context from the current branch, MR, or issue when crafting commit messages
 - Always check previous commits to ensure consistency in style and format before writing a new commit message
 - Always run `git branch --show-current` to verify the active branch matches the intended feature branch before committing
+
+## Push
+
+- NEVER push before the user confirms the fix works.
+- Workflow is always: **fix → tests pass (green) → user confirms → commit → push**
+- If a fix needs multiple iterations, commit only after the final confirmation

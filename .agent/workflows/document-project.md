@@ -1,6 +1,12 @@
 ---
-description: Re-document the project based on recent changes — updates stale docs sections without a full re-interview
-disable-model-invocation: true
+name: document-project
+description: >
+  Re-document the project based on recent changes - updates stale docs.
+  Trigger: When user wants to update project documentation.
+license: MIT
+metadata:
+  author: gentleman-programming
+  version: "1.0"
 ---
 
 # Document Project Workflow

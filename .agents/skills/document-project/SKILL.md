@@ -1,1 +1,1 @@
-../../../../.agent/workflows/document-project.md
+../../../.agent/workflows/document-project.md

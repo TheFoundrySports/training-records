@@ -1,5 +1,8 @@
 ---
-description: Use GitHub CLI (gh) to manage pull requests, issues, and Actions
+name: gh
+description: >
+  Use GitHub CLI (gh) to manage pull requests, issues, and Actions.
+  Trigger: When user wants to manage GitHub PRs, issues, or workflows.
 ---
 
 # GitHub CLI (gh)
