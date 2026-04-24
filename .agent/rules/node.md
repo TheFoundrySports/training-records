@@ -1,9 +1,8 @@
 ---
-description: Node.js version management — use nvm and respect .nvmrc before running npm commands.
-globs: "package.json, .nvmrc, **/*.js, **/*.ts, **/*.mjs, **/*.cjs"
-alwaysApply: false
-paths:
-  - "package.json"
+name: node
+description: >
+  Node.js version management - use nvm and respect .nvmrc before running npm commands.
+---
   - ".nvmrc"
   - "**/*.js"
   - "**/*.ts"

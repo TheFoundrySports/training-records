@@ -1,9 +1,9 @@
 ---
-description: TypeScript naming conventions — handle/on prefix for events, is prefix for booleans, no any.
-globs: "**/*.ts, **/*.tsx"
-alwaysApply: false
-paths:
-  - "**/*.ts"
+name: typescript
+description: >
+  TypeScript naming conventions - handle/on prefix for events, is prefix for booleans, no any.
+  Applies to TypeScript files.
+---
   - "**/*.tsx"
 ---
 

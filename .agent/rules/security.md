@@ -1,6 +1,8 @@
 ---
-description: Security rules — no secrets or PII in commits, input validation, least privilege.
-alwaysApply: true
+name: security
+description: >
+  Security rules - no secrets or PII in commits, input validation, least privilege.
+  Always applies.
 ---
 
 # Security Rules

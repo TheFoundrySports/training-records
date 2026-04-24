@@ -1,6 +1,7 @@
 ---
-description: Code comment standards — keep comments concise, purposeful, and referenced.
-alwaysApply: true
+name: comments
+description: >
+  Code comment standards - keep comments concise, purposeful, and referenced.
 ---
 
 # Comment Rules

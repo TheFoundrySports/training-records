@@ -1,6 +1,7 @@
 ---
-description: General clean code principles — DRY, separation of concerns, early returns, readability.
-alwaysApply: true
+name: clean-code
+description: >
+  General clean code principles - DRY, separation of concerns, early returns, readability.
 ---
 
 # Clean Code Rules

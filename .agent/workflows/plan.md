@@ -1,7 +1,12 @@
 ---
-description: Create an implementation plan by interviewing the user and analyzing requirements
-disable-model-invocation: true
-argument-hint: "[#ticket]"
+name: plan
+description: >
+  Create an implementation plan by interviewing the user and analyzing requirements.
+  Trigger: When user wants to plan a feature or implementation.
+license: MIT
+metadata:
+  author: gentleman-programming
+  version: "1.0"
 ---
 
 # Planning Workflow

@@ -1,6 +1,8 @@
 ---
-description: Merge/pull request creation standards — no labels, use templates, delete source branch.
-alwaysApply: true
+name: mr-pr
+description: >
+  Merge/pull request creation standards - no labels, use templates, delete source branch.
+  Always applies.
 ---
 
 # MR/PR Rules

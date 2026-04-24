@@ -1,6 +1,8 @@
 ---
-description: Issue and ticket creation standards — use templates, required sections, no labels.
-alwaysApply: true
+name: tickets
+description: >
+  Issue and ticket creation standards - use templates, required sections, no labels.
+  Always applies to ticket creation.
 ---
 
 # Tickets / Issues Rules

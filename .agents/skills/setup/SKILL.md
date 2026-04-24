@@ -1,1 +1,1 @@
-../../../../.agent/workflows/setup.md
+../../../.agent/workflows/setup.md

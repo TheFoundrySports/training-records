@@ -1,6 +1,8 @@
 ---
-description: Rules for collecting user input during interactive workflows using AskUserQuestion.
-alwaysApply: true
+name: interviewing
+description: >
+  Rules for collecting user input during interactive workflows.
+  Always applies.
 ---
 
 # Interviewing Rules

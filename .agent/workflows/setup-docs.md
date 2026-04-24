@@ -1,7 +1,12 @@
 ---
-description: Initial setup of docs/ folder — deep codebase analysis, user interview, and template filling
-disable-model-invocation: true
-template: docs
+name: setup-docs
+description: >
+  Initial setup of docs/ folder - deep codebase analysis and template filling.
+  Trigger: When user wants to document a project from scratch.
+license: MIT
+metadata:
+  author: gentleman-programming
+  version: "1.0"
 ---
 
 # Setup Docs Workflow

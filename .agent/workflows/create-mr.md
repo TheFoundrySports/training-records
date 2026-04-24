@@ -1,7 +1,12 @@
 ---
-description: Create a merge request after ensuring code is committed, reviewed, and pushed
-disable-model-invocation: true
-argument-hint: "[quick]"
+name: create-mr
+description: >
+  Create a merge request after ensuring code is committed, reviewed, and pushed.
+  Trigger: When user wants to create a merge/pull request.
+license: MIT
+metadata:
+  author: gentleman-programming
+  version: "1.0"
 ---
 
 # Merge Request Workflow
