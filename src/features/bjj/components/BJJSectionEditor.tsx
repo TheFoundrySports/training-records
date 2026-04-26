@@ -54,7 +54,7 @@ export function BJJSectionEditor({
   }
 
   return (
-    <Card>
+    <Card className="overflow-visible">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="text-base">Section {index + 1}</CardTitle>
