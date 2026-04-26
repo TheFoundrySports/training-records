@@ -95,6 +95,25 @@ describe('TechniqueSearch — REQ-316, REQ-317', () => {
       expect(mockUseBJJTechniques).toHaveBeenCalledWith({ search: undefined })
     })
 
+    it('shows dropdown on focus without typing', async () => {
+      mockUseBJJTechniques.mockReturnValue({
+        data: sampleTechniques,
+        isLoading: false,
+        error: null,
+      })
+
+      const user = userEvent.setup()
+      renderComponent()
+
+      const input = screen.getByLabelText(/search techniques/i)
+      await user.click(input)
+
+      await waitFor(() => {
+        expect(screen.getByRole('listbox')).toBeInTheDocument()
+        expect(screen.getByText('Closed Guard')).toBeInTheDocument()
+      })
+    })
+
     it('shows matching results when user types a query', async () => {
       mockUseBJJTechniques.mockReturnValue({
         data: sampleTechniques,

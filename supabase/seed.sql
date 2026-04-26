@@ -1078,6 +1078,51 @@ Round 3: 90 Double-unders, 27 Cal Row, 9 Bar Muscle-ups$$,
 )
 on conflict (id) do nothing;
 
+-- ---------------------------------------------------------------------------
+-- Reference data: bjj_techniques
+-- ---------------------------------------------------------------------------
+insert into public.bjj_techniques (name, description, category)
+values
+  -- Takedowns
+  ('Double Leg Takedown',    'Drive through both legs to take opponent to the ground.',                                          'takedown'),
+  ('Single Leg Takedown',    'Secure one leg and finish the takedown by driving forward or lifting.',                            'takedown'),
+  ('Collar Drag',            'Use collar or sleeve grip to pull opponent off-balance and past you.',                             'takedown'),
+  ('Arm Drag',               'Drag opponent''s arm across their body to take their back or shoot in.',                          'takedown'),
+  ('Guard Pull',             'Pull guard deliberately to bring the fight to the ground on your terms.',                         'takedown'),
+  -- Guard passes
+  ('Closed Guard Break',     'Use posture and hip pressure to open the closed guard before passing.',                           'guard_pass'),
+  ('Knee Slide Pass',        'Slide the knee through the guard while controlling the hip to flatten the opponent.',             'guard_pass'),
+  ('Double Under Pass',      'Thread both arms under opponent''s legs and stack to pass.',                                      'guard_pass'),
+  ('Leg Drag Pass',          'Drag one leg to the mat and use shoulder pressure to establish side control.',                    'guard_pass'),
+  ('Toreando Pass',          'Control both ankles and move laterally to pass without committing weight.',                       'guard_pass'),
+  -- Guard retention & guard types
+  ('Basic Guard Retention',  'Use frames, shrimping and hip movement to prevent the pass and recover guard.',                   'guard'),
+  ('Collar and Sleeve Guard','Control collar and sleeve to manage distance and attack with sweeps and submissions.',            'guard'),
+  ('De La Riva Guard',       'Wrap one leg around the outside of opponent''s leg to control posture and sweep.',                'guard'),
+  ('Spider Guard',           'Control both sleeves with feet on biceps to off-balance and sweep.',                              'guard'),
+  ('Lasso Guard',            'Thread one arm through opponent''s sleeve and wrap the leg to create leverage.',                  'guard'),
+  ('Butterfly Guard',        'Hook both feet inside opponent''s thighs to elevate and sweep.',                                  'guard'),
+  ('Half Guard',             'Control one leg between your own to prevent passing and set up sweeps.',                          'guard'),
+  ('Closed Guard',           'Lock both legs around opponent''s waist to control posture and attack.',                         'guard'),
+  ('X Guard',                'Insert under opponent with both hooks on one leg to unbalance and sweep.',                        'guard'),
+  ('Single Leg X Guard',     'Control one leg with a figure-four hook to sweep or transition to leg locks.',                   'guard'),
+  -- Submissions
+  ('Triangle Choke',         'Use legs to create a figure-four around opponent''s neck and arm to choke.',                     'submission'),
+  ('Armbar',                 'Hyperextend opponent''s elbow joint using your hips as a fulcrum.',                               'submission'),
+  ('Kimura',                 'Shoulder lock using a figure-four grip on opponent''s wrist.',                                    'submission'),
+  ('Omoplata',               'Shoulder lock using your leg to rotate opponent''s arm behind their back.',                      'submission'),
+  ('Cross Collar Choke',     'Insert both thumbs into opposite collar lapels and choke from closed guard.',                    'submission'),
+  ('Rear Naked Choke',       'Blood choke applied from the back using the forearm across the throat.',                         'submission'),
+  ('Straight Ankle Lock',    'Control foot and apply pressure to Achilles tendon with forearm.',                               'submission'),
+  -- Escapes
+  ('Mount Escape',           'Use bridge-and-roll or elbow-knee escape to recover guard from bottom mount.',                   'escape'),
+  ('Side Control Escape',    'Use frames and shrimping to recover guard from bottom side control.',                             'escape'),
+  ('Back Escape',            'Turn into opponent and recover guard or take top position from back control.',                   'escape'),
+  ('Triangle Escape',        'Posture up, stack or use hitchhiker mechanics to escape a triangle choke.',                      'escape'),
+  ('Guillotine Escape',      'Pop the head out or take the back to relieve pressure from a guillotine.',                       'escape'),
+  ('Armbar Escape',          'Stack, hitchhiker or roll to escape before full extension is achieved.',                         'escape')
+on conflict (name) do nothing;
+
 -- Sample workout for athlete2 (only inserted if the seed user exists)
 do $do$
 begin

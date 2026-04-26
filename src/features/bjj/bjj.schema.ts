@@ -7,6 +7,7 @@ export const BJJ_CATEGORIES = [
   'submission',
   'escape',
   'transition',
+  'guard_pass',
   'other',
 ] as const
 

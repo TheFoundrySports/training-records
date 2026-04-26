@@ -1,4 +1,4 @@
-export type BJJCategory = 'guard' | 'takedown' | 'submission' | 'escape' | 'transition' | 'other'
+export type BJJCategory = 'guard' | 'takedown' | 'submission' | 'escape' | 'transition' | 'guard_pass' | 'other'
 
 export interface BJJTechnique {
   id: string
