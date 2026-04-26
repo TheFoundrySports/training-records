@@ -88,7 +88,7 @@ export function TechniqueSearch({ selectedIds, onChange, disabled }: TechniqueSe
           aria-label="Search techniques"
           autoComplete="off"
         />
-        {open && query.length > 0 && filteredResults.length > 0 && (
+        {open && filteredResults.length > 0 && (
           <div className="absolute z-50 mt-1 w-full rounded-lg border bg-popover shadow-md">
             <ul
               role="listbox"
@@ -119,7 +119,7 @@ export function TechniqueSearch({ selectedIds, onChange, disabled }: TechniqueSe
             </ul>
           </div>
         )}
-        {open && query.length > 0 && filteredResults.length === 0 && (
+        {open && filteredResults.length === 0 && (
           <div className="absolute z-50 mt-1 w-full rounded-lg border bg-popover shadow-md">
             <p className="px-3 py-2 text-sm text-muted-foreground">No techniques found</p>
           </div>
