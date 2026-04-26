@@ -19,6 +19,13 @@ function jsonResponse(data: unknown, status = 200) {
   })
 }
 
+/** Postgres rejects uuid columns set to "" — treat as null. */
+function normalizeExercisePayload<T extends { category_id?: string | null }>(body: T): T {
+  if (!('category_id' in body) || body.category_id === undefined) return body
+  if (body.category_id === '') return { ...body, category_id: null }
+  return body
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function isAdmin(supabase: any, userId: string): Promise<boolean> {
   const { data } = await supabase.from('profiles').select('role').eq('id', userId).single()
@@ -138,18 +145,20 @@ Deno.serve(async (req) => {
           return errorResponse('FORBIDDEN', 'Admin access required', 403)
         }
 
-        const body = (await req.json()) as {
-          name: string
-          description?: string | null
-          category_id?: string | null
-          movement_type: string
-          measurement_type: string
-          difficulty_level: string
-          equipment?: string[]
-          is_benchmark?: boolean
-          video_url?: string | null
-          scaling_options?: string | null
-        }
+        const body = normalizeExercisePayload(
+          (await req.json()) as {
+            name: string
+            description?: string | null
+            category_id?: string | null
+            movement_type: string
+            measurement_type: string
+            difficulty_level: string
+            equipment?: string[]
+            is_benchmark?: boolean
+            video_url?: string | null
+            scaling_options?: string | null
+          },
+        )
 
         const { data, error } = await supabase.from('exercises').insert(body).select().single()
 
@@ -196,18 +205,20 @@ Deno.serve(async (req) => {
         return errorResponse('FORBIDDEN', 'Admin access required', 403)
       }
 
-      const body = (await req.json()) as {
-        name?: string
-        description?: string | null
-        category_id?: string | null
-        movement_type?: string
-        measurement_type?: string
-        difficulty_level?: string
-        equipment?: string[]
-        is_benchmark?: boolean
-        video_url?: string | null
-        scaling_options?: string | null
-      }
+      const body = normalizeExercisePayload(
+        (await req.json()) as {
+          name?: string
+          description?: string | null
+          category_id?: string | null
+          movement_type?: string
+          measurement_type?: string
+          difficulty_level?: string
+          equipment?: string[]
+          is_benchmark?: boolean
+          video_url?: string | null
+          scaling_options?: string | null
+        },
+      )
 
       const { data, error } = await supabase
         .from('exercises')
