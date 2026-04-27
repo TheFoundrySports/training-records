@@ -1,13 +1,19 @@
 import { useState } from 'react'
-import { useWatch, type Control } from 'react-hook-form'
+import { useWatch, useFormContext, type Control } from 'react-hook-form'
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { TechniqueSearch } from './TechniqueSearch'
+import { AIPreviewPanel } from './AIPreviewPanel'
 import { useBJJSectionAI } from '../hooks/useBJJSectionAI'
 import type { BJJWorkoutFormValues } from '../bjj.schema'
+
+interface AIPreview {
+  ai_description: string
+  matched_technique_ids: string[]
+}
 
 interface BJJSectionEditorProps {
   index: number
@@ -24,15 +30,17 @@ export function BJJSectionEditor({
   removeDisabled,
   isPending,
 }: BJJSectionEditorProps) {
-  const [aiDescription, setAiDescription] = useState<string | null>(null)
+  const [preview, setPreview] = useState<AIPreview | null>(null)
   const [aiError, setAiError] = useState<string | null>(null)
 
   const { enhance, isPending: isAIPending } = useBJJSectionAI()
+  const { setValue, getValues } = useFormContext<BJJWorkoutFormValues>()
 
   const rawDescription = useWatch({ control, name: `sections.${index}.rawDescription` })
   const sectionGoal = useWatch({ control, name: `sections.${index}.goal` })
 
-  const hasRawDescription = (rawDescription ?? '').trim().length > 0
+  const hasGoalOrDescription =
+    (sectionGoal ?? '').trim().length > 0 || (rawDescription ?? '').trim().length > 0
 
   function handleEnhance() {
     setAiError(null)
@@ -43,7 +51,7 @@ export function BJJSectionEditor({
       },
       {
         onSuccess: (result) => {
-          setAiDescription(result.ai_description)
+          setPreview(result)
         },
         onError: (err) => {
           const message = err instanceof Error ? err.message : 'AI enhancement failed'
@@ -51,6 +59,19 @@ export function BJJSectionEditor({
         },
       },
     )
+  }
+
+  function handleApply() {
+    if (!preview) return
+    setValue(`sections.${index}.rawDescription`, preview.ai_description)
+    const current = getValues(`sections.${index}.techniqueIds`) ?? []
+    const merged = [...new Set([...current, ...preview.matched_technique_ids])]
+    setValue(`sections.${index}.techniqueIds`, merged)
+    setPreview(null)
+  }
+
+  function handleDiscard() {
+    setPreview(null)
   }
 
   return (
@@ -111,33 +132,35 @@ export function BJJSectionEditor({
           )}
         />
 
-        {/* Enhance with AI */}
-        {hasRawDescription && (
-          <div className="space-y-3">
+        {/* Enhance with AI — always visible */}
+        <div className="space-y-3">
+          <div title={!hasGoalOrDescription ? 'AI not configured — contact your administrator' : undefined}>
             <Button
               type="button"
               variant="outline"
               size="sm"
               onClick={handleEnhance}
-              disabled={isAIPending || isPending}
+              disabled={isAIPending || isPending || !hasGoalOrDescription}
+              aria-disabled={!hasGoalOrDescription}
             >
               {isAIPending ? 'Enhancing…' : '✦ Enhance with AI'}
             </Button>
-
-            {aiError && (
-              <p className="text-sm text-destructive rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2">
-                {aiError}
-              </p>
-            )}
-
-            {aiDescription && !aiError && (
-              <div className="rounded-md border bg-muted/50 px-3 py-2">
-                <p className="text-xs font-medium text-muted-foreground mb-1">AI Enhanced</p>
-                <p className="text-sm">{aiDescription}</p>
-              </div>
-            )}
           </div>
-        )}
+
+          {aiError && (
+            <p className="text-sm text-destructive rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2">
+              {aiError}
+            </p>
+          )}
+
+          {preview && !aiError && (
+            <AIPreviewPanel
+              preview={preview}
+              onApply={handleApply}
+              onDiscard={handleDiscard}
+            />
+          )}
+        </div>
 
         {/* Duration */}
         <FormField

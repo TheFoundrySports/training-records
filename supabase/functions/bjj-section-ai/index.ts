@@ -32,6 +32,80 @@ interface BJJSectionAIResponse {
   matched_technique_ids: string[]
 }
 
+// ── AI Provider Adapter ──────────────────────────────────────────────────────
+
+interface AIConfig {
+  apiKey: string
+  baseUrl: string
+  model: string
+}
+
+interface ChatMessage {
+  role: 'system' | 'user'
+  content: string
+}
+
+class AIProviderAdapter {
+  constructor(private config: AIConfig) {}
+
+  async complete(messages: ChatMessage[]): Promise<string> {
+    const res = await fetch(`${this.config.baseUrl}/chat/completions`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${this.config.apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: this.config.model,
+        messages,
+        temperature: 0.3,
+        response_format: { type: 'json_object' },
+      }),
+    })
+
+    if (!res.ok) {
+      throw new Error(`AI provider error: ${res.status}`)
+    }
+
+    const data = (await res.json()) as { choices: Array<{ message: { content: string } }> }
+    return data.choices[0].message.content
+  }
+}
+
+// ── Config resolver: DB first, env fallback, null if neither ────────────────
+
+async function resolveAIConfig(supabaseAdmin: ReturnType<typeof createClient>): Promise<AIConfig | null> {
+  const { data } = await supabaseAdmin
+    .from('ai_settings')
+    .select('provider_name, base_url, model')
+    .limit(1)
+    .maybeSingle()
+
+  if (data) {
+    const apiKey = Deno.env.get('OPENAI_API_KEY')
+    if (!apiKey) return null
+    return {
+      apiKey,
+      baseUrl: data.base_url as string,
+      model: data.model as string,
+    }
+  }
+
+  // No DB row — fall back to env var with defaults
+  const envKey = Deno.env.get('OPENAI_API_KEY')
+  if (envKey) {
+    return {
+      apiKey: envKey,
+      baseUrl: 'https://api.openai.com/v1',
+      model: 'gpt-4o-mini',
+    }
+  }
+
+  return null
+}
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+
 function isValidAIResponse(data: unknown): data is BJJSectionAIResponse {
   if (typeof data !== 'object' || data === null) return false
   const d = data as Record<string, unknown>
@@ -82,6 +156,8 @@ function extractKeywords(rawDescription: string): string[] {
     .slice(0, 5)
 }
 
+// ── Main handler ─────────────────────────────────────────────────────────────
+
 Deno.serve(async (req) => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
@@ -100,11 +176,13 @@ Deno.serve(async (req) => {
 
   const supabaseUrl = Deno.env.get('SUPABASE_URL')!
   const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-  const openaiApiKey = Deno.env.get('OPENAI_API_KEY')
 
   const supabase = createClient(supabaseUrl, serviceRoleKey, {
     global: { headers: { Authorization: authHeader } },
   })
+
+  // Service-role client for config reads (bypasses RLS)
+  const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey)
 
   // Validate user
   const {
@@ -130,14 +208,6 @@ Deno.serve(async (req) => {
     return errorResponse('BAD_REQUEST', 'section_goal is required', 400)
   }
 
-  if (!raw_description.trim()) {
-    return errorResponse('BAD_REQUEST', 'raw_description is required', 400)
-  }
-
-  if (raw_description.trim().length < 10) {
-    return errorResponse('BAD_REQUEST', 'raw_description too short (minimum 10 characters)', 400)
-  }
-
   // ILIKE keyword query on bjj_techniques
   const keywords = extractKeywords(raw_description)
 
@@ -158,50 +228,32 @@ Deno.serve(async (req) => {
     techniques = (data ?? []) as BJJTechniqueRow[]
   }
 
-  // Mock fallback when OPENAI_API_KEY is absent
-  if (!openaiApiKey) {
+  // Resolve AI config: DB → env var → null
+  const aiConfig = await resolveAIConfig(supabaseAdmin)
+
+  // Mock fallback when no AI config is available
+  if (!aiConfig) {
     return jsonResponse({
       ai_description: `[Mock] Enhanced: "${raw_description.slice(0, 60)}…" — focused on ${section_goal}.`,
       matched_technique_ids: techniques.slice(0, 2).map((t: BJJTechniqueRow) => t.id),
     })
   }
 
-  // Build prompt and call OpenAI
+  // Build prompt and call AI provider
   const systemPrompt = buildSystemPrompt(techniques)
+  const adapter = new AIProviderAdapter(aiConfig)
 
   try {
-    const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${openaiApiKey}`,
-        'Content-Type': 'application/json',
+    const content = await adapter.complete([
+      { role: 'system', content: systemPrompt },
+      {
+        role: 'user',
+        content: `Section goal: ${section_goal}\nRaw description: ${raw_description}`,
       },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          {
-            role: 'user',
-            content: `Section goal: ${section_goal}\nRaw description: ${raw_description}`,
-          },
-        ],
-        temperature: 0.3,
-        response_format: { type: 'json_object' },
-      }),
-    })
+    ])
 
-    if (!openaiResponse.ok) {
-      const err = await openaiResponse.text()
-      return errorResponse('AI_ERROR', `OpenAI API error: ${openaiResponse.status}`, 502, err)
-    }
-
-    const openaiData = (await openaiResponse.json()) as {
-      choices: Array<{ message: { content: string } }>
-    }
-
-    const content = openaiData.choices?.[0]?.message?.content
     if (!content) {
-      return errorResponse('AI_ERROR', 'Empty response from OpenAI', 502)
+      return errorResponse('AI_ERROR', 'Empty response from AI provider', 502)
     }
 
     const parsed: unknown = JSON.parse(content)

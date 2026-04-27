@@ -13,6 +13,7 @@ import { CalendarPage } from '@/features/calendar'
 import { BJJTechniqueListPage } from '@/features/admin/bjj-techniques/pages/BJJTechniqueListPage'
 import { BJJTechniqueFormPage } from '@/features/admin/bjj-techniques/pages/BJJTechniqueFormPage'
 import { BJJWorkoutFormPage } from '@/features/bjj/pages/BJJWorkoutFormPage'
+import { AISettingsPage } from '@/features/admin/ai-settings/pages/AISettingsPage'
 
 export const router = createBrowserRouter([
   {
@@ -95,6 +96,14 @@ export const router = createBrowserRouter([
             element: (
               <AdminRoute>
                 <BJJTechniqueFormPage />
+              </AdminRoute>
+            ),
+          },
+          {
+            path: 'admin/ai-settings',
+            element: (
+              <AdminRoute>
+                <AISettingsPage />
               </AdminRoute>
             ),
           },

@@ -204,19 +204,31 @@ describe('BJJSectionEditor — REQ-306, REQ-315', () => {
   })
 
   describe('Enhance with AI button visibility', () => {
-    it('does not show Enhance button when rawDescription is empty', () => {
+    it('shows Enhance button (disabled) when both goal and rawDescription are empty', () => {
       render(<SectionEditorWrapper />)
-      expect(screen.queryByRole('button', { name: /enhance with ai/i })).not.toBeInTheDocument()
+      const btn = screen.getByRole('button', { name: /enhance with ai/i })
+      expect(btn).toBeInTheDocument()
+      expect(btn).toBeDisabled()
     })
 
-    it('shows Enhance button after typing in Notes field', async () => {
+    it('enables Enhance button after typing in Notes field', async () => {
       const user = userEvent.setup()
       render(<SectionEditorWrapper />)
 
       const notesInput = screen.getByLabelText(/notes/i)
       await user.type(notesInput, 'Some notes about drilling')
 
-      expect(screen.getByRole('button', { name: /enhance with ai/i })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /enhance with ai/i })).not.toBeDisabled()
+    })
+
+    it('enables Enhance button when goal has content', async () => {
+      const user = userEvent.setup()
+      render(<SectionEditorWrapper />)
+
+      const goalInput = screen.getByLabelText(/goal/i)
+      await user.type(goalInput, 'Guard passing')
+
+      expect(screen.getByRole('button', { name: /enhance with ai/i })).not.toBeDisabled()
     })
   })
 })
