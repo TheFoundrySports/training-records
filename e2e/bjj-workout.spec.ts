@@ -93,7 +93,7 @@ test.describe('BJJ Workout creation flow', () => {
     // Either results appear or "No techniques found" — either is valid
     await page.waitForTimeout(500) // wait for debounce + query
     // The dropdown should be visible (results or no results message)
-    const hasResults = await page
+    await page
       .getByText(/no techniques found/i)
       .isVisible()
       .then(() => false)

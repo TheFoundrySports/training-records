@@ -70,7 +70,6 @@ export function WorkoutFormPage() {
     })
   }
 
-  // eslint-disable-next-line react-hooks/incompatible-library
   const wodFormat = form.watch('wodFormat')
 
   // Populate form when editing and data is loaded

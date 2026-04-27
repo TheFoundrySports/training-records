@@ -106,7 +106,7 @@ adminTest.describe('Admin: BJJ Techniques CRUD', () => {
 })
 
 // Non-admin redirect test — runs with athlete storageState (chromium project)
-import { test, expect as _expect } from './fixtures/pages.fixture'
+import { test } from './fixtures/pages.fixture'
 
 test.describe('Admin route: non-admin redirect', () => {
   test('regular athlete navigating to /admin/bjj-techniques is redirected to /', async ({
