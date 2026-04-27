@@ -34,7 +34,8 @@ describe('isValidEvaluationResponse', () => {
   })
 
   it('returns false when summary is missing', () => {
-    const { summary: _, ...rest } = validResponse
+    const rest: Omit<typeof validResponse, 'summary'> & { summary?: string } = { ...validResponse }
+    delete (rest as Record<string, unknown>).summary
     expect(isValidEvaluationResponse(rest)).toBe(false)
   })
 
@@ -47,7 +48,8 @@ describe('isValidEvaluationResponse', () => {
   })
 
   it('returns false when readiness_level is missing', () => {
-    const { readiness_level: _, ...rest } = validResponse
+    const rest: Omit<typeof validResponse, 'readiness_level'> & { readiness_level?: string } = { ...validResponse }
+    delete (rest as Record<string, unknown>).readiness_level
     expect(isValidEvaluationResponse(rest)).toBe(false)
   })
 

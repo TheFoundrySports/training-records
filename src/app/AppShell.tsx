@@ -43,6 +43,14 @@ export function AppShell() {
                   BJJ Techniques
                 </Link>
               )}
+              {role === 'admin' && (
+                <Link
+                  to="/admin/ai-settings"
+                  className="text-foreground/60 transition-colors hover:text-foreground"
+                >
+                  AI Settings
+                </Link>
+              )}
             </nav>
           </div>
           <div className="flex items-center gap-3">
