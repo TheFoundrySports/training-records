@@ -10,7 +10,6 @@ description: >
 ## Never
 
 - NEVER create or add **labels** to Merge Requests or Issues unless explicitly asked by the USER.
-- **NEVER merge a PR directly to `main`** — all changes come from `feat/` or `fix/` branches
 
 ## Always
 
