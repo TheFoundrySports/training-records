@@ -59,7 +59,8 @@ class AIProviderAdapter {
         model: this.config.model,
         messages,
         temperature: 0.3,
-        response_format: { type: 'json_object' },
+        stream: false,
+        extra_body: { reasoning_split: true },
       }),
     })
 
@@ -67,8 +68,28 @@ class AIProviderAdapter {
       throw new Error(`AI provider error: ${res.status}`)
     }
 
-    const data = (await res.json()) as { choices: Array<{ message: { content: string } }> }
-    return data.choices[0].message.content
+    const data = await res.json() as {
+      choices: Array<{
+        message: {
+          content?: string
+          text?: string
+        }
+      }>
+    }
+    const msg = data.choices[0]?.message
+    let raw = msg?.content ?? msg?.text ?? ''
+
+    // MiniMax embeds thinking in <think>...</think> tags — strip them
+    // MiniMax thinking comes in <think>...</think> tags BEFORE the JSON content.
+    // Since thinking is always before the JSON and JSON always starts with '{',
+    // we strip thinking by finding the first '{' and taking everything from there.
+    const firstBrace = raw.indexOf('{')
+    raw = firstBrace >= 0 ? raw.substring(firstBrace) : raw
+
+    // Strip markdown fences (some providers wrap JSON in them)
+    raw = raw.replace(/^```json\s*/i, '').replace(/\s*```$/i, '').trim()
+
+    return raw
   }
 }
 
@@ -141,6 +162,7 @@ Return ONLY valid JSON:
 }
 
 Rules:
+- Respond always in Spanish
 - matched_technique_ids must only contain IDs from the catalog above
 - If no techniques are clearly relevant, return []
 - Do not invent techniques not in the catalog
@@ -151,7 +173,7 @@ Rules:
 function extractKeywords(rawDescription: string): string[] {
   return rawDescription
     .split(/\s+/)
-    .map((w) => w.replace(/[^a-zA-Z0-9]/g, '').toLowerCase())
+    .map((w) => w.replace(/[^a-zA-Z0-9áéíóúüñÁÉÍÓÚÜÑ]/g, '').toLowerCase())
     .filter((w) => w.length >= 4)
     .slice(0, 5)
 }
@@ -234,7 +256,7 @@ Deno.serve(async (req) => {
   // Mock fallback when no AI config is available
   if (!aiConfig) {
     return jsonResponse({
-      ai_description: `[Mock] Enhanced: "${raw_description.slice(0, 60)}…" — focused on ${section_goal}.`,
+      ai_description: `[Mock] Mejorado: "${raw_description.slice(0, 60)}…" — enfocado en ${section_goal}.`,
       matched_technique_ids: techniques.slice(0, 2).map((t: BJJTechniqueRow) => t.id),
     })
   }
