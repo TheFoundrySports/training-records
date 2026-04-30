@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import { useBJJTechniques } from '../hooks/useBJJTechniques'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
@@ -12,9 +12,8 @@ interface TechniqueSearchProps {
 
 /**
  * TechniqueSearch — controlled combobox with 300ms debounce.
- * nameMap stores names for IDs not in the useBJJTechniques result set
- * (i.e., IDs set programmatically via setValue from the AI enhance flow).
- * techniqueNameById provides a complete lookup from all loaded techniques.
+ * Populates nameMap from allTechniques so IDs set programmatically
+ * (via setValue from AI enhance flow) resolve to names immediately.
  */
 export function TechniqueSearch({ selectedIds, onChange, disabled }: TechniqueSearchProps) {
   const [query, setQuery] = useState('')
@@ -28,22 +27,6 @@ export function TechniqueSearch({ selectedIds, onChange, disabled }: TechniqueSe
   // IDs that were set programmatically (e.g., from AI enhance)
   const { data: allTechniques = [] } = useBJJTechniques()
 
-  // Sync nameMap whenever allTechniques loads — ensures IDs set via setValue
-  // (before techniques loaded) get resolved as soon as data arrives
-  useEffect(() => {
-    if (allTechniques.length === 0) return
-    const newEntries: Record<string, string> = {}
-    for (const t of allTechniques) {
-      // Only fill in missing entries — don't overwrite user-set names
-      if (!(t.id in nameMap)) {
-        newEntries[t.id] = t.name
-      }
-    }
-    if (Object.keys(newEntries).length > 0) {
-      setNameMap((prev) => ({ ...prev, ...newEntries }))
-    }
-  }, [allTechniques])
-
   // Debounce the search query
   const handleQueryChange = useCallback((value: string) => {
     setQuery(value)
@@ -56,8 +39,28 @@ export function TechniqueSearch({ selectedIds, onChange, disabled }: TechniqueSe
   // Results for the dropdown search
   const { data: results = [] } = useBJJTechniques({ search: debouncedQuery || undefined })
 
-  // Build a lookup from all techniques for when IDs are set programmatically
-  const techniqueNameById = new Map(allTechniques.map((t) => [t.id, t.name]))
+  // Build a lookup from all techniques — used in resolveName
+  const techniqueNameById = useMemo(
+    () => new Map(allTechniques.map((t) => [t.id, t.name])),
+    [allTechniques],
+  )
+
+  // Keep nameMap in sync with allTechniques. Using a ref to track which
+  // IDs we've already populated avoids re-merging on every render.
+  const populatedRef = useRef<Set<string>>(new Set())
+  useEffect(() => {
+    if (allTechniques.length === 0) return
+    const newEntries: Record<string, string> = {}
+    for (const t of allTechniques) {
+      if (!populatedRef.current.has(t.id)) {
+        newEntries[t.id] = t.name
+        populatedRef.current.add(t.id)
+      }
+    }
+    if (Object.keys(newEntries).length > 0) {
+      setNameMap((prev) => ({ ...prev, ...newEntries }))
+    }
+  }, [allTechniques])
 
   // Close dropdown when clicking outside
   useEffect(() => {
