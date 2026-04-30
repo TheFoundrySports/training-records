@@ -261,15 +261,25 @@ Deno.serve(async (req) => {
   let techniques: BJJTechniqueRow[] = []
 
   if (allKeywords.length > 0) {
-    // Search both English name and Spanish name for better keyword matching
-    const nameFilter = allKeywords.map((k) => `name.ilike.%${k}%`).join(',')
-    const nameEsFilter = allKeywords.map((k) => `name_es.ilike.%${k}%`).join(',')
-    const orFilter = `${nameFilter},${nameEsFilter}`
-    const { data, error: dbError } = await supabase
+    const orFilter = allKeywords.map((k) => `name.ilike.%${k}%`).join(',')
+
+    let { data, error: dbError } = await supabase
       .from('bjj_techniques')
       .select('id, name, name_es, description, category')
       .or(orFilter)
       .limit(15)
+
+    // Fallback: if name_es causes an error (column doesn't exist yet), retry without it
+    if (dbError && dbError.message.includes('name_es')) {
+      const fallbackFilter = allKeywords.map((k) => `name.ilike.%${k}%`).join(',')
+      const result = await supabase
+        .from('bjj_techniques')
+        .select('id, name, description, category')
+        .or(fallbackFilter)
+        .limit(15)
+      data = result.data
+      dbError = result.error
+    }
 
     if (dbError) {
       return errorResponse('INTERNAL_ERROR', 'Failed to query techniques', 500, dbError)
