@@ -4,11 +4,25 @@ import type { BJJTechnique, BJJSection } from '../bjj.types'
 interface BJJTechniqueRow {
   id: string
   name: string
+  name_es: string | null
   description: string | null
   category: string | null
   youtube_url: string | null
   created_at: string
   updated_at: string
+}
+
+export function mapTechniqueRow(row: BJJTechniqueRow): BJJTechnique {
+  return {
+    id: row.id,
+    name: row.name,
+    name_es: row.name_es ?? undefined,
+    description: row.description ?? undefined,
+    category: (row.category as BJJTechnique['category']) ?? undefined,
+    youtubeUrl: row.youtube_url ?? undefined,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  }
 }
 
 // DB row for bjj_sections, with joined techniques
@@ -22,18 +36,6 @@ interface BJJSectionRow {
   duration_minutes: number | null
   created_at: string
   bjj_section_techniques: Array<{ bjj_techniques: BJJTechniqueRow }>
-}
-
-export function mapTechniqueRow(row: BJJTechniqueRow): BJJTechnique {
-  return {
-    id: row.id,
-    name: row.name,
-    description: row.description ?? undefined,
-    category: (row.category as BJJTechnique['category']) ?? undefined,
-    youtubeUrl: row.youtube_url ?? undefined,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
-  }
 }
 
 export function mapSectionRow(row: BJJSectionRow): BJJSection {

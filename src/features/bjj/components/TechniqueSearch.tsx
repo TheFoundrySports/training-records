@@ -39,21 +39,26 @@ export function TechniqueSearch({ selectedIds, onChange, disabled }: TechniqueSe
   // Results for the dropdown search
   const { data: results = [] } = useBJJTechniques({ search: debouncedQuery || undefined })
 
-  // Build a lookup from all techniques — used in resolveName
+// Build lookups from all techniques for display and name resolution
   const techniqueNameById = useMemo(
     () => new Map(allTechniques.map((t) => [t.id, t.name])),
+    [allTechniques],
+  )
+  const techniqueNameEsById = useMemo(
+    () => new Map(allTechniques.map((t) => [t.id, t.name_es ?? ''])),
     [allTechniques],
   )
 
   // Keep nameMap in sync with allTechniques. Using a ref to track which
   // IDs we've already populated avoids re-merging on every render.
+  // nameMap stores both English and Spanish names.
   const populatedRef = useRef<Set<string>>(new Set())
   useEffect(() => {
     if (allTechniques.length === 0) return
     const newEntries: Record<string, string> = {}
     for (const t of allTechniques) {
       if (!populatedRef.current.has(t.id)) {
-        newEntries[t.id] = t.name
+        newEntries[t.id] = t.name_es ? `${t.name} / ${t.name_es}` : t.name
         populatedRef.current.add(t.id)
       }
     }
@@ -99,7 +104,10 @@ export function TechniqueSearch({ selectedIds, onChange, disabled }: TechniqueSe
   const filteredResults = results.filter((t) => !selectedSet.has(t.id))
 
   function resolveName(id: string): string {
-    return techniqueNameById.get(id) ?? nameMap[id] ?? id
+    const name = techniqueNameById.get(id)
+    const nameEs = techniqueNameEsById.get(id)
+    if (nameEs) return `${name ?? id} / ${nameEs}`
+    return name ?? nameMap[id] ?? id
   }
 
   return (

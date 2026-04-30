@@ -17,6 +17,14 @@ export function AIPreviewPanel({ preview, onApply, onDiscard }: AIPreviewPanelPr
   const { data: techniques = [] } = useBJJTechniques()
 
   const techniqueNameMap = new Map(techniques.map((t) => [t.id, t.name]))
+  const techniqueNameEsMap = new Map(techniques.map((t) => [t.id, t.name_es]))
+
+  function formatName(id: string): string {
+    const name = techniqueNameMap.get(id)
+    const nameEs = techniqueNameEsMap.get(id)
+    if (nameEs) return `${name} / ${nameEs}`
+    return name ?? id
+  }
 
   return (
     <div className="rounded-md border bg-muted/50 px-3 py-3 space-y-3">
@@ -31,7 +39,7 @@ export function AIPreviewPanel({ preview, onApply, onDiscard }: AIPreviewPanelPr
           <div className="flex flex-wrap gap-1.5">
             {preview.matched_technique_ids.map((id) => (
               <Badge key={id} variant="secondary" className="text-xs">
-                {techniqueNameMap.get(id) ?? id}
+                {formatName(id)}
               </Badge>
             ))}
           </div>
