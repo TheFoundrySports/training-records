@@ -89,8 +89,7 @@ class AIProviderAdapter {
     const msg = data.choices[0]?.message
     let raw = msg?.content ?? msg?.text ?? ''
 
-    // MiniMax embeds thinking in <think>...</think> tags — strip them
-    // MiniMax thinking comes in <think>...</think> tags BEFORE the JSON content.
+    // MiniMax embeds thinking in <think>... tags — strip them
     // Since thinking is always before the JSON and JSON always starts with '{',
     // we strip thinking by finding the first '{' and taking everything from there.
     const firstBrace = raw.indexOf('{')
@@ -114,7 +113,7 @@ async function resolveAIConfig(supabaseAdmin: ReturnType<typeof createClient>): 
 
   if (data) {
     const apiKey = Deno.env.get('OPENAI_API_KEY')
-    if (!apiKey || !isLikelyValidAPIKey(apiKey)) return null
+    if (!apiKey) return null
     return {
       apiKey,
       baseUrl: data.base_url as string,
@@ -122,13 +121,13 @@ async function resolveAIConfig(supabaseAdmin: ReturnType<typeof createClient>): 
     }
   }
 
-  // No DB row — fall back to env var with defaults
+  // No DB row — fall back to env var with MiniMax defaults
   const envKey = Deno.env.get('OPENAI_API_KEY')
-  if (envKey && isLikelyValidAPIKey(envKey)) {
+  if (envKey) {
     return {
       apiKey: envKey,
-      baseUrl: 'https://api.openai.com/v1',
-      model: 'gpt-4o-mini',
+      baseUrl: 'https://api.minimax.io/v1',
+      model: 'MiniMax-M2.7',
     }
   }
 
@@ -136,26 +135,6 @@ async function resolveAIConfig(supabaseAdmin: ReturnType<typeof createClient>): 
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
-
-/**
- * Sanity-check the API key format before making a call.
- * Platform keys (sk-cp-*) are NOT direct API keys — they belong to assistants API,
- * not the chat completions endpoint. Detecting this avoids a confusing 502 from the
- * AI provider and lets us fall back to mock gracefully.
- */
-/**
- * Sanity-check the API key format before making a call.
- * Platform keys (sk-cp-*) are NOT direct API keys — they belong to assistants API,
- * not the chat completions endpoint. Detecting this avoids a confusing 502 from the
- * AI provider and lets us fall back to mock gracefully.
- */
-function isLikelyValidAPIKey(key: string): boolean {
-  // Platform/assistants keys: sk-cp-... — these do NOT work with /chat/completions
-  if (key.startsWith('sk-cp-')) return false
-  // Must start with sk- (OpenAI, MiniMax, etc.)
-  if (!key.startsWith('sk-')) return false
-  return true
-}
 
 function buildMockResponse(
   raw_description: string,
