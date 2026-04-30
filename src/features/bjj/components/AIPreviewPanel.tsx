@@ -17,13 +17,14 @@ export function AIPreviewPanel({ preview, onApply, onDiscard }: AIPreviewPanelPr
   const { data: techniques = [] } = useBJJTechniques()
 
   const techniqueNameMap = new Map(techniques.map((t) => [t.id, t.name]))
-  const techniqueNameEsMap = new Map(techniques.map((t) => [t.id, t.name_es]))
+  // Match TechniqueSearch: treat missing Spanish as '' so `if (nameEs)` is bilingual-only
+  const techniqueNameEsMap = new Map(techniques.map((t) => [t.id, t.name_es ?? '']))
 
   function formatName(id: string): string {
     const name = techniqueNameMap.get(id)
-    const nameEs = techniqueNameEsMap.get(id)
-    if (nameEs) return `${name} / ${nameEs}`
-    return name ?? id
+    const nameEs = techniqueNameEsMap.get(id) ?? ''
+    if (nameEs) return `${name ?? 'Unknown technique'} / ${nameEs}`
+    return name ?? 'Unknown technique'
   }
 
   return (

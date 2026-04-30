@@ -1,5 +1,6 @@
 // @ts-nocheck — Deno global types not available in editor
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { buildSystemPrompt, type BJJTechniqueRow } from './prompt.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -18,14 +19,6 @@ function jsonResponse(data: unknown, status = 200) {
     status,
     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   })
-}
-
-interface BJJTechniqueRow {
-  id: string
-  name: string
-  name_es: string | null
-  description: string | null
-  category: string | null
 }
 
 interface BJJSectionAIResponse {
@@ -174,45 +167,6 @@ function isValidAIResponse(data: unknown): data is BJJSectionAIResponse {
     Array.isArray(d.matched_technique_ids) &&
     (d.matched_technique_ids as unknown[]).every((id) => typeof id === 'string')
   )
-}
-
-function buildSystemPrompt(techniques: BJJTechniqueRow[]): string {
-  const catalog =
-    techniques.length > 0
-      ? techniques
-          .map(
-            (t) =>
-              `- ${t.name}${
-                t.name_es ? ` / ${t.name_es}` : ''
-              } (${t.category ?? 'other'}): ${t.description ?? 'No description'}`,
-          )
-          .join('\n')
-      : '(no matching techniques found)'
-
-  return `You are a Brazilian Jiu-Jitsu training assistant. Enhance the athlete's
-raw section description to be clear, structured, and technically precise.
-Identify which techniques from the catalog the athlete was working on based on
-their description and goal. You can infer techniques even when the user uses
-informal Spanish terminology.
-
-Technique catalog:
-${catalog}
-
-Return ONLY valid JSON:
-{
-  "ai_description": "<enhanced 2-4 sentence description, max 500 chars>",
-  "matched_technique_ids": ["<uuid>", ...]
-}
-
-Rules:
-- Respond always in Spanish
-- Examine the user's raw_description carefully and infer which techniques
-  from the catalog they were practicing, even if they didn't name them explicitly
-- matched_technique_ids must only contain IDs from the catalog above
-- If no techniques are clearly relevant, return []
-- Do not invent techniques not in the catalog
-- Keep ai_description under 500 characters
-- Return ONLY valid JSON, no markdown, no explanation`
 }
 
 function extractKeywords(rawDescription: string): string[] {

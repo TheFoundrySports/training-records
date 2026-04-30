@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useWatch, useFormContext, type Control } from 'react-hook-form'
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
@@ -32,6 +32,8 @@ export function BJJSectionEditor({
 }: BJJSectionEditorProps) {
   const [preview, setPreview] = useState<AIPreview | null>(null)
   const [aiError, setAiError] = useState<string | null>(null)
+  /** Blocks a second click before React re-renders with `isAIPending` (TanStack Query updates async). */
+  const enhanceInFlightRef = useRef(false)
 
   const { enhance, isPending: isAIPending } = useBJJSectionAI()
   const { setValue, getValues } = useFormContext<BJJWorkoutFormValues>()
@@ -43,6 +45,9 @@ export function BJJSectionEditor({
     (sectionGoal ?? '').trim().length > 0 || (rawDescription ?? '').trim().length > 0
 
   function handleEnhance() {
+    if (enhanceInFlightRef.current || isAIPending || !hasGoalOrDescription) return
+
+    enhanceInFlightRef.current = true
     setAiError(null)
     enhance(
       {
@@ -56,6 +61,9 @@ export function BJJSectionEditor({
         onError: (err) => {
           const message = err instanceof Error ? err.message : 'AI enhancement failed'
           setAiError(message)
+        },
+        onSettled: () => {
+          enhanceInFlightRef.current = false
         },
       },
     )
