@@ -114,7 +114,7 @@ async function resolveAIConfig(supabaseAdmin: ReturnType<typeof createClient>): 
 
   if (data) {
     const apiKey = Deno.env.get('OPENAI_API_KEY')
-    if (!apiKey) return null
+    if (!apiKey || !isLikelyValidAPIKey(apiKey)) return null
     return {
       apiKey,
       baseUrl: data.base_url as string,
@@ -124,7 +124,7 @@ async function resolveAIConfig(supabaseAdmin: ReturnType<typeof createClient>): 
 
   // No DB row — fall back to env var with defaults
   const envKey = Deno.env.get('OPENAI_API_KEY')
-  if (envKey) {
+  if (envKey && isLikelyValidAPIKey(envKey)) {
     return {
       apiKey: envKey,
       baseUrl: 'https://api.openai.com/v1',
@@ -136,6 +136,37 @@ async function resolveAIConfig(supabaseAdmin: ReturnType<typeof createClient>): 
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
+
+/**
+ * Sanity-check the API key format before making a call.
+ * Platform keys (sk-cp-*) are NOT direct API keys — they belong to assistants API,
+ * not the chat completions endpoint. Detecting this avoids a confusing 502 from the
+ * AI provider and lets us fall back to mock gracefully.
+ */
+/**
+ * Sanity-check the API key format before making a call.
+ * Platform keys (sk-cp-*) are NOT direct API keys — they belong to assistants API,
+ * not the chat completions endpoint. Detecting this avoids a confusing 502 from the
+ * AI provider and lets us fall back to mock gracefully.
+ */
+function isLikelyValidAPIKey(key: string): boolean {
+  // Platform/assistants keys: sk-cp-... — these do NOT work with /chat/completions
+  if (key.startsWith('sk-cp-')) return false
+  // Must start with sk- (OpenAI, MiniMax, etc.)
+  if (!key.startsWith('sk-')) return false
+  return true
+}
+
+function buildMockResponse(
+  raw_description: string,
+  section_goal: string,
+  techniques: BJJTechniqueRow[],
+): BJJSectionAIResponse {
+  return {
+    ai_description: `[Mock] Mejorado: "${raw_description.slice(0, 60)}…" — enfocado en ${section_goal}.`,
+    matched_technique_ids: techniques.slice(0, 2).map((t) => t.id),
+  }
+}
 
 function isValidAIResponse(data: unknown): data is BJJSectionAIResponse {
   if (typeof data !== 'object' || data === null) return false
@@ -265,10 +296,7 @@ Deno.serve(async (req) => {
 
   // Mock fallback when no AI config is available
   if (!aiConfig) {
-    return jsonResponse({
-      ai_description: `[Mock] Mejorado: "${raw_description.slice(0, 60)}…" — enfocado en ${section_goal}.`,
-      matched_technique_ids: techniques.slice(0, 2).map((t: BJJTechniqueRow) => t.id),
-    })
+    return jsonResponse(buildMockResponse(raw_description, section_goal, techniques))
   }
 
   // Build prompt and call AI provider
@@ -301,7 +329,9 @@ Deno.serve(async (req) => {
       matched_technique_ids: parsed.matched_technique_ids,
     })
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Failed to call AI service'
-    return errorResponse('AI_ERROR', message, 502, err)
+    // AI call failed (network error, timeout, provider 5xx, etc.) — fall back to mock
+    // rather than surfacing a confusing 502 to the client.
+    console.error('[bjj-section-ai] AI provider call failed:', err)
+    return jsonResponse(buildMockResponse(raw_description, section_goal, techniques))
   }
 })
