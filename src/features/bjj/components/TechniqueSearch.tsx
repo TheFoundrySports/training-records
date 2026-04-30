@@ -12,20 +12,21 @@ interface TechniqueSearchProps {
 
 /**
  * TechniqueSearch — controlled combobox with 300ms debounce.
- * Stores selected technique names in a plain accumulator map
- * that is updated only in event handlers (not effects or render body)
- * to satisfy react-hooks/refs and react-hooks/set-state-in-effect.
+ * nameMap stores names for IDs not in the useBJJTechniques result set
+ * (i.e., IDs set programmatically via setValue from the AI enhance flow).
+ * techniqueNameById provides a complete lookup from all loaded techniques.
  */
 export function TechniqueSearch({ selectedIds, onChange, disabled }: TechniqueSearchProps) {
   const [query, setQuery] = useState('')
   const [debouncedQuery, setDebouncedQuery] = useState('')
   const [open, setOpen] = useState(false)
-  // Names are stored as state, updated only when user selects or removes a technique
   const [nameMap, setNameMap] = useState<Record<string, string>>({})
   const containerRef = useRef<HTMLDivElement>(null)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const { data: results = [] } = useBJJTechniques({ search: debouncedQuery || undefined })
+  // Load ALL techniques (no search filter) so we can resolve names for
+  // IDs that were set programmatically (e.g., from AI enhance)
+  const { data: allTechniques = [] } = useBJJTechniques()
 
   // Debounce the search query
   const handleQueryChange = useCallback((value: string) => {
@@ -35,6 +36,12 @@ export function TechniqueSearch({ selectedIds, onChange, disabled }: TechniqueSe
       setDebouncedQuery(value)
     }, 300)
   }, [])
+
+  // Results for the dropdown search
+  const { data: results = [] } = useBJJTechniques({ search: debouncedQuery || undefined })
+
+  // Build a lookup from all techniques for when IDs are set programmatically
+  const techniqueNameById = new Map(allTechniques.map((t) => [t.id, t.name]))
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -58,7 +65,6 @@ export function TechniqueSearch({ selectedIds, onChange, disabled }: TechniqueSe
 
   function handleSelect(technique: BJJTechnique) {
     if (!selectedSet.has(technique.id)) {
-      // Record the name when user explicitly selects it
       setNameMap((prev) => ({ ...prev, [technique.id]: technique.name }))
       onChange([...selectedIds, technique.id])
     }
@@ -72,6 +78,10 @@ export function TechniqueSearch({ selectedIds, onChange, disabled }: TechniqueSe
   }
 
   const filteredResults = results.filter((t) => !selectedSet.has(t.id))
+
+  function resolveName(id: string): string {
+    return techniqueNameById.get(id) ?? nameMap[id] ?? id
+  }
 
   return (
     <div ref={containerRef} className="space-y-2">
@@ -129,7 +139,7 @@ export function TechniqueSearch({ selectedIds, onChange, disabled }: TechniqueSe
       {selectedIds.length > 0 && (
         <div className="flex flex-wrap gap-2" aria-label="Selected techniques">
           {selectedIds.map((id) => {
-            const name = nameMap[id] ?? id
+            const name = resolveName(id)
             return (
               <Badge key={id} variant="secondary" className="gap-1">
                 {name}
