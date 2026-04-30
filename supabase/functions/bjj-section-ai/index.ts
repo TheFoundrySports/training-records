@@ -23,6 +23,7 @@ function jsonResponse(data: unknown, status = 200) {
 interface BJJTechniqueRow {
   id: string
   name: string
+  name_es: string | null
   description: string | null
   category: string | null
 }
@@ -260,10 +261,13 @@ Deno.serve(async (req) => {
   let techniques: BJJTechniqueRow[] = []
 
   if (allKeywords.length > 0) {
-    const orFilter = allKeywords.map((k) => `name.ilike.%${k}%`).join(',')
+    // Search both English name and Spanish name for better keyword matching
+    const nameFilter = allKeywords.map((k) => `name.ilike.%${k}%`).join(',')
+    const nameEsFilter = allKeywords.map((k) => `name_es.ilike.%${k}%`).join(',')
+    const orFilter = `${nameFilter},${nameEsFilter}`
     const { data, error: dbError } = await supabase
       .from('bjj_techniques')
-      .select('id, name, description, category')
+      .select('id, name, name_es, description, category')
       .or(orFilter)
       .limit(15)
 

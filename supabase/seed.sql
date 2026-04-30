@@ -1091,47 +1091,47 @@ on conflict (id) do update set
 -- ---------------------------------------------------------------------------
 -- Reference data: bjj_techniques
 -- ---------------------------------------------------------------------------
-insert into public.bjj_techniques (name, description, category)
+insert into public.bjj_techniques (name, name_es, description, category)
 values
   -- Takedowns
-  ('Double Leg Takedown',    'Impulsarse con ambas piernas para llevar al oponente al suelo.',                                  'takedown'),
-  ('Single Leg Takedown',    'Asegurar una pierna y finalizar el derribo empujando hacia adelante o levantando.',               'takedown'),
-  ('Collar Drag',            'Usar el agarre de solapa o manga para desequilibrar al oponente y pasarlo de largo.',             'takedown'),
-  ('Arm Drag',               'Arrastrar el brazo del oponente a través de su cuerpo para tomar la espalda o entrar en derribo.','takedown'),
-  ('Guard Pull',             'Jalar guardia deliberadamente para llevar el combate al suelo en tus propios términos.',          'takedown'),
+  ('Double Leg Takedown',    'Derribo por las dos piernas',   'Impulsarse con ambas piernas para llevar al oponente al suelo.',                                  'takedown'),
+  ('Single Leg Takedown',    'Derribo por una pierna',        'Asegurar una pierna y finalizar el derribo empujando hacia adelante o levantando.',               'takedown'),
+  ('Collar Drag',            'Arrastre de solapa',            'Usar el agarre de solapa o manga para desequilibrar al oponente y pasarlo de largo.',             'takedown'),
+  ('Arm Drag',               'Arrastre de brazo',             'Arrastrar el brazo del oponente a través de su cuerpo para tomar la espalda o entrar en derribo.','takedown'),
+  ('Guard Pull',             'Jalón de guardia',              'Jalar guardia deliberadamente para llevar el combate al suelo en tus propios términos.',          'takedown'),
   -- Guard passes
-  ('Closed Guard Break',     'Usar la postura y presión de cadera para abrir la guardia cerrada antes de pasarla.',            'guard_pass'),
-  ('Knee Slide Pass',        'Deslizar la rodilla a través de la guardia controlando la cadera para aplanar al oponente.',     'guard_pass'),
-  ('Double Under Pass',      'Pasar ambos brazos por debajo de las piernas del oponente y apilar para pasar.',                 'guard_pass'),
-  ('Leg Drag Pass',          'Arrastrar una pierna al tatami y usar presión de hombro para establecer control lateral.',       'guard_pass'),
-  ('Toreando Pass',          'Controlar ambos tobillos y moverse lateralmente para pasar sin comprometer el peso.',            'guard_pass'),
+  ('Closed Guard Break',     'Apertura de guardia cerrada',   'Usar la postura y presión de cadera para abrir la guardia cerrada antes de pasarla.',            'guard_pass'),
+  ('Knee Slide Pass',        'Paso en deslizamiento',        'Deslizar la rodilla a través de la guardia controlando la cadera para aplanar al oponente.',     'guard_pass'),
+  ('Double Under Pass',       'Paso doble por debajo',         'Pasar ambos brazos por debajo de las piernas del oponente y apilar para pasar.',                 'guard_pass'),
+  ('Leg Drag Pass',          'Arrastre de pierna',           'Arrastrar una pierna al tatami y usar presión de hombro para establecer control lateral.',       'guard_pass'),
+  ('Toreando Pass',          'Paso toreo',                   'Controlar ambos tobillos y moverse lateralmente para pasar sin comprometer el peso.',            'guard_pass'),
   -- Guard retention & guard types
-  ('Basic Guard Retention',  'Usar marcos, camarón y movimiento de cadera para evitar el pase y recuperar la guardia.',        'guard'),
-  ('Collar and Sleeve Guard','Controlar solapa y manga para manejar la distancia y atacar con barridas y sometimientos.',      'guard'),
-  ('De La Riva Guard',       'Enrollar una pierna por fuera de la pierna del oponente para controlar la postura y barrer.',    'guard'),
-  ('Spider Guard',           'Controlar ambas mangas con los pies en los bíceps para desequilibrar y barrer.',                 'guard'),
-  ('Lasso Guard',            'Pasar un brazo por la manga del oponente y enrollar la pierna para crear palanca.',              'guard'),
-  ('Butterfly Guard',        'Enganchar ambos pies dentro de los muslos del oponente para elevar y barrer.',                   'guard'),
-  ('Half Guard',             'Controlar una pierna entre las propias para evitar el pase y preparar barridas.',                'guard'),
-  ('Closed Guard',           'Cerrar ambas piernas alrededor de la cintura del oponente para controlar la postura y atacar.', 'guard'),
-  ('X Guard',                'Insertarse bajo el oponente con dos ganchos en una pierna para desequilibrar y barrer.',         'guard'),
-  ('Single Leg X Guard',     'Controlar una pierna con un gancho en cuatro para barrer o transicionar a candados de pierna.', 'guard'),
+  ('Basic Guard Retention',   'Retención básica de guardia',   'Usar marcos, camarón y movimiento de cadera para evitar el pase y recuperar la guardia.',        'guard'),
+  ('Collar and Sleeve Guard', 'Guardia de solapa y manga',    'Controlar solapa y manga para manejar la distancia y atacar con barridas y sometimientos.',      'guard'),
+  ('De La Riva Guard',       'Guardia De La Riva',            'Enrollar una pierna por fuera de la pierna del oponente para controlar la postura y barrer.',    'guard'),
+  ('Spider Guard',           'Guardia araña',                 'Controlar ambas mangas con los pies en los bíceps para desequilibrar y barrer.',                 'guard'),
+  ('Lasso Guard',            'Guardia lazo',                  'Pasar un brazo por la manga del oponente y enrollar la pierna para crear palanca.',              'guard'),
+  ('Butterfly Guard',        'Guardia mariposa',               'Enganchar ambos pies dentro de los muslos del oponente para elevar y barrer.',                   'guard'),
+  ('Half Guard',             'Media guardia',                  'Controlar una pierna entre las propias para evitar el pase y preparar barridas.',                'guard'),
+  ('Closed Guard',           'Guardia cerrada',               'Cerrar ambas piernas alrededor de la cintura del oponente para controlar la postura y atacar.', 'guard'),
+  ('X Guard',                'Guardia X',                     'Insertarse bajo el oponente con dos ganchos en una pierna para desequilibrar y barrer.',         'guard'),
+  ('Single Leg X Guard',     'Guardia X por una pierna',      'Controlar una pierna con un gancho en cuatro para barrer o transicionar a candados de pierna.', 'guard'),
   -- Submissions
-  ('Triangle Choke',         'Usar las piernas para crear un cuatro alrededor del cuello y brazo del oponente y ahogar.',     'submission'),
-  ('Armbar',                 'Hiperextender el codo del oponente usando las caderas como punto de apoyo.',                     'submission'),
-  ('Kimura',                 'Llave de hombro usando un agarre en cuatro sobre la muñeca del oponente.',                      'submission'),
-  ('Omoplata',               'Llave de hombro usando la pierna para rotar el brazo del oponente detrás de su espalda.',       'submission'),
-  ('Cross Collar Choke',     'Insertar ambos pulgares en las solapas opuestas y ahogar desde la guardia cerrada.',            'submission'),
-  ('Rear Naked Choke',       'Estrangulamiento sanguíneo aplicado desde la espalda usando el antebrazo sobre la garganta.',   'submission'),
-  ('Straight Ankle Lock',    'Controlar el pie y aplicar presión sobre el tendón de Aquiles con el antebrazo.',               'submission'),
+  ('Triangle Choke',         'Estrangulación triángulo',      'Usar las piernas para crear un cuatro alrededor del cuello y brazo del oponente y ahogar.',     'submission'),
+  ('Armbar',                 'Llave de codo',                 'Hiperextender el codo del oponente usando las caderas como punto de apoyo.',                     'submission'),
+  ('Kimura',                 'Kimura',                        'Llave de hombro usando un agarre en cuatro sobre la muñeca del oponente.',                      'submission'),
+  ('Omoplata',               'Omoplata',                      'Llave de hombro usando la pierna para rotar el brazo del oponente detrás de su espalda.',       'submission'),
+  ('Cross Collar Choke',     'Estrangulación de solapa',      'Insertar ambos pulgares en las solapas opuestas y ahogar desde la guardia cerrada.',            'submission'),
+  ('Rear Naked Choke',       'Estrangulación dorsal',          'Estrangulamiento sanguíneo aplicado desde la espalda usando el antebrazo sobre la garganta.',   'submission'),
+  ('Straight Ankle Lock',     'Llave de tobillo',              'Controlar el pie y aplicar presión sobre el tendón de Aquiles con el antebrazo.',               'submission'),
   -- Escapes
-  ('Mount Escape',           'Usar el puente-y-volteo o escape codo-rodilla para recuperar guardia desde el monte inferior.', 'escape'),
-  ('Side Control Escape',    'Usar marcos y camarón para recuperar la guardia desde el control lateral inferior.',             'escape'),
-  ('Back Escape',            'Girarse hacia el oponente y recuperar guardia o tomar posición superior desde el control de espalda.','escape'),
-  ('Triangle Escape',        'Mejorar la postura, apilar o usar la mecánica del autoestopista para escapar un triángulo.',    'escape'),
-  ('Guillotine Escape',      'Sacar la cabeza o tomar la espalda para aliviar la presión de una guillotina.',                 'escape'),
-  ('Armbar Escape',          'Apilar, autoestopista o rodar para escapar antes de que se alcance la extensión completa.',     'escape')
-on conflict (name) do nothing;
+  ('Mount Escape',           'Escape de monte',               'Usar el puente-y-volteo o escape codo-rodilla para recuperar guardia desde el monte inferior.', 'escape'),
+  ('Side Control Escape',    'Escape de control lateral',     'Usar marcos y camarón para recuperar la guardia desde el control lateral inferior.',             'escape'),
+  ('Back Escape',            'Escape de espalda',             'Girarse hacia el oponente y recuperar guardia o tomar posición superior desde el control de espalda.','escape'),
+  ('Triangle Escape',        'Escape de triángulo',           'Mejorar la postura, apilar o usar la mecánica del autoestopista para escapar un triángulo.',    'escape'),
+  ('Guillotine Escape',      'Escape de guillotina',           'Sacar la cabeza o tomar la espalda para aliviar la presión de una guillotina.',                 'escape'),
+  ('Armbar Escape',          'Escape de llave de codo',       'Apilar, autoestopista o rodar para escapar antes de que se alcance la extensión completa.',     'escape')
+on conflict (name) do update set name_es = excluded.name_es;
 
 -- Sample workout for athlete2 (only inserted if the seed user exists)
 do $do$
