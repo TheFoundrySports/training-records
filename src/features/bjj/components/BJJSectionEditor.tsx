@@ -64,9 +64,8 @@ export function BJJSectionEditor({
   function handleApply() {
     if (!preview) return
     setValue(`sections.${index}.rawDescription`, preview.ai_description)
-    const current = getValues(`sections.${index}.techniqueIds`) ?? []
-    const merged = [...new Set([...current, ...preview.matched_technique_ids])]
-    setValue(`sections.${index}.techniqueIds`, merged)
+    // Replace techniqueIds with the AI-matched ones (don't merge — user reviewed and approved)
+    setValue(`sections.${index}.techniqueIds`, preview.matched_technique_ids)
     setPreview(null)
   }
 

@@ -251,12 +251,16 @@ Deno.serve(async (req) => {
   }
 
   // ILIKE keyword query on bjj_techniques
-  const keywords = extractKeywords(raw_description)
+  // Search BOTH section_goal AND raw_description so the prompt always gets relevant techniques
+  const goalKeywords = extractKeywords(section_goal)
+  const descKeywords = extractKeywords(raw_description)
+  // Deduplicate, goal keywords take priority (they're more specific to the technique)
+  const allKeywords = [...new Set([...goalKeywords, ...descKeywords])].slice(0, 10)
 
   let techniques: BJJTechniqueRow[] = []
 
-  if (keywords.length > 0) {
-    const orFilter = keywords.map((k) => `name.ilike.%${k}%`).join(',')
+  if (allKeywords.length > 0) {
+    const orFilter = allKeywords.map((k) => `name.ilike.%${k}%`).join(',')
     const { data, error: dbError } = await supabase
       .from('bjj_techniques')
       .select('id, name, description, category')
