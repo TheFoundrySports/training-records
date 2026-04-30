@@ -49,22 +49,25 @@ export function TechniqueSearch({ selectedIds, onChange, disabled }: TechniqueSe
     [allTechniques],
   )
 
-  // Keep nameMap in sync with allTechniques. Using a ref to track which
-  // IDs we've already populated avoids re-merging on every render.
+  // Keep nameMap in sync with allTechniques. We always re-populate when
+  // allTechniques gains new entries (e.g., after the initial fetch completes).
+  // We use allTechniques.length as the "started loading" signal rather than
+  // a separate loading flag, so this runs on every transition from [] → [...].
   // nameMap stores both English and Spanish names.
-  const populatedRef = useRef<Set<string>>(new Set())
   useEffect(() => {
     if (allTechniques.length === 0) return
     const newEntries: Record<string, string> = {}
     for (const t of allTechniques) {
-      if (!populatedRef.current.has(t.id)) {
-        newEntries[t.id] = t.name_es ? `${t.name} / ${t.name_es}` : t.name
-        populatedRef.current.add(t.id)
+      newEntries[t.id] = t.name_es ? `${t.name} / ${t.name_es}` : t.name
+    }
+    setNameMap((prev) => {
+      // Merge: keep existing entries, add new ones
+      const merged = { ...prev }
+      for (const [id, name] of Object.entries(newEntries)) {
+        merged[id] = name
       }
-    }
-    if (Object.keys(newEntries).length > 0) {
-      setNameMap((prev) => ({ ...prev, ...newEntries }))
-    }
+      return merged
+    })
   }, [allTechniques])
 
   // Close dropdown when clicking outside
