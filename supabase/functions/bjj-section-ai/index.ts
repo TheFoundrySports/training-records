@@ -181,14 +181,19 @@ function buildSystemPrompt(techniques: BJJTechniqueRow[]): string {
     techniques.length > 0
       ? techniques
           .map(
-            (t) => `- ${t.name} (${t.category ?? 'other'}): ${t.description ?? 'No description'}`,
+            (t) =>
+              `- ${t.name}${
+                t.name_es ? ` / ${t.name_es}` : ''
+              } (${t.category ?? 'other'}): ${t.description ?? 'No description'}`,
           )
           .join('\n')
       : '(no matching techniques found)'
 
   return `You are a Brazilian Jiu-Jitsu training assistant. Enhance the athlete's
 raw section description to be clear, structured, and technically precise.
-Reference only techniques from the catalog where genuinely relevant.
+Identify which techniques from the catalog the athlete was working on based on
+their description and goal. You can infer techniques even when the user uses
+informal Spanish terminology.
 
 Technique catalog:
 ${catalog}
@@ -201,6 +206,8 @@ Return ONLY valid JSON:
 
 Rules:
 - Respond always in Spanish
+- Examine the user's raw_description carefully and infer which techniques
+  from the catalog they were practicing, even if they didn't name them explicitly
 - matched_technique_ids must only contain IDs from the catalog above
 - If no techniques are clearly relevant, return []
 - Do not invent techniques not in the catalog
@@ -269,22 +276,25 @@ Deno.serve(async (req) => {
   }
 
   // ILIKE keyword query on bjj_techniques
-  // Search BOTH section_goal AND raw_description so the prompt always gets relevant techniques
+  // Search BOTH section_goal AND raw_description for technique catalog
   const goalKeywords = extractKeywords(section_goal)
   const descKeywords = extractKeywords(raw_description)
-  // Deduplicate, goal keywords take priority (they're more specific to the technique)
   const allKeywords = [...new Set([...goalKeywords, ...descKeywords])].slice(0, 10)
 
+  // Fetch the full catalog for the AI to choose from — pass ALL relevant techniques
+  // so the AI can intelligently match them to the user's description
   let techniques: BJJTechniqueRow[] = []
 
   if (allKeywords.length > 0) {
     const orFilter = allKeywords.map((k) => `name.ilike.%${k}%`).join(',')
+    const nameEsFilter = allKeywords.map((k) => `name_es.ilike.%${k}%`).join(',')
+    const combinedFilter = `${orFilter},${nameEsFilter}`
 
     let { data, error: dbError } = await supabase
       .from('bjj_techniques')
       .select('id, name, name_es, description, category')
-      .or(orFilter)
-      .limit(15)
+      .or(combinedFilter)
+      .limit(30)
 
     // Fallback: if name_es causes an error (column doesn't exist yet), retry without it
     if (dbError && dbError.message.includes('name_es')) {
@@ -293,7 +303,7 @@ Deno.serve(async (req) => {
         .from('bjj_techniques')
         .select('id, name, description, category')
         .or(fallbackFilter)
-        .limit(15)
+        .limit(30)
       data = result.data
       dbError = result.error
     }
@@ -303,6 +313,19 @@ Deno.serve(async (req) => {
     }
 
     techniques = (data ?? []) as BJJTechniqueRow[]
+  }
+
+  // If no keywords matched, fall back to sending the full catalog
+  // so the AI can still identify techniques even without keyword matches
+  if (techniques.length === 0) {
+    const { data: allData, error: allError } = await supabase
+      .from('bjj_techniques')
+      .select('id, name, name_es, description, category')
+      .limit(50)
+
+    if (!allError && allData) {
+      techniques = allData as BJJTechniqueRow[]
+    }
   }
 
   // Resolve AI config: DB → env var → null
