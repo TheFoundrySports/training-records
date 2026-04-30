@@ -49,20 +49,30 @@ class AIProviderAdapter {
   constructor(private config: AIConfig) {}
 
   async complete(messages: ChatMessage[]): Promise<string> {
-    const res = await fetch(`${this.config.baseUrl}/chat/completions`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${this.config.apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: this.config.model,
-        messages,
-        temperature: 0.3,
-        stream: false,
-        extra_body: { reasoning_split: true },
-      }),
-    })
+    // Timeout after 30s — prevents Edge Function hang on slow AI provider
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 30_000)
+
+    let res: Response
+    try {
+      res = await fetch(`${this.config.baseUrl}/chat/completions`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${this.config.apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: this.config.model,
+          messages,
+          temperature: 0.3,
+          stream: false,
+          extra_body: { reasoning_split: true },
+        }),
+        signal: controller.signal,
+      })
+    } finally {
+      clearTimeout(timeoutId)
+    }
 
     if (!res.ok) {
       throw new Error(`AI provider error: ${res.status}`)
