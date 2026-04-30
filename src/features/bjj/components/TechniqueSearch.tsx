@@ -25,7 +25,7 @@ export function TechniqueSearch({ selectedIds, onChange, disabled }: TechniqueSe
 
   // Load ALL techniques (no search filter) so we can resolve names for
   // IDs that were set programmatically (e.g., from AI enhance)
-  const { data: allTechniques = [] } = useBJJTechniques()
+  const { data: allTechniques = [], isLoading: techniquesLoading } = useBJJTechniques()
 
   // Debounce the search query
   const handleQueryChange = useCallback((value: string) => {
@@ -163,7 +163,9 @@ export function TechniqueSearch({ selectedIds, onChange, disabled }: TechniqueSe
         )}
       </div>
 
-      {selectedIds.length > 0 && (
+      {techniquesLoading ? (
+        <p className="text-xs text-muted-foreground">Loading techniques…</p>
+      ) : selectedIds.length > 0 ? (
         <div className="flex flex-wrap gap-2" aria-label="Selected techniques">
           {selectedIds.map((id) => {
             const name = resolveName(id)
@@ -183,7 +185,7 @@ export function TechniqueSearch({ selectedIds, onChange, disabled }: TechniqueSe
             )
           })}
         </div>
-      )}
+      ) : null}
     </div>
   )
 }
