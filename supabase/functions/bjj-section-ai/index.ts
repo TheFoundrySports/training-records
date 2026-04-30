@@ -84,28 +84,37 @@ class AIProviderAdapter {
         message: {
           content?: string
           text?: string
+          reasoning_details?: Array<{ text: string }>
         }
+        finish_reason?: string
       }>
+      base_resp?: {
+        status_code: number
+        status_msg: string
+      }
     }
+
+    // MiniMax error in base_resp
+    if (data.base_resp && data.base_resp.status_code !== 0) {
+      throw new Error(`MiniMax error ${data.base_resp.status_code}: ${data.base_resp.status_msg}`)
+    }
+
     const msg = data.choices[0]?.message
     let raw = msg?.content ?? msg?.text ?? ''
 
-    // MiniMax returns <think>... thinking blocks BEFORE the JSON response.
-    // The actual JSON starts with '{' and always comes AFTER the thinking block.
-    // Find the closing  tag and take everything after it.
-    const thinkClose = raw.indexOf('')
-    if (thinkClose >= 0) {
-      raw = raw.substring(thinkClose + ''.length)
+    // Strip reasoning/thinking blocks — MiniMax embeds these in content
+    // with <think>...  tags or as separate reasoning_details field
+    const thinkOpen = raw.indexOf('<think>')
+    const thinkClose = raw.indexOf('</think>')
+    if (thinkOpen >= 0 && thinkClose > thinkOpen) {
+      raw = raw.substring(thinkClose + '</think>'.length)
     }
 
-    // Strip markdown fences (some providers wrap JSON in them)
+    // Strip markdown fences
     raw = raw.replace(/^```json\s*/i, '').replace(/\s*```$/i, '').trim()
 
-    // Defensive: if content doesn't look like JSON, return null so caller
-    // falls back gracefully instead of throwing a confusing parse error
-    if (!raw.startsWith('{')) {
-      return ''
-    }
+    // If stripping thinking left nothing useful, return empty so caller handles it
+    if (!raw) return ''
 
     return raw
   }
