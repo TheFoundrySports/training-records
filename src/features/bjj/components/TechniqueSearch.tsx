@@ -28,6 +28,22 @@ export function TechniqueSearch({ selectedIds, onChange, disabled }: TechniqueSe
   // IDs that were set programmatically (e.g., from AI enhance)
   const { data: allTechniques = [] } = useBJJTechniques()
 
+  // Sync nameMap whenever allTechniques loads — ensures IDs set via setValue
+  // (before techniques loaded) get resolved as soon as data arrives
+  useEffect(() => {
+    if (allTechniques.length === 0) return
+    const newEntries: Record<string, string> = {}
+    for (const t of allTechniques) {
+      // Only fill in missing entries — don't overwrite user-set names
+      if (!(t.id in nameMap)) {
+        newEntries[t.id] = t.name
+      }
+    }
+    if (Object.keys(newEntries).length > 0) {
+      setNameMap((prev) => ({ ...prev, ...newEntries }))
+    }
+  }, [allTechniques])
+
   // Debounce the search query
   const handleQueryChange = useCallback((value: string) => {
     setQuery(value)
