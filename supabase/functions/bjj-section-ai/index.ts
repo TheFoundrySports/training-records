@@ -90,14 +90,22 @@ class AIProviderAdapter {
     const msg = data.choices[0]?.message
     let raw = msg?.content ?? msg?.text ?? ''
 
-    // MiniMax embeds thinking in <think>... tags — strip them
-    // Since thinking is always before the JSON and JSON always starts with '{',
-    // we strip thinking by finding the first '{' and taking everything from there.
-    const firstBrace = raw.indexOf('{')
-    raw = firstBrace >= 0 ? raw.substring(firstBrace) : raw
+    // MiniMax returns <think>... thinking blocks BEFORE the JSON response.
+    // The actual JSON starts with '{' and always comes AFTER the thinking block.
+    // Find the closing  tag and take everything after it.
+    const thinkClose = raw.indexOf('')
+    if (thinkClose >= 0) {
+      raw = raw.substring(thinkClose + ''.length)
+    }
 
     // Strip markdown fences (some providers wrap JSON in them)
     raw = raw.replace(/^```json\s*/i, '').replace(/\s*```$/i, '').trim()
+
+    // Defensive: if content doesn't look like JSON, return null so caller
+    // falls back gracefully instead of throwing a confusing parse error
+    if (!raw.startsWith('{')) {
+      return ''
+    }
 
     return raw
   }
