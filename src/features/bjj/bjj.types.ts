@@ -20,6 +20,7 @@ export interface BJJSection {
   aiDescription?: string
   durationMinutes?: number
   techniques: BJJTechnique[]
+  enhancedNotes?: string
   createdAt: string
 }
 

@@ -36,7 +36,7 @@ export function BJJSectionEditor({
   const enhanceInFlightRef = useRef(false)
 
   const { enhance, isPending: isAIPending } = useBJJSectionAI()
-  const { setValue, getValues } = useFormContext<BJJWorkoutFormValues>()
+  const { setValue } = useFormContext<BJJWorkoutFormValues>()
 
   const rawDescription = useWatch({ control, name: `sections.${index}.rawDescription` })
   const sectionGoal = useWatch({ control, name: `sections.${index}.goal` })
@@ -71,9 +71,12 @@ export function BJJSectionEditor({
 
   function handleApply() {
     if (!preview) return
-    setValue(`sections.${index}.rawDescription`, preview.ai_description)
-    // Replace techniqueIds with the AI-matched ones (don't merge — user reviewed and approved)
-    setValue(`sections.${index}.techniqueIds`, preview.matched_technique_ids)
+    // Store AI result in enhancedNotes (preserves original rawDescription)
+    setValue(`sections.${index}.enhancedNotes`, preview.ai_description)
+    // Also update technique IDs if AI found matches
+    if (preview.matched_technique_ids.length > 0) {
+      setValue(`sections.${index}.techniqueIds`, preview.matched_technique_ids)
+    }
     setPreview(null)
   }
 
@@ -118,7 +121,7 @@ export function BJJSectionEditor({
           )}
         />
 
-        {/* Raw Description */}
+        {/* Notes (optional) */}
         <FormField
           control={control}
           name={`sections.${index}.rawDescription`}
@@ -128,6 +131,27 @@ export function BJJSectionEditor({
               <FormControl>
                 <Textarea
                   placeholder="What did you drill? How did it go?"
+                  rows={3}
+                  {...field}
+                  value={field.value ?? ''}
+                  disabled={isPending}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Enhanced Notes (AI) */}
+        <FormField
+          control={control}
+          name={`sections.${index}.enhancedNotes`}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Enhanced Notes (AI, optional)</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="AI-enhanced version of your notes will appear here"
                   rows={3}
                   {...field}
                   value={field.value ?? ''}
