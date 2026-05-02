@@ -15,11 +15,26 @@ vi.mock('../hooks/useWorkouts', () => ({
 
 vi.mock('../hooks/useWorkoutMutations', () => ({
   useCreateWorkout: vi.fn(),
-  useUpdateWorkout: vi.fn(),
+  useUpdateWorkout: vi.fn(() => ({
+    mutateAsync: vi.fn().mockResolvedValue({}),
+    isPending: false,
+    isError: false,
+    error: null,
+    reset: vi.fn(),
+  })),
   useDeleteWorkout: vi.fn(),
 }))
 
-// Mock auth context
+vi.mock('../hooks/useWorkoutNotesAI', () => ({
+  useWorkoutNotesAI: vi.fn(() => ({
+    enhance: vi.fn(),
+    enhanceAsync: vi.fn(),
+    isPending: false,
+    error: null,
+    reset: vi.fn(),
+  })),
+}))
+
 vi.mock('@/features/auth/AuthContext', () => ({
   useAuth: vi.fn(() => ({ user: { id: 'u1' }, session: {}, role: 'athlete', isLoading: false })),
 }))

@@ -18,6 +18,7 @@ export function useCreateBJJWorkout() {
           raw_description: s.rawDescription ?? null,
           duration_minutes: s.durationMinutes ?? null,
           technique_ids: s.techniqueIds,
+          enhanced_notes: s.enhancedNotes ?? null,
         })),
       })
 

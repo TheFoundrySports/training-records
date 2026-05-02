@@ -1,6 +1,5 @@
 // @ts-nocheck — Deno global types not available in editor
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { buildSystemPrompt, type BJJTechniqueRow } from './prompt.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -21,9 +20,8 @@ function jsonResponse(data: unknown, status = 200) {
   })
 }
 
-interface BJJSectionAIResponse {
-  ai_description: string
-  matched_technique_ids: string[]
+interface WorkoutNotesAIResponse {
+  enhanced_notes: string
 }
 
 // ── AI Provider Adapter ──────────────────────────────────────────────────────
@@ -97,10 +95,10 @@ class AIProviderAdapter {
 
     // Strip reasoning/thinking blocks — MiniMax embeds these in content
     // with <think>...  tags or as separate reasoning_details field
-    const thinkOpen = raw.indexOf('<think>')
-    const thinkClose = raw.indexOf('</think>')
+    const thinkOpen = raw.indexOf('【')
+    const thinkClose = raw.indexOf('】')
     if (thinkOpen >= 0 && thinkClose > thinkOpen) {
-      raw = raw.substring(thinkClose + '</think>'.length)
+      raw = raw.substring(thinkClose + '】'.length)
     }
 
     // Strip markdown fences
@@ -147,34 +145,39 @@ async function resolveAIConfig(supabaseAdmin: ReturnType<typeof createClient>): 
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-function buildMockResponse(
-  raw_description: string,
-  section_goal: string,
-  techniques: BJJTechniqueRow[],
-): BJJSectionAIResponse {
+function buildMockResponse(notes: string): WorkoutNotesAIResponse {
   return {
-    ai_description: `[Mock] Mejorado: "${raw_description.slice(0, 60)}…" — enfocado en ${section_goal}.`,
-    matched_technique_ids: techniques.slice(0, 2).map((t) => t.id),
+    enhanced_notes: notes.trim() + ' [AI enhancement unavailable]',
   }
 }
 
-function isValidAIResponse(data: unknown): data is BJJSectionAIResponse {
+function isValidAIResponse(data: unknown): data is WorkoutNotesAIResponse {
   if (typeof data !== 'object' || data === null) return false
   const d = data as Record<string, unknown>
-  return (
-    typeof d.ai_description === 'string' &&
-    d.ai_description.length > 0 &&
-    Array.isArray(d.matched_technique_ids) &&
-    (d.matched_technique_ids as unknown[]).every((id) => typeof id === 'string')
-  )
+  return typeof d.enhanced_notes === 'string' && (d.enhanced_notes as string).length > 0
 }
 
-function extractKeywords(rawDescription: string): string[] {
-  return rawDescription
-    .split(/\s+/)
-    .map((w) => w.replace(/[^a-zA-Z0-9áéíóúüñÁÉÍÓÚÜÑ]/g, '').toLowerCase())
-    .filter((w) => w.length >= 4)
-    .slice(0, 5)
+// ── Enhancement prompt ────────────────────────────────────────────────────────
+
+function buildSystemPrompt(): string {
+  return `You are an expert fitness coach and technical editor. Your job is to enhance workout notes by improving clarity, grammar, and structure.
+
+Rules:
+- Use bullet points for sets, reps, weights, and exercises
+- Keep all technical fitness terms (rep, set, EMOM, AMRAP, RPE, etc.) unchanged
+- Preserve specific numbers, weights, distances, and time domains exactly as written
+- Improve flow and readability without changing the actual content
+- Keep the tone practical and coach-like
+- If the notes are already clear, still apply light formatting improvements
+- Return ONLY a JSON object: {"enhanced_notes": "your enhanced text here"}
+- Do NOT include any explanation, markdown fences, or additional fields outside the JSON object
+
+Examples:
+Input: "squats 3x10 at 135lbs felt heavy today"
+Output: {"enhanced_notes": "• Squats: 3×10 @ 135 lbs\n• Felt heavy — consider deload next session"}
+
+Input: "5 rounds amrap 400m run and 15 pull-ups"
+Output: {"enhanced_notes": "• AMRAP (5 rounds):\n  - 400m run\n  - 15 pull-ups\n• Pacing: steady state recommended"}`
 }
 
 // ── Main handler ─────────────────────────────────────────────────────────────
@@ -215,71 +218,16 @@ Deno.serve(async (req) => {
   }
 
   // Parse and validate body
-  let section_goal: string
-  let raw_description: string
+  let notes: string
   try {
-    const body = (await req.json()) as { section_goal?: string; raw_description?: string }
-    section_goal = body.section_goal ?? ''
-    raw_description = body.raw_description ?? ''
+    const body = (await req.json()) as { notes?: string }
+    notes = body.notes ?? ''
   } catch {
     return errorResponse('BAD_REQUEST', 'Invalid JSON body', 400)
   }
 
-  if (!section_goal.trim()) {
-    return errorResponse('BAD_REQUEST', 'section_goal is required', 400)
-  }
-
-  // ILIKE keyword query on bjj_techniques
-  // Search BOTH section_goal AND raw_description for technique catalog
-  const goalKeywords = extractKeywords(section_goal)
-  const descKeywords = extractKeywords(raw_description)
-  const allKeywords = [...new Set([...goalKeywords, ...descKeywords])].slice(0, 10)
-
-  // Fetch the full catalog for the AI to choose from — pass ALL relevant techniques
-  // so the AI can intelligently match them to the user's description
-  let techniques: BJJTechniqueRow[] = []
-
-  if (allKeywords.length > 0) {
-    const orFilter = allKeywords.map((k) => `name.ilike.%${k}%`).join(',')
-    const nameEsFilter = allKeywords.map((k) => `name_es.ilike.%${k}%`).join(',')
-    const combinedFilter = `${orFilter},${nameEsFilter}`
-
-    let { data, error: dbError } = await supabase
-      .from('bjj_techniques')
-      .select('id, name, name_es, description, category')
-      .or(combinedFilter)
-      .limit(30)
-
-    // Fallback: if name_es causes an error (column doesn't exist yet), retry without it
-    if (dbError && dbError.message.includes('name_es')) {
-      const fallbackFilter = allKeywords.map((k) => `name.ilike.%${k}%`).join(',')
-      const result = await supabase
-        .from('bjj_techniques')
-        .select('id, name, description, category')
-        .or(fallbackFilter)
-        .limit(30)
-      data = result.data
-      dbError = result.error
-    }
-
-    if (dbError) {
-      return errorResponse('INTERNAL_ERROR', 'Failed to query techniques', 500, dbError)
-    }
-
-    techniques = (data ?? []) as BJJTechniqueRow[]
-  }
-
-  // If no keywords matched, fall back to sending the full catalog
-  // so the AI can still identify techniques even without keyword matches
-  if (techniques.length === 0) {
-    const { data: allData, error: allError } = await supabase
-      .from('bjj_techniques')
-      .select('id, name, name_es, description, category')
-      .limit(50)
-
-    if (!allError && allData) {
-      techniques = allData as BJJTechniqueRow[]
-    }
+  if (!notes.trim()) {
+    return errorResponse('BAD_REQUEST', 'notes is required and cannot be empty', 400)
   }
 
   // Resolve AI config: DB → env var → null
@@ -287,19 +235,18 @@ Deno.serve(async (req) => {
 
   // Mock fallback when no AI config is available
   if (!aiConfig) {
-    return jsonResponse(buildMockResponse(raw_description, section_goal, techniques))
+    return jsonResponse(buildMockResponse(notes))
   }
 
   // Build prompt and call AI provider
-  const systemPrompt = buildSystemPrompt(techniques)
   const adapter = new AIProviderAdapter(aiConfig)
 
   try {
     const content = await adapter.complete([
-      { role: 'system', content: systemPrompt },
+      { role: 'system', content: buildSystemPrompt() },
       {
         role: 'user',
-        content: `Section goal: ${section_goal}\nRaw description: ${raw_description}`,
+        content: `Raw workout notes:\n${notes}`,
       },
     ])
 
@@ -316,13 +263,12 @@ Deno.serve(async (req) => {
     }
 
     return jsonResponse({
-      ai_description: parsed.ai_description,
-      matched_technique_ids: parsed.matched_technique_ids,
+      enhanced_notes: parsed.enhanced_notes,
     })
   } catch (err) {
     // AI call failed (network error, timeout, provider 5xx, etc.) — fall back to mock
     // rather than surfacing a confusing 502 to the client.
-    console.error('[bjj-section-ai] AI provider call failed:', err)
-    return jsonResponse(buildMockResponse(raw_description, section_goal, techniques))
+    console.error('[workout-notes-ai] AI provider call failed:', err)
+    return jsonResponse(buildMockResponse(notes))
   }
 })

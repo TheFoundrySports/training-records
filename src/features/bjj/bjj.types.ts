@@ -3,6 +3,7 @@ export type BJJCategory = 'guard' | 'takedown' | 'submission' | 'escape' | 'tran
 export interface BJJTechnique {
   id: string
   name: string
+  name_es?: string
   description?: string
   category?: BJJCategory
   youtubeUrl?: string
@@ -19,6 +20,7 @@ export interface BJJSection {
   aiDescription?: string
   durationMinutes?: number
   techniques: BJJTechnique[]
+  enhancedNotes?: string
   createdAt: string
 }
 

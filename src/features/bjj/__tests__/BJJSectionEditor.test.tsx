@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -7,17 +7,15 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { bjjWorkoutSchema, type BJJWorkoutFormValues } from '../bjj.schema'
 import { BJJSectionEditor } from '../components/BJJSectionEditor'
 import { Form } from '@/components/ui/form'
+import { useBJJSectionAI } from '../hooks/useBJJSectionAI'
 
 // ── Mocks ─────────────────────────────────────────────────────────────────────
 
+const enhanceMock = vi.fn()
+
 // Mock useBJJSectionAI to avoid Supabase network calls
 vi.mock('../hooks/useBJJSectionAI', () => ({
-  useBJJSectionAI: vi.fn(() => ({
-    enhance: vi.fn(),
-    isPending: false,
-    error: null,
-    reset: vi.fn(),
-  })),
+  useBJJSectionAI: vi.fn(),
 }))
 
 // Mock useBJJTechniques to return empty results
@@ -102,6 +100,19 @@ function SectionEditorWrapper({
 describe('BJJSectionEditor — REQ-306, REQ-315', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    enhanceMock.mockImplementation(
+      (_input: unknown, opts?: { onSettled?: () => void }) => {
+        queueMicrotask(() => {
+          opts?.onSettled?.()
+        })
+      },
+    )
+    vi.mocked(useBJJSectionAI).mockReturnValue({
+      enhance: enhanceMock,
+      isPending: false,
+      error: null,
+      reset: vi.fn(),
+    })
   })
 
   describe('fields render', () => {
@@ -229,6 +240,18 @@ describe('BJJSectionEditor — REQ-306, REQ-315', () => {
       await user.type(goalInput, 'Guard passing')
 
       expect(screen.getByRole('button', { name: /enhance with ai/i })).not.toBeDisabled()
+    })
+
+    it('does not invoke enhance twice when the button receives two clicks in one sync turn', async () => {
+      const user = userEvent.setup()
+      render(<SectionEditorWrapper />)
+      await user.type(screen.getByLabelText(/notes/i), 'drilling')
+
+      const btn = screen.getByRole('button', { name: /enhance with ai/i })
+      fireEvent.click(btn)
+      fireEvent.click(btn)
+
+      expect(enhanceMock).toHaveBeenCalledOnce()
     })
   })
 })

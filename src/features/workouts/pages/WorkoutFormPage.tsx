@@ -1,14 +1,15 @@
-import '../registry/formats/index'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { workoutSchema, type WorkoutFormValues } from '../workout.schema'
 import { useWorkout } from '../hooks/useWorkouts'
 import { useCreateWorkout, useUpdateWorkout } from '../hooks/useWorkoutMutations'
+import { useWorkoutNotesAI } from '../hooks/useWorkoutNotesAI'
 import { getFormat } from '../registry/index'
 import { WodFormatSelector } from '../components/WodFormatSelector'
 import { PublicWodPickerModal } from '../components/PublicWodPickerModal'
+import { AINotesPreviewPanel } from '../components/AINotesPreviewPanel'
 import type { PublicWodFormFields } from '@/features/public-wods'
 import type { WodFormat } from '../registry/types'
 import { Button } from '@/components/ui/button'
@@ -51,12 +52,59 @@ export function WorkoutFormPage() {
       performedAt: new Date().toISOString().slice(0, 16),
       durationMinutes: 30,
       notes: '',
+      enhancedNotes: undefined,
       rpe: undefined,
       wodText: '',
       wodFormat: undefined,
       payload: undefined,
     },
   })
+
+  // AI Enhance state
+  const [aiPreview, setAiPreview] = useState<string | null>(null)
+  const [aiError, setAiError] = useState<string | null>(null)
+  /** Blocks a second click before React re-renders with `isAIPending`. */
+  const enhanceInFlightRef = useRef(false)
+
+  const { enhance, isPending: isAIPending } = useWorkoutNotesAI()
+
+  const notesValue = form.watch('notes')
+  /** Set to true when user clicks "Apply" on the AI preview — cleared on form reset/submit */
+  const aiWasAppliedRef = useRef(false)
+
+  function handleAIEnhance() {
+    const notes = notesValue ?? ''
+    if (!notes.trim() || enhanceInFlightRef.current || isAIPending) return
+
+    enhanceInFlightRef.current = true
+    setAiError(null)
+    enhance(
+      { notes },
+      {
+        onSuccess: (result) => {
+          setAiPreview(result.enhanced_notes)
+        },
+        onError: (err) => {
+          const message = err instanceof Error ? err.message : 'AI enhancement failed'
+          setAiError(message)
+        },
+        onSettled: () => {
+          enhanceInFlightRef.current = false
+        },
+      },
+    )
+  }
+
+  function handleAIApply(enhancedNotes: string) {
+    // Store enhanced notes separately — original notes are preserved
+    form.setValue('enhancedNotes', enhancedNotes, { shouldValidate: true })
+    aiWasAppliedRef.current = true
+    setAiPreview(null)
+  }
+
+  function handleAIDiscard() {
+    setAiPreview(null)
+  }
 
   function handlePublicWodSelect(fields: PublicWodFormFields) {
     form.reset({
@@ -117,11 +165,17 @@ export function WorkoutFormPage() {
       }
     }
 
+    // Include enhanced notes in submission if user applied AI enhancement
+    const submissionValues: WorkoutFormValues = {
+      ...values,
+      enhancedNotes: aiWasAppliedRef.current ? form.getValues('notes') : values.enhancedNotes,
+    }
+
     if (isEdit && id) {
-      await updateMutation.mutateAsync({ id, data: values })
+      await updateMutation.mutateAsync({ id, data: submissionValues })
       void navigate(`/workouts/${id}`)
     } else {
-      await createMutation.mutateAsync(values)
+      await createMutation.mutateAsync(submissionValues)
       void navigate('/workouts')
     }
   }
@@ -289,11 +343,37 @@ export function WorkoutFormPage() {
             name="notes"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Notes</FormLabel>
+                <div className="flex items-center justify-between">
+                  <FormLabel>Notes</FormLabel>
+                  {(notesValue ?? '').trim().length > 0 && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleAIEnhance}
+                      disabled={isAIPending || isPending}
+                      className="h-7 text-xs"
+                    >
+                      {isAIPending ? 'Enhancing…' : '✦ Enhance with AI'}
+                    </Button>
+                  )}
+                </div>
                 <FormControl>
                   <Textarea placeholder="How did it go?" {...field} />
                 </FormControl>
                 <FormMessage />
+                {aiError && (
+                  <p className="text-sm text-destructive rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 mt-1">
+                    {aiError}
+                  </p>
+                )}
+                {aiPreview && !aiError && (
+                  <AINotesPreviewPanel
+                    enhanced_notes={aiPreview}
+                    onApply={handleAIApply}
+                    onDiscard={handleAIDiscard}
+                  />
+                )}
               </FormItem>
             )}
           />

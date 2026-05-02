@@ -27,6 +27,7 @@ export const workoutSchema = z.object({
     .min(1, 'Duration must be at least 1 minute')
     .max(300, 'Duration must be 300 minutes or less'),
   notes: z.string().max(2000, 'Notes must be 2000 characters or less').optional(),
+  enhancedNotes: z.string().max(4000, 'Enhanced notes must be 4000 characters or less').optional(),
   wodText: z.string().max(5000, 'WOD text must be 5000 characters or less').optional(),
   rpe: z
     .number()

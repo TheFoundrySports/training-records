@@ -8,9 +8,9 @@ export function useBJJTechniques(options: { search?: string } = {}) {
     queryFn: async () => {
       let query = supabase
         .from('bjj_techniques')
-        .select('id, name, description, category, youtube_url, created_at, updated_at')
+        .select('id, name, name_es, description, category, youtube_url, created_at, updated_at')
         .order('name')
-        .limit(options.search ? 15 : 100)
+        .limit(options.search ? 15 : 500)
 
       if (options.search) {
         query = query.ilike('name', `%${options.search}%`)

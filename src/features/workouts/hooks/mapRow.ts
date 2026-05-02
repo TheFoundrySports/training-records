@@ -8,6 +8,7 @@ export function mapRow(row: {
   performed_at: string
   duration_minutes: number
   notes: string | null
+  enhanced_notes: string | null
   rpe: number | null
   wod_text: string | null
   wod_format: string | null
@@ -24,6 +25,7 @@ export function mapRow(row: {
     performedAt: row.performed_at,
     durationMinutes: row.duration_minutes,
     notes: row.notes ?? undefined,
+    enhancedNotes: row.enhanced_notes ?? undefined,
     rpe: row.rpe ?? undefined,
     wodText: row.wod_text ?? undefined,
     wodFormat: row.wod_format ?? undefined,

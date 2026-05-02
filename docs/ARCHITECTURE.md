@@ -2,6 +2,8 @@
 
 Product intent and functional scope are defined in [docs/PRD.md](PRD.md). This document reflects the **as-built** system.
 
+> **Deep reference:** For detailed class/method documentation, hook signatures, component internals, and step-by-step data flows, see [CODE_REFERENCE.md](CODE_REFERENCE.md).
+
 ## Overview
 
 Training Records is a **React SPA** for logging workouts, backed by **Supabase** for database, authentication, and serverless functions.
@@ -52,19 +54,23 @@ create table public.workouts (
   id               uuid primary key default gen_random_uuid(),
   user_id          uuid not null references auth.users(id) on delete cascade,
   title            text not null,
-  type             text not null check (type in ('crossfit', 'functional')),
+  type             text not null check (type in ('crossfit', 'functional', 'bjj')),
   performed_at     timestamptz not null,
   duration_minutes integer not null check (duration_minutes > 0),
   notes            text,
+  enhanced_notes   text,
   rpe              integer check (rpe between 1 and 10),
-  -- iteration 2: structured WOD fields
+  -- structured WOD fields
   wod_format       text check (wod_format in ('amrap', 'for_time', 'emom', 'tabata', 'ladder', 'rft')),
   wod_text         text,
   payload          jsonb,
+  garmin_activity_id uuid references public.garmin_activities(id),
   created_at       timestamptz not null default now(),
   updated_at       timestamptz not null default now()
 );
 ```
+
+> **Note:** `enhanced_notes` stores an AI-improved version of `notes`. The AI enhancement is user-triggered (never auto-applied), and the original `notes` field is never overwritten.
 
 ### `categories`
 
@@ -146,7 +152,7 @@ CREATE TABLE public.bjj_techniques (
 
 ### `bjj_sections`
 
-Ordered sections within a single BJJ workout. Each section has a goal and optional free-text + AI-enhanced description.
+Ordered sections within a single BJJ workout. Each section has a goal, user's raw notes, and an optional AI-enhanced version (`enhanced_notes`). The `ai_description` field is the legacy AI enhancement output (stored in the same field when user applies the BJJ section AI flow).
 
 ```sql
 CREATE TABLE public.bjj_sections (
@@ -155,6 +161,7 @@ CREATE TABLE public.bjj_sections (
   section_number   integer NOT NULL CHECK (section_number >= 1),
   goal             text    NOT NULL,
   raw_description  text,
+  enhanced_notes   text,
   ai_description   text,
   duration_minutes integer CHECK (duration_minutes BETWEEN 1 AND 300),
   created_at       timestamptz NOT NULL DEFAULT now(),
@@ -192,21 +199,34 @@ Deleting a `workouts` row cascades to → `bjj_sections` → `bjj_section_techni
 
 ### Atomic save: `bjj_create_workout` RPC
 
-BJJ workout creation (workout + sections + technique links) is wrapped in a single PostgreSQL transaction via a `SECURITY DEFINER` RPC function. The client calls `supabase.rpc('bjj_create_workout', {...})` — never parallel PostgREST calls — to prevent partial inserts (Risk R2 from proposal).
+BJJ workout creation (workout + sections + technique links) is wrapped in a single PostgreSQL transaction via a `SECURITY DEFINER` RPC function. The client calls `supabase.rpc('bjj_create_workout', {...})` — never parallel PostgREST calls — to prevent partial inserts.
 
 ```sql
--- Signature (simplified)
-CREATE OR REPLACE FUNCTION public.bjj_create_workout(
-  p_title        text,
-  p_performed_at timestamptz,
-  p_duration_min integer,
-  p_notes        text,
-  p_rpe          integer,
-  p_sections     bjj_section_input[]   -- custom composite type
+-- Composite type for section input
+CREATE TYPE bjj_section_input AS (
+  section_number    integer,
+  goal              text,
+  raw_description   text,
+  duration_minutes  integer,
+  technique_ids     uuid[],
+  enhanced_notes    text
+);
+
+-- Signature (p_enhanced_notes MUST be last for backward compatibility)
+CREATE FUNCTION public.bjj_create_workout(
+  p_title          text,
+  p_performed_at   timestamptz,
+  p_duration_min   integer,
+  p_notes          text,
+  p_rpe            integer,
+  p_sections       bjj_section_input[],  -- array of sections, each with enhanced_notes
+  p_enhanced_notes text DEFAULT null    -- top-level session notes AI enhancement
 )
-RETURNS uuid   -- returns new workout.id
+RETURNS uuid
 LANGUAGE plpgsql SECURITY DEFINER;
 ```
+
+The `p_sections` array carries per-section `enhanced_notes` — each section can have its own AI-enhanced version independent of others. `p_enhanced_notes` is retained at the workout level for top-level session notes AI enhancement.
 
 ## Directory Structure
 
@@ -348,7 +368,8 @@ See [docs/rls-verification.md](rls-verification.md) for full policy definitions 
 | `exercises`      | GET                   | `/categories` — list all categories                                                               |
 | `exercises`      | GET                   | `/equipment` — list all equipment types                                                           |
 | `workouts`       | ALL                   | CRUD gateway (not yet used by the SPA)                                                            |
-| `bjj-section-ai` | POST                  | Accepts section goal + raw description; returns AI-enhanced description and matched technique IDs |
+| `bjj-section-ai`  | POST                  | Accepts section goal + raw description; retrieves matching techniques via ILIKE; returns enhanced description + matched technique IDs |
+| `workout-notes-ai` | POST                  | Accepts workout `notes`; returns `enhanced_notes` — an AI-improved version with grammar, structure, and bullet formatting. Falls back to mock if AI unavailable |
 
 All Edge Functions validate the JWT before processing:
 
@@ -435,13 +456,14 @@ Adding a new format requires only: creating a new file in `registry/formats/`, i
 
 ## External Dependencies
 
-| Service                        | Purpose                                        |
-| ------------------------------ | ---------------------------------------------- |
-| **Supabase Auth**              | Authentication; issues JWTs                    |
-| **Supabase PostgreSQL**        | Primary data store                             |
-| **Supabase PostgREST**         | Auto-generated REST API from DB schema         |
-| **Supabase Edge Functions**    | AI workout generation; future API gateway      |
-| **OpenAI (or compatible LLM)** | Powers `ai-generate` (key is server-side only) |
+| Service                        | Purpose                                                                      |
+| ------------------------------ | ---------------------------------------------------------------------------- |
+| **Supabase Auth**              | Authentication; issues JWTs                                                   |
+| **Supabase PostgreSQL**        | Primary data store                                                           |
+| **Supabase PostgREST**         | Auto-generated REST API from DB schema                                        |
+| **Supabase Edge Functions**    | AI workout generation; CRUD; future API gateway                               |
+| **MiniMax (or compatible LLM)** | Powers `bjj-section-ai` and `workout-notes-ai` (key is server-side only) |
+| **OpenAI (or compatible LLM)** | Powers `ai-generate` (legacy, key is server-side only)                      |
 
 ## Technology Stack
 

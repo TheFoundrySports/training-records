@@ -19,6 +19,7 @@ import '../registry/formats/index'
 import { getFormat } from '../registry/index'
 import type { WodFormat } from '../registry/types'
 import { BJJWorkoutDetail } from '@/features/bjj/components/BJJWorkoutDetail'
+import { WorkoutNotesSection } from '../components/WorkoutNotesSection'
 import {
   useGarminActivity,
   useTrainingEvaluation,
@@ -174,12 +175,11 @@ export function WorkoutDetailPage() {
           <DetailRow label="Date" value={formatDate(workout.performedAt)} />
           <DetailRow label="Duration" value={`${workout.durationMinutes} minutes`} />
           {workout.rpe !== undefined && <DetailRow label="RPE" value={`${workout.rpe} / 10`} />}
-          {workout.notes && (
+          {(workout.notes || workout.enhancedNotes) && (
             <>
               <Separator className="my-2" />
               <div className="py-2">
-                <p className="text-sm text-muted-foreground mb-1">Notes</p>
-                <p className="text-sm whitespace-pre-wrap">{workout.notes}</p>
+                <WorkoutNotesSection workout={workout} />
               </div>
             </>
           )}

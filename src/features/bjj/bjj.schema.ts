@@ -27,6 +27,7 @@ export const bjjSectionSchema = z.object({
   durationMinutes: z.number().int().min(1).max(300).optional(),
   /** Array of technique IDs selected via TechniqueSearch */
   techniqueIds: z.array(z.string().uuid()).default([]),
+  enhancedNotes: z.string().max(4000).optional(),
 })
 export type BJJSectionFormValues = z.infer<typeof bjjSectionSchema>
 

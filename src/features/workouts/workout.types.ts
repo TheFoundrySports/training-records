@@ -9,6 +9,7 @@ export interface Workout {
   durationMinutes: number
   rpe?: number // 1–10
   notes?: string
+  enhancedNotes?: string
   wodText?: string
   wodFormat?: string
   payload?: Record<string, unknown>
@@ -24,6 +25,7 @@ export interface CreateWorkoutInput {
   durationMinutes: number
   rpe?: number
   notes?: string
+  enhancedNotes?: string
   wodText?: string
   wodFormat?: string
   payload?: Record<string, unknown>
