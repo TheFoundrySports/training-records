@@ -25,8 +25,8 @@ function formatDate(iso: string) {
 
 function WorkoutCard({ workout }: { workout: Workout }) {
   return (
-    <Link to={`/workouts/${workout.id}`} className="block hover:no-underline">
-      <Card className="hover:ring-primary/40 transition-shadow cursor-pointer">
+    <Link to={`/workouts/${workout.id}`} className="block hover:no-underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded-xl">
+      <Card className="hover:ring-primary/40 focus-visible:ring-primary/50 transition-shadow cursor-pointer">
         <CardContent className="flex items-start justify-between gap-4 py-4">
           <div className="flex-1 min-w-0">
             <p className="font-medium truncate">{workout.title}</p>
@@ -115,13 +115,16 @@ export function WorkoutListPage() {
       )}
 
       {!isLoading && !isError && workouts && workouts.length > 0 && (
-        <ul className="space-y-3" aria-label="Workout list">
-          {workouts.map((workout) => (
-            <li key={workout.id}>
-              <WorkoutCard workout={workout} />
-            </li>
-          ))}
-        </ul>
+        <nav aria-label="Workout list">
+          <h2 className="sr-only">Available workouts</h2>
+          <ul className="space-y-3">
+            {workouts.map((workout) => (
+              <li key={workout.id}>
+                <WorkoutCard workout={workout} />
+              </li>
+            ))}
+          </ul>
+        </nav>
       )}
     </div>
   )

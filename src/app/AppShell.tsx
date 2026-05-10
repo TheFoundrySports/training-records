@@ -3,9 +3,11 @@ import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/features/auth/AuthContext'
+import { usePageFocus } from '@/hooks/usePageFocus'
 
 export function AppShell() {
   const { user, role } = useAuth()
+  usePageFocus()
 
   async function handleLogout() {
     await supabase.auth.signOut()
@@ -64,7 +66,7 @@ export function AppShell() {
         </div>
         <Separator />
       </header>
-      <main className="flex-1">
+      <main id="main-content" tabIndex={-1} className="flex-1 outline-none">
         <Outlet />
       </main>
     </div>

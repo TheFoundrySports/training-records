@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router'
 import { useForm, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -55,14 +56,26 @@ export function BJJWorkoutFormPage() {
   const mutationError = (createMutation.error as { error?: { message?: string } } | null)?.error
     ?.message
 
+  const rootErrorRef = useRef<HTMLDivElement>(null)
+
+  // Focus error summary on submit failure
+  useEffect(() => {
+    if (rootErrorRef.current && mutationError) {
+      rootErrorRef.current.focus()
+    }
+  }, [mutationError])
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl">
       <h1 className="text-2xl font-semibold mb-6">Log BJJ Workout</h1>
 
       {mutationError && (
         <div
+          ref={rootErrorRef}
           role="alert"
-          className="mb-4 rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-destructive text-sm"
+          aria-live="assertive"
+          tabIndex={-1}
+          className="mb-4 rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-destructive text-sm outline-none"
         >
           {mutationError}
         </div>
@@ -174,8 +187,8 @@ export function BJJWorkoutFormPage() {
           />
 
           {/* Sections */}
-          <div className="space-y-4">
-            <h2 className="text-lg font-medium">Sections</h2>
+          <fieldset className="space-y-4">
+            <legend className="text-lg font-medium">Sections</legend>
             {fields.map((field, index) => (
               <BJJSectionEditor
                 key={field.id}
@@ -211,7 +224,7 @@ export function BJJWorkoutFormPage() {
             >
               + Add Section
             </Button>
-          </div>
+          </fieldset>
 
           {/* Submit */}
           <div className="flex gap-3 pt-2">

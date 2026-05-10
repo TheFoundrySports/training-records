@@ -60,6 +60,14 @@ export function WorkoutFormPage() {
     },
   })
 
+  const mutationError =
+    (createMutation.error as { error?: { message?: string } } | null)?.error?.message ??
+    (updateMutation.error as { error?: { message?: string } } | null)?.error?.message
+
+  const rootError = form.formState.errors.root?.message
+
+  const rootErrorRef = useRef<HTMLDivElement>(null)
+
   // AI Enhance state
   const [aiPreview, setAiPreview] = useState<string | null>(null)
   const [aiError, setAiError] = useState<string | null>(null)
@@ -71,6 +79,13 @@ export function WorkoutFormPage() {
   const notesValue = form.watch('notes')
   /** Set to true when user clicks "Apply" on the AI preview — cleared on form reset/submit */
   const aiWasAppliedRef = useRef(false)
+
+  // Focus error summary on submit failure
+  useEffect(() => {
+    if (rootErrorRef.current && (mutationError ?? rootError)) {
+      rootErrorRef.current.focus()
+    }
+  }, [mutationError, rootError])
 
   function handleAIEnhance() {
     const notes = notesValue ?? ''
@@ -191,12 +206,6 @@ export function WorkoutFormPage() {
     )
   }
 
-  const mutationError =
-    (createMutation.error as { error?: { message?: string } } | null)?.error?.message ??
-    (updateMutation.error as { error?: { message?: string } } | null)?.error?.message
-
-  const rootError = form.formState.errors.root?.message
-
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl">
       <div className="flex items-center justify-between mb-6">
@@ -216,8 +225,11 @@ export function WorkoutFormPage() {
 
       {(mutationError ?? rootError) && (
         <div
+          ref={rootErrorRef}
           role="alert"
-          className="mb-4 rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-destructive text-sm"
+          aria-live="assertive"
+          tabIndex={-1}
+          className="mb-4 rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-destructive text-sm outline-none"
         >
           {mutationError ?? rootError}
         </div>

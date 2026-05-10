@@ -49,7 +49,7 @@ export function CalendarHeader({
     <div className="flex flex-col gap-3 mb-4 sm:flex-row sm:items-center sm:justify-between">
       {/* Title + DateRangePicker */}
       <div className="flex items-center gap-3 flex-wrap">
-        <h2 className="text-xl font-semibold">{computedTitle}</h2>
+        <h2 aria-live="polite" className="text-xl font-semibold">{computedTitle}</h2>
         {dateRangePicker}
       </div>
 
