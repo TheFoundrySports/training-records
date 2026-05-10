@@ -2,15 +2,6 @@ import { format, startOfWeek, endOfWeek, isSameDay } from 'date-fns'
 import { Button } from '@/components/ui/button'
 import type { CalendarView } from '../calendar.types'
 
-interface CalendarHeaderProps {
-  view: CalendarView
-  anchorDate: Date
-  onPrev: () => void
-  onNext: () => void
-  onToday: () => void
-  onViewChange: (view: CalendarView) => void
-}
-
 function getTitle(view: CalendarView, anchorDate: Date): string {
   if (view === 'month') {
     return format(anchorDate, 'MMMM yyyy')
@@ -18,7 +9,6 @@ function getTitle(view: CalendarView, anchorDate: Date): string {
   if (view === 'week') {
     const start = startOfWeek(anchorDate, { weekStartsOn: 1 })
     const end = endOfWeek(anchorDate, { weekStartsOn: 1 })
-    // "31 Mar – 6 Apr 2026" — year shown only once at the end
     if (start.getFullYear() === end.getFullYear()) {
       if (start.getMonth() === end.getMonth()) {
         return `${format(start, 'd')} – ${format(end, 'd MMM yyyy')}`
@@ -27,32 +17,41 @@ function getTitle(view: CalendarView, anchorDate: Date): string {
     }
     return `${format(start, 'd MMM yyyy')} – ${format(end, 'd MMM yyyy')}`
   }
-  // day
   return format(anchorDate, 'EEEE, d MMMM yyyy')
 }
 
-const VIEW_LABELS: { view: CalendarView; label: string }[] = [
-  { view: 'day', label: 'Day' },
-  { view: 'week', label: 'Week' },
-  { view: 'month', label: 'Month' },
-]
+interface CalendarHeaderProps {
+  view: CalendarView
+  anchorDate: Date
+  title?: string
+  dateRangePicker?: React.ReactNode
+  onPrev: () => void
+  onNext: () => void
+  onToday: () => void
+  onViewChange: (view: CalendarView) => void
+}
 
 export function CalendarHeader({
   view,
   anchorDate,
+  title,
+  dateRangePicker,
   onPrev,
   onNext,
   onToday,
   onViewChange,
 }: CalendarHeaderProps) {
-  const title = getTitle(view, anchorDate)
+  const computedTitle = title ?? getTitle(view, anchorDate)
   const today = new Date()
   const isCurrentDay = isSameDay(anchorDate, today)
 
   return (
     <div className="flex flex-col gap-3 mb-4 sm:flex-row sm:items-center sm:justify-between">
-      {/* Title */}
-      <h2 className="text-xl font-semibold">{title}</h2>
+      {/* Title + DateRangePicker */}
+      <div className="flex items-center gap-3 flex-wrap">
+        <h2 className="text-xl font-semibold">{computedTitle}</h2>
+        {dateRangePicker}
+      </div>
 
       <div className="flex items-center gap-3 flex-wrap">
         {/* Prev / Today / Next */}
@@ -91,3 +90,9 @@ export function CalendarHeader({
     </div>
   )
 }
+
+const VIEW_LABELS: { view: CalendarView; label: string }[] = [
+  { view: 'day', label: 'Day' },
+  { view: 'week', label: 'Week' },
+  { view: 'month', label: 'Month' },
+]

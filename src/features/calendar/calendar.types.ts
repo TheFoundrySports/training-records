@@ -7,3 +7,9 @@ export interface CalendarDay {
   workouts: Workout[]
   isCurrentMonth: boolean
 }
+
+/** Validated date range with ISO date strings (YYYY-MM-DD). */
+export interface DateRange {
+  from: string
+  to: string
+}
