@@ -85,6 +85,7 @@ function SectionEditorWrapper({
         <form>
           <BJJSectionEditor
             index={index}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             control={form.control as any}
             onRemove={onRemove}
             removeDisabled={removeDisabled}
@@ -196,6 +197,7 @@ describe('BJJSectionEditor — REQ-306, REQ-315', () => {
               <form onSubmit={(e) => void form.handleSubmit(() => {})(e)}>
                 <BJJSectionEditor
                   index={0}
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   control={form.control as any}
                   onRemove={vi.fn()}
                   removeDisabled={true}
