@@ -22,12 +22,10 @@ vi.mock('../hooks/useWorkoutsByMonth', async (importOriginal) => {
 
 import { useWorkoutsByDateRange as useWorkoutsByDateRangeMock } from '../hooks/useWorkoutsByMonth'
 
-const mockUseWorkoutsByDateRange = vi.mocked(useWorkoutsByDateRangeMock)
-
 type UseWorkoutsByDateRangeResult = ReturnType<typeof useWorkoutsByDateRange>
 
 function mockReturn(val: Partial<UseWorkoutsByDateRangeResult> = {}) {
-  mockUseWorkoutsByDateRange.mockReturnValue({
+  vi.mocked(useWorkoutsByDateRangeMock).mockReturnValue({
     data: [],
     isLoading: false,
     isError: false,
@@ -118,15 +116,15 @@ describe('CalendarPage — view rendering', () => {
 
 describe('CalendarPage — hook called with correct range', () => {
   beforeEach(() => {
-    mockUseWorkoutsByDateRange.mockClear()
+    vi.mocked(useWorkoutsByDateRangeMock).mockClear()
     mockReturn()
   })
 
   it('calls useWorkoutsByDateRange with week range for ?view=week', () => {
     renderPage('/calendar?view=week&date=2026-04-14')
-    expect(mockUseWorkoutsByDateRange).toHaveBeenCalled()
+    expect(vi.mocked(useWorkoutsByDateRangeMock)).toHaveBeenCalled()
     // Find the call where the start date is in April (the week view call)
-    const calls = mockUseWorkoutsByDateRange.mock.calls
+    const calls = vi.mocked(useWorkoutsByDateRangeMock).mock.calls
     const weekCall = calls.find(([start]) => start.getMonth() === 3 && start.getDate() === 13)
     expect(weekCall).toBeDefined()
     const [start, end] = weekCall!
@@ -139,8 +137,8 @@ describe('CalendarPage — hook called with correct range', () => {
 
   it('calls useWorkoutsByDateRange with day range for ?view=day', () => {
     renderPage('/calendar?view=day&date=2026-04-10')
-    expect(mockUseWorkoutsByDateRange).toHaveBeenCalled()
-    const calls = mockUseWorkoutsByDateRange.mock.calls
+    expect(vi.mocked(useWorkoutsByDateRangeMock)).toHaveBeenCalled()
+    const calls = vi.mocked(useWorkoutsByDateRangeMock).mock.calls
     const dayCall = calls.find(([start]) => start.getMonth() === 3 && start.getDate() === 10)
     expect(dayCall).toBeDefined()
     const [start, end] = dayCall!
