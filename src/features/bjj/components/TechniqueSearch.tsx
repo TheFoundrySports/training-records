@@ -19,7 +19,6 @@ export function TechniqueSearch({ selectedIds, onChange, disabled }: TechniqueSe
   const [query, setQuery] = useState('')
   const [debouncedQuery, setDebouncedQuery] = useState('')
   const [open, setOpen] = useState(false)
-  const [nameMap, setNameMap] = useState<Record<string, string>>({})
   const containerRef = useRef<HTMLDivElement>(null)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -49,27 +48,6 @@ export function TechniqueSearch({ selectedIds, onChange, disabled }: TechniqueSe
     [allTechniques],
   )
 
-  // Keep nameMap in sync with allTechniques. We always re-populate when
-  // allTechniques gains new entries (e.g., after the initial fetch completes).
-  // We use allTechniques.length as the "started loading" signal rather than
-  // a separate loading flag, so this runs on every transition from [] → [...].
-  // nameMap stores both English and Spanish names.
-  useEffect(() => {
-    if (allTechniques.length === 0) return
-    const newEntries: Record<string, string> = {}
-    for (const t of allTechniques) {
-      newEntries[t.id] = t.name_es ? `${t.name} / ${t.name_es}` : t.name
-    }
-    setNameMap((prev) => {
-      // Merge: keep existing entries, add new ones
-      const merged = { ...prev }
-      for (const [id, name] of Object.entries(newEntries)) {
-        merged[id] = name
-      }
-      return merged
-    })
-  }, [allTechniques])
-
   // Close dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -92,7 +70,6 @@ export function TechniqueSearch({ selectedIds, onChange, disabled }: TechniqueSe
 
   function handleSelect(technique: BJJTechnique) {
     if (!selectedSet.has(technique.id)) {
-      setNameMap((prev) => ({ ...prev, [technique.id]: technique.name }))
       onChange([...selectedIds, technique.id])
     }
     setQuery('')
@@ -110,7 +87,7 @@ export function TechniqueSearch({ selectedIds, onChange, disabled }: TechniqueSe
     const name = techniqueNameById.get(id)
     const nameEs = techniqueNameEsById.get(id)
     if (nameEs) return `${name ?? id} / ${nameEs}`
-    return name ?? nameMap[id] ?? id
+    return name ?? id
   }
 
   return (

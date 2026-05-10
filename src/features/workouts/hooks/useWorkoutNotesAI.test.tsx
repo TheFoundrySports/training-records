@@ -35,7 +35,7 @@ function TestComponent({ onSuccess, onError }: { onSuccess?: () => void; onError
           try {
             await enhanceAsync({ notes: 'test notes' })
             onSuccess?.()
-          } catch (e) {
+          } catch {
             onError?.()
           }
         }}
