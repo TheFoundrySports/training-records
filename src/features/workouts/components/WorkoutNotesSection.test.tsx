@@ -72,7 +72,7 @@ describe('WorkoutNotesSection', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockUseWorkoutNotesAI.mockReturnValue(makeAINotPending())
-    mockUseUpdateWorkout.mockReturnValue(makeUpdateMutation())
+    mockUseUpdateWorkout.mockReturnValue(makeUpdateMutation() as unknown as ReturnType<typeof useUpdateWorkout>)
   })
 
   it('renders notes when present', () => {

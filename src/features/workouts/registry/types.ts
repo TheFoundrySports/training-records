@@ -25,10 +25,10 @@ export interface WorkoutMovement {
   notes?: string
 }
 
-// TPayload is a phantom type parameter for type-safe handler composition
+// _TPayload is a phantom type parameter for type-safe handler composition
 export interface WodFormSectionProps<
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  TPayload = unknown,
+  _TPayload = unknown,
 > {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   control: Control<any>

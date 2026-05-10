@@ -62,7 +62,8 @@ function SectionEditorWrapper({
   onRemove = vi.fn(),
 }: WrapperProps) {
   const form = useForm<BJJWorkoutFormValues>({
-    resolver: zodResolver(bjjWorkoutSchema),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    resolver: zodResolver(bjjWorkoutSchema) as any,
     defaultValues: {
       title: 'Test BJJ',
       performedAt: '2026-04-05T10:00',
@@ -84,7 +85,7 @@ function SectionEditorWrapper({
         <form>
           <BJJSectionEditor
             index={index}
-            control={form.control}
+            control={form.control as any}
             onRemove={onRemove}
             removeDisabled={removeDisabled}
             isPending={isPending}
@@ -109,6 +110,7 @@ describe('BJJSectionEditor — REQ-306, REQ-315', () => {
     )
     vi.mocked(useBJJSectionAI).mockReturnValue({
       enhance: enhanceMock,
+      enhanceAsync: enhanceMock,
       isPending: false,
       error: null,
       reset: vi.fn(),
@@ -176,7 +178,8 @@ describe('BJJSectionEditor — REQ-306, REQ-315', () => {
 
       function WrapperWithSubmit() {
         const form = useForm<BJJWorkoutFormValues>({
-          resolver: zodResolver(bjjWorkoutSchema),
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          resolver: zodResolver(bjjWorkoutSchema) as any,
           defaultValues: {
             title: '',
             performedAt: '2026-04-05T10:00',
@@ -193,7 +196,7 @@ describe('BJJSectionEditor — REQ-306, REQ-315', () => {
               <form onSubmit={(e) => void form.handleSubmit(() => {})(e)}>
                 <BJJSectionEditor
                   index={0}
-                  control={form.control}
+                  control={form.control as any}
                   onRemove={vi.fn()}
                   removeDisabled={true}
                   isPending={false}

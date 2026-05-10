@@ -11,6 +11,7 @@ const techniqueRowFull = {
   youtube_url: 'https://youtube.com/watch?v=abc',
   created_at: '2026-04-01T10:00:00.000Z',
   updated_at: '2026-04-02T11:00:00.000Z',
+  name_es: null,
 }
 
 const techniqueRowNulls = {
@@ -21,6 +22,7 @@ const techniqueRowNulls = {
   youtube_url: null,
   created_at: '2026-04-01T10:00:00.000Z',
   updated_at: '2026-04-02T11:00:00.000Z',
+  name_es: null,
 }
 
 const sectionRowFull = {

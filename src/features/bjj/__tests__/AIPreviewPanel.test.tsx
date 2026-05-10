@@ -33,7 +33,7 @@ describe('AIPreviewPanel', () => {
       fetchStatus: 'idle',
       error: null,
       refetch: vi.fn(),
-    } as ReturnType<typeof useBJJTechniques>)
+    } as unknown as ReturnType<typeof useBJJTechniques>)
 
     render(
       <AIPreviewPanel
@@ -57,7 +57,7 @@ describe('AIPreviewPanel', () => {
       fetchStatus: 'idle',
       error: null,
       refetch: vi.fn(),
-    } as ReturnType<typeof useBJJTechniques>)
+    } as unknown as ReturnType<typeof useBJJTechniques>)
 
     render(
       <AIPreviewPanel
@@ -81,7 +81,7 @@ describe('AIPreviewPanel', () => {
       fetchStatus: 'idle',
       error: null,
       refetch: vi.fn(),
-    } as ReturnType<typeof useBJJTechniques>)
+    } as unknown as ReturnType<typeof useBJJTechniques>)
 
     render(
       <AIPreviewPanel
@@ -105,7 +105,7 @@ describe('AIPreviewPanel', () => {
       fetchStatus: 'idle',
       error: null,
       refetch: vi.fn(),
-    } as ReturnType<typeof useBJJTechniques>)
+    } as unknown as ReturnType<typeof useBJJTechniques>)
 
     const onApply = vi.fn()
     const onDiscard = vi.fn()
