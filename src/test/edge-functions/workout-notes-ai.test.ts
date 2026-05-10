@@ -58,7 +58,7 @@ function validateNotesInput(notes: string): { valid: boolean; error?: { code: st
 
 // ── Mock AI success response ───────────────────────────────────────────────────
 
-function createMockAISuccessResponse(notes: string): { enhanced_notes: string } {
+function createMockAISuccessResponse(): { enhanced_notes: string } {
   return {
     enhanced_notes:
       '• Warm-up: 5 min rowing\n• Main: 3x5 back squat @ 135 lbs\n• Cool-down: stretching',
@@ -186,7 +186,7 @@ describe('workout-notes-ai pure logic', () => {
 
   describe('AI success: returns parsed enhanced_notes', () => {
     it('mock AI success: returns parsed enhanced_notes shape', () => {
-      const aiSuccessResponse = createMockAISuccessResponse('test notes')
+      const aiSuccessResponse = createMockAISuccessResponse()
 
       expect(isValidAIResponse(aiSuccessResponse)).toBe(true)
       expect(aiSuccessResponse.enhanced_notes).toContain('Warm-up')
