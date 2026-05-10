@@ -128,7 +128,7 @@ describe('BJJSectionEditor — REQ-306, REQ-315', () => {
 
     it('renders the Notes optional textarea', () => {
       render(<SectionEditorWrapper />)
-      expect(screen.getByLabelText(/notes/i)).toBeInTheDocument()
+      expect(screen.getByLabelText('Notes (optional)')).toBeInTheDocument()
     })
 
     it('renders the Duration optional input', () => {
@@ -226,7 +226,7 @@ describe('BJJSectionEditor — REQ-306, REQ-315', () => {
       const user = userEvent.setup()
       render(<SectionEditorWrapper />)
 
-      const notesInput = screen.getByLabelText(/notes/i)
+      const notesInput = screen.getByLabelText('Notes (optional)')
       await user.type(notesInput, 'Some notes about drilling')
 
       expect(screen.getByRole('button', { name: /enhance with ai/i })).not.toBeDisabled()
@@ -245,7 +245,7 @@ describe('BJJSectionEditor — REQ-306, REQ-315', () => {
     it('does not invoke enhance twice when the button receives two clicks in one sync turn', async () => {
       const user = userEvent.setup()
       render(<SectionEditorWrapper />)
-      await user.type(screen.getByLabelText(/notes/i), 'drilling')
+      await user.type(screen.getByLabelText('Notes (optional)'), 'drilling')
 
       const btn = screen.getByRole('button', { name: /enhance with ai/i })
       fireEvent.click(btn)
