@@ -23,4 +23,9 @@ test.describe('Auth: login flow', () => {
     await page.goto('/workouts')
     await expect(page).toHaveURL(/\/login/)
   })
+
+  test('unauthenticated user is redirected to login from /calendar', async ({ page }) => {
+    await page.goto('/calendar')
+    await expect(page).toHaveURL(/\/login/)
+  })
 })

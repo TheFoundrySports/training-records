@@ -19,15 +19,17 @@ export class WorkoutFormPage {
     this.durationInput = page.getByLabel(/duration/i)
     this.notesInput = page.getByLabel('Notes')
     this.wodFormatSelect = page.getByLabel('Workout type')
-    this.saveButton = page.getByRole('button', { name: /^save$/i })
+    this.saveButton = page.getByText('Save')
     this.cancelButton = page.getByRole('button', { name: /cancel/i })
     this.loadWorkoutButton = page.getByRole('button', { name: /load workout/i })
     this.rootError = page.getByRole('alert')
   }
 
   async gotoNew() {
-    await this.page.goto('/workouts/new')
-    await expect(this.saveButton).toBeVisible()
+    // /workouts/new shows WorkoutTypePicker; the actual CrossFit form is at /workouts/new/crossfit
+    await this.page.goto('/workouts/new/crossfit')
+    await this.page.waitForLoadState('domcontentloaded')
+    await expect(this.saveButton).toBeVisible({ timeout: 15000 })
   }
 
   async fillTitle(title: string) {
