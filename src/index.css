@@ -39,6 +39,8 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+  --focus-ring-color: oklch(0.708 0 0);
+  --focus-ring-width: 2px;
 }
 
 body {
@@ -138,5 +140,37 @@ body {
   }
   html {
     @apply font-sans;
+  }
+
+  /* Skip link — accessible bypass block */
+  .skip-link {
+    position: absolute;
+    top: -40px;
+    left: 0;
+    background: var(--primary);
+    color: var(--primary-foreground);
+    padding: 8px 16px;
+    z-index: 100;
+    text-decoration: none;
+    font-weight: 600;
+    transition: top 0.15s ease;
+  }
+  .skip-link:focus {
+    top: 0;
+    outline: var(--focus-ring-width) solid var(--focus-ring-color);
+    outline-offset: 2px;
+  }
+
+  /* Focus management — move focus to visible area */
+  *:focus {
+    outline: none;
+  }
+  *:focus-visible {
+    outline: var(--focus-ring-width) solid var(--focus-ring-color);
+    outline-offset: 2px;
+  }
+  /* Ensure focused elements clear sticky headers */
+  *:focus {
+    scroll-margin-top: 72px;
   }
 }

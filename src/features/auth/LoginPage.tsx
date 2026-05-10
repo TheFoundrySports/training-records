@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { useNavigate } from 'react-router'
 import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
@@ -12,6 +12,7 @@ export function LoginPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const errorRef = React.useRef<HTMLParagraphElement>(null)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -23,6 +24,8 @@ export function LoginPage() {
     if (error) {
       setError('Invalid email or password')
       setIsLoading(false)
+      // Move focus to error so screen reader announces it immediately
+      setTimeout(() => errorRef.current?.focus(), 50)
     } else {
       void navigate('/workouts')
     }
@@ -61,7 +64,7 @@ export function LoginPage() {
               />
             </div>
             {error && (
-              <p role="alert" className="text-sm font-medium text-destructive">
+              <p ref={errorRef} role="alert" aria-live="assertive" aria-atomic="true" className="text-sm font-medium text-destructive">
                 {error}
               </p>
             )}
