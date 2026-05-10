@@ -61,8 +61,7 @@ export function AIChatPage() {
 
   const generateMutation = useGenerateWorkout()
 
-  const generateError = (generateMutation.error as { error?: { message?: string } } | null)?.error
-    ?.message
+  const generateError = (generateMutation.error as Error | null)?.message
 
   async function handleGenerate() {
     if (!prompt.trim()) return

@@ -152,7 +152,7 @@ describe('AIChatPage', () => {
   it('shows error message when generation fails', () => {
     mockGenerate.mockReturnValue(
       makeGenerateMutation({
-        error: { error: { code: 'AI_ERROR', message: 'OpenAI API error' } } as unknown as Error,
+        error: new Error('OpenAI API error') as unknown as Error,
         isError: true,
       }),
     )
