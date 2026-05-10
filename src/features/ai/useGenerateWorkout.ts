@@ -10,10 +10,10 @@ export type WorkoutProposal = WorkoutFormValues
  * and extract .error.message, falling back to error.message.
  */
 export async function extractEdgeFunctionError(error: unknown): Promise<string> {
-  if (error instanceof Error && error.response) {
+  const err = error as Error & { response?: { clone: () => { json: () => Promise<unknown> } } }
+  if (err instanceof Error && err.response) {
     try {
-      const response = (error as Error & { response: { clone: () => { json: () => Promise<unknown> } } }).response
-      const cloned = response.clone()
+      const cloned = err.response.clone()
       const body = (await cloned.json()) as { error?: { message?: string } }
       if (body?.error?.message) {
         return body.error.message

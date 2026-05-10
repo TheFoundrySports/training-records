@@ -22,7 +22,8 @@ export function BJJWorkoutFormPage() {
   const isPending = createMutation.isPending
 
   const form = useForm<BJJWorkoutFormValues>({
-    resolver: zodResolver(bjjWorkoutSchema),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    resolver: zodResolver(bjjWorkoutSchema) as any,
     defaultValues: {
       title: '',
       performedAt: new Date().toISOString().slice(0, 16),
@@ -41,7 +42,8 @@ export function BJJWorkoutFormPage() {
   })
 
   const { fields, append, remove } = useFieldArray({
-    control: form.control,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    control: form.control as any,
     name: 'sections',
   })
 
