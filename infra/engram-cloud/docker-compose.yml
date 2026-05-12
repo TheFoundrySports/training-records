@@ -1,0 +1,38 @@
+# Self-hosted Engram Cloud (local dev / smoke).
+# Local SQLite stays authoritative; this stack is replication + dashboard only.
+# Docs: https://github.com/Gentleman-Programming/engram/tree/main/docs/engram-cloud
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: engram-cloud-postgres
+    environment:
+      POSTGRES_USER: engram
+      POSTGRES_PASSWORD: engram_dev
+      POSTGRES_DB: engram_cloud
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U engram -d engram_cloud"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    volumes:
+      - engram-cloud-pg:/var/lib/postgresql/data
+
+  cloud:
+    image: ghcr.io/gentleman-programming/engram:latest
+    container_name: engram-cloud
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      ENGRAM_DATABASE_URL: postgres://engram:engram_dev@postgres:5432/engram_cloud?sslmode=disable
+      ENGRAM_JWT_SECRET: engram-dev-jwt-secret-for-local-smoke-1234
+      ENGRAM_CLOUD_INSECURE_NO_AUTH: "1"
+      ENGRAM_CLOUD_ALLOWED_PROJECTS: training-records
+      ENGRAM_CLOUD_HOST: 0.0.0.0
+      ENGRAM_PORT: "18080"
+    ports:
+      - "127.0.0.1:18080:18080"
+    command: ["cloud", "serve"]
+
+volumes:
+  engram-cloud-pg:
