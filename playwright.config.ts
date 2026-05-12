@@ -54,6 +54,28 @@ export default defineConfig({
       },
       testMatch: /auth\.spec\.ts/,
     },
+
+    // ── Calendar E2E tests (authenticated) ───────────────────────────────────
+    {
+      name: 'calendar-e2e',
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: '.auth/athlete.json',
+      },
+      testMatch: /calendar\.e2e\.spec\.ts/,
+      dependencies: ['setup'],
+    },
+
+    // ── Accessibility tests (authenticated) ────────────────────────────────
+    {
+      name: 'a11y',
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: '.auth/athlete.json',
+      },
+      testMatch: /a11y\/.*\.spec\.ts/,
+      dependencies: ['setup'],
+    },
   ],
 
   webServer: {

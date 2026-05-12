@@ -36,3 +36,9 @@ jobs:
 
       - name: Build (includes type check)
         run: npm run build
+
+      - name: Accessibility tests
+        run: npx playwright test e2e/a11y/ --project=a11y
+
+      - name: Calendar E2E tests
+        run: npx playwright test e2e/calendar.e2e.spec.ts --project=calendar-e2e

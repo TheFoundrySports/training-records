@@ -1,0 +1,56 @@
+name: Accessibility
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  axe-core-scan:
+    name: Axe-core CLI Scan (WCAG 2.2 AA)
+    runs-on: ubuntu-latest
+
+    env:
+      VITE_SUPABASE_URL: http://127.0.0.1:54321
+      VITE_SUPABASE_ANON_KEY: sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Start dev server
+        run: npm run dev &
+        env:
+          CI: 'true'
+
+      - name: Wait for dev server
+        run: npx wait-on http://localhost:5173 --timeout 30000
+
+      - name: Run axe-core CLI on Login
+        run: npx axe http://localhost:5173/login --exit
+
+      - name: Run axe-core CLI on Workout List
+        run: npx axe http://localhost:5173/workouts --exit
+
+      - name: Run axe-core CLI on Workout Detail
+        run: npx axe http://localhost:5173/workouts/00000000-0000-0000-0000-000000000001 --exit
+
+      - name: Run axe-core CLI on Workout Form
+        run: npx axe http://localhost:5173/workouts/new --exit
+
+      - name: Run axe-core CLI on Calendar
+        run: npx axe http://localhost:5173/calendar --exit
+
+      - name: Stop dev server
+        if: always()
+        run: pkill -f "npm run dev" || true
