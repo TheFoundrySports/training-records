@@ -24,6 +24,15 @@ dist-ssr
 test-results/
 playwright-report/
 
+# Test coverage reports
+coverage/
+
+# SDD artifacts (local planning, not for version control)
+sdd/
+
+# Deno lockfile
+deno.lock
+
 # Atl (skill registry, non-shareable artifacts)
 .atl/
 
