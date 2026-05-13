@@ -14,6 +14,7 @@ import { BJJTechniqueListPage } from '@/features/admin/bjj-techniques/pages/BJJT
 import { BJJTechniqueFormPage } from '@/features/admin/bjj-techniques/pages/BJJTechniqueFormPage'
 import { BJJWorkoutFormPage } from '@/features/bjj/pages/BJJWorkoutFormPage'
 import { AISettingsPage } from '@/features/admin/ai-settings/pages/AISettingsPage'
+import { BeltProgressionPage } from '@/features/bjj/progression'
 
 export const router = createBrowserRouter([
   {
@@ -98,6 +99,10 @@ export const router = createBrowserRouter([
                 <BJJTechniqueFormPage />
               </AdminRoute>
             ),
+          },
+          {
+            path: 'bjj/blue-belt-progression',
+            element: <BeltProgressionPage />,
           },
           {
             path: 'admin/ai-settings',

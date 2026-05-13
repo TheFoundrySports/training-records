@@ -37,6 +37,12 @@ export function AppShell() {
               >
                 Calendar
               </Link>
+              <Link
+                to="/bjj/blue-belt-progression"
+                className="text-foreground/60 transition-colors hover:text-foreground"
+              >
+                Blue Belt
+              </Link>
               {role === 'admin' && (
                 <Link
                   to="/admin/bjj-techniques"
