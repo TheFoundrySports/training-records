@@ -24,6 +24,11 @@ dist-ssr
 test-results/
 playwright-report/
 
+# Playwright compiled TypeScript
+e2e/**/*.js
+e2e/**/*.d.ts
+e2e/tsconfig.tsbuildinfo
+
 # Test coverage reports
 coverage/
 
