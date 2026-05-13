@@ -76,6 +76,17 @@ export default defineConfig({
       testMatch: /a11y\/.*\.spec\.ts/,
       dependencies: ['setup'],
     },
+
+    // ── Belt Progression E2E tests (authenticated) ─────────────────────────
+    {
+      name: 'belt-progression',
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: '.auth/athlete.json',
+      },
+      testMatch: /belt-progression\.spec\.ts/,
+      dependencies: ['setup'],
+    },
   ],
 
   webServer: {
