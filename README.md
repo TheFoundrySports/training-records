@@ -125,6 +125,8 @@ supabase/
 
 ## Local Setup
 
+### Initial setup (first time only)
+
 ```bash
 # 1. Install dependencies
 npm install
@@ -141,12 +143,26 @@ supabase db reset
 
 # 5. Seed users
 bash scripts/seed-users.sh
+```
 
-# 6. Start Edge Functions (separate terminal)
+### Starting services (day-to-day)
+
+Run these commands in **separate terminals**:
+
+**Terminal 1 — Supabase Edge Functions:**
+```bash
 supabase functions serve
+```
 
-# 7. Start the Vite dev server (separate terminal)
+**Terminal 2 — Vite dev server:**
+```bash
 npm run dev
+```
+
+**Terminal 3 (optional) — Engram Cloud (persistent memory across team):**
+```bash
+cd infra/engram-cloud
+docker compose up
 ```
 
 > `supabase functions serve` and `npm run dev` must run concurrently.
