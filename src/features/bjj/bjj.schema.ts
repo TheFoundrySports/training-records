@@ -11,6 +11,31 @@ export const BJJ_CATEGORIES = [
   'other',
 ] as const
 
+// ── Belt Progression ────────────────────────────────────
+export const beltProgressionItemSchema = z.object({
+  id: z.string().uuid().optional(),
+  userId: z.string().uuid(),
+  beltLevel: z.enum(['blue']),
+  sectionId: z.string().min(1),
+  itemId: z.string().min(1),
+  isComplete: z.boolean(),
+  completedAt: z.string().datetime().nullable(),
+  techniqueId: z.string().uuid().nullable(),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
+})
+export type BeltProgressionItemSchema = z.infer<typeof beltProgressionItemSchema>
+
+export const beltProgressionUIStateSchema = z.object({
+  id: z.string().uuid().optional(),
+  userId: z.string().uuid(),
+  beltLevel: z.enum(['blue']),
+  sectionId: z.string().min(1),
+  isExpanded: z.boolean(),
+  updatedAt: z.string().datetime(),
+})
+export type BeltProgressionUIStateSchema = z.infer<typeof beltProgressionUIStateSchema>
+
 // ── Technique (admin form) ───────────────────────────────
 export const bjjTechniqueSchema = z.object({
   name: z.string().min(1, 'Name is required').max(200),

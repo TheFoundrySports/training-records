@@ -324,6 +324,80 @@ export type Database = {
           },
         ]
       }
+      belt_progression: {
+        Row: {
+          id: string
+          user_id: string
+          belt_level: string
+          section_id: string
+          item_id: string
+          is_complete: boolean
+          completed_at: string | null
+          technique_id: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          belt_level?: string
+          section_id: string
+          item_id: string
+          is_complete?: boolean
+          completed_at?: string | null
+          technique_id?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          belt_level?: string
+          section_id?: string
+          item_id?: string
+          is_complete?: boolean
+          completed_at?: string | null
+          technique_id?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'belt_progression_technique_id_fkey'
+            columns: ['technique_id']
+            isOneToOne: false
+            referencedRelation: 'bjj_techniques'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      belt_progression_ui_state: {
+        Row: {
+          id: string
+          user_id: string
+          belt_level: string
+          section_id: string
+          is_expanded: boolean
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          belt_level?: string
+          section_id: string
+          is_expanded?: boolean
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          belt_level?: string
+          section_id?: string
+          is_expanded?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
