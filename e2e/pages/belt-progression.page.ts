@@ -45,8 +45,8 @@ export class BeltProgressionPage {
    */
   async expandSection(namePattern: string | RegExp) {
     const header = this.sectionHeader(namePattern)
-    const isExpanded = (await header.getAttribute('aria-expanded')) === 'false'
-    if (isExpanded) {
+    const isExpanded = (await header.getAttribute('aria-expanded')) === 'true'
+    if (!isExpanded) {
       await header.click()
       await this.page.waitForTimeout(300) // wait for CSS transition
     }
@@ -65,16 +65,28 @@ export class BeltProgressionPage {
   }
 
   /**
-   * Check a checkbox by index.
+   * Toggle a checkbox by dispatching change event directly on the input.
+   * Works around collapsible animations that block normal Playwright clicks.
    */
-  async checkCheckbox(index: number) {
-    await this.checkboxes.nth(index).check()
-  }
-
-  /**
-   * Uncheck a checkbox by index.
-   */
-  async uncheckCheckbox(index: number) {
-    await this.checkboxes.nth(index).uncheck()
+  async toggleCheckboxByLabel(labelText: string) {
+    await this.page.evaluate((text) => {
+      const labels = Array.from(document.querySelectorAll('label'))
+      const label = labels.find((l) => l.textContent?.trim() === text)
+      if (!label) {
+        throw new Error(`Label not found: ${text}`)
+      }
+      const inputId = label.getAttribute('for')
+      if (!inputId) {
+        throw new Error(`Label has no 'for' attribute: ${text}`)
+      }
+      const input = document.getElementById(inputId) as HTMLInputElement
+      if (!input) {
+        throw new Error(`Input not found for id: ${inputId}`)
+      }
+      // Toggle the checkbox and dispatch both change and click events
+      input.checked = !input.checked
+      input.dispatchEvent(new Event('change', { bubbles: true }))
+      input.dispatchEvent(new Event('click', { bubbles: true }))
+    }, labelText)
   }
 }
