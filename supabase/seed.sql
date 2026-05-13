@@ -1102,6 +1102,7 @@ values
   -- Guard passes
   ('Closed Guard Break',     'Apertura de guardia cerrada',   'Usar la postura y presión de cadera para abrir la guardia cerrada antes de pasarla.',            'guard_pass'),
   ('Knee Slide Pass',        'Paso en deslizamiento',        'Deslizar la rodilla a través de la guardia controlando la cadera para aplanar al oponente.',     'guard_pass'),
+  ('Leg Weave Pass',         'Paso tejido de pierna',        'Tejer la rodilla entre las piernas del oponente para establecer presión y pasar la guardia.',    'guard_pass'),
   ('Double Under Pass',       'Paso doble por debajo',         'Pasar ambos brazos por debajo de las piernas del oponente y apilar para pasar.',                 'guard_pass'),
   ('Leg Drag Pass',          'Arrastre de pierna',           'Arrastrar una pierna al tatami y usar presión de hombro para establecer control lateral.',       'guard_pass'),
   ('Toreando Pass',          'Paso toreo',                   'Controlar ambos tobillos y moverse lateralmente para pasar sin comprometer el peso.',            'guard_pass'),
