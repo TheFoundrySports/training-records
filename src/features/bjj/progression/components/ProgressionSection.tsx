@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import type { ProgressionSection as ProgressionSectionType, ProgressionItem } from '../types/belt-progression.types'
+import type { ProgressionSection as ProgressionSectionType } from '../types/belt-progression.types'
 import { ProgressionChecklistItem } from './ProgressionChecklistItem'
 import { ProgressionProgressBar } from './ProgressionProgressBar'
 

@@ -8,11 +8,11 @@ import { calculateProgress } from '../utils/calculateProgress'
 import { ProgressionSection } from '../components/ProgressionSection'
 import { ProgressionProgressBar } from '../components/ProgressionProgressBar'
 import { ProgressionResetButton } from '../components/ProgressionResetButton'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Loader2Icon } from 'lucide-react'
 
 function BeltProgressionPage() {
-  const { progression, isLoading: progLoading, error: progError, toggleItem, isToggling, resetProgress, isResetting } = useBeltProgression()
+  const { progression, isLoading: progLoading, error: progError, toggleItem, resetProgress, isResetting } = useBeltProgression()
   const { uiState, isLoading: uiLoading, toggleSection } = useBeltProgressionUIState()
 
   const isLoading = progLoading || uiLoading

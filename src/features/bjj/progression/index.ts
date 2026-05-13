@@ -10,6 +10,6 @@ export { calculateProgress, calculateSectionProgress } from './utils/calculatePr
 export type {
   BeltProgressionItem,
   BeltProgressionUIState,
-  ProgressionSection,
+  ProgressionSection as ProgressionSectionType,
   ProgressionItem,
 } from './types/belt-progression.types'

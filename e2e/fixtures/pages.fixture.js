@@ -8,6 +8,7 @@ const workout_form_page_1 = require("../pages/workout-form.page");
 const workout_detail_page_1 = require("../pages/workout-detail.page");
 const garmin_import_page_1 = require("../pages/garmin-import.page");
 const calendar_page_1 = require("../pages/calendar.page");
+const belt_progression_page_1 = require("../pages/belt-progression.page");
 /**
  * Extended test with pre-instantiated Page Objects.
  * Import { test, expect } from this file instead of @playwright/test.
@@ -30,6 +31,9 @@ exports.test = test_1.test.extend({
     },
     calendarPage: async ({ page }, use) => {
         await use(new calendar_page_1.CalendarPage(page));
+    },
+    beltProgressionPage: async ({ page }, use) => {
+        await use(new belt_progression_page_1.BeltProgressionPage(page));
     },
 });
 var test_2 = require("@playwright/test");
