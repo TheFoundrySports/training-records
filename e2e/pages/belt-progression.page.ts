@@ -48,7 +48,7 @@ export class BeltProgressionPage {
     const isExpanded = (await header.getAttribute('aria-expanded')) === 'true'
     if (!isExpanded) {
       await header.click()
-      await this.page.waitForTimeout(300) // wait for CSS transition
+      await this.page.waitForTimeout(500) // wait for CSS transition
     }
   }
 
@@ -65,28 +65,13 @@ export class BeltProgressionPage {
   }
 
   /**
-   * Toggle a checkbox by dispatching change event directly on the input.
-   * Works around collapsible animations that block normal Playwright clicks.
+   * Toggle a checkbox by clicking its label.
+   * The label triggers the hidden checkbox via htmlFor/id association.
    */
-  async toggleCheckboxByLabel(labelText: string) {
-    await this.page.evaluate((text) => {
-      const labels = Array.from(document.querySelectorAll('label'))
-      const label = labels.find((l) => l.textContent?.trim() === text)
-      if (!label) {
-        throw new Error(`Label not found: ${text}`)
-      }
-      const inputId = label.getAttribute('for')
-      if (!inputId) {
-        throw new Error(`Label has no 'for' attribute: ${text}`)
-      }
-      const input = document.getElementById(inputId) as HTMLInputElement
-      if (!input) {
-        throw new Error(`Input not found for id: ${inputId}`)
-      }
-      // Toggle the checkbox and dispatch both change and click events
-      input.checked = !input.checked
-      input.dispatchEvent(new Event('change', { bubbles: true }))
-      input.dispatchEvent(new Event('click', { bubbles: true }))
-    }, labelText)
+  async toggleCheckboxByTestId(itemId: string) {
+    const label = this.page.locator(`label[for="${itemId}"]`)
+    await label.waitFor({ state: 'visible', timeout: 5000 })
+    await label.click()
+    await this.page.waitForTimeout(500) // Wait for React state + Supabase mutation
   }
 }

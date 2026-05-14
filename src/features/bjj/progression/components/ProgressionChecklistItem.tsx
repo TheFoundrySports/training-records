@@ -28,15 +28,15 @@ function ProgressionChecklistItem({
           type="checkbox"
           id={item.id}
           checked={isComplete}
-          aria-checked={isComplete}
           aria-label={item.label}
           onChange={handleChange}
           className="peer sr-only"
         />
         {/* Visible custom checkbox */}
         <div
+          data-testid={`checkbox-${item.id}`}
           className={cn(
-            'flex h-5 w-5 items-center justify-center rounded border transition-colors duration-150',
+            'flex h-5 w-5 pointer-events-none items-center justify-center rounded border transition-colors duration-150',
             isComplete
               ? 'bg-amber-400 border-amber-400'
               : 'border-muted-foreground bg-transparent',

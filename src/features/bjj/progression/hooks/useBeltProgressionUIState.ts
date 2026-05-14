@@ -42,10 +42,22 @@ export function useBeltProgressionUIState() {
   // ── Toggle section collapse mutation ───────────────────────
   const toggleSectionMutation = useMutation({
     mutationFn: async ({ sectionId, isExpanded }: { sectionId: string; isExpanded: boolean }) => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        throw {
+          error: {
+            code: 'UNAUTHENTICATED',
+            message: 'User must be authenticated to toggle section state',
+            details: null,
+          },
+        }
+      }
+
       const { error } = await supabase
         .from('belt_progression_ui_state')
         .upsert(
           {
+            user_id: user.id,
             belt_level: 'blue',
             section_id: sectionId,
             is_expanded: isExpanded,

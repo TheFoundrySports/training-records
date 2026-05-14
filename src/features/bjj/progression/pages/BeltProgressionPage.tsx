@@ -93,7 +93,7 @@ function BeltProgressionPage() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Progreso Cinturón Azul</h1>
           <p className="text-muted-foreground">
-            Seguimiento de los 45 requisitos para obtener el cinturón azul.
+            Seguimiento de los 43 requisitos para obtener el cinturón azul.
           </p>
         </div>
 

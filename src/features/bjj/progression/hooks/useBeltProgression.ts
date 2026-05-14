@@ -54,10 +54,22 @@ export function useBeltProgression() {
       itemId: string
       isComplete: boolean
     }) => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        throw {
+          error: {
+            code: 'UNAUTHENTICATED',
+            message: 'User must be authenticated to toggle progression item',
+            details: null,
+          },
+        }
+      }
+
       const { error } = await supabase
         .from('belt_progression')
         .upsert(
           {
+            user_id: user.id,
             belt_level: 'blue',
             section_id: sectionId,
             item_id: itemId,

@@ -96,7 +96,7 @@ function ProgressionSection({
         aria-hidden={!isExpanded}
         className={cn(
           'overflow-hidden transition-all duration-200',
-          isExpanded ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0',
+          isExpanded ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0 pointer-events-none',
         )}
       >
         <div ref={contentRef} className="px-4 pb-4">
@@ -115,21 +115,98 @@ function ProgressionSection({
           ) : (
             // Checkable section: render checklist items
             <div className="flex flex-col">
-              {section.items.map((item) => (
-                <ProgressionChecklistItem
-                  key={item.id}
-                  item={item}
-                  sectionId={section.id}
-                  isComplete={checkedMap.get(`${section.id}::${item.id}`) ?? false}
-                  onToggle={onToggle}
-                />
-              ))}
+              {renderChecklistItems(section, checkedMap, onToggle)}
             </div>
           )}
         </div>
       </div>
     </div>
   )
+}
+
+// ── Helper: render checklist items (with grouping if categories exist) ──────
+function renderChecklistItems(
+  section: ProgressionSectionType,
+  checkedMap: Map<string, boolean>,
+  onToggle: (sectionId: string, itemId: string, isComplete: boolean) => void,
+) {
+  // Check if items have categories
+  const hasCategories = section.items.some((item) => 'category' in item && item.category)
+
+  if (!hasCategories) {
+    // No categories: render flat list
+    return section.items.map((item) => (
+      <ProgressionChecklistItem
+        key={item.id}
+        item={item}
+        sectionId={section.id}
+        isComplete={checkedMap.get(`${section.id}::${item.id}`) ?? false}
+        onToggle={onToggle}
+      />
+    ))
+  }
+
+  // Group items by category
+  type CategoryGroup = {
+    category: string
+    label: string
+    items: ProgressionSectionType['items']
+  }
+
+  const categoryMap = new Map<string, CategoryGroup>()
+  const categoryOrder: string[] = []
+
+  // Category labels (Spanish, matching the reference site)
+  const categoryLabels: Record<string, string> = {
+    takedown: 'Comienzo de la lucha',
+    guard_pass: 'Pasados',
+    guard: 'Guardia',
+    submission: 'Sumisiones',
+    escape: 'Escapes y salidas',
+  }
+
+  for (const item of section.items) {
+    const category = 'category' in item && item.category ? item.category : 'other'
+    
+    if (!categoryMap.has(category)) {
+      categoryOrder.push(category)
+      categoryMap.set(category, {
+        category,
+        label: categoryLabels[category] ?? 'Otros',
+        items: [],
+      })
+    }
+    
+    categoryMap.get(category)!.items.push(item)
+  }
+
+  // Render grouped items with headers
+  return categoryOrder.map((category, groupIndex) => {
+    const group = categoryMap.get(category)!
+    const subsectionNumber = `${section.id === 'tecnicas' ? '2' : section.id}.${groupIndex + 1}`
+
+    return (
+      <div key={category} className="flex flex-col">
+        {/* Category header */}
+        <div className="pb-2 pt-4 first:pt-0">
+          <h4 className="text-sm font-semibold text-foreground">
+            {subsectionNumber}. {group.label}
+          </h4>
+        </div>
+
+        {/* Category items */}
+        {group.items.map((item) => (
+          <ProgressionChecklistItem
+            key={item.id}
+            item={item}
+            sectionId={section.id}
+            isComplete={checkedMap.get(`${section.id}::${item.id}`) ?? false}
+            onToggle={onToggle}
+          />
+        ))}
+      </div>
+    )
+  })
 }
 
 export { ProgressionSection }

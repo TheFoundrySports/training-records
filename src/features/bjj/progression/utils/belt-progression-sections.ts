@@ -23,7 +23,7 @@ export const PROGRESSION_SECTIONS: ProgressionSection[] = [
     ],
   },
 
-  // ── Section 2: Técnicas Requeridas (32 items) ───────────────────────────────
+  // ── Section 2: Técnicas Requeridas (31 items) ───────────────────────────────
   {
     id: 'tecnicas',
     title: '2. Técnicas Requeridas',
@@ -96,7 +96,7 @@ export const PROGRESSION_SECTIONS: ProgressionSection[] = [
     ],
   },
 
-  // ── Section 4: Requisitos Adicionales (6 items) ─────────────────────────────
+  // ── Section 4: Requisitos Adicionales (5 items) ─────────────────────────────
   {
     id: 'requisitos',
     title: '4. Requisitos Adicionales',
@@ -110,9 +110,6 @@ export const PROGRESSION_SECTIONS: ProgressionSection[] = [
 
       // 4.2 Edad
       { id: 'requisitos-edad-0', label: 'Ser mayor de 15 años.' },
-
-      // 4.3 Tiempo de entrenamiento
-      { id: 'requisitos-tiempo-0', label: 'Haber entrenado en La Cúpula al menos 1.5 a 2 años.' },
     ],
   },
 
@@ -128,9 +125,9 @@ export const PROGRESSION_SECTIONS: ProgressionSection[] = [
 ]
 
 /**
-
+ * Total checkable items across all non-informational sections.
+ * = 31 (técnicas) + 6 (sparring) + 5 (requisitos) + 1 (bonus) = 43
  */
 export const TOTAL_CHECKABLE_ITEMS = PROGRESSION_SECTIONS.filter(
   (s) => !s.isInformational
 ).reduce((acc, s) => acc + s.items.length, 0)
-// = 32 + 6 + 6 + 1 = 45
