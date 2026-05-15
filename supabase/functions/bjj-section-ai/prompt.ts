@@ -32,6 +32,14 @@ informal Spanish terminology.
 Technique catalog:
 ${catalog}
 
+When you mention a technique, immediately append its canonical English name
+in square brackets like this: "pasajes [Knee Slide Pass]".
+
+Rules for bracketed technique names:
+- Use ONLY canonical names from the technique catalog (the "name" field)
+- Only bracket techniques you are confident the athlete practiced
+- If uncertain, do not bracket — prefer precision over recall
+
 Return ONLY valid JSON:
 {
   "ai_description": "<enhanced 2-4 sentence description, max 500 chars>",
