@@ -50,3 +50,10 @@ export interface CreateBJJTechniqueInput {
 export interface UpdateBJJTechniqueInput extends Partial<CreateBJJTechniqueInput> {
   id: string
 }
+
+// Re-export technique tracking types (PR 2)
+export type {
+  TechniqueLearningStatus,
+  WorkoutHistoryEntry,
+  TechniqueSuggestion,
+} from './progression/types/technique-tracking.types'
