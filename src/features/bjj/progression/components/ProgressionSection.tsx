@@ -13,6 +13,8 @@ interface ProgressionSectionProps {
   isExpanded: boolean
   onToggle: (sectionId: string, itemId: string, isComplete: boolean) => void
   onToggleCollapse: (sectionId: string, isExpanded: boolean) => void
+  practiceDataMap?: Map<string, { count: number; threshold: number; isLearned: boolean; techniqueId: string }>
+  onPracticeBadgeClick?: (techniqueId: string, techniqueName: string) => void
 }
 
 function ProgressionSection({
@@ -21,6 +23,8 @@ function ProgressionSection({
   isExpanded,
   onToggle,
   onToggleCollapse,
+  practiceDataMap,
+  onPracticeBadgeClick,
 }: ProgressionSectionProps) {
   const [contentHeight, setContentHeight] = useState<number | 'auto'>('auto')
   const contentRef = useRef<HTMLDivElement>(null)
@@ -115,7 +119,7 @@ function ProgressionSection({
           ) : (
             // Checkable section: render checklist items
             <div className="flex flex-col">
-              {renderChecklistItems(section, checkedMap, onToggle)}
+              {renderChecklistItems(section, checkedMap, onToggle, practiceDataMap, onPracticeBadgeClick)}
             </div>
           )}
         </div>
@@ -129,21 +133,28 @@ function renderChecklistItems(
   section: ProgressionSectionType,
   checkedMap: Map<string, boolean>,
   onToggle: (sectionId: string, itemId: string, isComplete: boolean) => void,
+  practiceDataMap?: Map<string, { count: number; threshold: number; isLearned: boolean; techniqueId: string }>,
+  onPracticeBadgeClick?: (techniqueId: string, techniqueName: string) => void,
 ) {
   // Check if items have categories
   const hasCategories = section.items.some((item) => 'category' in item && item.category)
 
   if (!hasCategories) {
     // No categories: render flat list
-    return section.items.map((item) => (
-      <ProgressionChecklistItem
-        key={item.id}
-        item={item}
-        sectionId={section.id}
-        isComplete={checkedMap.get(`${section.id}::${item.id}`) ?? false}
-        onToggle={onToggle}
-      />
-    ))
+    return section.items.map((item) => {
+      const practiceData = practiceDataMap?.get(`${section.id}::${item.id}`) ?? null
+      return (
+        <ProgressionChecklistItem
+          key={item.id}
+          item={item}
+          sectionId={section.id}
+          isComplete={checkedMap.get(`${section.id}::${item.id}`) ?? false}
+          onToggle={onToggle}
+          practiceData={practiceData}
+          onPracticeClick={practiceData ? () => onPracticeBadgeClick?.(practiceData.techniqueId, item.label) : undefined}
+        />
+      )
+    })
   }
 
   // Group items by category
@@ -195,15 +206,20 @@ function renderChecklistItems(
         </div>
 
         {/* Category items */}
-        {group.items.map((item) => (
-          <ProgressionChecklistItem
-            key={item.id}
-            item={item}
-            sectionId={section.id}
-            isComplete={checkedMap.get(`${section.id}::${item.id}`) ?? false}
-            onToggle={onToggle}
-          />
-        ))}
+        {group.items.map((item) => {
+          const practiceData = practiceDataMap?.get(`${section.id}::${item.id}`) ?? null
+          return (
+            <ProgressionChecklistItem
+              key={item.id}
+              item={item}
+              sectionId={section.id}
+              isComplete={checkedMap.get(`${section.id}::${item.id}`) ?? false}
+              onToggle={onToggle}
+              practiceData={practiceData}
+              onPracticeClick={practiceData ? () => onPracticeBadgeClick?.(practiceData.techniqueId, item.label) : undefined}
+            />
+          )
+        })}
       </div>
     )
   })
