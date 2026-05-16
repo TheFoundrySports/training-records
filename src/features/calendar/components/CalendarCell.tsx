@@ -43,7 +43,7 @@ export function CalendarCell({
       }}
       className={cn(
         'min-h-24 p-1.5 border border-border rounded-sm flex flex-col gap-0.5',
-        disableOutOfMonthClick && !day.isCurrentMonth && 'bg-muted/60',
+        disableOutOfMonthClick && !day.isCurrentMonth && 'bg-muted',
         isClickable && 'cursor-pointer hover:bg-muted/50 transition-colors',
         isToday && 'ring-2 ring-primary ring-inset',
       )}
