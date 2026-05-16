@@ -13,7 +13,7 @@ function createMockChain(data: unknown, error: unknown) {
   const thenable = {
     then: (resolve: (value: { data: unknown; error: unknown }) => unknown) => {
       resolve({ data, error })
-      return thenable as Promise<unknown>
+      return thenable as unknown as Promise<unknown>
     },
     catch: vi.fn().mockReturnThis(),
   }
@@ -117,9 +117,7 @@ describe('useTechniqueLearningStatus', () => {
     const queryClient = makeQueryClient()
     ;(supabase.from as ReturnType<typeof vi.fn>).mockReturnValue({
       select: vi.fn().mockReturnValue({
-        eq: vi.fn().mockReturnValue(
-          createMockChain(mockStatusData, null)
-        ),
+        eq: vi.fn().mockReturnValue(createMockChain(mockStatusData, null)),
       }),
     })
 
@@ -137,9 +135,7 @@ describe('useTechniqueLearningStatus', () => {
     const queryClient = makeQueryClient()
     ;(supabase.from as ReturnType<typeof vi.fn>).mockReturnValue({
       select: vi.fn().mockReturnValue({
-        eq: vi.fn().mockReturnValue(
-          createMockChain(mockStatusData, null)
-        ),
+        eq: vi.fn().mockReturnValue(createMockChain(mockStatusData, null)),
       }),
     })
 
@@ -157,9 +153,7 @@ describe('useTechniqueLearningStatus', () => {
     const queryClient = makeQueryClient()
     ;(supabase.from as ReturnType<typeof vi.fn>).mockReturnValue({
       select: vi.fn().mockReturnValue({
-        eq: vi.fn().mockReturnValue(
-          createMockChain([], null)
-        ),
+        eq: vi.fn().mockReturnValue(createMockChain([], null)),
       }),
     })
 
@@ -176,9 +170,16 @@ describe('useTechniqueLearningStatus', () => {
     const queryClient = makeQueryClient()
     ;(supabase.from as ReturnType<typeof vi.fn>).mockReturnValue({
       select: vi.fn().mockReturnValue({
-        eq: vi.fn().mockReturnValue(
-          createMockChain(null, { code: 'PGRST204', message: 'Column not found', details: '', hint: '' })
-        ),
+        eq: vi
+          .fn()
+          .mockReturnValue(
+            createMockChain(null, {
+              code: 'PGRST204',
+              message: 'Column not found',
+              details: '',
+              hint: '',
+            }),
+          ),
       }),
     })
 

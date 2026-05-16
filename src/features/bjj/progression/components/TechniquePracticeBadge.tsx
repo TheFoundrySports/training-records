@@ -1,9 +1,8 @@
-"use client"
+'use client'
 
 import { useCallback } from 'react'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
-import type { ComponentProps } from 'react'
 
 interface TechniquePracticeBadgeProps {
   techniqueName?: string
@@ -13,7 +12,7 @@ interface TechniquePracticeBadgeProps {
   onClick: () => void
 }
 
-function getBadgeClasses(count: number, threshold: number, isLearned: boolean): string {
+function getBadgeClasses(count: number, threshold: number): string {
   if (count === 0) {
     return 'bg-gray-100 text-gray-500'
   }
@@ -24,7 +23,12 @@ function getBadgeClasses(count: number, threshold: number, isLearned: boolean): 
   return 'bg-amber-100 text-amber-700'
 }
 
-function buildAriaLabel(techniqueName: string | undefined, count: number, threshold: number, isLearned: boolean): string {
+function buildAriaLabel(
+  techniqueName: string | undefined,
+  count: number,
+  threshold: number,
+  isLearned: boolean,
+): string {
   const name = techniqueName ?? ''
   const status = isLearned ? 'validated' : 'not validated'
   return `${name} practiced ${count} out of ${threshold} times, ${status}`.trim()
@@ -37,7 +41,7 @@ function TechniquePracticeBadge({
   isLearned,
   onClick,
 }: TechniquePracticeBadgeProps) {
-  const badgeClasses = getBadgeClasses(count, threshold, isLearned)
+  const badgeClasses = getBadgeClasses(count, threshold)
   const ariaLabel = buildAriaLabel(techniqueName, count, threshold, isLearned)
 
   const handleKeyDown = useCallback(
@@ -47,7 +51,7 @@ function TechniquePracticeBadge({
         onClick()
       }
     },
-    [onClick]
+    [onClick],
   )
 
   return (

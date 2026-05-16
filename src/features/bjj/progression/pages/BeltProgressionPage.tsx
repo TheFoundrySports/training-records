@@ -1,11 +1,10 @@
-"use client"
+'use client'
 
 import { useMemo, useState } from 'react'
 import { useAuth } from '@/features/auth/AuthContext'
 import { useBeltProgression } from '../hooks/useBeltProgression'
 import { useBeltProgressionUIState } from '../hooks/useBeltProgressionUIState'
 import { useTechniqueLearningStatus } from '../hooks/useTechniqueLearningStatus'
-import { useTechniqueSuggestions } from '../hooks/useTechniqueSuggestions'
 import { PROGRESSION_SECTIONS, TOTAL_CHECKABLE_ITEMS } from '../utils/belt-progression-sections'
 import { calculateProgress } from '../utils/calculateProgress'
 import { ProgressionSection } from '../components/ProgressionSection'
@@ -19,14 +18,18 @@ import type { TechniqueLearningStatus } from '../types/technique-tracking.types'
 
 function BeltProgressionPage() {
   const { user } = useAuth()
-  const { progression, isLoading: progLoading, error: progError, toggleItem, resetProgress, isResetting } = useBeltProgression()
+  const {
+    progression,
+    isLoading: progLoading,
+    error: progError,
+    toggleItem,
+    resetProgress,
+    isResetting,
+  } = useBeltProgression()
   const { uiState, isLoading: uiLoading, toggleSection } = useBeltProgressionUIState()
 
   // Technique learning status (for practice badges)
   const { data: techniqueStatuses = [] } = useTechniqueLearningStatus(user?.id ?? '')
-
-  // Technique suggestions (for suggestion panel)
-  const { data: suggestions = [] } = useTechniqueSuggestions(user?.id ?? '')
 
   const [modalState, setModalState] = useState<{
     techniqueId: string
@@ -61,7 +64,10 @@ function BeltProgressionPage() {
 
   // Build practiceData map: "sectionId::itemId" → practiceData + techniqueId
   const practiceDataMap = useMemo(() => {
-    const map = new Map<string, { count: number; threshold: number; isLearned: boolean; techniqueId: string }>()
+    const map = new Map<
+      string,
+      { count: number; threshold: number; isLearned: boolean; techniqueId: string }
+    >()
     for (const section of PROGRESSION_SECTIONS) {
       for (const item of section.items) {
         const key = `${section.id}::${item.id}`

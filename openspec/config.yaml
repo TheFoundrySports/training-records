@@ -1,0 +1,25 @@
+project:
+  name: training-records
+  description: The Foundry Sports training records application
+  root: .
+
+testing:
+  unit:
+    framework: vitest
+    command: npm test
+    coverage_command: npm run test:coverage
+    strict_tdd: true
+  e2e:
+    framework: playwright
+    command: npm run test:e2e
+    strict_tdd: false
+
+build:
+  command: npm run build
+
+ci:
+  provider: github-actions
+  config: .github/workflows/
+
+standards:
+  skill_registry: .atl/skill-registry.md

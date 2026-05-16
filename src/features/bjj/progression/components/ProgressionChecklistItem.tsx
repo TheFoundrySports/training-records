@@ -1,4 +1,4 @@
-"use client"
+'use client'
 
 import { cn } from '@/lib/utils'
 import { Check } from 'lucide-react'
@@ -10,7 +10,12 @@ interface ProgressionChecklistItemProps {
   isComplete: boolean
   onToggle: (sectionId: string, itemId: string, isComplete: boolean) => void
   sectionId: string
-  practiceData?: { count: number; threshold: number; isLearned: boolean; techniqueId: string } | null
+  practiceData?: {
+    count: number
+    threshold: number
+    isLearned: boolean
+    techniqueId: string
+  } | null
   onPracticeClick?: () => void
 }
 
@@ -42,9 +47,7 @@ function ProgressionChecklistItem({
           data-testid={`checkbox-${item.id}`}
           className={cn(
             'flex h-5 w-5 pointer-events-none items-center justify-center rounded border transition-colors duration-150',
-            isComplete
-              ? 'bg-amber-400 border-amber-400'
-              : 'border-muted-foreground bg-transparent',
+            isComplete ? 'bg-amber-400 border-amber-400' : 'border-muted-foreground bg-transparent',
           )}
         >
           {isComplete && <Check className="size-3 text-black" strokeWidth={3} />}

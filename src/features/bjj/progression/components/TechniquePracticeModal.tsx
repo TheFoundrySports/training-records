@@ -1,4 +1,4 @@
-"use client"
+'use client'
 
 import { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
@@ -9,7 +9,6 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-  DialogClose,
 } from '@/components/ui/dialog'
 import { Card, CardContent } from '@/components/ui/card'
 import { Loader2Icon } from 'lucide-react'
@@ -28,7 +27,8 @@ async function fetchTechniqueWorkoutHistory(
 ): Promise<WorkoutHistoryEntry[]> {
   const { data, error } = await supabase
     .from('bjj_section_techniques')
-    .select(`
+    .select(
+      `
       workouts!inner (
         id,
         performed_at,
@@ -39,7 +39,8 @@ async function fetchTechniqueWorkoutHistory(
         goal,
         ai_description
       )
-    `)
+    `,
+    )
     .eq('technique_id', techniqueId)
     .eq('workouts.user_id', userId)
     .order('workouts.performed_at', { ascending: false })
@@ -57,10 +58,12 @@ async function fetchTechniqueWorkoutHistory(
 
   if (!data) return []
 
-  return (data as unknown as Array<{
-    workouts: { id: string; performed_at: string; user_id: string }
-    bjj_sections: { section_number: number; goal: string; ai_description: string }
-  }>).map((row) => ({
+  return (
+    data as unknown as Array<{
+      workouts: { id: string; performed_at: string; user_id: string }
+      bjj_sections: { section_number: number; goal: string; ai_description: string }
+    }>
+  ).map((row) => ({
     workout_id: row.workouts.id,
     performed_at: row.workouts.performed_at,
     section_number: row.bjj_sections.section_number,
@@ -148,25 +151,31 @@ function TechniquePracticeModal({
         </DialogHeader>
 
         {isLoading && (
-          <div className="flex items-center justify-center py-8" role="status" aria-label="Loading practice history">
+          <div
+            className="flex items-center justify-center py-8"
+            role="status"
+            aria-label="Loading practice history"
+          >
             <Loader2Icon className="size-6 animate-spin text-muted-foreground" />
           </div>
         )}
 
         {isError && (
           <p className="text-sm text-destructive" role="alert">
-            Error loading practice history: {String((error as { error?: { message?: string } })?.error?.message ?? error)}
+            Error loading practice history:{' '}
+            {String((error as { error?: { message?: string } })?.error?.message ?? error)}
           </p>
         )}
 
         {!isLoading && !isError && (
           <div className="flex flex-col gap-3 max-h-[400px] overflow-y-auto">
             {workouts && workouts.length > 0 ? (
-              workouts.map((entry) => (
-                <WorkoutCard key={entry.workout_id} entry={entry} />
-              ))
+              workouts.map((entry) => <WorkoutCard key={entry.workout_id} entry={entry} />)
             ) : (
-              <p className="text-sm text-muted-foreground py-4 text-center" data-testid="empty-state">
+              <p
+                className="text-sm text-muted-foreground py-4 text-center"
+                data-testid="empty-state"
+              >
                 No practice sessions found for this technique.
               </p>
             )}
