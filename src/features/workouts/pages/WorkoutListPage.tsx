@@ -115,16 +115,13 @@ export function WorkoutListPage() {
       )}
 
       {!isLoading && !isError && workouts && workouts.length > 0 && (
-        <nav aria-label="Workout list">
-          <span className="sr-only">Workout list</span>
-          <ul className="space-y-3">
-            {workouts.map((workout) => (
-              <li key={workout.id}>
-                <WorkoutCard workout={workout} />
-              </li>
-            ))}
-          </ul>
-        </nav>
+        <ul aria-label="Workout list" className="space-y-3">
+          {workouts.map((workout) => (
+            <li key={workout.id}>
+              <WorkoutCard workout={workout} />
+            </li>
+          ))}
+        </ul>
       )}
     </div>
   )
