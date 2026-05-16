@@ -25,7 +25,10 @@ function formatDate(iso: string) {
 
 function WorkoutCard({ workout }: { workout: Workout }) {
   return (
-    <Link to={`/workouts/${workout.id}`} className="block hover:no-underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded-xl">
+    <Link
+      to={`/workouts/${workout.id}`}
+      className="block hover:no-underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded-xl"
+    >
       <Card className="hover:ring-primary/40 focus-visible:ring-primary/50 transition-shadow cursor-pointer">
         <CardContent className="flex items-start justify-between gap-4 py-4">
           <div className="flex-1 min-w-0">

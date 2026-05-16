@@ -1,0 +1,66 @@
+name: Feature Request
+description: Submit a new feature or improvement
+title: "feat(): "
+labels: ["enhancement", "status:needs-review"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### Pre-flight Checks
+        - [ ] I have searched existing issues and this is not a duplicate
+        - [ ] I understand this issue needs `status:approved` before a PR can be opened
+        - [ ] I have read the project README and understand the domain
+
+  - type: textarea
+    id: problem-description
+    attributes:
+      label: Problem Description
+      description: The pain point or limitation this feature solves. Be specific about who is affected and when.
+      placeholder: |
+        Example: As a BJJ coach, I cannot configure how many practice sessions a student needs before marking a technique as "learned". The default of 10 is too high/low for some techniques.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: Proposed Solution
+      description: How the feature should work from the user's perspective. Include user flows, mockups, or API contract if applicable.
+      placeholder: |
+        Describe what should exist, how it should work, and what happens when users interact with it.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: affected-area
+    attributes:
+      label: Affected Area
+      options:
+        - Frontend (React, UI)
+        - Backend (API, Database, Supabase)
+        - Documentation
+        - CI/Workflows
+        - Multiple Areas
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Other approaches or workarounds you considered (optional)
+      placeholder: |
+        Optional — what else did you consider?
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Screenshots, mockups, references, or extra information (optional)
+      placeholder: |
+        Optional — attach any relevant files, Figma links, or references.
+    validations:
+      required: false
