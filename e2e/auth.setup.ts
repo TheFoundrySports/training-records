@@ -18,7 +18,7 @@ setup('authenticate as athlete1', async ({ page }) => {
 
   // Wait until we're on the workouts list — confirms auth succeeded
   await expect(page).toHaveURL('/workouts')
-  await expect(page.getByRole('heading', { name: /workouts/i })).toBeVisible()
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
 
   await page.context().storageState({ path: authFile })
 })

@@ -116,7 +116,7 @@ export function WorkoutListPage() {
 
       {!isLoading && !isError && workouts && workouts.length > 0 && (
         <nav aria-label="Workout list">
-          <h2 className="sr-only">Available workouts</h2>
+          <span className="sr-only">Workout list</span>
           <ul className="space-y-3">
             {workouts.map((workout) => (
               <li key={workout.id}>
