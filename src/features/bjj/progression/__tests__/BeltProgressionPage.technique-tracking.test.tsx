@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
 import type { ReactNode } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { BeltProgressionPage } from '../pages/BeltProgressionPage'
@@ -21,9 +20,16 @@ function createMockThenable(data: unknown, error: unknown) {
 }
 
 let mockProgressionData: Array<{
-  id: string; user_id: string; belt_level: string; section_id: string
-  item_id: string; is_complete: boolean; completed_at: string | null
-  technique_id: string | null; created_at: string; updated_at: string
+  id: string
+  user_id: string
+  belt_level: string
+  section_id: string
+  item_id: string
+  is_complete: boolean
+  completed_at: string | null
+  technique_id: string | null
+  created_at: string
+  updated_at: string
 }> = []
 
 let mockUIStateData: Array<{ section_id: string; is_expanded: boolean }> = []
@@ -79,9 +85,7 @@ vi.mock('@/lib/supabase', () => ({
       }
     }),
     auth: {
-      getUser: vi.fn(() =>
-        Promise.resolve({ data: { user: { id: MOCK_USER_ID } } })
-      ),
+      getUser: vi.fn(() => Promise.resolve({ data: { user: { id: MOCK_USER_ID } } })),
     },
   },
 }))
@@ -90,7 +94,7 @@ vi.mock('@/lib/supabase', () => ({
 
 vi.mock('../hooks/useBeltProgression', () => ({
   useBeltProgression: vi.fn(() => ({
-    progression: mockProgressionData.map(row => ({
+    progression: mockProgressionData.map((row) => ({
       id: row.id,
       userId: row.user_id,
       beltLevel: row.belt_level,
@@ -124,7 +128,7 @@ vi.mock('../hooks/useTechniqueLearningStatus', () => ({
 
 vi.mock('../hooks/useTechniqueSuggestions', () => ({
   useTechniqueSuggestions: vi.fn(() => ({
-    data: mockSuggestionData.map(row => ({
+    data: mockSuggestionData.map((row) => ({
       technique_id: row.technique_id,
       name: row.bjj_techniques.name,
       name_es: row.bjj_techniques.name_es,
@@ -147,9 +151,7 @@ function makeQueryClient() {
 }
 
 function Wrapper({ children }: { children: ReactNode }) {
-  return (
-    <QueryClientProvider client={makeQueryClient()}>{children}</QueryClientProvider>
-  )
+  return <QueryClientProvider client={makeQueryClient()}>{children}</QueryClientProvider>
 }
 
 // ── Fixtures ───────────────────────────────────────────────────────────────────

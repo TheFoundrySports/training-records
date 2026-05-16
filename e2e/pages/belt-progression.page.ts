@@ -67,7 +67,7 @@ export class BeltProgressionPage {
   /**
    * Toggle a checkbox by keyboard interaction (focus + Space).
    * Waits for state change and Supabase mutation to complete.
-   * 
+   *
    * @param itemId - The checkbox item ID (e.g., 'tecnicas-comienzo-0')
    */
   async toggleCheckboxByTestId(itemId: string): Promise<void> {

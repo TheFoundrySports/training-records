@@ -8,7 +8,12 @@ function renderItem(props: {
   isComplete: boolean
   onToggle: (sectionId: string, itemId: string, isComplete: boolean) => void
   sectionId: string
-  practiceData?: { count: number; threshold: number; isLearned: boolean } | null
+  practiceData?: {
+    count: number
+    threshold: number
+    isLearned: boolean
+    techniqueId: string
+  } | null
   onPracticeClick?: () => void
 }) {
   return render(<ProgressionChecklistItem {...props} />)
@@ -58,7 +63,7 @@ describe('ProgressionChecklistItem', () => {
         isComplete: false,
         onToggle,
         sectionId: 'tecnicas',
-        practiceData: { count: 7, threshold: 10, isLearned: false },
+        practiceData: { count: 7, threshold: 10, isLearned: false, techniqueId: 't1' },
         onPracticeClick,
       })
 
@@ -75,7 +80,7 @@ describe('ProgressionChecklistItem', () => {
         isComplete: false,
         onToggle,
         sectionId: 'tecnicas',
-        practiceData: { count: 7, threshold: 10, isLearned: false },
+        practiceData: { count: 7, threshold: 10, isLearned: false, techniqueId: 't1' },
         onPracticeClick,
       })
 

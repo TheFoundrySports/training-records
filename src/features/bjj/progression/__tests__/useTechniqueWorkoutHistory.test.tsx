@@ -1,40 +1,36 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { renderHook, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import type { ReactNode } from 'react'
 import { useTechniqueWorkoutHistory } from '../hooks/useTechniqueWorkoutHistory'
-import type { WorkoutHistoryEntry } from '../types/technique-tracking.types'
 
-// ── Mock Supabase ─────────────────────────────────────────────────────────────
+let mockResponse: { data: unknown; error: unknown } = { data: [], error: null }
+const eqCalls: [string, string][] = []
 
-const { mockFrom, configureResponse } = vi.hoisted(() => {
-  let capturedData: unknown = []
-  let capturedError: unknown = null
-
+const { mockFrom, configureResponse, clearEqCalls } = vi.hoisted(() => {
   function configureResponse(data: unknown, error: unknown) {
-    capturedData = data
-    capturedError = error
+    mockResponse = { data, error }
   }
 
-  function makeThenable() {
-    return {
-      then: (resolve: (v: { data: unknown; error: unknown }) => void) => {
-        resolve({ data: capturedData, error: capturedError })
-        return makeThenable()
-      },
-      catch: vi.fn().mockReturnThis(),
+  function clearEqCalls() {
+    eqCalls.length = 0
+  }
+
+  const mockFrom = vi.fn().mockImplementation(() => {
+    const builder = {
+      select: vi.fn(() => builder),
+      eq: vi.fn((column: string, value: string) => {
+        eqCalls.push([column, value])
+        return builder
+      }),
+      order: vi.fn(() => builder),
+      limit: vi.fn(() => Promise.resolve(mockResponse)),
     }
-  }
 
-  const mockFrom = vi.fn().mockImplementation(() => ({
-    select: vi.fn().mockReturnThis(),
-    eq: vi.fn().mockReturnThis(),
-    order: vi.fn().mockReturnThis(),
-    limit: vi.fn().mockImplementation(() => makeThenable()),
-    then: vi.fn().mockImplementation(() => makeThenable()),
-  }))
+    return builder
+  })
 
-  return { mockFrom, configureResponse }
+  return { mockFrom, configureResponse, clearEqCalls }
 })
 
 vi.mock('@/lib/supabase', () => ({
@@ -44,8 +40,6 @@ vi.mock('@/lib/supabase', () => ({
 }))
 
 import { supabase } from '@/lib/supabase'
-
-// ── Helpers ────────────────────────────────────────────────────────────────────
 
 function makeQueryClient() {
   return new QueryClient({ defaultOptions: { queries: { retry: false } } })
@@ -57,12 +51,37 @@ function makeWrapper(queryClient: QueryClient) {
   }
 }
 
-// ── Fixtures ───────────────────────────────────────────────────────────────────
-
 const USER_ID = '550e8400-e29b-41d4-a716-446655440000'
 const TECHNIQUE_ID = '550e8400-e29b-41d4-a716-446655440001'
 
-const MOCK_HISTORY: WorkoutHistoryEntry[] = [
+const MOCK_HISTORY_ROWS = [
+  {
+    workouts: {
+      id: '550e8400-e29b-41d4-a716-446655440100',
+      performed_at: '2026-04-15T10:00:00.000Z',
+      user_id: USER_ID,
+    },
+    bjj_sections: {
+      section_number: 2,
+      goal: 'Guard passing',
+      ai_description: 'Worked on knee slide pass.',
+    },
+  },
+  {
+    workouts: {
+      id: '550e8400-e29b-41d4-a716-446655440101',
+      performed_at: '2026-04-10T09:00:00.000Z',
+      user_id: USER_ID,
+    },
+    bjj_sections: {
+      section_number: 1,
+      goal: 'Warmup and guard work',
+      ai_description: 'Drilled closed guard retention.',
+    },
+  },
+]
+
+const EXPECTED_HISTORY = [
   {
     workout_id: '550e8400-e29b-41d4-a716-446655440100',
     performed_at: '2026-04-15T10:00:00.000Z',
@@ -79,16 +98,15 @@ const MOCK_HISTORY: WorkoutHistoryEntry[] = [
   },
 ]
 
-// ── Tests ──────────────────────────────────────────────────────────────────────
-
 describe('useTechniqueWorkoutHistory', () => {
   beforeEach(() => {
     configureResponse([], null)
+    clearEqCalls()
     mockFrom.mockClear()
   })
 
   it('queries bjj_section_techniques', async () => {
-    configureResponse(MOCK_HISTORY, null)
+    configureResponse(MOCK_HISTORY_ROWS, null)
     const queryClient = makeQueryClient()
 
     const { result } = renderHook(() => useTechniqueWorkoutHistory(TECHNIQUE_ID, USER_ID), {
@@ -101,26 +119,8 @@ describe('useTechniqueWorkoutHistory', () => {
   })
 
   it('calls eq with technique_id and user_id', async () => {
-    configureResponse(MOCK_HISTORY, null)
+    configureResponse(MOCK_HISTORY_ROWS, null)
     const queryClient = makeQueryClient()
-    const eqCalls: [string, string][] = []
-
-    mockFrom.mockImplementationOnce(() => ({
-      select: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockImplementation(function (col: string, val: string) {
-        eqCalls.push([col, val])
-        return mockFrom()
-      }),
-      order: vi.fn().mockReturnThis(),
-      limit: vi.fn().mockImplementation(() => ({
-        then: (resolve: (v: { data: unknown; error: unknown }) => void) => {
-          resolve({ data: MOCK_HISTORY, error: null })
-          return { then: vi.fn(), catch: vi.fn() }
-        },
-        catch: vi.fn(),
-      })),
-      then: vi.fn(),
-    }))
 
     const { result } = renderHook(() => useTechniqueWorkoutHistory(TECHNIQUE_ID, USER_ID), {
       wrapper: makeWrapper(queryClient),
@@ -133,7 +133,7 @@ describe('useTechniqueWorkoutHistory', () => {
   })
 
   it('returns WorkoutHistoryEntry array when data is available', async () => {
-    configureResponse(MOCK_HISTORY, null)
+    configureResponse(MOCK_HISTORY_ROWS, null)
     const queryClient = makeQueryClient()
 
     const { result } = renderHook(() => useTechniqueWorkoutHistory(TECHNIQUE_ID, USER_ID), {
@@ -142,8 +142,7 @@ describe('useTechniqueWorkoutHistory', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true), { timeout: 3000 })
 
-    expect(result.current.data).toBeDefined()
-    expect(Array.isArray(result.current.data)).toBe(true)
+    expect(result.current.data).toEqual(EXPECTED_HISTORY)
   })
 
   it('returns empty array when no workouts contain this technique', async () => {
@@ -160,7 +159,12 @@ describe('useTechniqueWorkoutHistory', () => {
   })
 
   it('throws structured error when query fails', async () => {
-    configureResponse(null, { code: 'PGRST204', message: 'Column not found', details: '', hint: '' })
+    configureResponse(null, {
+      code: 'PGRST204',
+      message: 'Column not found',
+      details: '',
+      hint: '',
+    })
     const queryClient = makeQueryClient()
 
     const { result } = renderHook(() => useTechniqueWorkoutHistory(TECHNIQUE_ID, USER_ID), {
@@ -184,6 +188,7 @@ describe('useTechniqueWorkoutHistory', () => {
     const { result } = renderHook(() => useTechniqueWorkoutHistory('', USER_ID), {
       wrapper: makeWrapper(queryClient),
     })
+
     expect(result.current.isPending).toBe(true)
     expect(supabase.from).not.toHaveBeenCalled()
   })
@@ -195,6 +200,7 @@ describe('useTechniqueWorkoutHistory', () => {
     const { result } = renderHook(() => useTechniqueWorkoutHistory(TECHNIQUE_ID, ''), {
       wrapper: makeWrapper(queryClient),
     })
+
     expect(result.current.isPending).toBe(true)
     expect(supabase.from).not.toHaveBeenCalled()
   })
