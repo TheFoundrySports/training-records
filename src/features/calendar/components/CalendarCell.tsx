@@ -55,7 +55,7 @@ export function CalendarCell({
           'text-xs font-medium self-start leading-none mb-0.5',
           isToday
             ? 'bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center text-[11px]'
-            : 'text-muted-foreground',
+            : 'text-foreground',
         )}
       >
         {day.date.getDate()}
