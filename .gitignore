@@ -41,6 +41,11 @@ deno.lock
 # Atl (skill registry, non-shareable artifacts)
 .atl/
 
+# Pi / OpenCode local runtime artifacts
+.engram/
+.pi-lens/
+e2e/.pi-lens/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
