@@ -3,12 +3,15 @@
 import { cn } from '@/lib/utils'
 import { Check } from 'lucide-react'
 import type { ProgressionItem } from '../types/belt-progression.types'
+import { TechniquePracticeBadge } from './TechniquePracticeBadge'
 
 interface ProgressionChecklistItemProps {
   item: ProgressionItem
   isComplete: boolean
   onToggle: (sectionId: string, itemId: string, isComplete: boolean) => void
   sectionId: string
+  practiceData?: { count: number; threshold: number; isLearned: boolean; techniqueId: string } | null
+  onPracticeClick?: () => void
 }
 
 function ProgressionChecklistItem({
@@ -16,6 +19,8 @@ function ProgressionChecklistItem({
   isComplete,
   onToggle,
   sectionId,
+  practiceData,
+  onPracticeClick,
 }: ProgressionChecklistItemProps) {
   const handleChange = () => {
     onToggle(sectionId, item.id, !isComplete)
@@ -56,6 +61,15 @@ function ProgressionChecklistItem({
       >
         {item.label}
       </label>
+      {practiceData && onPracticeClick && (
+        <TechniquePracticeBadge
+          techniqueName={item.label}
+          count={practiceData.count}
+          threshold={practiceData.threshold}
+          isLearned={practiceData.isLearned}
+          onClick={onPracticeClick}
+        />
+      )}
     </div>
   )
 }

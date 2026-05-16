@@ -1,19 +1,42 @@
 "use client"
 
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
+import { useAuth } from '@/features/auth/AuthContext'
 import { useBeltProgression } from '../hooks/useBeltProgression'
 import { useBeltProgressionUIState } from '../hooks/useBeltProgressionUIState'
+import { useTechniqueLearningStatus } from '../hooks/useTechniqueLearningStatus'
+import { useTechniqueSuggestions } from '../hooks/useTechniqueSuggestions'
 import { PROGRESSION_SECTIONS, TOTAL_CHECKABLE_ITEMS } from '../utils/belt-progression-sections'
 import { calculateProgress } from '../utils/calculateProgress'
 import { ProgressionSection } from '../components/ProgressionSection'
 import { ProgressionProgressBar } from '../components/ProgressionProgressBar'
 import { ProgressionResetButton } from '../components/ProgressionResetButton'
+import { TechniqueSuggestionPanel } from '../components/TechniqueSuggestionPanel'
+import { TechniquePracticeModal } from '../components/TechniquePracticeModal'
 import { Card, CardContent } from '@/components/ui/card'
 import { Loader2Icon } from 'lucide-react'
+import type { TechniqueLearningStatus } from '../types/technique-tracking.types'
 
 function BeltProgressionPage() {
+  const { user } = useAuth()
   const { progression, isLoading: progLoading, error: progError, toggleItem, resetProgress, isResetting } = useBeltProgression()
   const { uiState, isLoading: uiLoading, toggleSection } = useBeltProgressionUIState()
+
+  // Technique learning status (for practice badges)
+  const { data: techniqueStatuses = [] } = useTechniqueLearningStatus(user?.id ?? '')
+
+  // Technique suggestions (for suggestion panel)
+  const { data: suggestions = [] } = useTechniqueSuggestions(user?.id ?? '')
+
+  const [modalState, setModalState] = useState<{
+    techniqueId: string
+    techniqueName: string
+    open: boolean
+  }>({
+    techniqueId: '',
+    techniqueName: '',
+    open: false,
+  })
 
   const isLoading = progLoading || uiLoading
 
@@ -25,6 +48,36 @@ function BeltProgressionPage() {
     }
     return map
   }, [progression])
+
+  // Build technique status map: "name_es | name" → TechniqueLearningStatus
+  const techniqueStatusMap = useMemo(() => {
+    const map = new Map<string, TechniqueLearningStatus>()
+    for (const status of techniqueStatuses) {
+      if (status.name_es) map.set(status.name_es, status)
+      if (status.name) map.set(status.name, status)
+    }
+    return map
+  }, [techniqueStatuses])
+
+  // Build practiceData map: "sectionId::itemId" → practiceData + techniqueId
+  const practiceDataMap = useMemo(() => {
+    const map = new Map<string, { count: number; threshold: number; isLearned: boolean; techniqueId: string }>()
+    for (const section of PROGRESSION_SECTIONS) {
+      for (const item of section.items) {
+        const key = `${section.id}::${item.id}`
+        const status = techniqueStatusMap.get(item.label)
+        if (status) {
+          map.set(key, {
+            count: status.total_practices,
+            threshold: status.required_practices,
+            isLearned: status.is_learned,
+            techniqueId: status.technique_id,
+          })
+        }
+      }
+    }
+    return map
+  }, [techniqueStatusMap])
 
   // Build expandedMap: sectionId → isExpanded (from DB state)
   const expandedMap = useMemo(() => {
@@ -70,6 +123,14 @@ function BeltProgressionPage() {
     toggleSection({ sectionId, isExpanded })
   }
 
+  const handlePracticeBadgeClick = (techniqueId: string, techniqueName: string) => {
+    setModalState({ techniqueId, techniqueName, open: true })
+  }
+
+  const handleModalClose = () => {
+    setModalState((prev) => ({ ...prev, open: false }))
+  }
+
   if (isLoading) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
@@ -96,6 +157,9 @@ function BeltProgressionPage() {
             Seguimiento de los 43 requisitos para obtener el cinturón azul.
           </p>
         </div>
+
+        {/* Suggestion panel */}
+        <TechniqueSuggestionPanel userId={user?.id ?? ''} />
 
         {/* Global progress bar */}
         <Card>
@@ -128,6 +192,8 @@ function BeltProgressionPage() {
               isExpanded={sectionExpandedMap.get(section.id) ?? false}
               onToggle={handleToggle}
               onToggleCollapse={handleToggleCollapse}
+              practiceDataMap={practiceDataMap}
+              onPracticeBadgeClick={handlePracticeBadgeClick}
             />
           ))}
         </div>
@@ -137,6 +203,14 @@ function BeltProgressionPage() {
           <ProgressionResetButton onReset={resetProgress} isPending={isResetting} />
         </div>
       </div>
+
+      {/* Practice modal — mounted at page root */}
+      <TechniquePracticeModal
+        techniqueId={modalState.techniqueId}
+        techniqueName={modalState.techniqueName}
+        open={modalState.open}
+        onClose={handleModalClose}
+      />
     </div>
   )
 }
