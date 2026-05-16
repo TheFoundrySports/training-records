@@ -12,19 +12,335 @@ interface TechniqueSuggestionPanelProps {
   userId: string
 }
 
-// Find the belt progression sectionId+itemId for a given techniqueId
-// This requires matching the technique name against the progression sections
+function normalizeTechniqueKey(value: string | null | undefined) {
+  return (value ?? '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/&/g, ' and ')
+    .replace(/\//g, ' ')
+    .replace(/\([^)]*\)/g, ' ')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim()
+}
+
+const TECHNIQUE_TO_PROGRESSION_ITEM: Record<string, { sectionId: string; itemId: string }> = {
+  // Takedowns
+  [normalizeTechniqueKey('Double Leg')]: { sectionId: 'tecnicas', itemId: 'tecnicas-comienzo-0' },
+  [normalizeTechniqueKey('Double Leg Takedown')]: {
+    sectionId: 'tecnicas',
+    itemId: 'tecnicas-comienzo-0',
+  },
+  [normalizeTechniqueKey('Derribo por las dos piernas')]: {
+    sectionId: 'tecnicas',
+    itemId: 'tecnicas-comienzo-0',
+  },
+  [normalizeTechniqueKey('Single Leg')]: { sectionId: 'tecnicas', itemId: 'tecnicas-comienzo-1' },
+  [normalizeTechniqueKey('Single Leg Takedown')]: {
+    sectionId: 'tecnicas',
+    itemId: 'tecnicas-comienzo-1',
+  },
+  [normalizeTechniqueKey('Derribo por una pierna')]: {
+    sectionId: 'tecnicas',
+    itemId: 'tecnicas-comienzo-1',
+  },
+  [normalizeTechniqueKey('Collar Drag')]: { sectionId: 'tecnicas', itemId: 'tecnicas-comienzo-2' },
+  [normalizeTechniqueKey('Arm Drag')]: { sectionId: 'tecnicas', itemId: 'tecnicas-comienzo-2' },
+  [normalizeTechniqueKey('Arrastre de solapa')]: {
+    sectionId: 'tecnicas',
+    itemId: 'tecnicas-comienzo-2',
+  },
+  [normalizeTechniqueKey('Arrastre de brazo')]: {
+    sectionId: 'tecnicas',
+    itemId: 'tecnicas-comienzo-2',
+  },
+  [normalizeTechniqueKey('Guard Pull')]: { sectionId: 'tecnicas', itemId: 'tecnicas-comienzo-3' },
+  [normalizeTechniqueKey('Jalon de guardia')]: {
+    sectionId: 'tecnicas',
+    itemId: 'tecnicas-comienzo-3',
+  },
+
+  // Guard passes
+  [normalizeTechniqueKey('Abrir la Guardia Cerrada')]: {
+    sectionId: 'tecnicas',
+    itemId: 'tecnicas-pasados-0',
+  },
+  [normalizeTechniqueKey('Closed Guard Break')]: {
+    sectionId: 'tecnicas',
+    itemId: 'tecnicas-pasados-0',
+  },
+  [normalizeTechniqueKey('Apertura de guardia cerrada')]: {
+    sectionId: 'tecnicas',
+    itemId: 'tecnicas-pasados-0',
+  },
+  [normalizeTechniqueKey('Knee Slide & Leg Weave')]: {
+    sectionId: 'tecnicas',
+    itemId: 'tecnicas-pasados-1',
+  },
+  [normalizeTechniqueKey('Knee Slide Pass')]: {
+    sectionId: 'tecnicas',
+    itemId: 'tecnicas-pasados-1',
+  },
+  [normalizeTechniqueKey('Leg Weave Pass')]: {
+    sectionId: 'tecnicas',
+    itemId: 'tecnicas-pasados-1',
+  },
+  [normalizeTechniqueKey('Paso en deslizamiento')]: {
+    sectionId: 'tecnicas',
+    itemId: 'tecnicas-pasados-1',
+  },
+  [normalizeTechniqueKey('Paso tejido de pierna')]: {
+    sectionId: 'tecnicas',
+    itemId: 'tecnicas-pasados-1',
+  },
+  [normalizeTechniqueKey('Double Under')]: { sectionId: 'tecnicas', itemId: 'tecnicas-pasados-2' },
+  [normalizeTechniqueKey('Double Under Pass')]: {
+    sectionId: 'tecnicas',
+    itemId: 'tecnicas-pasados-2',
+  },
+  [normalizeTechniqueKey('Paso doble por debajo')]: {
+    sectionId: 'tecnicas',
+    itemId: 'tecnicas-pasados-2',
+  },
+  [normalizeTechniqueKey('Leg Drag')]: { sectionId: 'tecnicas', itemId: 'tecnicas-pasados-3' },
+  [normalizeTechniqueKey('Leg Drag Pass')]: { sectionId: 'tecnicas', itemId: 'tecnicas-pasados-3' },
+  [normalizeTechniqueKey('Arrastre de pierna')]: {
+    sectionId: 'tecnicas',
+    itemId: 'tecnicas-pasados-3',
+  },
+  [normalizeTechniqueKey('Toreando')]: { sectionId: 'tecnicas', itemId: 'tecnicas-pasados-4' },
+  [normalizeTechniqueKey('Toreando Pass')]: { sectionId: 'tecnicas', itemId: 'tecnicas-pasados-4' },
+  [normalizeTechniqueKey('Paso toreo')]: { sectionId: 'tecnicas', itemId: 'tecnicas-pasados-4' },
+
+  // Guards
+  [normalizeTechniqueKey('Retencion Basica de Guardia')]: {
+    sectionId: 'tecnicas',
+    itemId: 'tecnicas-guardia-0',
+  },
+  [normalizeTechniqueKey('Basic Guard Retention')]: {
+    sectionId: 'tecnicas',
+    itemId: 'tecnicas-guardia-0',
+  },
+  [normalizeTechniqueKey('Retencion basica de guardia')]: {
+    sectionId: 'tecnicas',
+    itemId: 'tecnicas-guardia-0',
+  },
+  [normalizeTechniqueKey('Collar y Manga')]: {
+    sectionId: 'tecnicas',
+    itemId: 'tecnicas-guardia-1',
+  },
+  [normalizeTechniqueKey('Collar and Sleeve Guard')]: {
+    sectionId: 'tecnicas',
+    itemId: 'tecnicas-guardia-1',
+  },
+  [normalizeTechniqueKey('Guardia de solapa y manga')]: {
+    sectionId: 'tecnicas',
+    itemId: 'tecnicas-guardia-1',
+  },
+  [normalizeTechniqueKey('De La Riva')]: { sectionId: 'tecnicas', itemId: 'tecnicas-guardia-2' },
+  [normalizeTechniqueKey('De La Riva Guard')]: {
+    sectionId: 'tecnicas',
+    itemId: 'tecnicas-guardia-2',
+  },
+  [normalizeTechniqueKey('Guardia De La Riva')]: {
+    sectionId: 'tecnicas',
+    itemId: 'tecnicas-guardia-2',
+  },
+  [normalizeTechniqueKey('Guardia Araña y Lasso')]: {
+    sectionId: 'tecnicas',
+    itemId: 'tecnicas-guardia-3',
+  },
+  [normalizeTechniqueKey('Spider Guard')]: { sectionId: 'tecnicas', itemId: 'tecnicas-guardia-3' },
+  [normalizeTechniqueKey('Lasso Guard')]: { sectionId: 'tecnicas', itemId: 'tecnicas-guardia-3' },
+  [normalizeTechniqueKey('Guardia araña')]: { sectionId: 'tecnicas', itemId: 'tecnicas-guardia-3' },
+  [normalizeTechniqueKey('Guardia lazo')]: { sectionId: 'tecnicas', itemId: 'tecnicas-guardia-3' },
+  [normalizeTechniqueKey('Guardia Mariposa')]: {
+    sectionId: 'tecnicas',
+    itemId: 'tecnicas-guardia-4',
+  },
+  [normalizeTechniqueKey('Butterfly Guard')]: {
+    sectionId: 'tecnicas',
+    itemId: 'tecnicas-guardia-4',
+  },
+  [normalizeTechniqueKey('Media Guardia')]: { sectionId: 'tecnicas', itemId: 'tecnicas-guardia-5' },
+  [normalizeTechniqueKey('Half Guard')]: { sectionId: 'tecnicas', itemId: 'tecnicas-guardia-5' },
+  [normalizeTechniqueKey('Guardia Cerrada')]: {
+    sectionId: 'tecnicas',
+    itemId: 'tecnicas-guardia-6',
+  },
+  [normalizeTechniqueKey('Closed Guard')]: { sectionId: 'tecnicas', itemId: 'tecnicas-guardia-6' },
+  [normalizeTechniqueKey('Guardia X & Single X')]: {
+    sectionId: 'tecnicas',
+    itemId: 'tecnicas-guardia-7',
+  },
+  [normalizeTechniqueKey('X Guard')]: { sectionId: 'tecnicas', itemId: 'tecnicas-guardia-7' },
+  [normalizeTechniqueKey('Single Leg X Guard')]: {
+    sectionId: 'tecnicas',
+    itemId: 'tecnicas-guardia-7',
+  },
+  [normalizeTechniqueKey('Guardia X')]: { sectionId: 'tecnicas', itemId: 'tecnicas-guardia-7' },
+  [normalizeTechniqueKey('Guardia X por una pierna')]: {
+    sectionId: 'tecnicas',
+    itemId: 'tecnicas-guardia-7',
+  },
+
+  // Submissions
+  [normalizeTechniqueKey('Triangulo')]: { sectionId: 'tecnicas', itemId: 'tecnicas-sumisiones-0' },
+  [normalizeTechniqueKey('Triangle Choke')]: {
+    sectionId: 'tecnicas',
+    itemId: 'tecnicas-sumisiones-0',
+  },
+  [normalizeTechniqueKey('Estrangulacion triangulo')]: {
+    sectionId: 'tecnicas',
+    itemId: 'tecnicas-sumisiones-0',
+  },
+  [normalizeTechniqueKey('Palanca de Brazo (Armbar)')]: {
+    sectionId: 'tecnicas',
+    itemId: 'tecnicas-sumisiones-1',
+  },
+  [normalizeTechniqueKey('Palanca de Brazo')]: {
+    sectionId: 'tecnicas',
+    itemId: 'tecnicas-sumisiones-1',
+  },
+  [normalizeTechniqueKey('Armbar')]: { sectionId: 'tecnicas', itemId: 'tecnicas-sumisiones-1' },
+  [normalizeTechniqueKey('Llave de codo')]: {
+    sectionId: 'tecnicas',
+    itemId: 'tecnicas-sumisiones-1',
+  },
+  [normalizeTechniqueKey('Kimura')]: { sectionId: 'tecnicas', itemId: 'tecnicas-sumisiones-2' },
+  [normalizeTechniqueKey('Omoplata')]: { sectionId: 'tecnicas', itemId: 'tecnicas-sumisiones-3' },
+  [normalizeTechniqueKey('Cross Choke (Estrangulación Cruzada)')]: {
+    sectionId: 'tecnicas',
+    itemId: 'tecnicas-sumisiones-4',
+  },
+  [normalizeTechniqueKey('Cross Choke')]: {
+    sectionId: 'tecnicas',
+    itemId: 'tecnicas-sumisiones-4',
+  },
+  [normalizeTechniqueKey('Cross Collar Choke')]: {
+    sectionId: 'tecnicas',
+    itemId: 'tecnicas-sumisiones-4',
+  },
+  [normalizeTechniqueKey('Estrangulacion cruzada')]: {
+    sectionId: 'tecnicas',
+    itemId: 'tecnicas-sumisiones-4',
+  },
+  [normalizeTechniqueKey('Estrangulacion de solapa')]: {
+    sectionId: 'tecnicas',
+    itemId: 'tecnicas-sumisiones-4',
+  },
+  [normalizeTechniqueKey('Mataleon (Rear Naked Choke)')]: {
+    sectionId: 'tecnicas',
+    itemId: 'tecnicas-sumisiones-5',
+  },
+  [normalizeTechniqueKey('Mataleon')]: { sectionId: 'tecnicas', itemId: 'tecnicas-sumisiones-5' },
+  [normalizeTechniqueKey('Rear Naked Choke')]: {
+    sectionId: 'tecnicas',
+    itemId: 'tecnicas-sumisiones-5',
+  },
+  [normalizeTechniqueKey('Estrangulacion dorsal')]: {
+    sectionId: 'tecnicas',
+    itemId: 'tecnicas-sumisiones-5',
+  },
+  [normalizeTechniqueKey('Llave de Pie (Botinha / Straight Ankle Lock)')]: {
+    sectionId: 'tecnicas',
+    itemId: 'tecnicas-sumisiones-6',
+  },
+  [normalizeTechniqueKey('Llave de Pie')]: {
+    sectionId: 'tecnicas',
+    itemId: 'tecnicas-sumisiones-6',
+  },
+  [normalizeTechniqueKey('Botinha')]: { sectionId: 'tecnicas', itemId: 'tecnicas-sumisiones-6' },
+  [normalizeTechniqueKey('Straight Ankle Lock')]: {
+    sectionId: 'tecnicas',
+    itemId: 'tecnicas-sumisiones-6',
+  },
+  [normalizeTechniqueKey('Llave de tobillo')]: {
+    sectionId: 'tecnicas',
+    itemId: 'tecnicas-sumisiones-6',
+  },
+
+  // Escapes
+  [normalizeTechniqueKey('Escape de Montada')]: {
+    sectionId: 'tecnicas',
+    itemId: 'tecnicas-escapes-0',
+  },
+  [normalizeTechniqueKey('Mount Escape')]: { sectionId: 'tecnicas', itemId: 'tecnicas-escapes-0' },
+  [normalizeTechniqueKey('Escape de monte')]: {
+    sectionId: 'tecnicas',
+    itemId: 'tecnicas-escapes-0',
+  },
+  [normalizeTechniqueKey('Escape de Control Lateral')]: {
+    sectionId: 'tecnicas',
+    itemId: 'tecnicas-escapes-1',
+  },
+  [normalizeTechniqueKey('Side Control Escape')]: {
+    sectionId: 'tecnicas',
+    itemId: 'tecnicas-escapes-1',
+  },
+  [normalizeTechniqueKey('Escape de control lateral')]: {
+    sectionId: 'tecnicas',
+    itemId: 'tecnicas-escapes-1',
+  },
+  [normalizeTechniqueKey('Escape de Espalda')]: {
+    sectionId: 'tecnicas',
+    itemId: 'tecnicas-escapes-2',
+  },
+  [normalizeTechniqueKey('Back Escape')]: { sectionId: 'tecnicas', itemId: 'tecnicas-escapes-2' },
+  [normalizeTechniqueKey('Escape de espalda')]: {
+    sectionId: 'tecnicas',
+    itemId: 'tecnicas-escapes-2',
+  },
+  [normalizeTechniqueKey('Escape de Triángulo')]: {
+    sectionId: 'tecnicas',
+    itemId: 'tecnicas-escapes-3',
+  },
+  [normalizeTechniqueKey('Triangle Escape')]: {
+    sectionId: 'tecnicas',
+    itemId: 'tecnicas-escapes-3',
+  },
+  [normalizeTechniqueKey('Escape de triangulo')]: {
+    sectionId: 'tecnicas',
+    itemId: 'tecnicas-escapes-3',
+  },
+  [normalizeTechniqueKey('Escape de Guillotina')]: {
+    sectionId: 'tecnicas',
+    itemId: 'tecnicas-escapes-4',
+  },
+  [normalizeTechniqueKey('Guillotine Escape')]: {
+    sectionId: 'tecnicas',
+    itemId: 'tecnicas-escapes-4',
+  },
+  [normalizeTechniqueKey('Escape de guillotina')]: {
+    sectionId: 'tecnicas',
+    itemId: 'tecnicas-escapes-4',
+  },
+  [normalizeTechniqueKey('Escape de Palanca de Brazo (Armbar)')]: {
+    sectionId: 'tecnicas',
+    itemId: 'tecnicas-escapes-5',
+  },
+  [normalizeTechniqueKey('Escape de Palanca de Brazo')]: {
+    sectionId: 'tecnicas',
+    itemId: 'tecnicas-escapes-5',
+  },
+  [normalizeTechniqueKey('Armbar Escape')]: { sectionId: 'tecnicas', itemId: 'tecnicas-escapes-5' },
+  [normalizeTechniqueKey('Escape de llave de codo')]: {
+    sectionId: 'tecnicas',
+    itemId: 'tecnicas-escapes-5',
+  },
+}
+
+// Find the belt progression sectionId+itemId for a suggestion.
+// Prefer explicit aliases because suggestion names come from the technique catalog,
+// while progression labels are sometimes abbreviated, translated, or combined.
 function matchTechniqueToProgressionItem(
   suggestion: TechniqueSuggestion,
-  progressionItems: Array<{ sectionId: string; itemId: string; label: string; category?: string }>,
 ): { sectionId: string; itemId: string } | null {
-  // Match by name_es (Spanish) first, then name (English)
-  for (const item of progressionItems) {
-    if (item.label === suggestion.name_es || item.label === suggestion.name) {
-      return { sectionId: item.sectionId, itemId: item.itemId }
-    }
-  }
-  return null
+  return (
+    TECHNIQUE_TO_PROGRESSION_ITEM[normalizeTechniqueKey(suggestion.name_es)] ??
+    TECHNIQUE_TO_PROGRESSION_ITEM[normalizeTechniqueKey(suggestion.name)] ??
+    null
+  )
 }
 
 function SuggestionCard({
@@ -77,24 +393,22 @@ function SuggestionCard({
   )
 }
 
+function loadDismissedIds(userId: string) {
+  try {
+    const stored = localStorage.getItem(`suggestions_dismissed_${userId}`)
+    if (!stored) return new Set<string>()
+
+    return new Set(JSON.parse(stored) as string[])
+  } catch {
+    return new Set<string>()
+  }
+}
+
 function TechniqueSuggestionPanel({ userId }: TechniqueSuggestionPanelProps) {
   const { data: suggestions = [], isLoading } = useTechniqueSuggestions(userId)
   const { toggleItem } = useBeltProgression()
   const [isCollapsed, setIsCollapsed] = useState(false)
-  const [dismissedIds, setDismissedIds] = useState<Set<string>>(new Set())
-
-  // Load dismissed state from localStorage on mount
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem(`suggestions_dismissed_${userId}`)
-      if (stored) {
-        const ids = JSON.parse(stored) as string[]
-        setDismissedIds(new Set(ids))
-      }
-    } catch {
-      // Ignore localStorage errors
-    }
-  }, [userId])
+  const [dismissedIds, setDismissedIds] = useState<Set<string>>(() => loadDismissedIds(userId))
 
   // Persist dismissed IDs to localStorage
   useEffect(() => {
@@ -118,23 +432,8 @@ function TechniqueSuggestionPanel({ userId }: TechniqueSuggestionPanelProps) {
     setDismissedIds(new Set(suggestions.map((s) => s.technique_id)))
   }
 
-  const handleMarkComplete = async (suggestion: TechniqueSuggestion) => {
-    // Find the corresponding progression item
-    // For blue belt, the section is 'tecnicas'
-    // We need to match by name/name_es against the items
-    const { PROGRESSION_SECTIONS } = await import('../utils/belt-progression-sections')
-    const tecnicasSection = PROGRESSION_SECTIONS.find((s) => s.id === 'tecnicas')
-    if (!tecnicasSection) return
-
-    const match = matchTechniqueToProgressionItem(
-      suggestion,
-      tecnicasSection.items.map((item) => ({
-        sectionId: 'tecnicas',
-        itemId: item.id,
-        label: item.label,
-        category: (item as { category?: string }).category,
-      })),
-    )
+  const handleMarkComplete = (suggestion: TechniqueSuggestion) => {
+    const match = matchTechniqueToProgressionItem(suggestion)
 
     if (match) {
       toggleItem({ sectionId: match.sectionId, itemId: match.itemId, isComplete: true })
