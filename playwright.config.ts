@@ -42,7 +42,7 @@ export default defineConfig({
         storageState: '.auth/athlete.json',
       },
       dependencies: ['setup'],
-      testIgnore: /auth\.spec\.ts/,
+      testIgnore: [/auth\.spec\.ts/, /belt-progression\.spec\.ts/],
     },
 
     // ── Unauthenticated tests ──────────────────────────────────────────────

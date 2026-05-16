@@ -30,14 +30,18 @@ test.describe('BJJ Blue Belt Progression', () => {
   })
 
   test('check item persists across refresh', async ({ page, beltProgressionPage }) => {
+    // Reset: ensure checkbox starts unchecked
+    await page.getByRole('button', { name: /reiniciar/i }).click()
+    await page.getByRole('button', { name: /confirmar/i }).click()
+    await page.waitForTimeout(500) // Wait for reset mutation
+
     // Expand the Técnicas section
     await beltProgressionPage.expandSection(/2\. Técnicas/i)
 
     // Toggle checkbox via data-testid
     await beltProgressionPage.toggleCheckboxByTestId('tecnicas-comienzo-0')
-    await page.waitForTimeout(100) // Wait for React state update
     
-    // Verify checkbox is checked
+    // Verify checkbox is checked (Page Object already waited for state change)
     const firstCheckbox = page.locator('input#tecnicas-comienzo-0')
     await expect(firstCheckbox).toBeChecked()
 

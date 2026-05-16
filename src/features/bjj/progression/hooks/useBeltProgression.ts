@@ -54,32 +54,34 @@ export function useBeltProgression() {
       itemId: string
       isComplete: boolean
     }) => {
-      const { data: { user } } = await supabase.auth.getUser()
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser()
+
       if (!user) {
         throw {
           error: {
             code: 'UNAUTHENTICATED',
             message: 'User must be authenticated to toggle progression item',
-            details: null,
+            details: authError,
           },
         }
       }
 
-      const { error } = await supabase
-        .from('belt_progression')
-        .upsert(
-          {
-            user_id: user.id,
-            belt_level: 'blue',
-            section_id: sectionId,
-            item_id: itemId,
-            is_complete: isComplete,
-            completed_at: isComplete ? new Date().toISOString() : null,
-          },
-          {
-            onConflict: 'user_id,belt_level,section_id,item_id',
-          },
-        )
+      const { error } = await supabase.from('belt_progression').upsert(
+        {
+          user_id: user.id,
+          belt_level: 'blue',
+          section_id: sectionId,
+          item_id: itemId,
+          is_complete: isComplete,
+          completed_at: isComplete ? new Date().toISOString() : null,
+        },
+        {
+          onConflict: 'user_id,belt_level,section_id,item_id',
+        },
+      )
 
       if (error) {
         throw {
@@ -147,10 +149,7 @@ export function useBeltProgression() {
   // ── Reset mutation ────────────────────────────────────────
   const resetMutation = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase
-        .from('belt_progression')
-        .delete()
-        .eq('belt_level', 'blue')
+      const { error } = await supabase.from('belt_progression').delete().eq('belt_level', 'blue')
 
       if (error) {
         throw {
