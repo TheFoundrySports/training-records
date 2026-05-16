@@ -1,4 +1,4 @@
-import { type Page, type Locator } from '@playwright/test'
+import { type Page, type Locator, expect } from '@playwright/test'
 
 export class BeltProgressionPage {
   readonly page: Page
@@ -65,13 +65,29 @@ export class BeltProgressionPage {
   }
 
   /**
-   * Toggle a checkbox by clicking its label.
-   * The label triggers the hidden checkbox via htmlFor/id association.
+   * Toggle a checkbox by keyboard interaction (focus + Space).
+   * Waits for state change and Supabase mutation to complete.
+   * 
+   * @param itemId - The checkbox item ID (e.g., 'tecnicas-comienzo-0')
    */
-  async toggleCheckboxByTestId(itemId: string) {
-    const label = this.page.locator(`label[for="${itemId}"]`)
-    await label.waitFor({ state: 'visible', timeout: 5000 })
-    await label.click()
-    await this.page.waitForTimeout(500) // Wait for React state + Supabase mutation
+  async toggleCheckboxByTestId(itemId: string): Promise<void> {
+    const checkbox = this.page.locator(`input#${itemId}`)
+
+    // Capture initial state before toggling
+    const wasChecked = await checkbox.isChecked()
+
+    // Focus and press Space (keyboard method, reliable for sr-only inputs)
+    await checkbox.focus()
+    await this.page.keyboard.press('Space')
+
+    // Wait for Supabase mutation to complete
+    await this.page.waitForTimeout(1000)
+
+    // Verify checkbox state after mutation completes
+    if (wasChecked) {
+      await expect(checkbox).not.toBeChecked({ timeout: 5000 })
+    } else {
+      await expect(checkbox).toBeChecked({ timeout: 5000 })
+    }
   }
 }
