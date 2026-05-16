@@ -43,7 +43,7 @@ export function CalendarCell({
       }}
       className={cn(
         'min-h-24 p-1.5 border border-border rounded-sm flex flex-col gap-0.5',
-        disableOutOfMonthClick && !day.isCurrentMonth && 'bg-muted/30 opacity-50',
+        disableOutOfMonthClick && !day.isCurrentMonth && 'bg-muted/60',
         isClickable && 'cursor-pointer hover:bg-muted/50 transition-colors',
         isToday && 'ring-2 ring-primary ring-inset',
       )}
@@ -53,9 +53,9 @@ export function CalendarCell({
       <span
         className={cn(
           'text-xs font-medium self-start leading-none mb-0.5',
-          disableOutOfMonthClick && !day.isCurrentMonth && 'text-muted-foreground',
-          isToday &&
-            'bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center text-[11px]',
+          isToday
+            ? 'bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center text-[11px]'
+            : 'text-muted-foreground',
         )}
       >
         {day.date.getDate()}

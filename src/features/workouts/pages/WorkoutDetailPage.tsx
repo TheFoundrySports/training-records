@@ -109,12 +109,12 @@ export function WorkoutDetailPage() {
         </Button>
         <div
           role="alert"
-          className="rounded-xl border border-destructive/30 bg-destructive/10 p-6 text-destructive text-center"
+          className="rounded-xl border border-destructive/30 bg-muted p-6 text-center"
         >
           <p className="text-lg font-medium">
             {isNotFound ? 'Workout not found' : 'Failed to load workout'}
           </p>
-          <p className="text-sm mt-1 text-destructive/80">
+          <p className="text-sm mt-1">
             {isNotFound
               ? 'This workout does not exist or you do not have permission to view it.'
               : (errorMessage ?? 'An unexpected error occurred.')}
