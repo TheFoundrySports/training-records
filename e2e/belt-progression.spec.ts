@@ -40,7 +40,7 @@ test.describe('BJJ Blue Belt Progression', () => {
 
     // Toggle checkbox via data-testid
     await beltProgressionPage.toggleCheckboxByTestId('tecnicas-comienzo-0')
-    
+
     // Verify checkbox is checked (Page Object already waited for state change)
     const firstCheckbox = page.locator('input#tecnicas-comienzo-0')
     await expect(firstCheckbox).toBeChecked()
@@ -48,10 +48,10 @@ test.describe('BJJ Blue Belt Progression', () => {
     // Refresh and verify persistence
     await page.reload()
     await page.waitForLoadState('networkidle')
-    
+
     // Re-expand section after reload (sections default to collapsed)
     await beltProgressionPage.expandSection(/2\. Técnicas/i)
-    
+
     await expect(firstCheckbox).toBeChecked()
   })
 
@@ -92,20 +92,37 @@ test.describe('BJJ Blue Belt Progression', () => {
     // Check first 22 items via data-testid (4+5+8+5 from Section 2)
     const itemIds = [
       // 2.1 Comienzo (4)
-      'tecnicas-comienzo-0', 'tecnicas-comienzo-1', 'tecnicas-comienzo-2', 'tecnicas-comienzo-3',
+      'tecnicas-comienzo-0',
+      'tecnicas-comienzo-1',
+      'tecnicas-comienzo-2',
+      'tecnicas-comienzo-3',
       // 2.2 Pasados (5)
-      'tecnicas-pasados-0', 'tecnicas-pasados-1', 'tecnicas-pasados-2', 'tecnicas-pasados-3', 'tecnicas-pasados-4',
+      'tecnicas-pasados-0',
+      'tecnicas-pasados-1',
+      'tecnicas-pasados-2',
+      'tecnicas-pasados-3',
+      'tecnicas-pasados-4',
       // 2.3 Guardia (8)
-      'tecnicas-guardia-0', 'tecnicas-guardia-1', 'tecnicas-guardia-2', 'tecnicas-guardia-3',
-      'tecnicas-guardia-4', 'tecnicas-guardia-5', 'tecnicas-guardia-6', 'tecnicas-guardia-7',
+      'tecnicas-guardia-0',
+      'tecnicas-guardia-1',
+      'tecnicas-guardia-2',
+      'tecnicas-guardia-3',
+      'tecnicas-guardia-4',
+      'tecnicas-guardia-5',
+      'tecnicas-guardia-6',
+      'tecnicas-guardia-7',
       // 2.4 Sumisiones (5 of 7)
-      'tecnicas-sumisiones-0', 'tecnicas-sumisiones-1', 'tecnicas-sumisiones-2', 'tecnicas-sumisiones-3', 'tecnicas-sumisiones-4',
+      'tecnicas-sumisiones-0',
+      'tecnicas-sumisiones-1',
+      'tecnicas-sumisiones-2',
+      'tecnicas-sumisiones-3',
+      'tecnicas-sumisiones-4',
     ]
 
     for (const id of itemIds) {
       await beltProgressionPage.toggleCheckboxByTestId(id)
     }
-    
+
     await page.waitForTimeout(200) // Wait for all optimistic updates
 
     // Verify 51% global progress (22/43 = 0.5116 → 51%)
@@ -113,7 +130,10 @@ test.describe('BJJ Blue Belt Progression', () => {
     await expect(globalProgressBar).toHaveAttribute('aria-valuenow', '51')
   })
 
-  test('reset with confirmation — confirm clears all progress', async ({ page, beltProgressionPage }) => {
+  test('reset with confirmation — confirm clears all progress', async ({
+    page,
+    beltProgressionPage,
+  }) => {
     // Expand Section 2 and check some items first
     await beltProgressionPage.expandSection(/2\. Técnicas/i)
     await beltProgressionPage.toggleCheckboxByTestId('tecnicas-comienzo-0')
@@ -136,7 +156,10 @@ test.describe('BJJ Blue Belt Progression', () => {
     await expect(firstCheckbox).not.toBeChecked()
   })
 
-  test('reset with confirmation — cancel leaves state unchanged', async ({ page, beltProgressionPage }) => {
+  test('reset with confirmation — cancel leaves state unchanged', async ({
+    page,
+    beltProgressionPage,
+  }) => {
     // Expand Section 2 and check some items
     await beltProgressionPage.expandSection(/2\. Técnicas/i)
     await beltProgressionPage.toggleCheckboxByTestId('tecnicas-comienzo-0')

@@ -1,7 +1,6 @@
-"use client"
+'use client'
 
 import { useState, useEffect, useMemo } from 'react'
-import { useQueryClient } from '@tanstack/react-query'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { ChevronDownIcon, ChevronUpIcon, CheckIcon, XIcon } from 'lucide-react'
@@ -17,7 +16,7 @@ interface TechniqueSuggestionPanelProps {
 // This requires matching the technique name against the progression sections
 function matchTechniqueToProgressionItem(
   suggestion: TechniqueSuggestion,
-  progressionItems: Array<{ sectionId: string; itemId: string; label: string; category?: string }>
+  progressionItems: Array<{ sectionId: string; itemId: string; label: string; category?: string }>,
 ): { sectionId: string; itemId: string } | null {
   // Match by name_es (Spanish) first, then name (English)
   for (const item of progressionItems) {
@@ -38,7 +37,10 @@ function SuggestionCard({
   onDismiss: () => void
 }) {
   return (
-    <div className="flex items-start gap-3 rounded-lg border p-3" data-testid={`suggestion-card-${suggestion.technique_id}`}>
+    <div
+      className="flex items-start gap-3 rounded-lg border p-3"
+      data-testid={`suggestion-card-${suggestion.technique_id}`}
+    >
       <div className="flex flex-col gap-2 flex-1">
         <div className="flex items-start justify-between">
           <div>
@@ -76,7 +78,6 @@ function SuggestionCard({
 }
 
 function TechniqueSuggestionPanel({ userId }: TechniqueSuggestionPanelProps) {
-  const queryClient = useQueryClient()
   const { data: suggestions = [], isLoading } = useTechniqueSuggestions(userId)
   const { toggleItem } = useBeltProgression()
   const [isCollapsed, setIsCollapsed] = useState(false)
@@ -98,10 +99,7 @@ function TechniqueSuggestionPanel({ userId }: TechniqueSuggestionPanelProps) {
   // Persist dismissed IDs to localStorage
   useEffect(() => {
     try {
-      localStorage.setItem(
-        `suggestions_dismissed_${userId}`,
-        JSON.stringify([...dismissedIds])
-      )
+      localStorage.setItem(`suggestions_dismissed_${userId}`, JSON.stringify([...dismissedIds]))
     } catch {
       // Ignore localStorage errors
     }
@@ -109,7 +107,7 @@ function TechniqueSuggestionPanel({ userId }: TechniqueSuggestionPanelProps) {
 
   const filteredSuggestions = useMemo(
     () => suggestions.filter((s) => !dismissedIds.has(s.technique_id)).slice(0, 5),
-    [suggestions, dismissedIds]
+    [suggestions, dismissedIds],
   )
 
   const handleDismiss = (techniqueId: string) => {
@@ -135,7 +133,7 @@ function TechniqueSuggestionPanel({ userId }: TechniqueSuggestionPanelProps) {
         itemId: item.id,
         label: item.label,
         category: (item as { category?: string }).category,
-      }))
+      })),
     )
 
     if (match) {
