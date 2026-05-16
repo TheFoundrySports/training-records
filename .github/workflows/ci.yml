@@ -55,7 +55,10 @@ jobs:
         run: npm run build
 
       - name: Accessibility tests
-        run: npx playwright test e2e/a11y/ --project=a11y
+        run: npx playwright test e2e/a11y/ --project=a11y --grep-invert calendar.a11y
+
+      - name: Calendar a11y (isolated)
+        run: npx playwright test e2e/a11y/calendar.a11y.spec.ts --project=a11y
 
       - name: Calendar E2E tests
         run: npx playwright test e2e/calendar.e2e.spec.ts --project=calendar-e2e
