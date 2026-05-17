@@ -15,6 +15,7 @@ import { BJJTechniqueFormPage } from '@/features/admin/bjj-techniques/pages/BJJT
 import { BJJWorkoutFormPage } from '@/features/bjj/pages/BJJWorkoutFormPage'
 import { AISettingsPage } from '@/features/admin/ai-settings/pages/AISettingsPage'
 import { BeltProgressionPage } from '@/features/bjj/progression'
+import { TechniqueThresholdsPage } from '@/features/admin/technique-thresholds/pages/TechniqueThresholdsPage'
 
 export const router = createBrowserRouter([
   {
@@ -109,6 +110,14 @@ export const router = createBrowserRouter([
             element: (
               <AdminRoute>
                 <AISettingsPage />
+              </AdminRoute>
+            ),
+          },
+          {
+            path: 'admin/technique-thresholds',
+            element: (
+              <AdminRoute>
+                <TechniqueThresholdsPage />
               </AdminRoute>
             ),
           },
