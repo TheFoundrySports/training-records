@@ -132,10 +132,10 @@ describe('useTechniqueThresholds', () => {
     expect(sorted[1].name).toBe('Armbar')
     expect(sorted[2].name).toBe('Turtle Escape')
     expect(sorted[3].name).toBe('Omoplata')
-    expect(sorted[0].currentThreshold).toBe(10)
+    expect(sorted[0].currentThreshold).toBeNull()
   })
 
-  it('uses default threshold of 10 when technique_learning_thresholds row is null', async () => {
+  it('returns null currentThreshold when technique_learning_thresholds row is null', async () => {
     const queryClient = makeQueryClient()
 
     const techniquesWithNullThreshold: BJJTechniqueWithThreshold[] = [
@@ -156,8 +156,8 @@ describe('useTechniqueThresholds', () => {
     if (!data) return
 
     expect(data).toHaveLength(2)
-    expect(data[0].currentThreshold).toBe(10)
-    expect(data[1].currentThreshold).toBe(10)
+    expect(data[0].currentThreshold).toBeNull()
+    expect(data[1].currentThreshold).toBeNull()
   })
 
   it('uses stored required_practices when threshold row exists', async () => {
@@ -220,7 +220,7 @@ describe('useTechniqueThresholds', () => {
     expect(data[0]).toHaveProperty('currentThreshold')
   })
 
-  it('throws structured error when query fails', async () => {
+  it('throws Error instance when query fails', async () => {
     const queryClient = makeQueryClient()
     mockChainData = null
     mockChainError = {
@@ -236,12 +236,8 @@ describe('useTechniqueThresholds', () => {
 
     await waitFor(() => expect(result.current.isError).toBe(true), { timeout: 3000 })
 
-    expect(result.current.error).toMatchObject({
-      error: {
-        code: 'PGRST204',
-        message: 'Column not found',
-      },
-    })
+    expect(result.current.error).toBeInstanceOf(Error)
+    expect(result.current.error?.message).toBe('Column not found')
   })
 
   it('has staleTime of 60_000', async () => {

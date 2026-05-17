@@ -104,7 +104,7 @@ describe('useUpdateTechniqueThreshold', () => {
     )
   })
 
-  it('invalidates technique-learning-status query on success', async () => {
+  it('invalidates technique-thresholds AND technique-learning-status queries on success', async () => {
     const queryClient = makeQueryClient()
     mockUpsertData = null
     mockUpsertError = null

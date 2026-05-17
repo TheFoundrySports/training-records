@@ -5,7 +5,13 @@ export interface TechniqueWithThreshold {
   techniqueId: string
   name: string
   category: string | null
-  currentThreshold: number // null means no row yet → default 10
+  /** null means no threshold row yet — defaults to 10 at usage site */
+  currentThreshold: number | null
+}
+
+export interface UpdateThresholdInput {
+  techniqueId: string
+  requiredPractices: number
 }
 
 interface BJJTechniqueRow {
@@ -22,17 +28,11 @@ async function fetchTechniqueThresholds(): Promise<TechniqueWithThreshold[]> {
   const { data, error } = await supabase
     .from('bjj_techniques')
     .select('id, name, category, technique_learning_thresholds(technique_id, required_practices)')
-    .order('category')
-    .order('name')
+    .order('category', { nullsFirst: false })
+    .order('name', { nullsFirst: false })
 
   if (error) {
-    throw {
-      error: {
-        code: error.code ?? 'UNKNOWN',
-        message: error.message,
-        details: error.details,
-      },
-    }
+    throw new Error(error.message)
   }
 
   const rows = (data as unknown as BJJTechniqueRow[]) ?? []
@@ -41,7 +41,7 @@ async function fetchTechniqueThresholds(): Promise<TechniqueWithThreshold[]> {
     techniqueId: row.id,
     name: row.name,
     category: row.category,
-    currentThreshold: row.technique_learning_thresholds?.required_practices ?? 10,
+    currentThreshold: row.technique_learning_thresholds?.required_practices ?? null,
   }))
 }
 

@@ -1,10 +1,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
+import type { UpdateThresholdInput } from './useTechniqueThresholds'
 
-export interface UpdateThresholdInput {
-  techniqueId: string
-  requiredPractices: number
-}
+export { type UpdateThresholdInput } from './useTechniqueThresholds'
 
 export function useUpdateTechniqueThreshold() {
   const queryClient = useQueryClient()
@@ -18,16 +16,12 @@ export function useUpdateTechniqueThreshold() {
         )
 
       if (error) {
-        throw {
-          error: {
-            code: error.code ?? 'UNKNOWN',
-            message: error.message,
-            details: error.details,
-          },
-        }
+        throw new Error(error.message)
       }
     },
     onSuccess: () => {
+      // Invalidate admin thresholds list AND athlete learning status views
+      void queryClient.invalidateQueries({ queryKey: ['technique-thresholds'] })
       void queryClient.invalidateQueries({ queryKey: ['technique-learning-status'] })
     },
   })

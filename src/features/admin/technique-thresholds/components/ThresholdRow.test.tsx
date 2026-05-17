@@ -34,7 +34,6 @@ describe('ThresholdRow', () => {
 
   it('renders technique name and category', () => {
     render(<ThresholdRow technique={mockTechnique} />)
-
     expect(screen.getByText('Knee Slide Pass')).toBeInTheDocument()
     expect(screen.getByText('guard_pass')).toBeInTheDocument()
   })
@@ -45,13 +44,11 @@ describe('ThresholdRow', () => {
       category: null,
     }
     render(<ThresholdRow technique={nullCategoryTechnique} />)
-
     expect(screen.getByText('—')).toBeInTheDocument()
   })
 
   it('shows current threshold value in input', () => {
     render(<ThresholdRow technique={mockTechnique} />)
-
     const input = screen.getByRole('spinbutton')
     expect(input).toHaveValue(10)
   })
@@ -62,7 +59,6 @@ describe('ThresholdRow', () => {
       currentThreshold: 15,
     }
     render(<ThresholdRow technique={techniqueWithStoredThreshold} />)
-
     const input = screen.getByRole('spinbutton')
     expect(input).toHaveValue(15)
   })
@@ -78,18 +74,28 @@ describe('ThresholdRow', () => {
       error: null,
     } as any)
 
-    render(<ThresholdRow technique={mockTechnique} />)
+    // Use a technique with currentThreshold: 0 so typing "20" gives exactly "20"
+    const techWithZero: TechniqueWithThreshold = {
+      ...mockTechnique,
+      currentThreshold: 0,
+    }
+    render(<ThresholdRow technique={techWithZero} />)
 
     const input = screen.getByRole('spinbutton')
+    expect(input).toHaveValue(0)
+
+    // Type the new value (no need to clear when starting from 0)
+    await user.click(input)
     await user.clear(input)
     await user.type(input, '20')
+    expect(input).toHaveValue(20)
 
     const saveButton = screen.getByRole('button', { name: 'Save' })
     await user.click(saveButton)
 
     expect(mockMutate).toHaveBeenCalledWith(
-      expect.objectContaining({ techniqueId: 'tech-123', requiredPractices: 20 }),
-      expect.any(Object),
+      { techniqueId: 'tech-123', requiredPractices: 20 },
+      expect.objectContaining({ onSuccess: expect.any(Function), onError: expect.any(Function) }),
     )
   })
 
@@ -103,11 +109,14 @@ describe('ThresholdRow', () => {
     } as any)
 
     render(<ThresholdRow technique={mockTechnique} />)
-
     expect(screen.getByRole('button', { name: 'Saving…' })).toBeDisabled()
   })
 
-  it('reset input to saved value after mutation success', () => {
+  it('displays saved value after mutation success', () => {
+    const techniqueWithStoredThreshold: TechniqueWithThreshold = {
+      ...mockTechnique,
+      currentThreshold: 15,
+    }
     vi.mocked(useUpdateTechniqueThreshold).mockReturnValue({
       mutate: vi.fn(),
       isPending: false,
@@ -116,9 +125,8 @@ describe('ThresholdRow', () => {
       error: null,
     } as any)
 
-    render(<ThresholdRow technique={mockTechnique} />)
-
+    render(<ThresholdRow technique={techniqueWithStoredThreshold} />)
     const input = screen.getByRole('spinbutton')
-    expect(input).toHaveValue(10)
+    expect(input).toHaveValue(15)
   })
 })
