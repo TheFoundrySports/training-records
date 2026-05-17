@@ -44,21 +44,21 @@ const suggestions: TechniqueSuggestion[] = [
   {
     technique_id: 't1',
     name: 'Knee Slide Pass',
-    name_es: 'Pasaje de Rodilla',
+    name_es: 'Paso en deslizamiento',
     total_practices: 8,
     last_practiced_at: '2026-05-10T10:00:00.000Z',
   },
   {
     technique_id: 't2',
-    name: 'Closed Guard Retention',
-    name_es: 'Retención de Guardia Cerrada',
+    name: 'Basic Guard Retention',
+    name_es: 'Retención básica de guardia',
     total_practices: 5,
     last_practiced_at: '2026-05-08T14:00:00.000Z',
   },
   {
     technique_id: 't3',
-    name: 'Armbar from Guard',
-    name_es: 'Armbar desde Guardia',
+    name: 'Armbar',
+    name_es: 'Llave de codo',
     total_practices: 12,
     last_practiced_at: '2026-05-05T09:00:00.000Z',
   },
@@ -88,8 +88,8 @@ describe('TechniqueSuggestionPanel', () => {
     await waitFor(() => {
       expect(screen.getByText('Knee Slide Pass')).toBeInTheDocument()
     })
-    expect(screen.getByText('Closed Guard Retention')).toBeInTheDocument()
-    expect(screen.getByText('Armbar from Guard')).toBeInTheDocument()
+    expect(screen.getByText('Basic Guard Retention')).toBeInTheDocument()
+    expect(screen.getByText('Armbar')).toBeInTheDocument()
   })
 
   it('shows empty state when no suggestions', () => {
@@ -109,6 +109,20 @@ describe('TechniqueSuggestionPanel', () => {
 
     const buttons = screen.getAllByRole('button', { name: /as complete/i })
     expect(buttons).toHaveLength(3)
+  })
+
+  it('marks a matched suggestion as complete in progression', async () => {
+    mockSuggestions = suggestions
+
+    render(<TechniqueSuggestionPanel userId={MOCK_USER_ID} />)
+
+    await userEvent.click(screen.getByRole('button', { name: /mark knee slide pass as complete/i }))
+
+    expect(mockToggleItem).toHaveBeenCalledWith({
+      sectionId: 'tecnicas',
+      itemId: 'tecnicas-pasados-1',
+      isComplete: true,
+    })
   })
 
   it('per-item dismiss button sets localStorage', async () => {

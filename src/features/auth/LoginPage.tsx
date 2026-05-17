@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card'
 
 export function LoginPage() {
   const navigate = useNavigate()
@@ -32,10 +32,12 @@ export function LoginPage() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-background px-4">
+    <main aria-labelledby="login-heading" className="flex min-h-screen items-center justify-center bg-background px-4">
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle className="text-2xl">Training Records</CardTitle>
+          <h1 id="login-heading" className="text-2xl font-semibold tracking-tight">
+            Training Records
+          </h1>
           <CardDescription>Sign in to your account</CardDescription>
         </CardHeader>
         <CardContent>
@@ -74,6 +76,6 @@ export function LoginPage() {
           </form>
         </CardContent>
       </Card>
-    </div>
+    </main>
   )
 }

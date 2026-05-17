@@ -165,7 +165,7 @@ function BeltProgressionPage() {
         </div>
 
         {/* Suggestion panel */}
-        <TechniqueSuggestionPanel userId={user?.id ?? ''} />
+        <TechniqueSuggestionPanel key={user?.id ?? 'anonymous'} userId={user?.id ?? ''} />
 
         {/* Global progress bar */}
         <Card>

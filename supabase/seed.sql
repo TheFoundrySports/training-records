@@ -24,13 +24,20 @@
 -- Sample workouts for athlete1 (only inserted if the seed user exists)
 -- Users are created via scripts/seed-users.sh after supabase db reset.
 do $do$
+declare
+  athlete1_id uuid;
 begin
-  if exists (select 1 from auth.users where id = '00000000-0000-0000-0000-000000000001') then
+  select id into athlete1_id
+  from auth.users
+  where email = 'athlete1@example.com'
+  limit 1;
+
+  if athlete1_id is not null then
     insert into public.workouts (id, user_id, title, type, performed_at, duration_minutes, rpe, notes)
     values
       (
         'aaaaaaaa-0000-0000-0000-000000000001',
-        '00000000-0000-0000-0000-000000000001',
+        athlete1_id,
         'Morning CrossFit WOD',
         'crossfit',
         now() - interval '1 day',
@@ -40,7 +47,7 @@ begin
       ),
       (
         'aaaaaaaa-0000-0000-0000-000000000002',
-        '00000000-0000-0000-0000-000000000001',
+        athlete1_id,
         'Functional Training Session',
         'functional',
         now() - interval '3 days',
@@ -50,7 +57,7 @@ begin
       ),
       (
         'aaaaaaaa-0000-0000-0000-000000000003',
-        '00000000-0000-0000-0000-000000000001',
+        athlete1_id,
         'AMRAP Workout',
         'crossfit',
         now() - interval '5 days',

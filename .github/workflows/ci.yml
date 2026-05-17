@@ -28,6 +28,23 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Set up Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Start Supabase local stack
+        run: supabase start
+
+      - name: Reset database and seed reference data
+        run: supabase db reset
+
+      - name: Seed test users
+        run: bash scripts/seed-users.sh
+
       - name: Lint
         run: npm run lint
 
@@ -38,7 +55,10 @@ jobs:
         run: npm run build
 
       - name: Accessibility tests
-        run: npx playwright test e2e/a11y/ --project=a11y
+        run: npx playwright test e2e/a11y/ --project=a11y --grep-invert calendar.a11y
+
+      - name: Calendar a11y (isolated)
+        run: npx playwright test e2e/a11y/calendar.a11y.spec.ts --project=a11y
 
       - name: Calendar E2E tests
         run: npx playwright test e2e/calendar.e2e.spec.ts --project=calendar-e2e

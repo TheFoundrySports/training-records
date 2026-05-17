@@ -77,13 +77,13 @@ begin
   values
     (v_user_id, new.technique_id, 1, v_performed_at, v_performed_at)
   on conflict (user_id, technique_id) do update set
-    total_practices    = technique_practice_log.total_practices + 1,
-    last_practiced_at  = greatest(technique_practice_log.last_practiced_at, v_performed_at),
+    total_practices   = technique_practice_log.total_practices + 1,
+    last_practiced_at = greatest(technique_practice_log.last_practiced_at, v_performed_at),
     updated_at        = now();
 
   return new;
 end;
-$$ language plpgsql;
+$$;
 
 -- Fire trigger after each new technique link is inserted into bjj_section_techniques
 create trigger technique_practice_log_trigger
