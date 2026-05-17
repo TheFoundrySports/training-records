@@ -43,30 +43,24 @@ export function AppShell() {
               >
                 Blue Belt
               </Link>
-              {role === 'admin' && (
-                <Link
-                  to="/admin/bjj-techniques"
-                  className="text-foreground/60 transition-colors hover:text-foreground"
-                >
-                  BJJ Techniques
-                </Link>
-              )}
-              {role === 'admin' && (
-                <Link
-                  to="/admin/ai-settings"
-                  className="text-foreground/60 transition-colors hover:text-foreground"
-                >
-                  AI Settings
-                </Link>
-              )}
-              {role === 'admin' && (
-                <Link
-                  to="/admin/technique-thresholds"
-                  className="text-foreground/60 transition-colors hover:text-foreground"
-                >
-                  Thresholds
-                </Link>
-              )}
+              <Link
+                to="/admin/bjj-techniques"
+                className="text-foreground/60 transition-colors hover:text-foreground"
+              >
+                BJJ Techniques
+              </Link>
+              <Link
+                to="/admin/ai-settings"
+                className="text-foreground/60 transition-colors hover:text-foreground"
+              >
+                AI Settings
+              </Link>
+              <Link
+                to="/admin/technique-thresholds"
+                className="text-foreground/60 transition-colors hover:text-foreground"
+              >
+                Thresholds
+              </Link>
             </nav>
           </div>
           <div className="flex items-center gap-3">
