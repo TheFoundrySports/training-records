@@ -6,7 +6,7 @@ import { useAuth } from '@/features/auth/AuthContext'
 import { usePageFocus } from '@/hooks/usePageFocus'
 
 export function AppShell() {
-  const { user, role } = useAuth()
+  const { user } = useAuth()
   usePageFocus()
 
   async function handleLogout() {
