@@ -59,6 +59,14 @@ export function AppShell() {
                   AI Settings
                 </Link>
               )}
+              {role === 'admin' && (
+                <Link
+                  to="/admin/technique-thresholds"
+                  className="text-foreground/60 transition-colors hover:text-foreground"
+                >
+                  Thresholds
+                </Link>
+              )}
             </nav>
           </div>
           <div className="flex items-center gap-3">
