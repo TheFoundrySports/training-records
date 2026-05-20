@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router'
 import { useWorkout } from '../hooks/useWorkouts'
 import { useDeleteWorkout } from '../hooks/useWorkoutMutations'
+import { ExportWorkoutButton } from '../components/ExportWorkoutButton'
 import { useAuth } from '@/features/auth/AuthContext'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -224,6 +225,7 @@ export function WorkoutDetailPage() {
           <Button variant="destructive" onClick={() => setDeleteOpen(true)}>
             Delete
           </Button>
+          <ExportWorkoutButton workoutId={workout.id} />
           <GarminImportTrigger
             workoutId={workout.id}
             hasExistingImport={garminActivity !== null && garminActivity !== undefined}

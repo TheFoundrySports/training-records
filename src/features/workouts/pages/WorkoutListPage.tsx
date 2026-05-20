@@ -1,6 +1,9 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router'
+import { useQueryClient } from '@tanstack/react-query'
 import { useWorkouts } from '../hooks/useWorkouts'
+import { ExportAllWorkoutsButton } from '../components/ExportAllWorkoutsButton'
+import { ImportWorkoutsModal } from '../components/ImportWorkoutsModal'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
@@ -80,14 +83,22 @@ function TypeFilter({ value, onChange }: { value: FilterType; onChange: (v: Filt
 
 export function WorkoutListPage() {
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const [filter, setFilter] = useState<FilterType>('all')
+  const [importModalOpen, setImportModalOpen] = useState(false)
   const { data: workouts, isLoading, isError, error } = useWorkouts({ type: filter })
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-semibold">Workouts</h1>
-        <Button onClick={() => void navigate('/workouts/new')}>Log workout</Button>
+        <div className="flex items-center gap-2">
+          <ExportAllWorkoutsButton />
+          <Button variant="outline" onClick={() => setImportModalOpen(true)}>
+            Import
+          </Button>
+          <Button onClick={() => void navigate('/workouts/new')}>Log workout</Button>
+        </div>
       </div>
 
       <TypeFilter value={filter} onChange={setFilter} />
@@ -126,6 +137,15 @@ export function WorkoutListPage() {
           ))}
         </ul>
       )}
+
+      <ImportWorkoutsModal
+        open={importModalOpen}
+        onClose={() => setImportModalOpen(false)}
+        onSuccess={() => {
+          setImportModalOpen(false)
+          void queryClient.invalidateQueries({ queryKey: ['workouts'] })
+        }}
+      />
     </div>
   )
 }
