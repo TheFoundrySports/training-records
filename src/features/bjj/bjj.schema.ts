@@ -47,6 +47,8 @@ export type BJJTechniqueFormValues = z.infer<typeof bjjTechniqueSchema>
 
 // ── Section (used inside BJJ workout form) ───────────────
 export const bjjSectionSchema = z.object({
+  /** DB section id — present only for existing sections in edit mode */
+  id: z.string().uuid().optional(),
   goal: z.string().min(1, 'Goal is required').max(300),
   rawDescription: z.string().max(2000).optional(),
   durationMinutes: z.number().int().min(1).max(300).optional(),

@@ -50,6 +50,10 @@ export const router = createBrowserRouter([
             element: <BJJWorkoutFormPage />,
           },
           {
+            path: 'bjj/:id/edit',
+            element: <BJJWorkoutFormPage />,
+          },
+          {
             path: 'workouts/:id',
             element: <WorkoutDetailPage />,
           },

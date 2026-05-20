@@ -1,9 +1,12 @@
 import { useEffect, useRef } from 'react'
-import { useNavigate } from 'react-router'
+import { useParams, useNavigate } from 'react-router'
 import { useForm, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { bjjWorkoutSchema, type BJJWorkoutFormValues } from '../bjj.schema'
 import { useCreateBJJWorkout } from '../hooks/useBJJWorkoutMutations'
+import { useUpdateBJJWorkout } from '../hooks/useUpdateBJJWorkout'
+import { useWorkout } from '@/features/workouts/hooks/useWorkouts'
+import { useBJJSections } from '../hooks/useBJJSections'
 import { BJJSectionEditor } from '../components/BJJSectionEditor'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -16,11 +19,20 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
+import type { BJJSection } from '../bjj.types'
 
 export function BJJWorkoutFormPage() {
+  const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const isEditMode = Boolean(id)
+
   const createMutation = useCreateBJJWorkout()
-  const isPending = createMutation.isPending
+  const updateMutation = useUpdateBJJWorkout()
+  const isPending = createMutation.isPending || updateMutation.isPending
+
+  // Fetch existing workout for edit mode
+  const { data: existingWorkout, isLoading: loadingWorkout } = useWorkout(id ?? '')
+  const { data: existingSections } = useBJJSections(id ?? '')
 
   const form = useForm<BJJWorkoutFormValues>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -48,13 +60,54 @@ export function BJJWorkoutFormPage() {
     name: 'sections',
   })
 
+  // Pre-fill form when editing
+  useEffect(() => {
+    if (isEditMode && existingWorkout && existingSections) {
+      const mappedSections = existingSections.map((section: BJJSection) => ({
+        id: section.id,
+        goal: section.goal,
+        rawDescription: section.rawDescription ?? '',
+        durationMinutes: section.durationMinutes,
+        techniqueIds: section.techniques.map((t) => t.id),
+      }))
+
+      form.reset({
+        title: existingWorkout.title,
+        performedAt: existingWorkout.performedAt.slice(0, 16),
+        durationMinutes: existingWorkout.durationMinutes,
+        notes: existingWorkout.notes ?? '',
+        rpe: existingWorkout.rpe,
+        sections: mappedSections.length > 0 ? mappedSections : form.getValues('sections'),
+      })
+    }
+  }, [isEditMode, existingWorkout, existingSections, form.reset])
+
   async function onSubmit(values: BJJWorkoutFormValues) {
-    const workoutId = await createMutation.mutateAsync(values)
-    void navigate(`/workouts/${workoutId}`)
+    if (isEditMode && id) {
+      await updateMutation.mutateAsync({
+        workoutId: id,
+        title: values.title,
+        performedAt: new Date(values.performedAt).toISOString(),
+        durationMin: values.durationMinutes,
+        notes: values.notes ?? '',
+        rpe: values.rpe,
+        sections: values.sections.map((s, idx) => ({
+          id: s.id,
+          goal: s.goal,
+          orderIndex: idx,
+          techniqueIds: s.techniqueIds,
+        })),
+      })
+      void navigate(`/workouts/${id}`)
+    } else {
+      const workoutId = await createMutation.mutateAsync(values)
+      void navigate(`/workouts/${workoutId}`)
+    }
   }
 
-  const mutationError = (createMutation.error as { error?: { message?: string } } | null)?.error
-    ?.message
+  const mutationError =
+    (createMutation.error as { error?: { message?: string } } | null)?.error?.message ??
+    (updateMutation.error as { error?: { message?: string } } | null)?.error?.message
 
   const rootErrorRef = useRef<HTMLDivElement>(null)
 
@@ -65,9 +118,20 @@ export function BJJWorkoutFormPage() {
     }
   }, [mutationError])
 
+  if (isEditMode && loadingWorkout) {
+    return (
+      <div className="container mx-auto px-4 py-8 max-w-2xl">
+        <div role="status" aria-label="Loading workout" className="space-y-4">
+          <div className="h-8 w-48 rounded bg-muted animate-pulse" aria-hidden="true" />
+          <div className="h-64 rounded-xl bg-muted animate-pulse" aria-hidden="true" />
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl">
-      <h1 className="text-2xl font-semibold mb-6">Log BJJ Workout</h1>
+      <h1 className="text-2xl font-semibold mb-6">{isEditMode ? 'Edit BJJ Workout' : 'Log BJJ Workout'}</h1>
 
       {mutationError && (
         <div
@@ -234,7 +298,7 @@ export function BJJWorkoutFormPage() {
             <Button
               type="button"
               variant="outline"
-              onClick={() => void navigate('/workouts')}
+              onClick={() => void navigate(isEditMode && id ? `/workouts/${id}` : '/workouts')}
               disabled={isPending}
             >
               Cancel

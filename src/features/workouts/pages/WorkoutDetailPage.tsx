@@ -54,11 +54,19 @@ function DetailRow({ label, value }: { label: string; value: React.ReactNode }) 
 export function WorkoutDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { user } = useAuth()
+  const { user, role } = useAuth()
   const { data: workout, isLoading, isError, error } = useWorkout(id ?? '')
   const deleteMutation = useDeleteWorkout()
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [liveEvaluation, setLiveEvaluation] = useState<TrainingEvaluation | null>(null)
+
+  const isAdmin = role === 'admin'
+  const isOwner = Boolean(workout && user && workout.userId === user.id)
+  const canEdit = isAdmin || isOwner
+
+  // Determine edit path based on workout type
+  const editPath =
+    workout?.type === 'bjj' ? `/bjj/${workout.id}/edit` : `/workouts/${workout?.id}/edit`
 
   const { data: garminActivity } = useGarminActivity(id)
   const { data: storedEvaluation, isLoading: isEvaluationLoading } = useTrainingEvaluation(
@@ -139,12 +147,10 @@ export function WorkoutDetailPage() {
         >
           &larr; Back to workouts
         </Button>
-        <BJJWorkoutDetail workoutId={workout.id} workout={workout} />
+        <BJJWorkoutDetail workoutId={workout.id} workout={workout} canEdit={canEdit} />
       </div>
     )
   }
-
-  const isOwner = workout.userId === user?.id
 
   async function handleDelete() {
     if (!id) return
@@ -217,9 +223,9 @@ export function WorkoutDetailPage() {
         </CardContent>
       </Card>
 
-      {isOwner && (
+      {canEdit && (
         <div className="flex flex-wrap gap-3 mt-6">
-          <Button variant="outline" onClick={() => void navigate(`/workouts/${workout.id}/edit`)}>
+          <Button variant="outline" onClick={() => void navigate(editPath)}>
             Edit
           </Button>
           <Button variant="destructive" onClick={() => setDeleteOpen(true)}>
