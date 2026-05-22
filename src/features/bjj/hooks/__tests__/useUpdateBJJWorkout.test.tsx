@@ -46,8 +46,8 @@ describe('useUpdateBJJWorkout', () => {
           error: null,
         }),
       }),
-    } as ReturnType<typeof supabase.from>)
-    mockRpc.mockResolvedValueOnce({ error: null })
+    } as unknown as ReturnType<typeof supabase.from>)
+    mockRpc.mockResolvedValueOnce({ data: null, error: null, count: null, status: 200, statusText: 'OK' })
 
     const { result } = renderHook(() => useUpdateBJJWorkout(), {
       wrapper: createWrapper(),
@@ -113,8 +113,8 @@ describe('useUpdateBJJWorkout', () => {
       select: vi.fn().mockReturnValue({
         in: vi.fn().mockResolvedValue({ data: [], error: null }),
       }),
-    } as ReturnType<typeof supabase.from>)
-    mockRpc.mockResolvedValueOnce({ error: null })
+    } as unknown as ReturnType<typeof supabase.from>)
+    mockRpc.mockResolvedValueOnce({ data: null, error: null, count: null, status: 200, statusText: 'OK' })
 
     const queryClient = new QueryClient({
       defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
@@ -150,9 +150,9 @@ describe('useUpdateBJJWorkout', () => {
       select: vi.fn().mockReturnValue({
         in: vi.fn().mockResolvedValue({ data: [], error: null }),
       }),
-    } as ReturnType<typeof supabase.from>)
-    const rpcError = { message: 'Unauthorized', code: 'UNAUTHORIZED' }
-    mockRpc.mockResolvedValueOnce({ error: rpcError })
+    } as unknown as ReturnType<typeof supabase.from>)
+    const rpcError = { message: 'Unauthorized', code: 'UNAUTHORIZED', details: '', hint: '', name: 'PostgrestError' }
+    mockRpc.mockResolvedValueOnce({ data: null, error: rpcError, count: null, status: 401, statusText: 'Unauthorized' })
 
     const { result } = renderHook(() => useUpdateBJJWorkout(), {
       wrapper: createWrapper(),
