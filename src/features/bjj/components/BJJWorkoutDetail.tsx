@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router'
+import { Trash2 } from 'lucide-react'
 import { useBJJSections } from '../hooks/useBJJSections'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -12,6 +13,8 @@ interface BJJWorkoutDetailProps {
   workoutId: string
   workout: Workout
   canEdit?: boolean
+  canDelete?: boolean
+  onDelete?: () => void
 }
 
 function formatDate(iso: string) {
@@ -116,7 +119,13 @@ function BJJSectionCard({ section }: { section: BJJSection }) {
   )
 }
 
-export function BJJWorkoutDetail({ workoutId, workout, canEdit }: BJJWorkoutDetailProps) {
+export function BJJWorkoutDetail({
+  workoutId,
+  workout,
+  canEdit,
+  canDelete,
+  onDelete,
+}: BJJWorkoutDetailProps) {
   const navigate = useNavigate()
   const { data: sections, isLoading, isError } = useBJJSections(workoutId)
 
@@ -147,11 +156,19 @@ export function BJJWorkoutDetail({ workoutId, workout, canEdit }: BJJWorkoutDeta
         </CardContent>
       </Card>
 
-      {canEdit && (
+      {(canEdit || (canDelete && onDelete)) && (
         <div className="flex flex-wrap gap-3 mt-6">
-          <Button variant="outline" onClick={() => void navigate(`/bjj/${workout.id}/edit`)}>
-            Edit
-          </Button>
+          {canEdit && (
+            <Button variant="outline" onClick={() => void navigate(`/bjj/${workout.id}/edit`)}>
+              Edit
+            </Button>
+          )}
+          {canDelete && onDelete && (
+            <Button variant="destructive" size="sm" onClick={onDelete}>
+              <Trash2 className="h-4 w-4 mr-1" aria-hidden="true" />
+              Delete
+            </Button>
+          )}
         </div>
       )}
 
