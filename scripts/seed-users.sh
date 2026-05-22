@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # Creates local dev users via the Supabase Auth Admin API.
-# Run once after `supabase db reset`.
+# Run once on first setup (after `supabase start`).
+# Use `supabase db push --local` to apply new migrations without losing data.
+# Only use `supabase db reset` if you explicitly need to wipe all data.
 #
 # Usage: ./scripts/seed-users.sh
 #
