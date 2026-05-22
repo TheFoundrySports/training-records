@@ -60,9 +60,11 @@ export function BJJWorkoutFormPage() {
     name: 'sections',
   })
 
-  // Pre-fill form when editing
+  // Pre-fill form when editing — run only once after data loads
+  const hasPrefilledRef = useRef(false)
   useEffect(() => {
-    if (isEditMode && existingWorkout && existingSections) {
+    if (isEditMode && existingWorkout && existingSections && !hasPrefilledRef.current) {
+      hasPrefilledRef.current = true
       const mappedSections = existingSections.map((section: BJJSection) => ({
         id: section.id,
         goal: section.goal,
@@ -77,10 +79,11 @@ export function BJJWorkoutFormPage() {
         durationMinutes: existingWorkout.durationMinutes,
         notes: existingWorkout.notes ?? '',
         rpe: existingWorkout.rpe,
-        sections: mappedSections.length > 0 ? mappedSections : form.getValues('sections'),
+        sections: mappedSections.length > 0 ? mappedSections : [],
       })
     }
-  }, [isEditMode, existingWorkout, existingSections, form.reset])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isEditMode, existingWorkout, existingSections])
 
   async function onSubmit(values: BJJWorkoutFormValues) {
     if (isEditMode && id) {

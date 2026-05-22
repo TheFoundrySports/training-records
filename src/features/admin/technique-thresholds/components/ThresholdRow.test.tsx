@@ -3,6 +3,10 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { TechniqueWithThreshold } from '../hooks/useTechniqueThresholds'
 import { ThresholdRow } from '../components/ThresholdRow'
+import type { UseMutationResult } from '@tanstack/react-query'
+import type { UpdateThresholdInput } from '../hooks/useUpdateTechniqueThreshold'
+
+type UpdateMutationResult = UseMutationResult<void, Error, UpdateThresholdInput>
 import { useUpdateTechniqueThreshold } from '../hooks/useUpdateTechniqueThreshold'
 
 // Mock at top level
@@ -13,7 +17,7 @@ vi.mock('../hooks/useUpdateTechniqueThreshold', () => ({
     isSuccess: false,
     isError: false,
     error: null,
-  } as any),
+  } as UpdateMutationResult),
 }))
 
 const mockTechnique: TechniqueWithThreshold = {
@@ -72,7 +76,7 @@ describe('ThresholdRow', () => {
       isSuccess: false,
       isError: false,
       error: null,
-    } as any)
+    } as UpdateMutationResult)
 
     // Use a technique with currentThreshold: 0 so typing "20" gives exactly "20"
     const techWithZero: TechniqueWithThreshold = {
@@ -106,7 +110,7 @@ describe('ThresholdRow', () => {
       isSuccess: false,
       isError: false,
       error: null,
-    } as any)
+    } as UpdateMutationResult)
 
     render(<ThresholdRow technique={mockTechnique} />)
     expect(screen.getByRole('button', { name: 'Saving…' })).toBeDisabled()
@@ -123,7 +127,7 @@ describe('ThresholdRow', () => {
       isSuccess: true,
       isError: false,
       error: null,
-    } as any)
+    } as UpdateMutationResult)
 
     render(<ThresholdRow technique={techniqueWithStoredThreshold} />)
     const input = screen.getByRole('spinbutton')
