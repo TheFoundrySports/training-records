@@ -147,7 +147,40 @@ export function WorkoutDetailPage() {
         >
           &larr; Back to workouts
         </Button>
-        <BJJWorkoutDetail workoutId={workout.id} workout={workout} canEdit={canEdit} />
+        <BJJWorkoutDetail
+          workoutId={workout.id}
+          workout={workout}
+          canEdit={canEdit}
+          canDelete={canEdit}
+          onDelete={() => setDeleteOpen(true)}
+        />
+
+        <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+          <DialogContent showCloseButton={false}>
+            <DialogHeader>
+              <DialogTitle>Delete workout</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to delete this workout? This action cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setDeleteOpen(false)}
+                disabled={deleteMutation.isPending}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => void handleDelete()}
+                disabled={deleteMutation.isPending}
+              >
+                {deleteMutation.isPending ? 'Deleting…' : 'Delete'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     )
   }
