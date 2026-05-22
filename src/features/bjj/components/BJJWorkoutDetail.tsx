@@ -1,6 +1,8 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router'
 import { useBJJSections } from '../hooks/useBJJSections'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import type { Workout } from '@/features/workouts/workout.types'
@@ -9,6 +11,7 @@ import type { BJJSection } from '../bjj.types'
 interface BJJWorkoutDetailProps {
   workoutId: string
   workout: Workout
+  canEdit?: boolean
 }
 
 function formatDate(iso: string) {
@@ -113,7 +116,8 @@ function BJJSectionCard({ section }: { section: BJJSection }) {
   )
 }
 
-export function BJJWorkoutDetail({ workoutId, workout }: BJJWorkoutDetailProps) {
+export function BJJWorkoutDetail({ workoutId, workout, canEdit }: BJJWorkoutDetailProps) {
+  const navigate = useNavigate()
   const { data: sections, isLoading, isError } = useBJJSections(workoutId)
 
   return (
@@ -142,6 +146,14 @@ export function BJJWorkoutDetail({ workoutId, workout }: BJJWorkoutDetailProps) 
           )}
         </CardContent>
       </Card>
+
+      {canEdit && (
+        <div className="flex flex-wrap gap-3 mt-6">
+          <Button variant="outline" onClick={() => void navigate(`/bjj/${workout.id}/edit`)}>
+            Edit
+          </Button>
+        </div>
+      )}
 
       {/* Sections */}
       <div className="mt-6">

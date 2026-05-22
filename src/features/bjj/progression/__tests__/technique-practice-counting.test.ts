@@ -31,7 +31,6 @@ function simulateTriggerInsert(
   userId: string,
   techniqueId: string,
   workoutId: string,
-  _performedAt: string,
 ): { dedupInserted: boolean; aggregateUpserted: boolean } {
   const key = makeDedupKey(userId, techniqueId, workoutId)
   const alreadyExists = state.dedupRows.has(key)
@@ -76,9 +75,9 @@ describe('technique practice counting — dedup logic', () => {
       // so only the first section gets dedupInserted=true. Sections 2 and 3 hit
       // ON CONFLICT DO NOTHING and get dedupInserted=false.
       const results = [
-        simulateTriggerInsert(state, USER_ID, TECHNIQUE_ID, WORKOUT_ID_A, '2026-05-10T10:00:00Z'),
-        simulateTriggerInsert(state, USER_ID, TECHNIQUE_ID, WORKOUT_ID_A, '2026-05-10T10:05:00Z'),
-        simulateTriggerInsert(state, USER_ID, TECHNIQUE_ID, WORKOUT_ID_A, '2026-05-10T10:10:00Z'),
+        simulateTriggerInsert(state, USER_ID, TECHNIQUE_ID, WORKOUT_ID_A),
+        simulateTriggerInsert(state, USER_ID, TECHNIQUE_ID, WORKOUT_ID_A),
+        simulateTriggerInsert(state, USER_ID, TECHNIQUE_ID, WORKOUT_ID_A),
       ]
 
       // Dedup insert fires 1 time (first section); sections 2 and 3 are no-ops
@@ -115,7 +114,6 @@ describe('technique practice counting — dedup logic', () => {
           USER_ID,
           TECHNIQUE_ID,
           WORKOUT_ID_A,
-          `2026-05-10T10:${String(i * 5).padStart(2, '0')}:00Z`,
         )
         if (result.dedupInserted) mockClient.calls.techniqueWorkoutLogInserts++
         if (result.aggregateUpserted) mockClient.calls.techniquePracticeLogUpserts++
@@ -135,8 +133,8 @@ describe('technique practice counting — dedup logic', () => {
       }
 
       const results = [
-        simulateTriggerInsert(state, USER_ID, TECHNIQUE_ID, WORKOUT_ID_A, '2026-05-10T10:00:00Z'),
-        simulateTriggerInsert(state, USER_ID, TECHNIQUE_ID, WORKOUT_ID_B, '2026-05-12T14:00:00Z'),
+        simulateTriggerInsert(state, USER_ID, TECHNIQUE_ID, WORKOUT_ID_A),
+        simulateTriggerInsert(state, USER_ID, TECHNIQUE_ID, WORKOUT_ID_B),
       ]
 
       // Dedup insert fires 2 times (one per workout)
@@ -162,7 +160,6 @@ describe('technique practice counting — dedup logic', () => {
       }
 
       const workouts = [WORKOUT_ID_A, WORKOUT_ID_B]
-      const dates = ['2026-05-10T10:00:00Z', '2026-05-12T14:00:00Z']
 
       for (let i = 0; i < 2; i++) {
         const result = simulateTriggerInsert(
@@ -170,7 +167,6 @@ describe('technique practice counting — dedup logic', () => {
           USER_ID,
           TECHNIQUE_ID,
           workouts[i],
-          dates[i],
         )
         if (result.dedupInserted) mockClient.calls.techniqueWorkoutLogInserts++
         if (result.aggregateUpserted) mockClient.calls.techniquePracticeLogUpserts++
@@ -189,9 +185,9 @@ describe('technique practice counting — dedup logic', () => {
       }
 
       const results = [
-        simulateTriggerInsert(state, USER_ID, TECHNIQUE_ID, WORKOUT_ID_A, '2026-05-10T10:00:00Z'),
-        simulateTriggerInsert(state, USER_ID, TECHNIQUE_ID, WORKOUT_ID_A, '2026-05-10T10:30:00Z'),
-        simulateTriggerInsert(state, USER_ID, TECHNIQUE_ID, WORKOUT_ID_B, '2026-05-12T14:00:00Z'),
+        simulateTriggerInsert(state, USER_ID, TECHNIQUE_ID, WORKOUT_ID_A),
+        simulateTriggerInsert(state, USER_ID, TECHNIQUE_ID, WORKOUT_ID_A),
+        simulateTriggerInsert(state, USER_ID, TECHNIQUE_ID, WORKOUT_ID_B),
       ]
 
       // Dedup insert fires 2 times: first section of A (new), second section of A (dup),
