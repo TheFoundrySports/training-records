@@ -16,6 +16,8 @@ import { BJJWorkoutFormPage } from '@/features/bjj/pages/BJJWorkoutFormPage'
 import { AISettingsPage } from '@/features/admin/ai-settings/pages/AISettingsPage'
 import { BeltProgressionPage } from '@/features/bjj/progression'
 import { TechniqueThresholdsPage } from '@/features/admin/technique-thresholds/pages/TechniqueThresholdsPage'
+import { AdminShell } from '@/features/admin/admin-shell/AdminShell'
+import { UserManagementPage } from '@/features/admin/users/pages/UserManagementPage'
 
 export const router = createBrowserRouter([
   {
@@ -82,48 +84,42 @@ export const router = createBrowserRouter([
             element: <CalendarPage />,
           },
           {
-            path: 'admin/bjj-techniques',
+            path: 'admin',
             element: (
               <AdminRoute>
-                <BJJTechniqueListPage />
+                <AdminShell />
               </AdminRoute>
             ),
-          },
-          {
-            path: 'admin/bjj-techniques/new',
-            element: (
-              <AdminRoute>
-                <BJJTechniqueFormPage />
-              </AdminRoute>
-            ),
-          },
-          {
-            path: 'admin/bjj-techniques/:id/edit',
-            element: (
-              <AdminRoute>
-                <BJJTechniqueFormPage />
-              </AdminRoute>
-            ),
+            children: [
+              {
+                path: 'bjj-techniques',
+                element: <BJJTechniqueListPage />,
+              },
+              {
+                path: 'bjj-techniques/new',
+                element: <BJJTechniqueFormPage />,
+              },
+              {
+                path: 'bjj-techniques/:id/edit',
+                element: <BJJTechniqueFormPage />,
+              },
+              {
+                path: 'ai-settings',
+                element: <AISettingsPage />,
+              },
+              {
+                path: 'technique-thresholds',
+                element: <TechniqueThresholdsPage />,
+              },
+              {
+                path: 'users',
+                element: <UserManagementPage />,
+              },
+            ],
           },
           {
             path: 'bjj/blue-belt-progression',
             element: <BeltProgressionPage />,
-          },
-          {
-            path: 'admin/ai-settings',
-            element: (
-              <AdminRoute>
-                <AISettingsPage />
-              </AdminRoute>
-            ),
-          },
-          {
-            path: 'admin/technique-thresholds',
-            element: (
-              <AdminRoute>
-                <TechniqueThresholdsPage />
-              </AdminRoute>
-            ),
           },
         ],
       },
