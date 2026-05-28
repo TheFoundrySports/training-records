@@ -32,7 +32,6 @@ vi.mock('@/features/auth/hooks/useRegister', () => ({
         registerState.isLoading = false
         registerState.isError = true
         registerState.error = err instanceof Error ? err.message : 'Unknown error'
-        throw err
       }
     },
     get isLoading() { return registerState.isLoading },
