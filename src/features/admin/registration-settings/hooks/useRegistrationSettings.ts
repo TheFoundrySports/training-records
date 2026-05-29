@@ -20,7 +20,9 @@ interface UpdateSettingsResponse {
 }
 
 async function fetchSettings(): Promise<RegistrationSettings> {
-  const { data, error } = await supabase.functions.invoke<RegistrationSettingsResponse>('registration-settings')
+  const { data, error } = await supabase.functions.invoke<RegistrationSettingsResponse>('registration-settings', {
+    method: 'GET',
+  })
 
   if (error) {
     throw new Error(error.message ?? 'Failed to fetch settings')
