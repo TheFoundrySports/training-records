@@ -60,7 +60,12 @@ export function useUpdateRegistrationSettings() {
 
       return data
     },
-    onSuccess: () => {
+    onSuccess: (data, variables) => {
+      // Optimistic cache update so the UI reflects the change immediately
+      queryClient.setQueryData<RegistrationSettings>(['registration-settings'], (prev) => {
+        if (!prev) return prev
+        return { ...prev, ...variables }
+      })
       queryClient.invalidateQueries({ queryKey: ['registration-settings'] })
     },
   })
