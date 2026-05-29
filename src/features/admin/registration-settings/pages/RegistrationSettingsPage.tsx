@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -18,6 +18,8 @@ export function RegistrationSettingsPage() {
 
   const [inviteExpiryHours, setInviteExpiryHours] = useState<number>(settings?.invite_expiry_hours ?? 48)
   const [showSaved, setShowSaved] = useState(false)
+
+  const currentMode = settings?.registration_mode ?? 'open'
 
   async function handleToggleMode(newMode: 'open' | 'invite_only') {
     await updateSettings({ registration_mode: newMode })
@@ -49,8 +51,6 @@ export function RegistrationSettingsPage() {
     )
   }
 
-  const currentMode = settings?.registration_mode ?? 'open'
-
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl space-y-8">
       <h1 className="text-2xl font-semibold">Registration Settings</h1>
@@ -66,6 +66,7 @@ export function RegistrationSettingsPage() {
               variant={currentMode === 'open' ? 'default' : 'outline'}
               onClick={() => void handleToggleMode('open')}
               disabled={isUpdating}
+              aria-pressed={currentMode === 'open'}
             >
               Open Registration
             </Button>
@@ -73,6 +74,7 @@ export function RegistrationSettingsPage() {
               variant={currentMode === 'invite_only' ? 'default' : 'outline'}
               onClick={() => void handleToggleMode('invite_only')}
               disabled={isUpdating}
+              aria-pressed={currentMode === 'invite_only'}
             >
               Invite Only
             </Button>

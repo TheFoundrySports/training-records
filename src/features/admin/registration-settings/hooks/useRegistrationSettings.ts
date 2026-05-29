@@ -60,7 +60,11 @@ export function useUpdateRegistrationSettings() {
 
       return data
     },
-    onSuccess: () => {
+    onSuccess: (_, input) => {
+      queryClient.setQueryData<RegistrationSettings>(['registration-settings'], (prev) => {
+        if (!prev) return prev
+        return { ...prev, ...input }
+      })
       queryClient.invalidateQueries({ queryKey: ['registration-settings'] })
     },
   })
