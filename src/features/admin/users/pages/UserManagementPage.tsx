@@ -28,7 +28,8 @@ export function UserManagementPage() {
         <p className="text-sm text-muted-foreground">No users found.</p>
       ) : (
         <div className="rounded-xl border border-border overflow-hidden">
-          <table className="w-full text-sm">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
             <thead>
               <tr className="border-b bg-muted/50">
                 <th className="px-4 py-3 text-left font-medium">Email</th>
@@ -56,6 +57,7 @@ export function UserManagementPage() {
               ))}
             </tbody>
           </table>
+            </div>
         </div>
       )}
     </div>

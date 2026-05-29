@@ -112,4 +112,12 @@ describe('WorkoutListPage', () => {
     renderPage()
     expect(screen.getAllByRole('button', { name: /log workout/i }).length).toBeGreaterThan(0)
   })
+
+  it('action buttons container uses flex-wrap so buttons stack on small screens', () => {
+    mockReturn({ data: [], isLoading: false, isError: false, error: null })
+    renderPage()
+
+    const buttonContainer = document.querySelector('.flex.flex-wrap')
+    expect(buttonContainer).toBeInTheDocument()
+  })
 })
