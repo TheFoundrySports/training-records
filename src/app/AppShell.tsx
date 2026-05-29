@@ -9,13 +9,10 @@ import { useAuth } from '@/features/auth/AuthContext'
 import { usePageFocus } from '@/hooks/usePageFocus'
 
 const NAV_ITEMS = [
-  { label: 'Dashboard', to: '/workouts' },
-  { label: 'Calendar', to: '/calendar' },
-  { label: 'Athletes', to: '/athletes' },
   { label: 'Workouts', to: '/workouts' },
-  { label: 'Exercises', to: '/exercises' },
-  { label: 'Programs', to: '/programs' },
-  { label: 'Profile', to: '/profile' },
+  { label: 'AI Generate', to: '/ai' },
+  { label: 'Calendar', to: '/calendar' },
+  { label: 'Blue Belt', to: '/bjj/blue-belt-progression' },
 ]
 
 export function AppShell() {

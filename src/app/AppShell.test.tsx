@@ -34,13 +34,11 @@ function renderWithRouter() {
       <QueryClientProvider client={queryClient}>
         <Routes>
           <Route path="/" element={<AppShell />}>
-            <Route index element={<div>Dashboard Content</div>} />
+            <Route index element={<div>Home Content</div>} />
             <Route path="workouts" element={<div>Workouts Content</div>} />
             <Route path="calendar" element={<div>Calendar Content</div>} />
-            <Route path="athletes" element={<div>Athletes Content</div>} />
-            <Route path="exercises" element={<div>Exercises Content</div>} />
-            <Route path="programs" element={<div>Programs Content</div>} />
-            <Route path="profile" element={<div>Profile Content</div>} />
+            <Route path="ai" element={<div>AI Content</div>} />
+            <Route path="bjj/blue-belt-progression" element={<div>Blue Belt Content</div>} />
           </Route>
         </Routes>
       </QueryClientProvider>
@@ -81,14 +79,12 @@ describe('AppShell', () => {
 
     fireEvent.click(hamburger)
 
-    // Drawer should be visible with nav links (use getAllBy since desktop nav may also have matching text)
-    const dashboardLinks = screen.getAllByText('Dashboard')
+    // Drawer should be visible with nav links
+    expect(screen.getByText('Menu')).toBeInTheDocument()
     const calendarLinks = screen.getAllByText('Calendar')
-    expect(dashboardLinks.length).toBeGreaterThanOrEqual(1)
     expect(calendarLinks.length).toBeGreaterThanOrEqual(1)
-    // At least one instance should be in the drawer (visible)
-    const drawerCalendar = screen.getByRole('link', { name: 'Calendar' })
-    expect(drawerCalendar).toBeInTheDocument()
+    const workoutsLinks = screen.getAllByText('Workouts')
+    expect(workoutsLinks.length).toBeGreaterThanOrEqual(1)
   })
 
   it('closes drawer when nav link is clicked', () => {
