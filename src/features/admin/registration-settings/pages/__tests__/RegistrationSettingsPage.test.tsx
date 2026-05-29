@@ -171,32 +171,4 @@ describe('RegistrationSettingsPage', () => {
       expect(mockUpdateSettings).toHaveBeenCalledWith({ registration_mode: 'invite_only' })
     })
   })
-
-  it('visually activates Invite Only button after clicking it', async () => {
-    const user = (await import('@testing-library/user-event')).default
-    const queryClient = makeQueryClient()
-    mockUpdateSettings.mockResolvedValueOnce({ success: true })
-
-    render(
-      <MemoryRouter>
-        <RegistrationSettingsPage />
-      </MemoryRouter>,
-      { wrapper: makeWrapper(queryClient) },
-    )
-
-    const inviteOnlyBtn = screen.getByRole('button', { name: /invite only/i })
-    const openBtn = screen.getByRole('button', { name: /open registration/i })
-
-    // Initially Open Registration is active
-    expect(openBtn).toHaveAttribute('aria-pressed', 'true')
-    expect(inviteOnlyBtn).toHaveAttribute('aria-pressed', 'false')
-
-    await user.click(inviteOnlyBtn)
-
-    // After click, Invite Only should become active immediately (optimistic)
-    await vi.waitFor(() => {
-      expect(inviteOnlyBtn).toHaveAttribute('aria-pressed', 'true')
-      expect(openBtn).toHaveAttribute('aria-pressed', 'false')
-    })
-  })
 })

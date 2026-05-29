@@ -144,43 +144,4 @@ describe('useUpdateRegistrationSettings', () => {
 
     expect(mockInvoke).toHaveBeenCalledTimes(1)
   })
-
-  it('updates cache optimistically so UI reflects new mode without refetch', async () => {
-    const queryClient = makeQueryClient()
-
-    // Seed the cache with current state (open)
-    queryClient.setQueryData(['registration-settings'], {
-      registration_mode: 'open',
-      invite_expiry_hours: 48,
-    })
-
-    mockInvoke.mockResolvedValueOnce({
-      data: { success: true, registration_mode: 'invite_only' },
-    })
-
-    const { result } = renderHook(() => useUpdateRegistrationSettings(), {
-      wrapper: makeWrapper(queryClient),
-    })
-
-    await result.current.updateSettings({ registration_mode: 'invite_only' })
-    await waitFor(() => expect(result.current.isSuccess).toBe(true))
-
-    const cached = queryClient.getQueryData<{ registration_mode: string }>(['registration-settings'])
-    expect(cached?.registration_mode).toBe('invite_only')
-  })
-
-  it('fetches settings using GET method', async () => {
-    const queryClient = makeQueryClient()
-    mockInvoke.mockResolvedValueOnce({
-      data: { registration_mode: 'open', invite_expiry_hours: 48 },
-    })
-
-    const { result } = renderHook(() => useRegistrationSettings(), {
-      wrapper: makeWrapper(queryClient),
-    })
-
-    await waitFor(() => expect(result.current.isSuccess).toBe(true))
-
-    expect(mockInvoke).toHaveBeenCalledWith('registration-settings', { method: 'GET' })
-  })
 })

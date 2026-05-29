@@ -20,9 +20,7 @@ interface UpdateSettingsResponse {
 }
 
 async function fetchSettings(): Promise<RegistrationSettings> {
-  const { data, error } = await supabase.functions.invoke<RegistrationSettingsResponse>('registration-settings', {
-    method: 'GET',
-  })
+  const { data, error } = await supabase.functions.invoke<RegistrationSettingsResponse>('registration-settings')
 
   if (error) {
     throw new Error(error.message ?? 'Failed to fetch settings')
@@ -62,12 +60,7 @@ export function useUpdateRegistrationSettings() {
 
       return data
     },
-    onSuccess: (data, variables) => {
-      // Optimistic cache update so the UI reflects the change immediately
-      queryClient.setQueryData<RegistrationSettings>(['registration-settings'], (prev) => {
-        if (!prev) return prev
-        return { ...prev, ...variables }
-      })
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['registration-settings'] })
     },
   })
