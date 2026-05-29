@@ -5,6 +5,8 @@ const NAV_ITEMS = [
   { label: 'AI Settings', to: '/admin/ai-settings' },
   { label: 'Thresholds', to: '/admin/technique-thresholds' },
   { label: 'Users', to: '/admin/users' },
+  { label: 'Create User', to: '/admin/create-user' },
+  { label: 'Registration Settings', to: '/admin/registration-settings' },
 ]
 
 export function AdminShell() {
