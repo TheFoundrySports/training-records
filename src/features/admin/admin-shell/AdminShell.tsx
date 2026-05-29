@@ -1,4 +1,8 @@
 import { NavLink, Outlet } from 'react-router'
+import { useState } from 'react'
+import { Menu, X } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Dialog, DialogOverlay, DialogPopup } from '@/components/ui/dialog'
 
 const NAV_ITEMS = [
   { label: 'BJJ Techniques', to: '/admin/bjj-techniques' },
@@ -10,35 +14,89 @@ const NAV_ITEMS = [
 ]
 
 export function AdminShell() {
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+
   return (
     <div className="flex min-h-screen">
-      {/* Sidebar */}
-      <aside className="w-56 border-r bg-muted/30 shrink-0">
+      {/* Desktop Sidebar — full width, visible above lg */}
+      <aside className="hidden lg:flex w-56 shrink-0 flex-col border-r bg-muted/30">
         <nav className="flex flex-col gap-1 p-4">
-            {NAV_ITEMS.map((item) => {
-              return (
-                <NavLink
-                  key={item.to}
-                  to={item.to}
-                  className={({ isActive }: { isActive: boolean }) =>
-                    `flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                      isActive
-                        ? 'bg-primary text-primary-foreground'
-                        : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-                    }`
-                  }
-                >
-                  {item.label}
-                </NavLink>
-              )
-            })}
+          {NAV_ITEMS.map((item) => {
+            return (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                className={({ isActive }: { isActive: boolean }) =>
+                  `flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                    isActive
+                      ? 'bg-primary text-primary-foreground'
+                      : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                  }`
+                }
+              >
+                {item.label}
+              </NavLink>
+            )
+          })}
         </nav>
       </aside>
 
       {/* Main content */}
       <main className="flex-1 min-h-screen">
+        {/* Mobile hamburger — visible below lg */}
+        <div className="lg:hidden sticky top-0 z-40 flex items-center gap-4 p-4 border-b bg-background/95 backdrop-blur">
+          <Button
+            aria-label="Open admin navigation"
+            variant="ghost"
+            size="icon"
+            onClick={() => setSidebarOpen(true)}
+          >
+            <Menu className="w-5 h-5" />
+          </Button>
+          <span className="font-semibold">Admin</span>
+        </div>
+
         <Outlet />
       </main>
+
+      {/* Mobile Sidebar Drawer */}
+      <Dialog open={sidebarOpen} onOpenChange={(open) => {
+        setSidebarOpen(open)
+        document.body.style.overflow = open ? 'hidden' : ''
+      }}>
+        <DialogOverlay className="fixed inset-0 bg-black/40 z-50" />
+        <DialogPopup className="fixed inset-y-0 left-0 w-64 bg-background z-50 shadow-lg flex flex-col">
+          <div className="flex items-center justify-between p-4 border-b">
+            <span className="font-semibold">Admin</span>
+            <Button
+              aria-label="Close admin navigation"
+              variant="ghost"
+              size="icon"
+              onClick={() => setSidebarOpen(false)}
+            >
+              <X className="w-5 h-5" />
+            </Button>
+          </div>
+          <nav className="flex flex-col gap-1 p-4">
+            {NAV_ITEMS.map((item) => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                className={({ isActive }: { isActive: boolean }) =>
+                  `flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                    isActive
+                      ? 'bg-primary text-primary-foreground'
+                      : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                  }`
+                }
+                onClick={() => setSidebarOpen(false)}
+              >
+                {item.label}
+              </NavLink>
+            ))}
+          </nav>
+        </DialogPopup>
+      </Dialog>
     </div>
   )
 }
