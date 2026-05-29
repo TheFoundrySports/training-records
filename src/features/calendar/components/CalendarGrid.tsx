@@ -36,18 +36,20 @@ export function CalendarGrid({ year, month, workouts, isLoading }: CalendarGridP
       </div>
 
       {/* Calendar grid */}
-      <div className="grid grid-cols-7 gap-px bg-border rounded overflow-hidden">
-        {isLoading
-          ? Array.from({ length: 35 }).map((_, i) => (
-              <div key={i} className="min-h-24 bg-muted animate-pulse" aria-hidden="true" />
-            ))
-          : days.map((day) => (
-              <CalendarCell
-                key={day.date.toISOString()}
-                day={day}
-                onEmptyClick={handleEmptyClick}
-              />
-            ))}
+      <div className="overflow-x-auto">
+        <div className="grid grid-cols-7 gap-px bg-border rounded min-w-[640px]">
+          {isLoading
+            ? Array.from({ length: 35 }).map((_, i) => (
+                <div key={i} className="min-h-24 bg-muted animate-pulse" aria-hidden="true" />
+              ))
+            : days.map((day) => (
+                <CalendarCell
+                  key={day.date.toISOString()}
+                  day={day}
+                  onEmptyClick={handleEmptyClick}
+                />
+              ))}
+        </div>
       </div>
 
       {/* Empty state — shown after load when no workouts */}
