@@ -18,11 +18,23 @@ import { BeltProgressionPage } from '@/features/bjj/progression'
 import { TechniqueThresholdsPage } from '@/features/admin/technique-thresholds/pages/TechniqueThresholdsPage'
 import { AdminShell } from '@/features/admin/admin-shell/AdminShell'
 import { UserManagementPage } from '@/features/admin/users/pages/UserManagementPage'
+import { RegisterPage } from '@/features/auth/pages/RegisterPage'
+import { AcceptInvitePage } from '@/features/auth/pages/AcceptInvitePage'
+import { CreateUserPage } from '@/features/admin/create-user/pages/CreateUserPage'
+import { RegistrationSettingsPage } from '@/features/admin/registration-settings/pages/RegistrationSettingsPage'
 
 export const router = createBrowserRouter([
   {
     path: '/login',
     element: <LoginPage />,
+  },
+  {
+    path: '/register',
+    element: <RegisterPage />,
+  },
+  {
+    path: '/accept-invite',
+    element: <AcceptInvitePage />,
   },
   {
     path: '/',
@@ -114,6 +126,14 @@ export const router = createBrowserRouter([
               {
                 path: 'users',
                 element: <UserManagementPage />,
+              },
+              {
+                path: 'create-user',
+                element: <CreateUserPage />,
+              },
+              {
+                path: 'registration-settings',
+                element: <RegistrationSettingsPage />,
               },
             ],
           },
