@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { Menu, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
-import { Dialog, DialogOverlay, DialogPopup } from '@/components/ui/dialog'
+import { Dialog as DialogPrimitive } from '@base-ui/react/dialog'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/features/auth/AuthContext'
 import { usePageFocus } from '@/hooks/usePageFocus'
@@ -89,48 +89,48 @@ export function AppShell() {
       </header>
 
       {/* Mobile Navigation Drawer */}
-      <Dialog open={mobileNavOpen} onOpenChange={(open) => {
+      <DialogPrimitive.Root open={mobileNavOpen} onOpenChange={(open) => {
         setMobileNavOpen(open)
         document.body.style.overflow = open ? 'hidden' : ''
       }}>
-        <DialogOverlay className="fixed inset-0 bg-black/40 z-50" />
-        <DialogPopup
-          className="fixed inset-y-0 left-0 w-64 bg-background z-50 shadow-lg flex flex-col"
-        >
-          <div className="flex items-center justify-between p-4 border-b">
-            <span className="font-semibold">Menu</span>
-            <Button
-              aria-label="Close navigation menu"
-              variant="ghost"
-              size="icon"
-              onClick={() => setMobileNavOpen(false)}
-            >
-              <X className="w-5 h-5" />
-            </Button>
-          </div>
-          <nav className="flex flex-col gap-1 p-4">
-            {NAV_ITEMS.map((item) => (
-              <Link
-                key={item.to}
-                to={item.to}
-                className="px-3 py-2 rounded-md text-sm font-medium text-foreground/60 hover:bg-muted hover:text-foreground transition-colors"
+        <DialogPrimitive.Portal>
+          <DialogPrimitive.Backdrop className="fixed inset-0 bg-black/50 z-50" />
+          <DialogPrimitive.Popup className="fixed inset-y-0 left-0 w-72 bg-background z-50 shadow-xl flex flex-col outline-none">
+            <div className="flex items-center justify-between p-4 border-b">
+              <span className="font-semibold text-foreground">Menu</span>
+              <Button
+                aria-label="Close navigation menu"
+                variant="ghost"
+                size="icon"
                 onClick={() => setMobileNavOpen(false)}
               >
-                {item.label}
-              </Link>
-            ))}
-            {role === 'admin' && (
-              <Link
-                to="/admin/bjj-techniques"
-                className="px-3 py-2 rounded-md text-sm font-medium text-foreground/60 hover:bg-muted hover:text-foreground transition-colors"
-                onClick={() => setMobileNavOpen(false)}
-              >
-                Admin
-              </Link>
-            )}
-          </nav>
-        </DialogPopup>
-      </Dialog>
+                <X className="w-5 h-5" />
+              </Button>
+            </div>
+            <nav className="flex flex-col gap-1 p-4">
+              {NAV_ITEMS.map((item) => (
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  className="px-3 py-2 rounded-md text-sm font-medium text-foreground/70 hover:bg-muted hover:text-foreground transition-colors"
+                  onClick={() => setMobileNavOpen(false)}
+                >
+                  {item.label}
+                </Link>
+              ))}
+              {role === 'admin' && (
+                <Link
+                  to="/admin/bjj-techniques"
+                  className="px-3 py-2 rounded-md text-sm font-medium text-foreground/70 hover:bg-muted hover:text-foreground transition-colors"
+                  onClick={() => setMobileNavOpen(false)}
+                >
+                  Admin
+                </Link>
+              )}
+            </nav>
+          </DialogPrimitive.Popup>
+        </DialogPrimitive.Portal>
+      </DialogPrimitive.Root>
 
       <main id="main-content" tabIndex={-1} className="flex-1 outline-none">
         <Outlet />
