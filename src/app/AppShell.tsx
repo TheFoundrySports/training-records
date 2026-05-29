@@ -12,6 +12,7 @@ const NAV_ITEMS = [
   { label: 'Workouts', to: '/workouts' },
   { label: 'AI Generate', to: '/ai' },
   { label: 'Calendar', to: '/calendar' },
+  { label: 'Exercises', to: '/exercises' },
   { label: 'Blue Belt', to: '/bjj/blue-belt-progression' },
 ]
 
