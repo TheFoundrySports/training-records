@@ -90,9 +90,9 @@ export function WorkoutListPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
         <h1 className="text-2xl font-semibold">Workouts</h1>
-        <div className="flex flex-wrap gap-2">
+<div className="flex flex-wrap items-center gap-2">
           <ExportAllWorkoutsButton />
           <Button variant="outline" onClick={() => setImportModalOpen(true)}>
             Import
