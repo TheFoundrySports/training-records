@@ -29,7 +29,8 @@ export function TechniqueThresholdsPage() {
         <p className="text-sm text-muted-foreground">No techniques found.</p>
       ) : (
         <div className="rounded-xl border border-border overflow-hidden">
-          <table aria-label="Technique thresholds" className="w-full text-sm">
+          <div className="overflow-x-auto">
+            <table aria-label="Technique thresholds" className="w-full text-sm">
             <thead>
               <tr className="border-b bg-muted/50">
                 <th className="px-4 py-3 text-left font-medium">Name</th>
@@ -44,6 +45,7 @@ export function TechniqueThresholdsPage() {
               ))}
             </tbody>
           </table>
+            </div>
         </div>
       )}
     </div>

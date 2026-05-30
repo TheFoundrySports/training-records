@@ -224,3 +224,19 @@ describe('CalendarGrid component — workout chip integration (REQ-CAL-06, REQ-C
     expect(screen.getByText('functional')).toBeInTheDocument()
   })
 })
+
+describe('CalendarGrid component — mobile scroll wrapper', () => {
+  it('wraps the grid in overflow-x-auto for horizontal scroll on mobile', () => {
+    renderGrid({ year: 2026, month: 4, workouts: [], isLoading: false })
+
+    const wrapper = document.querySelector('.overflow-x-auto')
+    expect(wrapper).toBeInTheDocument()
+  })
+
+  it('inner grid has min-w-[640px] to prevent crushing on small screens', () => {
+    renderGrid({ year: 2026, month: 4, workouts: [], isLoading: false })
+
+    const innerGrid = document.querySelector('.min-w-\\[640px\\]')
+    expect(innerGrid).toBeInTheDocument()
+  })
+})

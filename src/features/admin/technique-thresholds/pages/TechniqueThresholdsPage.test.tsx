@@ -176,4 +176,25 @@ describe('TechniqueThresholdsPage', () => {
       expect(screen.getByText('Technique Thresholds')).toBeInTheDocument()
     })
   })
+
+  it('wraps table in overflow-x-auto for horizontal scroll on mobile', async () => {
+    vi.mocked(useTechniqueThresholds).mockReturnValue({
+      data: MOCK_TECHNIQUES,
+      isLoading: false,
+      isPending: false,
+      isSuccess: true,
+    } as ReturnType<typeof useTechniqueThresholds>)
+
+    const queryClient = makeQueryClient()
+    render(
+      <QueryClientProvider client={queryClient}>
+        <TechniqueThresholdsPage />
+      </QueryClientProvider>,
+    )
+
+    await waitFor(() => {
+      const wrapper = document.querySelector('.overflow-x-auto')
+      expect(wrapper).toBeInTheDocument()
+    })
+  })
 })
