@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import type { ReactNode } from 'react'
 import { MemoryRouter, Route, Routes } from 'react-router'
 import { AdminShell } from './AdminShell'
+import userEvent from '@testing-library/user-event'
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -83,5 +84,68 @@ describe('AdminShell', () => {
 
     const aiSettingsLink = screen.getByText('AI Settings')
     expect(aiSettingsLink.closest('a')).not.toHaveClass('bg-primary')
+  })
+
+  it('renders hamburger button in mobile header area (lg:hidden parent container)', () => {
+    renderWithRouter('/admin/bjj-techniques')
+
+    // The hamburger is inside a div with lg:hidden class (shown below lg)
+    const mobileHeader = document.querySelector('div.lg\\:hidden')
+    expect(mobileHeader).toBeInTheDocument()
+
+    const hamburger = screen.getByRole('button', { name: /open admin navigation/i })
+    expect(hamburger).toBeInTheDocument()
+  })
+
+  it('opens sidebar drawer when hamburger is clicked', async () => {
+    const user = userEvent.setup()
+    renderWithRouter('/admin/bjj-techniques')
+
+    const hamburger = screen.getByRole('button', { name: /open admin navigation/i })
+    await user.click(hamburger)
+
+    // Drawer shows header + same nav items (getAllBy since desktop sidebar may also exist but hidden)
+    expect(screen.getAllByText('Admin').length).toBeGreaterThanOrEqual(1)
+    expect(screen.getAllByText('BJJ Techniques').length).toBeGreaterThanOrEqual(1)
+  })
+
+  it('closes drawer when nav link is clicked', async () => {
+    const user = userEvent.setup()
+    renderWithRouter('/admin/bjj-techniques')
+
+    // Open drawer
+    const hamburger = screen.getByRole('button', { name: /open admin navigation/i })
+    await user.click(hamburger)
+
+    // Click a nav link in the drawer
+    const bjjLink = screen.getByRole('link', { name: 'BJJ Techniques' })
+    await user.click(bjjLink)
+
+    // Drawer should be closed — close button should not be present
+    expect(screen.queryByRole('button', { name: /close admin navigation/i })).not.toBeInTheDocument()
+  })
+
+  it('closes drawer when close button is clicked', async () => {
+    const user = userEvent.setup()
+    renderWithRouter('/admin/bjj-techniques')
+
+    // Open drawer
+    const hamburger = screen.getByRole('button', { name: /open admin navigation/i })
+    await user.click(hamburger)
+
+    // Click close button
+    const closeBtn = screen.getByRole('button', { name: /close admin navigation/i })
+    await user.click(closeBtn)
+
+    // Drawer should be closed — close button should not be present
+    expect(screen.queryByRole('button', { name: /close admin navigation/i })).not.toBeInTheDocument()
+  })
+
+  it('desktop sidebar is hidden below lg (has hidden lg:flex)', () => {
+    renderWithRouter('/admin/bjj-techniques')
+
+    const sidebar = document.querySelector('aside')
+    expect(sidebar).toBeInTheDocument()
+    expect(sidebar).toHaveClass('hidden', 'lg:flex')
   })
 })
