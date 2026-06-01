@@ -1,23 +1,15 @@
 import { useMutation } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabase'
+import { invokeFunction } from '@/lib/edge-function'
 import type { RegisterInput, RegisterResponse } from '../auth.types'
 
 export function useRegister() {
   const mutation = useMutation({
     mutationFn: async (input: RegisterInput) => {
-      const { data, error } = await supabase.functions.invoke<RegisterResponse>('register-user', {
+      // register-user is a public endpoint — no auth token required
+      return invokeFunction<RegisterResponse>({
+        name: 'register-user',
         body: input,
       })
-
-      if (error) {
-        throw new Error(error.message ?? 'Failed to register')
-      }
-
-      if (data?.error) {
-        throw new Error(data.error)
-      }
-
-      return data
     },
   })
 

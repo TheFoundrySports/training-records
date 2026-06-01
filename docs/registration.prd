@@ -1,0 +1,303 @@
+---
+sdd:
+  change: registration
+  openspec: openspec/changes/user-registration
+  phase: prd
+  status: draft
+  next_phase: sdd-explore
+document:
+  title: Admin User Registration & Invitation
+  version: "0.1"
+  date: 2026-05-30
+  author: Francisco José Seva Mora
+---
+
+# Admin User Registration & Invitation
+
+## SDD traceability
+
+| SDD phase   | Artifact |
+| ----------- | -------- |
+| PRD         | `docs/registration.prd` (this file) |
+| Explore     | `openspec/changes/user-registration/exploration.md` |
+| Proposal    | `openspec/changes/user-registration/proposal.md` — **update to match this PRD** |
+| Spec        | `openspec/changes/user-registration/specs/` |
+| Design      | `openspec/changes/user-registration/design.md` — **update to Supabase-native email** |
+| Tasks       | `openspec/changes/user-registration/tasks.md` |
+| Apply       | Implementation in repo |
+| Verify      | Tests + manual Inbucket verification |
+
+**Related docs:** [PRD.md](PRD.md) · [PRODUCT.md](PRODUCT.md) · [ARCHITECTURE.md](ARCHITECTURE.md) · [prd-admin-user-registration-invitation.md](prd-admin-user-registration-invitation.md) · **[registration-change-proposal.md](registration-change-proposal.md)** (existing code inventory + remaining work)
+
+---
+
+## 1. Summary
+
+Administrators onboard users from **Admin → Create User** (`/admin/create-user`) using **Supabase Auth email templates**:
+
+| # | Use case | Admin action | Supabase email template | User outcome |
+| - | -------- | ------------ | ----------------------- | ------------ |
+| 1 | Create user with password | Email + password | **Confirm signup** | Confirm email → sign in with admin-set password |
+| 2 | Send invitation | Email only | **You have been invited** | Open link → set password → sign in |
+
+Both flows MUST use Supabase built-in email delivery. An earlier implementation mixed custom tokens, auto-confirmed users, and duplicate invite paths — see [registration-change-proposal.md](registration-change-proposal.md).
+
+---
+
+## 2. Problem (original — largely fixed for admin UI)
+
+| Issue | Was | Status |
+| ----- | --- | ------ |
+| Wrong API for Create User | `useCreateUser` called `create_invite` | **Fixed** → `admin-create-user` |
+| No password in UI | Email only | **Fixed** |
+| Email confirmation off | `enable_confirmations = false` | **Fixed** in `config.toml` (restart Supabase) |
+| Dual invite paths | Custom token URL vs Supabase email | **Fixed** for accept flow |
+| Misleading UI | Both said “Invitation sent” | **Fixed** |
+| Public `register-user` auto-confirms | `email_confirm: true` | **Open** — see change proposal |
+| OpenSpec describes old SMTP flow | Stale specs | **Open** — see change proposal |
+
+---
+
+## 3. Goals and non-goals
+
+### Goals
+
+- **G1:** Admin creates user with **email + password**; user receives **Confirm signup** email and signs in after confirming.
+- **G2:** Admin sends **invitation**; user receives **You have been invited** email, sets password, signs in.
+- **G3:** All admin-created users get `profiles.role = athlete` (existing `handle_new_user` trigger).
+- **G4:** Admin-only access to create/invite APIs and pages.
+- **G5:** Clear success/error messages per flow.
+- **G6:** Local verification via Inbucket (Supabase local stack).
+
+### Non-goals
+
+- Custom in-app email template editor (use Supabase Dashboard / `config.toml`)
+- Admin creation of `role = admin`
+- Bulk CSV import
+- Password reset flow (separate initiative)
+- Replacing public `/register` mode logic (separate; admin flows always work)
+
+---
+
+## 4. User stories
+
+### Use case 1 — Create user with password
+
+- **US-01:** As an administrator, I enter email and password so I can provision an account with known credentials.
+- **US-02:** As a new user, I receive a **Confirm signup** email after an admin creates my account.
+- **US-03:** As a new user, I sign in with the admin-set password after confirming my email.
+
+### Use case 2 — Send invitation
+
+- **US-04:** As an administrator, I enter only an email to invite someone who will choose their own password.
+- **US-05:** As an invited user, I receive **You have been invited** with a working link.
+- **US-06:** As an invited user, I set my password from that link and sign in.
+
+### Administration
+
+- **US-07:** As an administrator, I see distinct success/error messages for each action.
+- **US-08:** As a non-admin, I cannot access admin create/invite endpoints.
+- **US-09:** As an administrator, I see pending invitations in Registration Settings.
+
+---
+
+## 5. Functional requirements
+
+### 5.1 Admin Create User page (`/admin/create-user`)
+
+| Action | Fields | Button | Backend |
+| ------ | ------ | ------ | ------- |
+| Create user | Email, password, confirm password | Create User | `admin-create-user` |
+| Send invitation | Email | Send Invite | `create_invite` |
+
+**Validation:** valid email; password min 8 chars with confirmation match; no duplicate pending invite for invite flow.
+
+**Success messages:**
+
+- Create user: *User created. A confirmation email was sent to {email}.*
+- Send invite: *Invitation sent to {email}.*
+
+**Error codes:** `EMAIL_ALREADY_EXISTS`, `INVITE_EXISTS`, `FORBIDDEN`, `WEAK_PASSWORD`
+
+Do not show a fabricated custom invite URL for use case 1.
+
+### 5.2 Use case 1 — Confirm signup flow
+
+1. Admin JWT required; verify `profiles.role = admin`.
+2. `admin.createUser({ email, password, email_confirm: false, user_metadata: { role: 'athlete' } })`.
+3. `enable_confirmations = true` in Supabase Auth (local + production).
+4. Site URL and redirect URLs include auth callback.
+5. User confirms via email link, then logs in with admin-set credentials.
+6. Duplicate email → HTTP 409 `EMAIL_ALREADY_EXISTS`.
+
+```mermaid
+sequenceDiagram
+  participant Admin
+  participant App
+  participant EF as admin-create-user
+  participant Auth as Supabase Auth
+  participant User
+
+  Admin->>App: email + password
+  App->>EF: POST + admin JWT
+  EF->>Auth: createUser(email_confirm false)
+  Auth->>User: Confirm signup email
+  User->>Auth: confirm link
+  User->>App: login with password
+```
+
+### 5.3 Use case 2 — Invite flow
+
+1. `inviteUserByEmail(email, { redirectTo: APP_URL/accept-invite })` sends **You have been invited**.
+2. Do not use a parallel `/accept-invite?token=<custom-uuid>` that differs from the email link.
+3. `AcceptInvitePage` handles Supabase invite callback: session from URL hash → set-password form → `updateUser({ password })` → redirect `/login?activated=true`.
+4. Optional `invitations` row for admin audit only; Supabase Auth is authoritative for invite validity.
+5. Deprecate `accept-invite` Edge Function logic that re-creates users already created by `inviteUserByEmail`.
+
+```mermaid
+sequenceDiagram
+  participant Admin
+  participant App
+  participant EF as create_invite
+  participant Auth as Supabase Auth
+  participant User
+  participant Accept as AcceptInvitePage
+
+  Admin->>App: email
+  App->>EF: POST + admin JWT
+  EF->>Auth: inviteUserByEmail
+  Auth->>User: You have been invited
+  User->>Accept: email link + session
+  Accept->>Auth: updateUser(password)
+  User->>App: login
+```
+
+### 5.4 Authorization
+
+| Resource | Rule |
+| -------- | ---- |
+| `/admin/create-user` | Authenticated admin |
+| `admin-create-user`, `create_invite` | Bearer JWT + admin role |
+| `/accept-invite` | Public; valid Supabase invite session |
+
+### 5.5 Registration Settings
+
+Existing `/admin/registration-settings` keeps `registration_mode` and `invite_expiry_hours` for **public** registration and invite audit. Admin create/invite always works regardless of mode.
+
+---
+
+## 6. Acceptance criteria
+
+### Use case 1
+
+- [ ] Form has email, password, confirm password
+- [ ] Create User calls `admin-create-user`, not `create_invite`
+- [ ] User unconfirmed until email link clicked
+- [ ] Confirm signup email in Inbucket / inbox
+- [ ] Login works after confirmation
+- [ ] Duplicate email shows error
+- [ ] New profile has `role = athlete`
+
+### Use case 2
+
+- [ ] Send Invite uses email only
+- [ ] You have been invited email delivered
+- [ ] Email link opens accept-invite with valid session
+- [ ] Password set via `updateUser`
+- [ ] Login works after password set
+- [ ] No duplicate auth user on acceptance
+
+### General
+
+- [ ] Non-admin gets 403
+- [ ] Distinct success copy per action
+- [ ] Tests updated for hooks and Edge Functions
+- [ ] Local dev documented (Inbucket, `enable_confirmations`, `APP_URL`)
+
+---
+
+## 7. Technical approach
+
+### 7.1 Supabase Auth config
+
+```toml
+# supabase/config.toml
+[auth]
+site_url = "http://localhost:5173"
+additional_redirect_urls = ["http://localhost:5173/accept-invite", "http://localhost:5173/auth/callback"]
+
+[auth.email]
+enable_signup = true
+enable_confirmations = true
+```
+
+Production: enable Confirm email in Dashboard; configure Site URL, redirect URLs, and SMTP or Supabase hosted email.
+
+| Env var | Purpose |
+| ------- | ------- |
+| `APP_URL` | `redirectTo` for invites |
+| `SUPABASE_URL` | Edge Functions |
+| `SUPABASE_SERVICE_ROLE_KEY` | Admin Auth API |
+
+### 7.2 Edge Functions
+
+| Function | Action |
+| -------- | ------ |
+| `admin-create-user` | **New** — admin `createUser`, `email_confirm: false` |
+| `create_invite` | **Refactor** — `inviteUserByEmail` only; optional audit insert |
+| `accept-invite` | **Deprecate** server-side user creation; client uses `updateUser` |
+| `register-user` | **Keep** for public `/register` only |
+
+### 7.3 Frontend
+
+| File | Change |
+| ---- | ------ |
+| `CreateUserPage.tsx` | Password fields; distinct handlers/messages |
+| `useCreateUser.ts` | Call `admin-create-user` with `{ email, password }` |
+| `useCreateInvite.ts` | Keep `create_invite` |
+| `AcceptInvitePage.tsx` | Supabase session + `updateUser` |
+| `lib/supabase.ts` | `detectSessionInUrl: true` |
+
+### 7.4 Database
+
+Keep `invitations` for audit. Optional migration: drop custom `token` if fully Supabase-native.
+
+### 7.5 Testing
+
+- Edge Functions: auth, duplicate, success paths
+- Hooks and page tests
+- Manual: Inbucket full click-through for both templates
+
+---
+
+## 8. Gap analysis (remaining)
+
+See [registration-change-proposal.md](registration-change-proposal.md) for full inventory. Summary:
+
+| Area | Status |
+| ---- | ------ |
+| Admin create / invite UI + hooks | Done |
+| `admin-create-user` / refactored `create_invite` / accept flow | Done in repo — deploy + smoke test pending |
+| `register-user` public path | Needs alignment with `enable_confirmations` |
+| Registration Settings resend/revoke | Not implemented |
+| OpenSpec + E2E tests | Stale / missing |
+
+---
+
+## 9. Open questions
+
+| # | Question | Default |
+| - | -------- | ------- |
+| 1 | Auto sign-in after invite password? | Redirect to `/login?activated=true` |
+| 2 | Keep `invitations.token`? | Remove; track by email + auth user id |
+| 3 | Password rules? | Min 8 chars (match register page) |
+| 4 | Re-send invite? | Phase 2 |
+
+---
+
+## 10. Changelog
+
+| Version | Date | Changes |
+| ------- | ---- | ------- |
+| 0.1 | 2026-05-30 | Initial PRD; SDD traceability |
+| 0.2 | 2026-05-30 | Admin flows implemented; link change proposal; gap table updated |
