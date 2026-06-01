@@ -30,10 +30,9 @@ Deno.serve(async (req) => {
   }
 
   const supabaseUrl = Deno.env.get('SUPABASE_URL')!
-  const anonKey = Deno.env.get('SUPABASE_ANON_KEY')!
-
-  // Use anon key - this endpoint is public and doesn't require auth
-  const supabase = createClient(supabaseUrl, anonKey)
+  // Use service role key to bypass RLS — this endpoint is public
+  const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+  const supabase = createClient(supabaseUrl, serviceRoleKey)
 
   const { data: settings, error: settingsError } = await supabase
     .from('app_settings')
