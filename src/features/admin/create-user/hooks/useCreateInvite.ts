@@ -1,14 +1,30 @@
 import { useMutation } from '@tanstack/react-query'
-import { invokeFunction } from '@/lib/edge-function'
-import type { CreateInviteInput, InviteResult } from '../create-user.types'
+import { supabase } from '@/lib/supabase'
+import type { CreateInviteInput } from '../create-user.types'
+
+interface CreateInviteResponse {
+  success: boolean
+  invite_url?: string
+  expires_at?: string
+  error?: string
+}
 
 export function useCreateInvite() {
   const mutation = useMutation({
     mutationFn: async (input: CreateInviteInput) => {
-      return invokeFunction<InviteResult>({
-        name: 'create_invite',
+      const { data, error } = await supabase.functions.invoke<CreateInviteResponse>('create-invite', {
         body: input,
       })
+
+      if (error) {
+        throw new Error(error.message ?? 'Failed to create invitation')
+      }
+
+      if (data?.error) {
+        throw new Error(data.error)
+      }
+
+      return data
     },
   })
 
@@ -18,6 +34,7 @@ export function useCreateInvite() {
     isSuccess: mutation.isSuccess,
     isError: mutation.isError,
     error: mutation.error?.message ?? null,
+    inviteUrl: mutation.data?.invite_url ?? null,
     expiresAt: mutation.data?.expires_at ?? null,
   }
 }

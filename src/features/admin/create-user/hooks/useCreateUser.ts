@@ -1,14 +1,29 @@
 import { useMutation } from '@tanstack/react-query'
-import { invokeFunction } from '@/lib/edge-function'
-import type { CreateUserInput, CreateUserResult } from '../create-user.types'
+import { supabase } from '@/lib/supabase'
+import type { CreateUserInput } from '../create-user.types'
+
+interface RegisterResponse {
+  success: boolean
+  user_id?: string
+  error?: string
+}
 
 export function useCreateUser() {
   const mutation = useMutation({
     mutationFn: async (input: CreateUserInput) => {
-      return invokeFunction<CreateUserResult>({
-        name: 'admin-create-user',
-        body: { email: input.email, password: input.password },
+      const { data, error } = await supabase.functions.invoke<RegisterResponse>('register-user', {
+        body: { email: input.email },
       })
+
+      if (error) {
+        throw new Error(error.message ?? 'Failed to create user')
+      }
+
+      if (data?.error) {
+        throw new Error(data.error)
+      }
+
+      return data
     },
   })
 
