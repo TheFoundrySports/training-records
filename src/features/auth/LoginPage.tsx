@@ -1,10 +1,11 @@
 import React, { useState } from 'react'
-import { useNavigate } from 'react-router'
+import { useNavigate, Link } from 'react-router'
 import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card'
+import { usePublicConfig } from './hooks/usePublicConfig'
 
 export function LoginPage() {
   const navigate = useNavigate()
@@ -13,6 +14,7 @@ export function LoginPage() {
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const errorRef = React.useRef<HTMLParagraphElement>(null)
+  const { registrationMode, isLoading: isConfigLoading } = usePublicConfig()
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -74,6 +76,14 @@ export function LoginPage() {
               {isLoading ? 'Signing in…' : 'Sign in'}
             </Button>
           </form>
+          {!isConfigLoading && registrationMode === 'open' && (
+            <p className="mt-4 text-center text-sm text-muted-foreground">
+              Don&apos;t have an account?{' '}
+              <Link to="/register" className="text-primary hover:underline">
+                Create one
+              </Link>
+            </p>
+          )}
         </CardContent>
       </Card>
     </main>
