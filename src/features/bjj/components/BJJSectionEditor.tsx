@@ -41,11 +41,13 @@ export function BJJSectionEditor({
   const rawDescription = useWatch({ control, name: `sections.${index}.rawDescription` })
   const sectionGoal = useWatch({ control, name: `sections.${index}.goal` })
 
-  const hasGoalOrDescription =
-    (sectionGoal ?? '').trim().length > 0 || (rawDescription ?? '').trim().length > 0
+  // bjj-section-ai Edge Function requires `section_goal` to be non-empty (returns 400 otherwise).
+  // Keep the button in lockstep with that contract to avoid the user seeing a generic
+  // "Edge Function returned a non-2xx status code" error.
+  const hasSectionGoal = (sectionGoal ?? '').trim().length > 0
 
   function handleEnhance() {
-    if (enhanceInFlightRef.current || isAIPending || !hasGoalOrDescription) return
+    if (enhanceInFlightRef.current || isAIPending || !hasSectionGoal) return
 
     enhanceInFlightRef.current = true
     setAiError(null)
@@ -165,14 +167,14 @@ export function BJJSectionEditor({
 
         {/* Enhance with AI — always visible */}
         <div className="space-y-3">
-          <div title={!hasGoalOrDescription ? 'AI not configured — contact your administrator' : undefined}>
+          <div title={!hasSectionGoal ? 'Add a Goal before enhancing with AI' : undefined}>
             <Button
               type="button"
               variant="outline"
               size="sm"
               onClick={handleEnhance}
-              disabled={isAIPending || isPending || !hasGoalOrDescription}
-              aria-disabled={!hasGoalOrDescription}
+              disabled={isAIPending || isPending || !hasSectionGoal}
+              aria-disabled={!hasSectionGoal}
             >
               {isAIPending ? 'Enhancing…' : '✦ Enhance with AI'}
             </Button>

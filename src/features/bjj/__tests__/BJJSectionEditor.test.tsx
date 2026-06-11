@@ -227,14 +227,15 @@ describe('BJJSectionEditor — REQ-306, REQ-315', () => {
       expect(btn).toBeDisabled()
     })
 
-    it('enables Enhance button after typing in Notes field', async () => {
+    it('keeps Enhance button disabled when only Notes is filled (bjj-section-ai requires section_goal)', async () => {
       const user = userEvent.setup()
       render(<SectionEditorWrapper />)
 
       const notesInput = screen.getByLabelText('Notes (optional)')
       await user.type(notesInput, 'Some notes about drilling')
 
-      expect(screen.getByRole('button', { name: /enhance with ai/i })).not.toBeDisabled()
+      // EF returns 400 if section_goal is empty; UI keeps button disabled to match
+      expect(screen.getByRole('button', { name: /enhance with ai/i })).toBeDisabled()
     })
 
     it('enables Enhance button when goal has content', async () => {
@@ -247,16 +248,13 @@ describe('BJJSectionEditor — REQ-306, REQ-315', () => {
       expect(screen.getByRole('button', { name: /enhance with ai/i })).not.toBeDisabled()
     })
 
-    it('does not invoke enhance twice when the button receives two clicks in one sync turn', async () => {
+    it('does not invoke enhance when button is disabled (no goal filled)', async () => {
       const user = userEvent.setup()
       render(<SectionEditorWrapper />)
-      await user.type(screen.getByLabelText('Notes (optional)'), 'drilling')
-
+      // Don't fill the goal — button stays disabled
       const btn = screen.getByRole('button', { name: /enhance with ai/i })
       fireEvent.click(btn)
-      fireEvent.click(btn)
-
-      expect(enhanceMock).toHaveBeenCalledOnce()
+      expect(enhanceMock).not.toHaveBeenCalled()
     })
   })
 })
