@@ -88,6 +88,12 @@ if [[ ! $ADMIN_ID =~ $UUID_REGEX ]]; then
 fi
 supabase db query "UPDATE public.profiles SET role = 'admin' WHERE id = '$ADMIN_ID';"
 
+# Also sync role to auth.users.raw_user_meta_data — the frontend reads `role`
+# from user_metadata (in the JWT), not from the profiles table. Without this,
+# the admin user can't see the admin menu or access /admin/* routes.
+echo "Syncing admin role to auth.users.user_metadata..."
+supabase db query "UPDATE auth.users SET raw_user_meta_data = raw_user_meta_data || jsonb_build_object('role', 'admin') WHERE id = '$ADMIN_ID';"
+
 echo ""
 echo "Seeding sample workouts for athlete1..."
 supabase db query "
