@@ -88,7 +88,7 @@ function renderPage() {
   const queryClient = makeQueryClient()
   return render(
     <QueryClientProvider client={queryClient}>
-      <MemoryRouter>
+      <MemoryRouter initialEntries={['/accept-invite?token=test-token']}>
         <AcceptInvitePage />
       </MemoryRouter>
     </QueryClientProvider>,

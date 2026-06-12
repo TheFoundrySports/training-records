@@ -25,7 +25,7 @@ export function AcceptInvitePage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const token = searchParams.get('token')
-  const { acceptInvite, isLoading, error, isError } = useAcceptInvite()
+  const { acceptInvite, isLoading, error, isError, warning } = useAcceptInvite()
   const [tokenError, setTokenError] = useState<string | null>(null)
   const errorRef = React.useRef<HTMLParagraphElement>(null)
 
@@ -103,6 +103,11 @@ export function AcceptInvitePage() {
                 <p className="text-sm text-destructive">{errors.passwordConfirmation.message}</p>
               )}
             </div>
+            {warning && !isError && (
+              <p role="status" aria-live="polite" aria-atomic="true" className="text-sm text-muted-foreground">
+                {warning}
+              </p>
+            )}
             {(isError || tokenError) && (error || tokenError) && (
               <p ref={errorRef} role="alert" aria-live="assertive" aria-atomic="true" className="text-sm font-medium text-destructive">
                 {error ?? tokenError}
