@@ -151,7 +151,10 @@ describe('parseBJJSectionAIResponse — reject path', () => {
     if (!result.ok) {
       const issue = result.error.issues.find((i) => i.path === 'rolls.0.confidence')
       expect(issue).toBeDefined()
-      expect(issue!.message).toMatch(/less than or equal to 1/i)
+      // Zod v4 emits a "Too big" message; we just assert the issue is present
+      // (the boundary enforcement is the real assertion — the message text is
+      // a Zod implementation detail that may change between versions).
+      expect(issue!.message).toMatch(/too big|<=\s*1/i)
     }
   })
 
