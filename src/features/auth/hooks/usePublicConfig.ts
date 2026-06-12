@@ -17,6 +17,10 @@ export function usePublicConfig() {
         throw new Error(error.message ?? 'Failed to fetch public config')
       }
 
+      if (!data) {
+        throw new Error('No public config returned')
+      }
+
       return data
     },
     staleTime: 1000 * 60 * 5, // 5 minutes

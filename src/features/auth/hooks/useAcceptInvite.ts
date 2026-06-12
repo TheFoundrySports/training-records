@@ -27,5 +27,6 @@ export function useAcceptInvite() {
     isSuccess: mutation.isSuccess,
     isError: mutation.isError,
     error: mutation.error?.message ?? null,
+    warning: mutation.data?.warning ?? null,
   }
 }

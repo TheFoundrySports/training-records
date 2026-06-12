@@ -19,38 +19,41 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
+          cache: pnpm
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Start dev server
-        run: npm run dev &
+        run: pnpm run dev &
         env:
           CI: 'true'
 
       - name: Wait for dev server
-        run: npx wait-on http://localhost:5173 --timeout 30000
+        run: pnpm dlx wait-on http://localhost:5173 --timeout 30000
 
       - name: Run axe-core CLI on Login
-        run: npx axe http://localhost:5173/login --exit
+        run: pnpm exec axe http://localhost:5173/login --exit
 
       - name: Run axe-core CLI on Workout List
-        run: npx axe http://localhost:5173/workouts --exit
+        run: pnpm exec axe http://localhost:5173/workouts --exit
 
       - name: Run axe-core CLI on Workout Detail
-        run: npx axe http://localhost:5173/workouts/00000000-0000-0000-0000-000000000001 --exit
+        run: pnpm exec axe http://localhost:5173/workouts/00000000-0000-0000-0000-000000000001 --exit
 
       - name: Run axe-core CLI on Workout Form
-        run: npx axe http://localhost:5173/workouts/new --exit
+        run: pnpm exec axe http://localhost:5173/workouts/new --exit
 
       - name: Run axe-core CLI on Calendar
-        run: npx axe http://localhost:5173/calendar --exit
+        run: pnpm exec axe http://localhost:5173/calendar --exit
 
       - name: Stop dev server
         if: always()
-        run: pkill -f "npm run dev" || true
+        run: pkill -f "vite" || true

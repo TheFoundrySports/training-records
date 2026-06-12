@@ -249,7 +249,6 @@ describe('BJJSectionEditor — REQ-306, REQ-315', () => {
     })
 
     it('does not invoke enhance when button is disabled (no goal filled)', async () => {
-      const user = userEvent.setup()
       render(<SectionEditorWrapper />)
       // Don't fill the goal — button stays disabled
       const btn = screen.getByRole('button', { name: /enhance with ai/i })
