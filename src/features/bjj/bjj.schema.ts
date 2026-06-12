@@ -11,6 +11,64 @@ export const BJJ_CATEGORIES = [
   'other',
 ] as const
 
+// ── Canonical position keys (REQ-PV2) ────────────────────
+// MUST stay in sync with supabase/migrations/20260612000002_bjj_positions.sql
+// 11 keys, snake_case. The migration is the runtime source of truth (DB seed);
+// this constant is the client/source source of truth (Zod enum). Drift between
+// the two would let an unknown position slip past the schema and be rejected
+// by the DB only at insert time — bad UX. If a new key is added to the
+// migration, add it here too.
+export const BJJ_POSITION_KEYS = [
+  'standing',
+  'closed_guard',
+  'open_guard',
+  'half_guard',
+  'side_control',
+  'mount',
+  'back_control',
+  'turtle',
+  'knee_on_belly',
+  'leg_entanglement',
+  'other',
+] as const
+export const BJJPositionKeySchema = z.enum(BJJ_POSITION_KEYS)
+
+// ── Roll capture (REQ-RE6) ───────────────────────────────
+// LLM + mock fallback emit a `rolls[]` array. The schema is the
+// boundary contract — anything that crosses the EF→client wire is
+// parsed through BJJSectionAIResponseSchema.
+export const BJJRollRoleSchema = z.enum(['attacking', 'defending', 'neutral'])
+export const BJJRollOutcomeSchema = z.enum([
+  'submission',
+  'position_gain',
+  'position_loss',
+  'neutral',
+])
+export const BJJRollValidationErrorSchema = z.enum([
+  'unknown_position_from',
+  'unknown_position_to',
+])
+
+export const BJJRollProposalSchema = z.object({
+  roll_index: z.number().int().positive(),
+  role: BJJRollRoleSchema,
+  outcome: BJJRollOutcomeSchema,
+  position_from: BJJPositionKeySchema,
+  position_to: BJJPositionKeySchema.nullable(),
+  technique_names: z.array(z.string()).default([]),
+  confidence: z.number().min(0).max(1),
+  raw_excerpt: z.string().min(1),
+  validation_error: BJJRollValidationErrorSchema.optional(),
+})
+export type BJJRollProposal = z.infer<typeof BJJRollProposalSchema>
+
+export const BJJSectionAIResponseSchema = z.object({
+  ai_description: z.string().min(1, 'ai_description is required'),
+  matched_technique_ids: z.array(z.string().uuid()),
+  rolls: z.array(BJJRollProposalSchema).default([]),
+})
+export type BJJSectionAIResponse = z.infer<typeof BJJSectionAIResponseSchema>
+
 // ── Belt Progression ────────────────────────────────────
 export const beltProgressionItemSchema = z.object({
   id: z.string().uuid().optional(),
