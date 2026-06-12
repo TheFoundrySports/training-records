@@ -1,6 +1,11 @@
 // @ts-nocheck — Deno global types not available in editor
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { buildSystemPrompt, type BJJTechniqueRow } from './prompt.ts'
+import {
+  BJJSectionAIResponseSchema,
+  type BJJSectionAIResponse,
+  type BJJRollProposal,
+} from '../../../src/features/bjj/bjj.schema.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -24,6 +29,7 @@ function jsonResponse(data: unknown, status = 200) {
 interface BJJSectionAIResponse {
   ai_description: string
   matched_technique_ids: string[]
+  rolls: BJJRollProposal[]
 }
 
 // ── AI Provider Adapter ──────────────────────────────────────────────────────
@@ -155,18 +161,16 @@ function buildMockResponse(
   return {
     ai_description: `[Mock] Mejorado: "${raw_description.slice(0, 60)}…" — enfocado en ${section_goal}.`,
     matched_technique_ids: techniques.slice(0, 2).map((t) => t.id),
+    rolls: [],
   }
 }
 
 function isValidAIResponse(data: unknown): data is BJJSectionAIResponse {
-  if (typeof data !== 'object' || data === null) return false
-  const d = data as Record<string, unknown>
-  return (
-    typeof d.ai_description === 'string' &&
-    d.ai_description.length > 0 &&
-    Array.isArray(d.matched_technique_ids) &&
-    (d.matched_technique_ids as unknown[]).every((id) => typeof id === 'string')
-  )
+  // The schema is the source of truth for the LLM response shape. The mock
+  // fallback and the LLM path both pass through BJJSectionAIResponseSchema
+  // so the contract is uniform — see commit 6 for the parseBJJSectionAIResponse
+  // extraction (this function is the call site that delegates to it).
+  return BJJSectionAIResponseSchema.safeParse(data).success
 }
 
 function extractKeywords(rawDescription: string): string[] {
@@ -318,6 +322,7 @@ Deno.serve(async (req) => {
     return jsonResponse({
       ai_description: parsed.ai_description,
       matched_technique_ids: parsed.matched_technique_ids,
+      rolls: parsed.rolls,
     })
   } catch (err) {
     // AI call failed (network error, timeout, provider 5xx, etc.) — fall back to mock
