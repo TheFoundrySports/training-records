@@ -165,3 +165,136 @@ extend `bjj-section-ai` and `useBJJSectionAI` to write into
 - Test runner: Vitest 4.1.7 (detected from `package.json`).
 - No Deno / pg / psql available locally; structural tests are the
   pragmatic layer; full SQL execution deferred to staging.
+
+---
+
+## 2. PR 2 — Phase B: EF + Zod + RPC + backfill integration
+
+> **Status**: PR 2 complete. Ready for review and merge to `main`.
+> **Generated**: 2026-06-12 (UTC).
+> **Strict TDD**: active — every RED test was failing before the matching GREEN migration / schema / helper was written.
+
+### Commits (11 total, in order)
+
+| # | SHA | Subject |
+|---|-----|---------|
+| 1  | `f418535` | `test(zod): add BJJRollProposalSchema + BJJSectionAIResponseSchema RED tests` |
+| 2  | `6ebebdf` | `feat(zod): add BJJRollProposalSchema, BJJPositionKeySchema, BJJSectionAIResponseSchema` |
+| 3  | `9718502` | `feat(ef): extend bjj-section-ai system prompt with roll extraction rules` |
+| 4  | `b48a068` | `feat(ef): extend bjj-section-ai response with rolls[]; update mock + validator` |
+| 5  | `7452cae` | `test(ef): add parseBJJSectionAIResponse pure function RED tests` |
+| 6  | `c9aa686` | `feat(ef): extract parseBJJSectionAIResponse pure function + wire EF to it` |
+| 7  | `fcae515` | `test(db): add failing tests for bjj_dashboard_data RPC structure` |
+| 8  | `9e004c6` | `feat(db): create bjj_dashboard_data SECURITY DEFINER RPC composing 3 views + technique aggregates` |
+| 9  | `265dbbf` | `test(ef): add planSectionBackfill pure function RED tests` |
+| 10 | `248a2db` | `feat(ef): add EF-driven richer backfill helper replacing SQL stub` |
+| 11 | (this commit) | `chore(apply): record PR 2 progress for bjj-evolution-dashboard` |
+
+### Files added
+
+- `src/features/bjj/__tests__/bjj.schema.rolls.test.ts` (29 tests)
+- `src/features/bjj/ai/__tests__/parseBJJSectionAIResponse.test.ts` (18 tests)
+- `src/features/bjj/ai/parseBJJSectionAIResponse.ts` (pure function)
+- `src/__tests__/db/bjj-dashboard-data-rpc.test.ts` (21 tests)
+- `src/features/bjj/ai/__tests__/planSectionBackfill.test.ts` (13 tests)
+- `src/features/bjj/ai/planSectionBackfill.ts` (pure function)
+- `supabase/migrations/20260612000005_bjj_dashboard_data_rpc.sql` (1 migration)
+- `supabase/scripts/backfill-rolls.ts` (Deno script — glue code, not testable in Vitest)
+
+### Files modified
+
+- `src/features/bjj/bjj.schema.ts` (added BJJPositionKeySchema, BJJRollRoleSchema, BJJRollOutcomeSchema, BJJRollValidationErrorSchema, BJJRollProposalSchema, BJJSectionAIResponseSchema, BJJ_POSITION_KEYS const)
+- `supabase/functions/bjj-section-ai/prompt.ts` (roll extraction rules + inline 11-key position vocabulary)
+- `supabase/functions/bjj-section-ai/index.ts` (BJJSectionAIResponse grows rolls[]; buildMockResponse emits rolls:[]; isValidAIResponse delegates to parseBJJSectionAIResponse; LLM path uses discriminated parse for 422 with Zod issues)
+
+### Test summary (PR 2 additions only)
+
+| File | Tests | Pass | Status |
+|------|-------|------|--------|
+| `bjj.schema.rolls.test.ts` | 29 | 29 | ✅ GREEN |
+| `parseBJJSectionAIResponse.test.ts` | 18 | 18 | ✅ GREEN |
+| `bjj-dashboard-data-rpc.test.ts` | 21 | 21 | ✅ GREEN |
+| `planSectionBackfill.test.ts` | 13 | 13 | ✅ GREEN |
+| **PR 2 new tests** | **81** | **81** | ✅ |
+
+Full suite (with PR 2 changes): 87 files, 803 tests, 800 pass + 3 pre-existing failures in `AcceptInvitePage.test.tsx` (timing-related; present on `main` before this work — not introduced by this PR).
+
+### Lint / build status
+
+- `npm run lint`: same pre-existing problems as PR 1 (in `BJJSectionEditor.test.tsx` and `WorkoutFormPage.tsx`); **none** in files this PR touched. New code is clean.
+- `npm run build`: 6+ pre-existing TypeScript errors in unrelated files (`usePublicConfig.ts`, `AcceptInvitePage.test.tsx`, `useUpdateBJJWorkout.test.tsx`, `RegistrationSettingsPage.tsx`) plus the PR 1 db test files' `node:fs`/`node:path`/`__dirname` errors (all on `main` before this PR). **None** in PR 2 files. The structural RPC test file `bjj-dashboard-data-rpc.test.ts` has the same `node:fs` issue as the other db tests — a project-wide tsconfig decision (db tests use Node fs/path to read migration files, but `tsconfig.app.json` only loads `vite/client` types); the test runner resolves them at runtime via Vitest.
+
+### Migrations added
+
+1. `20260612000005_bjj_dashboard_data_rpc.sql` — SECURITY DEFINER plpgsql function `bjj_dashboard_data(p_window text, p_start date default null, p_end date default null) returns jsonb`. Composes the 3 PR 1 views + technique aggregates into the `BJJDashboardData` JSON shape. Uses `auth.uid()` only (no `p_user_id` param per RE5 lock). Resolves `7d`/`30d`/`90d` to date ranges, `10r` to last 10 workouts with ≥1 confirmed roll, raises `P0001` on `UNKNOWN_WINDOW` and `UNAUTHENTICATED`. **Header comment explicitly notes: "This migration has NOT been executed against real Postgres. The repo has no staging environment."** First smoke test: `select public.bjj_dashboard_data('30d');` against a real Postgres instance. Implements **REQ-RE5**.
+
+### New code summary (production)
+
+| File | Lines | Purpose |
+|------|-------|---------|
+| `bjj.schema.ts` (additions) | +58 | 4 Zod schemas + 11-key const array |
+| `prompt.ts` (additions) | +67 | Roll extraction rules + inline position vocabulary |
+| `index.ts` (refactor) | +5 net | Replaces hand-rolled validation with schema delegation; LLM path uses discriminated parse for 422 |
+| `parseBJJSectionAIResponse.ts` | +72 | Pure function — discriminated wrapper around Zod safeParse |
+| `planSectionBackfill.ts` | +125 | Pure function — backfill plan (idempotent, confirmed-sacred) |
+| `20260612000005_bjj_dashboard_data_rpc.sql` | +242 | The deferred-from-PR-1 RPC |
+| `backfill-rolls.ts` | +190 | Deno script — glue code; calls pure function |
+| **Production total** | **~760 lines** | |
+
+### TDD cycle evidence
+
+| Task | Test File | Layer | RED | GREEN | TRIANGULATE | REFACTOR |
+|------|-----------|-------|-----|-------|-------------|----------|
+| T2.1/T2.2 (Zod schema) | `bjj.schema.rolls.test.ts` | Unit | ✅ 29 fail | ✅ 29 pass | ✅ 29 cases (one per spec req) | ✅ Existing 39 schema tests still green |
+| T2.3 (mock fallback) | (commit 4 — no separate test) | Implicit | ➖ Implied by 4 | ✅ via schema | ➖ Single shape | ✅ |
+| T2.4 (EF emit rolls) | (commit 4 — no separate test) | Implicit | ➖ Implied by 1+2 | ✅ via schema | ➖ | ✅ |
+| T2.6 (prompt) | (commit 3 — content) | N/A (content) | ➖ | ➖ Implied GREEN | ➖ | ➖ |
+| T2.5 (parseBJJSectionAIResponse) | `parseBJJSectionAIResponse.test.ts` | Unit | ✅ 18 fail | ✅ 18 pass | ✅ 18 cases | ✅ Test message regex adapted to Zod v4 ("Too big" vs "less than or equal to") |
+| T2.7/T2.8 (RPC structure) | `bjj-dashboard-data-rpc.test.ts` | Unit (structural) | ✅ 21 fail | ✅ 21 pass | ✅ 21 cases (per assertion) | ✅ Parens/quote balance verified manually |
+| T2.9/T2.10 (backfill helper) | `planSectionBackfill.test.ts` | Unit | ✅ 13 fail | ✅ 13 pass | ✅ 13 cases (idempotency, skip, UPSERT, DELETE, purity) | ✅ |
+
+### Deviations from design.md
+
+- **RPC function is the deferred migration 4.** `design.md §3.4` had `bjj_dashboard_data` as migration 4. PR 1 deferred it to PR 2 per the orchestrator brief. PR 2 ships it as migration **5** (chronologically after the PR 1 stub backfill migration 4). The brief takes precedence.
+- **PR 2 has 11 commits, not 9 as in `tasks.md PR 2 (B) §"Commit plan"`.** The orchestrator brief re-scoped to 11 commits: Zod test/feat (commits 1+2), prompt (3), EF interface (4), parse pure function test/feat (5+6), RPC test/feat (7+8), backfill test/feat (9+10), chore (11). The brief's order is the source of truth.
+- **RPC PL/pgSQL body has 4 fields that are intentionally `null` in the JSON: `category_label`, `last_label`, color tokens, and `insight_rows`.** Per `design.md §3.4`: "Decision: keep client-side" — the client fills these from the existing `categoryLabel()` helper and `Intl.RelativeTimeFormat('en')` (REQ-BD10) so the SQL stays simple. Documented inline in the migration's comment block.
+- **RPC has 3 unverified properties at code-review time:**
+  1. The PL/pgSQL body has not been executed against real Postgres (no staging env in this repo). The 21-test structural file in `src/__tests__/db/bjj-dashboard-data-rpc.test.ts` is the only safety net; first SQL execution must be `supabase db reset` on staging.
+  2. The `bjj_section_techniques` join path uses the existing `bjj_section_techniques` + `bjj_sections` + `workouts` 3-table join pattern (pre-existing in this repo). If a future migration changes the schema, the RPC's `technique_types` aggregate needs to be updated.
+  3. The `10r` window resolves to "last 10 workouts with ≥1 confirmed roll" via a `LIMIT v_limit` subquery on `workouts` filtered by `EXISTS` on `bjj_roll_events WHERE status='confirmed'`. If the index on `bjj_roll_events(workout_id, status)` is dropped, this will fall back to a sequential scan.
+- **Backfill script is glue, not tested in Vitest.** The Deno script at `supabase/scripts/backfill-rolls.ts` cannot run in the local environment (no Deno harness, no real DB). The pure function `planSectionBackfill` is tested (13 tests, all green). The script's contract is "read plan, apply via supabase client" — straightforward, but unverified end-to-end.
+- **PR 2 test diff is ~1,500 lines (production + tests), well above the 250-line forecast.** The orchestrator brief specifically required a `parse-rpc-definition.test.ts` (commit 7, 198 lines, 21 assertions) as the only safety net for the unverified SQL. Each commit is under 400 lines (the per-commit budget), but the PR total exceeds the per-PR budget by a significant margin. This is documented as a `size:exception`-equivalent: the RPC structural test is the only way to lock the SQL contract given no staging env.
+
+### Acknowledged PR-1 risks (resolved or updated)
+
+1. **Backfill stub replacement** (PR 1 risk #1). **RESOLVED.** The PR 1 SQL stub rows (`status='proposed'`, `confidence=0`, `source='manual'`) are now valid UPSERT targets for the EF-driven backfill via `planSectionBackfill`. Per orchestrator brief: "Recommend (b) UPSERT by `(section_id, roll_index)`" — option (b) is implemented. Idempotency verified (13 tests, including a "apply plan + re-plan" test).
+2. **`bjj_dashboard_data` RPC creation** (PR 1 risk #2). **RESOLVED.** Migration 5 ships the RPC as a SECURITY DEFINER plpgsql function. 21-test structural file is the only safety net — the SQL has not been executed against real Postgres.
+3. **Deno harness can't run EF tests** (PR 1 risk #3). **RESOLVED.** The Zod parse is extracted into a pure function `parseBJJSectionAIResponse` (`src/features/bjj/ai/parseBJJSectionAIResponse.ts`) that Vitest exercises with 18 tests covering happy path, reject path, and error envelope. The Deno harness is not required for contract coverage.
+
+### New risks for next PR (PR 3 — Phase C1: UI scaffold)
+
+1. **`bjj-section-ai` mock fallback now returns `rolls: []` instead of the previous behavior.** PR 3's `BJJSectionEditor` integration must handle the new shape — the existing AIPreview state already accepts the new interface (extended in PR 1's design intent) but the TypeScript types in `src/features/bjj/hooks/useBJJSectionAI.ts` and `src/features/bjj/components/BJJSectionEditor.tsx` need the `rolls: BJJRollProposal[]` field added. (Out of scope for PR 2; in scope for PR 3.)
+2. **The 21-test RPC structural file is the only thing protecting the SQL from typos.** If a future PR adds/removes a top-level field, the structural test must be updated in lockstep. Consider adding a follow-up test that asserts the EXACT 8 top-level fields (no more, no less) once staging verification has happened.
+3. **`planSectionBackfill` treats `source='manual'` as the source for ALL upserts.** This matches the PR 1 SQL stub convention (so the rollback / re-run filter in `design.md §3.5` scopes correctly). But it means the EF-driven backfill and the athlete's manual `Add roll` action both write `source='manual'`. PR 7's `useConfirmRolls` will distinguish them via a different field (e.g., `validation_error` or a new `source='backfill_llm'` enum value). Defer to PR 7.
+4. **The 4 unverified properties in the RPC (deviation §3 above) become blocking if staging deploy fails.** The orchestrator should pause between PR 2 and PR 3 to confirm the 5 migrations apply cleanly on staging.
+
+### Next PR (PR 3 — Phase C1: UI scaffold + React Bits)
+
+**Goal**: All theme utilities + React Bits land before any route; no MUI deps yet. App compiles but no `/bjj/dashboard` route exists.
+
+**Needs from PR 2**: the EF now returns `rolls: BJJRollProposal[]` on every response; the Zod schemas are exported from `src/features/bjj/bjj.schema.ts`; the RPC signature is locked; the backfill plan is testable.
+
+**Forecast**: ~250 lines per `tasks.md PR 3 §"Forecast lines"`. 8 commits (per `tasks.md PR 3 §"Commit plan"`).
+
+### Open questions for the user
+
+1. Should PR 3 also wire `useBJJSectionAI` to surface `rolls[]` in the AIPreview state, or is that PR 5 (D1) territory? The brief scoped the EF change to PR 2 but left the client hook extension implicit. Recommend PR 3 to keep the contract test coverage consistent.
+2. The 11-line `// @ts-nocheck` directive on `supabase/functions/bjj-section-ai/index.ts` carries forward from PR 1. Acceptable for a Deno file, but it disables type checking for the whole EF. Should PR 3 scope-tighten the directive to a few specific lines (e.g., the `https://esm.sh/` imports) so the rest of the file benefits from type checking? Defer — not blocking.
+
+### Skill resolution
+
+- `sdd-apply` (this skill) — loaded from `~/.config/opencode/skills/sdd-apply/SKILL.md`.
+- `strict-tdd.md` — loaded from `~/.config/opencode/skills/sdd-apply/strict-tdd.md`.
+- Test runner: Vitest 4.1.7 (detected from `package.json`).
+- No Deno / pg / psql available locally; structural tests are the
+  pragmatic layer; full SQL execution deferred to staging.
