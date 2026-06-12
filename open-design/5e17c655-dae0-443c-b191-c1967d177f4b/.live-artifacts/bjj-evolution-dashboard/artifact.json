@@ -1,0 +1,15 @@
+{
+  "title": "BJJ Evolution Dashboard",
+  "slug": "bjj-evolution-dashboard",
+  "pinned": true,
+  "preview": {
+    "type": "html",
+    "entry": "index.html"
+  },
+  "document": {
+    "format": "html_template_v1",
+    "templatePath": "template.html",
+    "generatedPreviewPath": "index.html",
+    "dataPath": "data.json"
+  }
+}

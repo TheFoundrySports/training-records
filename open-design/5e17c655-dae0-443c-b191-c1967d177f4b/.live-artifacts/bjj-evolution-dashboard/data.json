@@ -1,0 +1,283 @@
+{
+  "title": "BJJ Evolution Dashboard",
+  "subtitle": "Your game over 30 days: techniques, role balance, and how your rolls end.",
+  "generated_at": "Jun 11, 2026 · 2:32 PM",
+  "last_techniques": {
+    "total": 14,
+    "items": [
+      {
+        "name": "Rear Naked Choke from back mount",
+        "category": "submission",
+        "category_label": "Submissions",
+        "count": 8,
+        "last_label": "1 day ago"
+      },
+      {
+        "name": "Hip bump sweep",
+        "category": "transition",
+        "category_label": "Transitions",
+        "count": 6,
+        "last_label": "2 days ago"
+      },
+      {
+        "name": "Toreando pass",
+        "category": "guard_pass",
+        "category_label": "Guard passes",
+        "count": 5,
+        "last_label": "3 days ago"
+      },
+      {
+        "name": "Heel hook (IBJJF illegal)",
+        "category": "submission",
+        "category_label": "Submissions",
+        "count": 4,
+        "last_label": "3 days ago"
+      },
+      {
+        "name": "Scissor sweep",
+        "category": "transition",
+        "category_label": "Transitions",
+        "count": 4,
+        "last_label": "4 days ago"
+      },
+      {
+        "name": "Triangle choke from guard",
+        "category": "submission",
+        "category_label": "Submissions",
+        "count": 3,
+        "last_label": "5 days ago"
+      },
+      {
+        "name": "Single leg takedown",
+        "category": "takedown",
+        "category_label": "Takedowns",
+        "count": 3,
+        "last_label": "6 days ago"
+      },
+      {
+        "name": "Side control escape (hip)",
+        "category": "escape",
+        "category_label": "Escapes",
+        "count": 3,
+        "last_label": "7 days ago"
+      },
+      {
+        "name": "Knee on belly retention",
+        "category": "guard_pass",
+        "category_label": "Guard passes",
+        "count": 2,
+        "last_label": "8 days ago"
+      },
+      {
+        "name": "Closed guard recovery",
+        "category": "guard",
+        "category_label": "Guard",
+        "count": 2,
+        "last_label": "10 days ago"
+      }
+    ]
+  },
+  "technique_types": {
+    "total": 40,
+    "segments": [
+      {
+        "color": "#1a73e8",
+        "dasharray": "86.4 314.16",
+        "dashoffset": "0"
+      },
+      {
+        "color": "#dc2626",
+        "dasharray": "61.07 314.16",
+        "dashoffset": "-94.25"
+      },
+      {
+        "color": "#7c3aed",
+        "dasharray": "35.98 314.16",
+        "dashoffset": "-159.32"
+      },
+      {
+        "color": "#16a34a",
+        "dasharray": "35.98 314.16",
+        "dashoffset": "-199.30"
+      },
+      {
+        "color": "#d97706",
+        "dasharray": "23.41 314.16",
+        "dashoffset": "-239.28"
+      },
+      {
+        "color": "#0891b2",
+        "dasharray": "13.99 314.16",
+        "dashoffset": "-266.69"
+      },
+      {
+        "color": "#5f6368",
+        "dasharray": "1.49 314.16",
+        "dashoffset": "-284.68"
+      }
+    ],
+    "legend": [
+      {
+        "label": "Guard passes",
+        "color": "#1a73e8",
+        "pct": 30
+      },
+      {
+        "label": "Submissions",
+        "color": "#dc2626",
+        "pct": 22
+      },
+      {
+        "label": "Escapes",
+        "color": "#7c3aed",
+        "pct": 14
+      },
+      {
+        "label": "Guard",
+        "color": "#16a34a",
+        "pct": 14
+      },
+      {
+        "label": "Takedowns",
+        "color": "#d97706",
+        "pct": 10
+      },
+      {
+        "label": "Transitions",
+        "color": "#0891b2",
+        "pct": 7
+      },
+      {
+        "label": "Other",
+        "color": "#5f6368",
+        "pct": 3
+      }
+    ],
+    "insight_rows": [
+      {
+        "show_style": "display: flex;",
+        "text": "Low practice of Takedowns (10%) in this period — 6 workouts, 3-week gap."
+      }
+    ]
+  },
+  "role_balance": {
+    "segments": [
+      {
+        "label": "Attacking",
+        "color": "#1a73e8",
+        "pct": 47
+      },
+      {
+        "label": "Defending",
+        "color": "#d97706",
+        "pct": 38
+      },
+      {
+        "label": "Neutral",
+        "color": "#5f6368",
+        "pct": 15
+      }
+    ],
+    "legend": [
+      {
+        "label": "Attacking",
+        "color": "#1a73e8",
+        "pct": 47
+      },
+      {
+        "label": "Defending",
+        "color": "#d97706",
+        "pct": 38
+      },
+      {
+        "label": "Neutral",
+        "color": "#5f6368",
+        "pct": 15
+      }
+    ]
+  },
+  "outcomes": {
+    "tiles": [
+      {
+        "label": "Submission",
+        "color": "#188038",
+        "pct": 32,
+        "n": 16
+      },
+      {
+        "label": "Position gain",
+        "color": "#1a73e8",
+        "pct": 28,
+        "n": 14
+      },
+      {
+        "label": "Position loss",
+        "color": "#d93025",
+        "pct": 24,
+        "n": 12
+      },
+      {
+        "label": "Neutral",
+        "color": "#5f6368",
+        "pct": 16,
+        "n": 8
+      }
+    ]
+  },
+  "roll_flow": {
+    "total_rolls": 50,
+    "total_transitions": 187,
+    "top_n": 7,
+    "edges": [
+      {
+        "from": "Standing",
+        "to": "Closed guard",
+        "count": 24,
+        "pct": 100,
+        "color": "#1a73e8"
+      },
+      {
+        "from": "Closed guard",
+        "to": "Side control",
+        "count": 18,
+        "pct": 75,
+        "color": "#1a73e8"
+      },
+      {
+        "from": "Side control",
+        "to": "Back mount",
+        "count": 14,
+        "pct": 58,
+        "color": "#7c3aed"
+      },
+      {
+        "from": "Back mount",
+        "to": "RNC finish",
+        "count": 12,
+        "pct": 50,
+        "color": "#188038"
+      },
+      {
+        "from": "Closed guard",
+        "to": "Triangle attempt",
+        "count": 10,
+        "pct": 42,
+        "color": "#dc2626"
+      },
+      {
+        "from": "Half guard",
+        "to": "Sweep to top",
+        "count": 9,
+        "pct": 38,
+        "color": "#d97706"
+      },
+      {
+        "from": "Side control",
+        "to": "Mount",
+        "count": 7,
+        "pct": 29,
+        "color": "#7c3aed"
+      }
+    ]
+  }
+}

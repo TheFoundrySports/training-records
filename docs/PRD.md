@@ -8,7 +8,7 @@
 | **Version** | 0.9                                                                                                                                                                                                                                           |
 | **Date**    | 2026-04-15                                                                                                                                                                                                                                    |
 | **Author**  | Francisco José Seva Mora                                                                                                                                                                                                                      |
-| **Status**  | Draft — BaaS/Supabase + MVP testing; iteration 2 CrossFit / WOD authoring requirements drafted; iteration 3 Calendar / Training Planner drafted; iteration 4 Garmin Import + Training Intelligence drafted; iteration 5 BJJ Extension drafted |
+| **Status**  | Draft — BaaS/Supabase + MVP testing; iteration 2 CrossFit / WOD authoring requirements drafted; iteration 3 Calendar / Training Planner drafted; iteration 4 Garmin Import + Training Intelligence drafted; iteration 5 BJJ Extension drafted; iteration 8 BJJ Evolution Dashboard drafted |
 
 **Related links**
 
@@ -114,7 +114,7 @@ People who train regularly often lack a **single, dependable place** to track **
 
 ### Out of scope (deferred)
 
-- Advanced analytics dashboards (PR charts, periodisation views) — **Phase 2** unless promoted.
+- Advanced analytics dashboards (PR charts, periodisation views) — **Phase 2** unless promoted. **BJJ Evolution Dashboard** is specified in [prd-bjj-dashboard.md](prd-bjj-dashboard.md) (Iteration 8).
 - Deep integration with **Strava, Apple Health** — **Phase 2+**. **Garmin `.fit` upload** is now **in scope for iteration 4**; Garmin Connect OAuth is a **stretch goal for iteration 4**.
 - Offline-first or PWA — **later**.
 
@@ -479,7 +479,6 @@ This subsection defines **what “tested enough for MVP” means**: required too
   - Spacing
   - Responsive design
   - Theming and visual customization
-- Avoid introducing additional UI frameworks (e.g. Material UI, Bootstrap).
 
 ---
 

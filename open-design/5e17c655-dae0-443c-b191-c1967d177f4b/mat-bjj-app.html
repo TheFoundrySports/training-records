@@ -1,0 +1,754 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta name="color-scheme" content="light dark" />
+<meta name="description" content="Dashboard de evolución de BJJ: técnicas, balance de rol, resultados y flujo de rollos en los últimos 30 días." />
+<title>MAT — BJJ Evolution Dashboard</title>
+<style>
+/* Material design system — bound verbatim from tokens.css */
+:root {
+  --bg: #f8fafd;
+  --surface: #ffffff;
+  --surface-warm: #e8f0fe;
+  --fg: #202124;
+  --fg-2: #3c4043;
+  --muted: #5f6368;
+  --meta: #1a73e8;
+  --border: #dadce0;
+  --border-soft: #edf0f2;
+  --accent: #1a73e8;
+  --accent-on: #ffffff;
+  --accent-hover: color-mix(in oklab, var(--accent), black 8%);
+  --accent-active: color-mix(in oklab, var(--accent), black 14%);
+  --success: #188038;
+  --warn: #f9ab00;
+  --danger: #d93025;
+  --font-display: "Google Sans", Roboto, Arial, sans-serif;
+  --font-body: Roboto, Arial, sans-serif;
+  --font-mono: "Roboto Mono", ui-monospace, Menlo, monospace;
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-base: 16px;
+  --text-lg: 18px;
+  --text-xl: 24px;
+  --text-2xl: 32px;
+  --text-3xl: 48px;
+  --text-4xl: 64px;
+  --leading-body: 1.5;
+  --leading-tight: 1.12;
+  --tracking-display: 0;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --section-y-desktop: 96px;
+  --section-y-tablet: 68px;
+  --section-y-phone: 48px;
+  --radius-sm: 4px;
+  --radius-md: 12px;
+  --radius-lg: 24px;
+  --radius-pill: 9999px;
+  --elev-flat: none;
+  --elev-ring: 0 0 0 1px var(--border);
+  --elev-raised: 0 3px 8px rgba(60, 64, 67, 0.18);
+  --focus-ring: 0 0 0 4px rgba(26, 115, 232, 0.24);
+  --motion-fast: 150ms;
+  --motion-base: 250ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --container-max: 1200px;
+  --container-gutter-desktop: 36px;
+  --container-gutter-tablet: 24px;
+  --container-gutter-phone: 16px;
+  /* 5th technique-type color: tonal purple, used only for the donut's "Transiciones" slice.
+     Inherited from material secondary in light, lifted in dark. */
+  --accent-2: #9334e6;
+  /* Hero band gradient stops (defined for both modes so .hero-band is never transparent). */
+  --hero-grad-from: #eef3fc;
+  --hero-grad-to: #f8fafd;
+}
+
+/* Dark theme — bound via [data-theme="dark"] */
+:root[data-theme="dark"] {
+  --bg: #0f1115;
+  --surface: #1a1c20;
+  --surface-warm: #1e2a3d;
+  --fg: #e8eaed;
+  --fg-2: #bdc1c6;
+  --muted: #9aa0a6;
+  --border: #3c4043;
+  --border-soft: #2a2d31;
+  --accent: #8ab4f8;
+  --accent-on: #0f1115;
+  --accent-2: #c58af9;
+  --hero-grad-from: #1e2a3d;
+  --hero-grad-to: #1a1c20;
+}
+
+/* Theme tokens are owned by JS:
+     - JS reads localStorage 'mat-theme'; falls back to OS preference on first visit
+       and immediately writes that fallback to localStorage so it becomes the user's choice.
+     - JS always sets data-theme to "light" or "dark" — never leaves the attribute absent.
+   The :root[data-theme="dark"] block above is the only place dark tokens are defined. */
+
+/* Respect users who opted out of motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: var(--text-base); line-height: var(--leading-body); -webkit-font-smoothing: antialiased; }
+body { min-height: 100vh; padding-bottom: var(--space-12); }
+a { color: inherit; text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 2px; }
+button { font: inherit; cursor: pointer; background: none; border: 0; color: inherit; }
+input, select, textarea { font: inherit; }
+img, svg { display: block; max-width: 100%; }
+:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+/* Layout shell */
+.shell { max-width: var(--container-max); margin: 0 auto; padding: 0 var(--container-gutter-desktop); }
+@media (max-width: 1024px) { .shell { padding: 0 var(--container-gutter-tablet); } }
+@media (max-width: 600px)  { .shell { padding: 0 var(--container-gutter-phone); } }
+
+/* Top bar — shared with app.html */
+.topbar { background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 50; }
+.topbar-inner { display: flex; align-items: center; gap: var(--space-6); padding: var(--space-3) 0; }
+.brand { display: flex; align-items: center; gap: var(--space-3); font-family: var(--font-display); font-size: var(--text-xl); letter-spacing: var(--tracking-display); font-weight: 500; text-decoration: none; color: var(--fg); }
+.brand-mark { width: 36px; height: 36px; background: var(--surface-warm); color: var(--accent); border-radius: var(--radius-md); display: grid; place-items: center; font-family: var(--font-display); font-size: 18px; font-weight: 500; }
+.tabs { display: flex; gap: var(--space-1); margin-left: auto; align-items: center; }
+.tab { padding: var(--space-2) var(--space-4); font-family: var(--font-body); font-weight: 500; font-size: var(--text-sm); color: var(--fg-2); border-radius: var(--radius-pill); text-decoration: none; transition: background var(--motion-fast) var(--ease-standard), color var(--motion-fast) var(--ease-standard); }
+.tab[aria-current="page"] { background: var(--accent); color: var(--accent-on); }
+.tab:hover { background: var(--surface-warm); color: var(--fg); }
+.theme-btn { width: 36px; height: 36px; border-radius: var(--radius-pill); background: var(--surface-warm); color: var(--fg-2); display: grid; place-items: center; border: 0; transition: background var(--motion-fast) var(--ease-standard), color var(--motion-fast) var(--ease-standard); }
+.theme-btn:hover { background: var(--accent); color: var(--accent-on); }
+.theme-btn svg { width: 18px; height: 18px; }
+@media (max-width: 600px) { .tab { padding: var(--space-2) var(--space-3); font-size: 11px; } .brand { font-size: 18px; } .brand-mark { width: 30px; height: 30px; font-size: 16px; } }
+
+/* Page header */
+.page-head { padding: var(--space-8) 0 var(--space-4); }
+.page-head-row { display: flex; align-items: end; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; }
+.page-title { font-family: var(--font-display); font-size: clamp(32px, 4.4vw, var(--text-3xl)); line-height: var(--leading-tight); font-weight: 500; color: var(--fg); }
+.page-sub { font-family: var(--font-body); font-size: var(--text-sm); color: var(--muted); margin-top: var(--space-2); }
+.eyebrow { font-family: var(--font-body); font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; font-size: var(--text-xs); color: var(--accent-active); display: inline-block; padding: 2px 0; margin-bottom: var(--space-3); }
+h2 { font-family: var(--font-display); font-size: var(--text-xl); line-height: var(--leading-tight); font-weight: 500; }
+.lead { font-size: var(--text-lg); max-width: 60ch; color: var(--fg-2); line-height: var(--leading-body); }
+.mono { font-family: var(--font-mono); }
+
+/* Time filter (segmented control) */
+.filter-bar { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; margin-top: var(--space-4); }
+.segmented { display: inline-flex; background: var(--surface-warm); border-radius: var(--radius-pill); padding: 4px; gap: 2px; }
+.segmented button { font-family: var(--font-body); font-weight: 500; font-size: var(--text-sm); padding: 6px 14px; border-radius: var(--radius-pill); background: transparent; color: var(--fg-2); border: 0; transition: background var(--motion-fast) var(--ease-standard), color var(--motion-fast) var(--ease-standard); }
+.segmented button[aria-pressed="true"] { background: var(--surface); color: var(--accent); box-shadow: var(--elev-raised); }
+.segmented button:hover { color: var(--fg); }
+
+/* Widget grid */
+.dash-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--space-5); margin-top: var(--space-5); }
+.dash-grid .span-2 { grid-column: span 2; }
+.dash-grid .span-3 { grid-column: span 3; }
+@media (max-width: 1024px) { .dash-grid { grid-template-columns: 1fr 1fr; } .dash-grid .span-3 { grid-column: span 2; } }
+@media (max-width: 700px)  { .dash-grid { grid-template-columns: 1fr; } .dash-grid .span-2, .dash-grid .span-3 { grid-column: span 1; } }
+
+.card { background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--elev-raised); padding: var(--space-6); border: 1px solid var(--border-soft); display: flex; flex-direction: column; }
+.card-head { display: flex; align-items: center; justify-content: space-between; padding-bottom: var(--space-4); margin-bottom: var(--space-4); gap: var(--space-3); flex-wrap: wrap; border-bottom: 1px solid var(--border-soft); }
+.card-head h2 { font-size: var(--text-lg); }
+.tag { font-family: var(--font-body); font-weight: 500; font-size: var(--text-xs); padding: 4px 10px; border-radius: var(--radius-pill); background: var(--surface-warm); color: var(--accent); }
+
+/* Hero band — BJJ Evolution Dashboard */
+.hero-band { background: linear-gradient(135deg, var(--hero-grad-from), var(--hero-grad-to)); border-radius: var(--radius-lg); padding: var(--space-8); margin-top: var(--space-5); border: 1px solid var(--border-soft); position: relative; overflow: hidden; }
+.hero-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-6); }
+@media (max-width: 1024px) { .hero-grid-3 { grid-template-columns: repeat(3, 1fr); gap: var(--space-5); } }
+@media (max-width: 700px)  { .hero-grid-3 { grid-template-columns: 1fr; gap: var(--space-5); } }
+.hero-num { font-family: var(--font-display); font-size: clamp(40px, 5.6vw, 64px); line-height: 1; font-weight: 500; letter-spacing: var(--tracking-display); color: var(--accent); font-variant-numeric: tabular-nums; }
+.hero-num-label { font-family: var(--font-body); font-weight: 500; font-size: var(--text-sm); color: var(--muted); margin-top: var(--space-2); }
+.hero-num-sub { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--fg-2); margin-top: var(--space-1); }
+
+/* Widget 1: Last techniques */
+.tech-list { display: flex; flex-direction: column; gap: var(--space-2); }
+.tech-row { display: grid; grid-template-columns: 1fr auto auto; gap: var(--space-3); padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); background: var(--surface-warm); align-items: center; transition: background var(--motion-fast) var(--ease-standard), color var(--motion-fast) var(--ease-standard); color: var(--fg); }
+.tech-row:hover, .tech-row:focus-visible { background: var(--accent); color: var(--accent-on); }
+.tech-row:hover .tech-row-meta, .tech-row:focus-visible .tech-row-meta { color: color-mix(in oklab, var(--accent-on), transparent 25%); }
+.tech-row:hover .tech-row-cat, .tech-row:focus-visible .tech-row-cat { background: color-mix(in oklab, var(--accent-on), transparent 80%); color: var(--accent-on); }
+.tech-row-name { font-family: var(--font-display); font-weight: 500; font-size: var(--text-sm); color: inherit; }
+.tech-row-cat { font-family: var(--font-body); font-weight: 500; font-size: 11px; padding: 2px 8px; border-radius: var(--radius-pill); background: var(--surface); color: var(--accent); text-transform: uppercase; letter-spacing: 0.06em; transition: background var(--motion-fast) var(--ease-standard), color var(--motion-fast) var(--ease-standard); }
+.tech-row-meta { font-family: var(--font-body); font-size: var(--text-xs); color: var(--muted); font-variant-numeric: tabular-nums; transition: color var(--motion-fast) var(--ease-standard); }
+.tech-row-count { font-family: var(--font-display); font-weight: 500; font-size: var(--text-base); color: inherit; font-variant-numeric: tabular-nums; }
+
+/* Widget 2: Technique types donut */
+.donut-wrap { display: grid; grid-template-columns: 160px 1fr; gap: var(--space-5); align-items: center; }
+@media (max-width: 480px) { .donut-wrap { grid-template-columns: 1fr; } .donut-svg-wrap { justify-self: center; } }
+.donut-svg-wrap { position: relative; width: 160px; height: 160px; }
+.donut-center { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; }
+.donut-center .v { font-family: var(--font-display); font-size: var(--text-2xl); font-weight: 500; color: var(--fg); line-height: 1; }
+.donut-center .l { font-family: var(--font-body); font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 4px; }
+.donut-legend { display: flex; flex-direction: column; gap: var(--space-2); }
+.donut-legend-row { display: grid; grid-template-columns: 12px 1fr auto; gap: var(--space-2); align-items: center; font-family: var(--font-body); font-size: var(--text-xs); }
+.donut-swatch { width: 12px; height: 12px; border-radius: 3px; }
+.donut-legend-label { color: var(--fg-2); }
+.donut-legend-pct { color: var(--muted); font-variant-numeric: tabular-nums; font-weight: 500; }
+
+/* Widget 3: Role balance stacked bar */
+.role-bar { display: flex; height: 16px; border-radius: var(--radius-pill); overflow: hidden; background: var(--surface-warm); margin-top: var(--space-2); }
+.role-seg { height: 100%; }
+.role-seg.attacking { background: var(--accent); }
+.role-seg.defending { background: color-mix(in oklab, var(--accent), white 50%); }
+:root[data-theme="dark"] .role-seg.defending { background: color-mix(in oklab, var(--accent), black 40%); }
+.role-seg.neutral { background: var(--border); }
+.role-legend { display: flex; flex-direction: column; gap: var(--space-2); margin-top: var(--space-4); }
+.role-row { display: grid; grid-template-columns: 12px 1fr auto; gap: var(--space-2); align-items: center; font-family: var(--font-body); font-size: var(--text-sm); }
+.role-dot { width: 12px; height: 12px; border-radius: 3px; background: var(--accent); }
+.role-dot.defending { background: color-mix(in oklab, var(--accent), white 50%); }
+:root[data-theme="dark"] .role-dot.defending { background: color-mix(in oklab, var(--accent), black 40%); }
+.role-dot.neutral { background: var(--border); }
+.role-label { color: var(--fg); font-weight: 500; }
+.role-pct { color: var(--muted); font-variant-numeric: tabular-nums; font-weight: 500; }
+
+/* Widget 4: Outcomes list */
+.outcome-list { display: flex; flex-direction: column; gap: var(--space-3); }
+.outcome-row { display: grid; grid-template-columns: 1fr auto; gap: var(--space-3); align-items: center; }
+.outcome-name { font-family: var(--font-body); font-weight: 500; font-size: var(--text-sm); color: var(--fg); }
+.outcome-pct { font-family: var(--font-display); font-weight: 500; font-size: var(--text-base); color: var(--fg); font-variant-numeric: tabular-nums; }
+.outcome-track { height: 8px; border-radius: var(--radius-pill); background: var(--surface-warm); overflow: hidden; grid-column: 1 / -1; }
+.outcome-fill { height: 100%; background: var(--accent); width: 0%; border-radius: var(--radius-pill); transition: width 700ms var(--ease-standard); }
+.outcome-fill.success { background: var(--success); }
+.outcome-fill.warn { background: var(--warn); }
+.outcome-fill.danger { background: var(--danger); }
+
+/* Widget 5: Roll flow — sequence timeline */
+.flow-head { display: grid; grid-template-columns: 110px 1fr; gap: var(--space-4); align-items: end; margin-bottom: var(--space-3); }
+.flow-steps { display: grid; grid-template-columns: repeat(6, 1fr); gap: var(--space-2); }
+.flow-step { font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); text-align: center; padding-bottom: 6px; border-bottom: 2px solid var(--border-soft); }
+.flow-step.now { color: var(--accent); border-bottom-color: var(--accent); }
+.flow-body { display: flex; flex-direction: column; gap: 14px; }
+.flow-lane { display: grid; grid-template-columns: 110px 1fr; gap: var(--space-4); align-items: center; }
+.flow-lane-meta { display: flex; flex-direction: column; gap: 4px; }
+.flow-lane-pct { font-family: var(--font-display); font-size: var(--text-xl); line-height: 1; color: var(--fg); }
+.flow-lane-label { font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+.flow-lane-bar { height: 4px; background: var(--border-soft); border-radius: var(--radius-pill); overflow: hidden; }
+.flow-lane-fill { height: 100%; background: var(--accent); border-radius: var(--radius-pill); }
+.flow-chain { display: grid; grid-template-columns: repeat(6, 1fr); gap: var(--space-2); align-items: center; position: relative; }
+.flow-node { display: flex; flex-direction: column; align-items: center; gap: 4px; position: relative; z-index: 2; }
+.flow-circle { width: 38px; height: 38px; border-radius: 50%; background: var(--surface-warm); border: 2px solid var(--border); display: grid; place-items: center; font-family: var(--font-display); font-size: 11px; color: var(--fg); text-transform: uppercase; letter-spacing: 0.02em; text-align: center; line-height: 1; padding: 4px; }
+.flow-circle.peak { background: var(--accent); color: var(--accent-on); border-color: var(--accent); }
+.flow-circle.end { background: var(--surface); border-style: dashed; }
+.flow-circle.loss { background: var(--danger); color: var(--accent-on); border-color: var(--danger); }
+.flow-node-label { font-family: var(--font-body); font-size: 10px; color: var(--fg-2); text-align: center; line-height: 1.2; max-width: 70px; }
+.flow-summary { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-4); background: var(--surface-warm); border: 1px solid var(--border-soft); border-radius: var(--radius-md); margin-top: var(--space-4); font-family: var(--font-body); font-size: var(--text-sm); }
+.flow-summary .label { font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+.flow-summary strong { font-family: var(--font-display); }
+@media (max-width: 700px) {
+  .flow-head, .flow-lane { grid-template-columns: 80px 1fr; gap: var(--space-3); }
+  .flow-circle { width: 32px; height: 32px; font-size: 10px; }
+  .flow-node-label { font-size: 9px; max-width: 56px; }
+  .flow-step { font-size: 9px; }
+}
+
+/* Empty state */
+.empty { padding: var(--space-8); text-align: center; color: var(--muted); font-family: var(--font-body); font-size: var(--text-sm); }
+
+/* Footer */
+.foot { display: flex; justify-content: space-between; align-items: center; padding: var(--space-6) 0 0; margin-top: var(--space-8); border-top: 1px solid var(--border-soft); flex-wrap: wrap; gap: var(--space-3); }
+.foot .mono { font-size: var(--text-sm); color: var(--muted); }
+
+/* Mobile */
+@media (max-width: 600px) {
+  .topbar-inner { gap: var(--space-3); }
+  .page-head { padding: var(--space-5) 0 var(--space-3); }
+  .filter-bar { gap: var(--space-2); }
+  .segmented button { padding: 5px 10px; font-size: 11px; }
+  .hero-band { padding: var(--space-5); }
+  .card { padding: var(--space-4); }
+}
+
+/* Visually hidden — used for screen-reader-only labels (trend deltas, etc.) */
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+}
+
+/* Outcome track — accessible progressbar */
+.outcome-track[role="progressbar"] { position: relative; }
+.outcome-track:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+/* On the smallest phones, the flow labels overflow at 6-column grid. Hide labels
+   at <= 420px so the circles stay scannable; the data is in the lane bar/pct. */
+@media (max-width: 420px) {
+  .flow-node-label { display: none; }
+  .flow-step { font-size: 8px; letter-spacing: 0.04em; }
+  .flow-head, .flow-lane { grid-template-columns: 64px 1fr; gap: var(--space-2); }
+}
+
+/* Roll flow chain — connecting line behind circles (auto-applied to each lane) */
+.flow-chain { position: relative; }
+.flow-chain::before { content: ''; position: absolute; top: 19px; left: 19px; right: 19px; height: 2px; background: var(--accent); opacity: 0.35; z-index: 1; }
+.flow-chain.win::before { background: var(--accent); opacity: 0.7; }
+.flow-chain.loss::before { background: var(--danger); opacity: 0.6; }
+.flow-chain.mixed::before { background: var(--warn); opacity: 0.5; }
+@media (max-width: 700px) {
+  .flow-chain::before { top: 15px; left: 15px; right: 15px; }
+  .flow-chain { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+}
+
+/* Trend indicator on hero numbers */
+.trend { display: inline-flex; align-items: center; gap: 4px; font-family: var(--font-body); font-size: var(--text-xs); font-weight: 500; color: var(--success); }
+.trend.down { color: var(--danger); }
+.trend svg { width: 10px; height: 10px; }
+
+/* Empty state — shown by JS when window has 0 workouts */
+.tech-empty { padding: var(--space-6) var(--space-4); text-align: center; color: var(--muted); font-family: var(--font-body); font-size: var(--text-sm); }
+.tech-empty .lead { color: var(--fg-2); margin: 0 auto var(--space-2); max-width: 32ch; }
+.tech-empty[hidden] { display: none; }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="shell topbar-inner">
+    <a href="index.html" class="brand" aria-label="MAT home">
+      <span class="brand-mark">M</span>
+      <span>MAT / BJJ</span>
+    </a>
+    <nav class="tabs" aria-label="Primary">
+      <a class="tab" href="mat-bjj-app.html" aria-current="page">BJJ Dashboard</a>
+      <a class="tab" href="app.html">Train</a>
+      <a class="tab" href="app.html#techniques">Library</a>
+      <a class="tab" href="app.html#log">Log</a>
+      <button class="theme-btn" id="themeBtn" type="button" aria-label="Cambiar tema" aria-pressed="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path class="theme-icon-moon" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          <g class="theme-icon-sun" style="display:none;">
+            <circle cx="12" cy="12" r="4"/>
+            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+          </g>
+        </svg>
+      </button>
+    </nav>
+  </div>
+</header>
+
+<main class="shell">
+
+  <header class="page-head">
+    <span class="eyebrow">Resumen · ventana 30 días</span>
+    <h1 class="page-title">Cómo está evolucionando tu juego.</h1>
+    <p class="page-sub" data-window-sub>Última actualización 06:42 PM · 22 entrenamientos · 47 rollos en ventana</p>
+
+    <div class="filter-bar" role="toolbar" aria-label="Time range">
+      <div class="segmented" id="windowSegmented">
+        <button type="button" aria-pressed="false" data-window="7d">7 días</button>
+        <button type="button" aria-pressed="true"  data-window="30d">30 días</button>
+        <button type="button" aria-pressed="false" data-window="90d">90 días</button>
+        <button type="button" aria-pressed="false" data-window="last10">Últimos 10 rollos</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero band — three numbers that matter today -->
+  <section class="hero-band" aria-label="Headline metrics">
+    <div class="hero-grid-3">
+      <div>
+        <div class="hero-num">22</div>
+        <div class="hero-num-label">días entrenados</div>
+        <div class="hero-num-sub"><span class="trend"><svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 7 L5 3 L8 7"/></svg><span aria-hidden="true">+4 vs 30d previos</span><span class="sr-only">Aumento de 4 días entrenados vs los 30 días previos</span></span></div>
+      </div>
+      <div>
+        <div class="hero-num">148</div>
+        <div class="hero-num-label">técnicas practicadas</div>
+        <div class="hero-num-sub"><span class="trend"><svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 7 L5 3 L8 7"/></svg><span aria-hidden="true">+18 vs 30d previos</span><span class="sr-only">Aumento de 18 técnicas practicadas vs los 30 días previos</span></span></div>
+      </div>
+      <div>
+        <div class="hero-num">34%</div>
+        <div class="hero-num-label">tasa de sumisión</div>
+        <div class="hero-num-sub"><span class="trend"><svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 7 L5 3 L8 7"/></svg><span aria-hidden="true">+6 pp vs 30d previos</span><span class="sr-only">Aumento de 6 puntos porcentuales en la tasa de sumisión vs los 30 días previos</span></span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 widgets -->
+  <section class="dash-grid" aria-label="Dashboard widgets">
+
+    <!-- Widget 1: Last techniques -->
+    <div class="card">
+      <div class="card-head">
+        <h2>Últimas técnicas</h2>
+      </div>
+      <div class="tech-list" id="lastTechList">
+        <div class="tech-empty" id="techEmpty" hidden>
+          <p class="lead">Aún no hay técnicas registradas en esta ventana.</p>
+          <p>Registra un entrenamiento de BJJ y mejora las secciones de rollo con IA para ver tu evolución.</p>
+        </div>
+        <div class="tech-row">
+          <div>
+            <div class="tech-row-name">Armbar from guard</div>
+            <div class="tech-row-meta">hace 3 días</div>
+          </div>
+          <span class="tech-row-cat">Submission</span>
+          <span class="tech-row-count">12</span>
+        </div>
+        <div class="tech-row">
+          <div>
+            <div class="tech-row-name">Hip bump sweep</div>
+            <div class="tech-row-meta">hace 4 días</div>
+          </div>
+          <span class="tech-row-cat">Sweep</span>
+          <span class="tech-row-count">9</span>
+        </div>
+        <div class="tech-row">
+          <div>
+            <div class="tech-row-name">Triangle choke</div>
+            <div class="tech-row-meta">hace 5 días</div>
+          </div>
+          <span class="tech-row-cat">Submission</span>
+          <span class="tech-row-count">7</span>
+        </div>
+        <div class="tech-row">
+          <div>
+            <div class="tech-row-name">Bridge &amp; roll escape</div>
+            <div class="tech-row-meta">hace 6 días</div>
+          </div>
+          <span class="tech-row-cat">Escape</span>
+          <span class="tech-row-count">6</span>
+        </div>
+        <div class="tech-row">
+          <div>
+            <div class="tech-row-name">Rear naked choke</div>
+            <div class="tech-row-meta">hace 7 días</div>
+          </div>
+          <span class="tech-row-cat">Submission</span>
+          <span class="tech-row-count">5</span>
+        </div>
+        <div class="tech-row">
+          <div>
+            <div class="tech-row-name">Flower sweep</div>
+            <div class="tech-row-meta">hace 9 días</div>
+          </div>
+          <span class="tech-row-cat">Sweep</span>
+          <span class="tech-row-count">4</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Widget 2: Technique types donut -->
+    <div class="card">
+      <div class="card-head">
+        <h2>Tipos de técnica</h2>
+      </div>
+      <div class="donut-wrap">
+        <div class="donut-svg-wrap">
+          <svg viewBox="0 0 42 42" class="donut-svg" width="160" height="160" role="img" aria-labelledby="donutTitle donutDesc">
+            <title id="donutTitle">Distribución de técnicas</title>
+            <desc id="donutDesc">Sumisiones 32%, Pasados 22%, Guardia 16%, Escapes 14%, Transiciones 10%, Otros 6% — 148 prácticas en 30 días.</desc>
+            <circle cx="21" cy="21" r="15.915" fill="none" stroke="var(--surface-warm)" stroke-width="6"/>
+            <!-- Donut math:
+                 - 100-unit path (r ≈ 15.915 ≈ 100/2π); one full revolution = 100 units.
+                 - rotate(-90) moves the start of the path to 12 o'clock.
+                 - dasharray="P 100-P" draws P% of the path; the rest is gap.
+                 - dashoffset shifts where the dash pattern starts on the path. Positive offset pushes the
+                   pattern forward, so the first 25 units of the path stay empty (the gap-at-top), and slice
+                   1 begins at position 25. Each subsequent slice's offset is the previous end position,
+                   keeping the slices contiguous through the implicit wrap at 100→0.
+                 - Cumulative stops: 25, 57, 79, 95, 9, 19 (mod 100). -->
+            <circle cx="21" cy="21" r="15.915" fill="none" stroke="var(--accent)"   stroke-width="6" stroke-dasharray="32 68" stroke-dashoffset="25" transform="rotate(-90 21 21)"/>
+            <circle cx="21" cy="21" r="15.915" fill="none" stroke="var(--success)"  stroke-width="6" stroke-dasharray="22 78" stroke-dashoffset="57" transform="rotate(-90 21 21)"/>
+            <circle cx="21" cy="21" r="15.915" fill="none" stroke="var(--warn)"     stroke-width="6" stroke-dasharray="16 84" stroke-dashoffset="79" transform="rotate(-90 21 21)"/>
+            <circle cx="21" cy="21" r="15.915" fill="none" stroke="var(--danger)"   stroke-width="6" stroke-dasharray="14 86" stroke-dashoffset="95" transform="rotate(-90 21 21)"/>
+            <circle cx="21" cy="21" r="15.915" fill="none" stroke="var(--accent-2)" stroke-width="6" stroke-dasharray="10 90" stroke-dashoffset="9"  transform="rotate(-90 21 21)"/>
+            <circle cx="21" cy="21" r="15.915" fill="none" stroke="var(--muted)"    stroke-width="6" stroke-dasharray="6  94" stroke-dashoffset="19" transform="rotate(-90 21 21)"/>
+          </svg>
+          <div class="donut-center" aria-hidden="true">
+            <div>
+              <div class="v">148</div>
+              <div class="l">total</div>
+            </div>
+          </div>
+        </div>
+        <div class="donut-legend">
+          <div class="donut-legend-row"><span class="donut-swatch" style="background: var(--accent);"></span><span class="donut-legend-label">Sumisiones</span><span class="donut-legend-pct">32%</span></div>
+          <div class="donut-legend-row"><span class="donut-swatch" style="background: var(--success);"></span><span class="donut-legend-label">Pasados</span><span class="donut-legend-pct">22%</span></div>
+          <div class="donut-legend-row"><span class="donut-swatch" style="background: var(--warn);"></span><span class="donut-legend-label">Guardia</span><span class="donut-legend-pct">16%</span></div>
+          <div class="donut-legend-row"><span class="donut-swatch" style="background: var(--danger);"></span><span class="donut-legend-label">Escapes</span><span class="donut-legend-pct">14%</span></div>
+          <div class="donut-legend-row"><span class="donut-swatch" style="background: var(--accent-2);"></span><span class="donut-legend-label">Transiciones</span><span class="donut-legend-pct">10%</span></div>
+          <div class="donut-legend-row"><span class="donut-swatch" style="background: var(--muted);"></span><span class="donut-legend-label">Otros</span><span class="donut-legend-pct">6%</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Widget 3: Role balance -->
+    <div class="card">
+      <div class="card-head">
+        <h2>Balance de rol</h2>
+      </div>
+      <div class="role-bar" role="img" aria-label="Attacking 58%, Defending 28%, Neutral 14%">
+        <div class="role-seg attacking" style="width: 58%;"></div>
+        <div class="role-seg defending" style="width: 28%;"></div>
+        <div class="role-seg neutral" style="width: 14%;"></div>
+      </div>
+      <div class="role-legend">
+        <div class="role-row">
+          <span class="role-dot"></span>
+          <span class="role-label">Atacando</span>
+          <span class="role-pct">58%</span>
+        </div>
+        <div class="role-row">
+          <span class="role-dot defending"></span>
+          <span class="role-label">Defendiendo</span>
+          <span class="role-pct">28%</span>
+        </div>
+        <div class="role-row">
+          <span class="role-dot neutral"></span>
+          <span class="role-label">Neutral</span>
+          <span class="role-pct">14%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Widget 4: Outcomes -->
+    <div class="card">
+      <div class="card-head">
+        <h2>Resultados</h2>
+      </div>
+      <div class="outcome-list">
+        <div>
+          <div class="outcome-row"><span class="outcome-name">Sumisión ganada</span><span class="outcome-pct">34%</span></div>
+          <div class="outcome-track" role="progressbar" aria-valuenow="34" aria-valuemin="0" aria-valuemax="100" aria-label="Sumisión ganada 34%"><div class="outcome-fill success" data-pct="34"></div></div>
+        </div>
+        <div>
+          <div class="outcome-row"><span class="outcome-name">Posición ganada</span><span class="outcome-pct">28%</span></div>
+          <div class="outcome-track" role="progressbar" aria-valuenow="28" aria-valuemin="0" aria-valuemax="100" aria-label="Posición ganada 28%"><div class="outcome-fill" data-pct="28"></div></div>
+        </div>
+        <div>
+          <div class="outcome-row"><span class="outcome-name">Posición perdida</span><span class="outcome-pct">22%</span></div>
+          <div class="outcome-track" role="progressbar" aria-valuenow="22" aria-valuemin="0" aria-valuemax="100" aria-label="Posición perdida 22%"><div class="outcome-fill warn" data-pct="22"></div></div>
+        </div>
+        <div>
+          <div class="outcome-row"><span class="outcome-name">Sin resultado</span><span class="outcome-pct">16%</span></div>
+          <div class="outcome-track" role="progressbar" aria-valuenow="16" aria-valuemin="0" aria-valuemax="100" aria-label="Sin resultado 16%"><div class="outcome-fill" data-pct="16"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Widget 5: Roll flow — sequence timeline -->
+    <div class="card span-2">
+      <div class="card-head">
+        <h2>Flujo de rollos</h2>
+        <span class="tag" data-flow-tag>30 días · 47 rollos</span>
+      </div>
+
+      <div class="flow-head">
+        <div></div>
+        <div class="flow-steps">
+          <div class="flow-step">Start</div>
+          <div class="flow-step">Scramble</div>
+          <div class="flow-step">Sweep / pass</div>
+          <div class="flow-step now">Peak</div>
+          <div class="flow-step">Finish</div>
+          <div class="flow-step">Result</div>
+        </div>
+      </div>
+
+      <div class="flow-body">
+
+        <!-- Lane 1: 38% — guard → mount → RNC (win) -->
+        <div class="flow-lane">
+          <div class="flow-lane-meta">
+            <span class="flow-lane-pct">38%</span>
+            <span class="flow-lane-label">de rollos</span>
+            <div class="flow-lane-bar"><div class="flow-lane-fill" style="width:100%;"></div></div>
+          </div>
+          <div class="flow-chain win">
+            <div class="flow-node"><div class="flow-circle">CG</div><div class="flow-node-label">Closed guard</div></div>
+            <div class="flow-node"><div class="flow-circle">HS</div><div class="flow-node-label">Hip bump</div></div>
+            <div class="flow-node"><div class="flow-circle peak">MT</div><div class="flow-node-label">Mount</div></div>
+            <div class="flow-node"><div class="flow-circle">RNC</div><div class="flow-node-label">Crossface</div></div>
+            <div class="flow-node"><div class="flow-circle peak">SUB</div><div class="flow-node-label">RNC finish</div></div>
+            <div class="flow-node"><div class="flow-circle end">W</div><div class="flow-node-label">Tap · win</div></div>
+          </div>
+        </div>
+
+        <!-- Lane 2: 22% — half guard → sweep → side control → back-take → bow choke (win) -->
+        <div class="flow-lane">
+          <div class="flow-lane-meta">
+            <span class="flow-lane-pct">22%</span>
+            <span class="flow-lane-label">de rollos</span>
+            <div class="flow-lane-bar"><div class="flow-lane-fill" style="width:58%;"></div></div>
+          </div>
+          <div class="flow-chain win">
+            <div class="flow-node"><div class="flow-circle">HG</div><div class="flow-node-label">Half guard</div></div>
+            <div class="flow-node"><div class="flow-circle">FS</div><div class="flow-node-label">Flower sweep</div></div>
+            <div class="flow-node"><div class="flow-circle peak">SC</div><div class="flow-node-label">Side control</div></div>
+            <div class="flow-node"><div class="flow-circle">BT</div><div class="flow-node-label">Back take</div></div>
+            <div class="flow-node"><div class="flow-circle peak">SUB</div><div class="flow-node-label">Bow choke</div></div>
+            <div class="flow-node"><div class="flow-circle end">W</div><div class="flow-node-label">Tap · win</div></div>
+          </div>
+        </div>
+
+        <!-- Lane 3: 17% — open mat scramble → no finish (mixed) -->
+        <div class="flow-lane">
+          <div class="flow-lane-meta">
+            <span class="flow-lane-pct">17%</span>
+            <span class="flow-lane-label">de rollos</span>
+            <div class="flow-lane-bar"><div class="flow-lane-fill" style="width:45%;"></div></div>
+          </div>
+          <div class="flow-chain mixed">
+            <div class="flow-node"><div class="flow-circle">ST</div><div class="flow-node-label">Standing</div></div>
+            <div class="flow-node"><div class="flow-circle">SC</div><div class="flow-node-label">Scramble</div></div>
+            <div class="flow-node"><div class="flow-circle">OP</div><div class="flow-node-label">Open guard</div></div>
+            <div class="flow-node"><div class="flow-circle">HG</div><div class="flow-node-label">Back to half</div></div>
+            <div class="flow-node"><div class="flow-circle end">RST</div><div class="flow-node-label">Reset</div></div>
+            <div class="flow-node"><div class="flow-circle end">—</div><div class="flow-node-label">No finish</div></div>
+          </div>
+        </div>
+
+        <!-- Lane 4: 14% — bottom player escapes, reguards, finishes kimura (win) -->
+        <div class="flow-lane">
+          <div class="flow-lane-meta">
+            <span class="flow-lane-pct">14%</span>
+            <span class="flow-lane-label">de rollos</span>
+            <div class="flow-lane-bar"><div class="flow-lane-fill" style="width:37%;"></div></div>
+          </div>
+          <div class="flow-chain win">
+            <div class="flow-node"><div class="flow-circle">SC</div><div class="flow-node-label">Side control</div></div>
+            <div class="flow-node"><div class="flow-circle">FR</div><div class="flow-node-label">Frame · shrimp</div></div>
+            <div class="flow-node"><div class="flow-circle peak">HG</div><div class="flow-node-label">Recover half</div></div>
+            <div class="flow-node"><div class="flow-circle">KM</div><div class="flow-node-label">Kimura grip</div></div>
+            <div class="flow-node"><div class="flow-circle peak">SUB</div><div class="flow-node-label">Kimura finish</div></div>
+            <div class="flow-node"><div class="flow-circle end">W</div><div class="flow-node-label">Tap · win</div></div>
+          </div>
+        </div>
+
+        <!-- Lane 5: 9% — getting submitted (defense gap · loss) -->
+        <div class="flow-lane">
+          <div class="flow-lane-meta">
+            <span class="flow-lane-pct">9%</span>
+            <span class="flow-lane-label">de rollos</span>
+            <div class="flow-lane-bar"><div class="flow-lane-fill" style="width:24%; background: var(--danger);"></div></div>
+          </div>
+          <div class="flow-chain loss">
+            <div class="flow-node"><div class="flow-circle">CG</div><div class="flow-node-label">Closed guard</div></div>
+            <div class="flow-node"><div class="flow-circle">PA</div><div class="flow-node-label">Pass attempt</div></div>
+            <div class="flow-node"><div class="flow-circle">SC</div><div class="flow-node-label">Stuck in side</div></div>
+            <div class="flow-node"><div class="flow-circle">BT</div><div class="flow-node-label">Back taken</div></div>
+            <div class="flow-node"><div class="flow-circle loss">SUB</div><div class="flow-node-label">Choked</div></div>
+            <div class="flow-node"><div class="flow-circle end">L</div><div class="flow-node-label">Tapped · loss</div></div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="flow-summary">
+        <span class="label">Finalización más común</span>
+        <span><strong>RNC desde mount</strong> · <span data-flow-summary>38% de los rollos en los últimos 30 días · tu secuencia de finalización más fuerte</span></span>
+      </div>
+    </div>
+
+  </section>
+
+  <footer class="foot">
+    <span class="mono">mat / bjj · bjj evolution dashboard · v0.5 · iteration 8</span>
+    <a href="app.html" class="mono">Open the trainer →</a>
+  </footer>
+
+</main>
+
+<script>
+/* Theme — JS owns initial state. The attribute is ALWAYS set to "light" or "dark";
+   removing it would re-trigger the OS preference and flip the user back unexpectedly. */
+const THEME_KEY = 'mat-theme';
+const themeBtn = document.getElementById('themeBtn');
+const themeIconMoon = themeBtn.querySelector('.theme-icon-moon');
+const themeIconSun = themeBtn.querySelector('.theme-icon-sun');
+const storedTheme = (() => { try { return localStorage.getItem(THEME_KEY); } catch (e) { return null; } })();
+const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+const initialTheme = storedTheme === 'light' || storedTheme === 'dark'
+  ? storedTheme
+  : (prefersDark ? 'dark' : 'light');
+document.documentElement.setAttribute('data-theme', initialTheme);
+if (!storedTheme) {
+  try { localStorage.setItem(THEME_KEY, initialTheme); } catch (e) {}
+}
+const syncThemeBtn = () => {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  themeBtn.setAttribute('aria-pressed', String(isDark));
+  themeBtn.setAttribute('aria-label', isDark ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro');
+  themeIconMoon.style.display = isDark ? 'none' : '';
+  themeIconSun.style.display = isDark ? '' : 'none';
+};
+syncThemeBtn();
+themeBtn.addEventListener('click', () => {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const next = isDark ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  try { localStorage.setItem(THEME_KEY, next); } catch (e) {}
+  syncThemeBtn();
+});
+
+/* Time filter — persisted to localStorage per PRD §6.2.
+   Filter switches update the per-widget tags, page sub-line, and the flow summary
+   so the user sees the window change reflected across every visible label. */
+const segmented = document.getElementById('windowSegmented');
+const storedWindow = localStorage.getItem('bjj-dashboard-window') || '30d';
+const WINDOW_LABELS = {
+  '7d':     { tag: '7 días',      flowTag: '7 días · 12 rollos',  flow: '38% de los rollos en los últimos 7 días · tu secuencia de finalización más fuerte' },
+  '30d':    { tag: '30 días',     flowTag: '30 días · 47 rollos', flow: '38% de los rollos en los últimos 30 días · tu secuencia de finalización más fuerte' },
+  '90d':    { tag: '90 días',     flowTag: '90 días · 138 rollos',flow: '38% de los rollos en los últimos 90 días · tu secuencia de finalización más fuerte' },
+  'last10': { tag: 'últimos 10',  flowTag: 'últimos 10 rollos',   flow: 'RNC desde mount en 4 de los últimos 10 rollos · tu secuencia de finalización más fuerte' }
+};
+const applyWindowLabels = (win) => {
+  const cfg = WINDOW_LABELS[win] || WINDOW_LABELS['30d'];
+  // Only the roll-flow card carries a time tag (the rest use the page-level filter
+  // and the hero eyebrow as the window signal, so we don't duplicate the label).
+  const flowTag = document.querySelector('[data-flow-tag]');
+  if (flowTag) flowTag.textContent = cfg.flowTag;
+  const sub = document.querySelector('[data-window-sub]');
+  if (sub) {
+    sub.textContent = `Última actualización 06:42 PM · 22 entrenamientos · ${
+      win === '7d' ? '12' : win === '90d' ? '138' : win === 'last10' ? '10' : '47'
+    } rollos en ventana`;
+  }
+  const fs = document.querySelector('[data-flow-summary]');
+  if (fs) fs.textContent = cfg.flow;
+};
+segmented.querySelectorAll('button').forEach(b => {
+  b.setAttribute('aria-pressed', String(b.dataset.window === storedWindow));
+});
+applyWindowLabels(storedWindow);
+segmented.addEventListener('click', (e) => {
+  const btn = e.target.closest('button');
+  if (!btn) return;
+  segmented.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', 'false'));
+  btn.setAttribute('aria-pressed', 'true');
+  localStorage.setItem('bjj-dashboard-window', btn.dataset.window);
+  applyWindowLabels(btn.dataset.window);
+  /* In a wired app this would re-fetch widgets and toggle #techEmpty based on result count. */
+});
+
+/* Animate outcome fills */
+requestAnimationFrame(() => {
+  document.querySelectorAll('.outcome-fill').forEach(el => {
+    const pct = parseInt(el.dataset.pct, 10) || 0;
+    el.style.width = pct + '%';
+  });
+});
+
+/* Empty state — show if the technique list has no rows */
+(function syncEmptyState() {
+  const list = document.getElementById('lastTechList');
+  const empty = document.getElementById('techEmpty');
+  if (!list || !empty) return;
+  const rows = list.querySelectorAll('.tech-row');
+  if (rows.length === 0) empty.removeAttribute('hidden');
+  /* Hide it now: the list is seeded with rows, so on first paint the empty state is hidden by default. */
+  empty.setAttribute('hidden', '');
+})();
+</script>
+</body>
+</html>

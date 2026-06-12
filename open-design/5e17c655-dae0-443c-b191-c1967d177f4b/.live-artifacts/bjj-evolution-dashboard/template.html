@@ -1,0 +1,586 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>{{data.title}}</title>
+<style>
+/* ============================================================
+ * Material design system — bound verbatim
+ * source: design-systems/material/tokens.css
+ * ============================================================ */
+:root {
+  --bg: #f8fafd;
+  --surface: #ffffff;
+  --surface-warm: #e8f0fe;
+  --fg: #202124;
+  --fg-2: #3c4043;
+  --muted: #5f6368;
+  --meta: #1a73e8;
+  --border: #dadce0;
+  --border-soft: #edf0f2;
+  --accent: #1a73e8;
+  --accent-on: #ffffff;
+  --accent-hover: color-mix(in oklab, var(--accent), black 8%);
+  --accent-active: color-mix(in oklab, var(--accent), black 14%);
+  --success: #188038;
+  --warn: #f9ab00;
+  --danger: #d93025;
+  --font-display: "Google Sans", Roboto, Arial, sans-serif;
+  --font-body: Roboto, Arial, sans-serif;
+  --font-mono: "Roboto Mono", ui-monospace, Menlo, monospace;
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-base: 16px;
+  --text-lg: 18px;
+  --text-xl: 24px;
+  --text-2xl: 32px;
+  --text-3xl: 48px;
+  --text-4xl: 64px;
+  --leading-body: 1.5;
+  --leading-tight: 1.12;
+  --tracking-display: 0;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --section-y-desktop: 96px;
+  --section-y-tablet: 68px;
+  --section-y-phone: 48px;
+  --radius-sm: 4px;
+  --radius-md: 12px;
+  --radius-lg: 24px;
+  --radius-pill: 9999px;
+  --elev-flat: none;
+  --elev-ring: 0 0 0 1px var(--border);
+  --elev-raised: 0 3px 8px rgba(60, 64, 67, 0.18);
+  --focus-ring: 0 0 0 4px rgba(26, 115, 232, 0.24);
+  --motion-fast: 150ms;
+  --motion-base: 250ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --container-max: 1200px;
+  --container-gutter-desktop: 36px;
+  --container-gutter-tablet: 24px;
+  --container-gutter-phone: 16px;
+
+  /* Belt / category color tokens (content-level, BJJ domain) */
+  --cat-takedown: #d97706;
+  --cat-guard_pass: #1a73e8;
+  --cat-guard: #16a34a;
+  --cat-submission: #dc2626;
+  --cat-escape: #7c3aed;
+  --cat-transition: #0891b2;
+  --cat-other: #5f6368;
+  --role-attack: #1a73e8;
+  --role-defend: #d97706;
+  --role-neutral: #5f6368;
+  --outcome-sub: #188038;
+  --outcome-gain: #1a73e8;
+  --outcome-loss: #d93025;
+  --outcome-neutral: #5f6368;
+}
+
+/* Dark theme via system preference (no JS) */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #101418;
+    --surface: #1a1d22;
+    --surface-warm: #1f2733;
+    --fg: #e8eaed;
+    --fg-2: #bdc1c6;
+    --muted: #9aa0a6;
+    --border: #2d3137;
+    --border-soft: #23272d;
+    --accent: #8ab4f8;
+    --accent-on: #0b1a2c;
+    --accent-hover: color-mix(in oklab, var(--accent), white 8%);
+    --accent-active: color-mix(in oklab, var(--accent), white 16%);
+    --success: #81c995;
+    --warn: #fdd663;
+    --danger: #f28b82;
+    --elev-raised: 0 3px 8px rgba(0, 0, 0, 0.45);
+    --focus-ring: 0 0 0 4px rgba(138, 180, 248, 0.32);
+    --cat-takedown: #fbbf24;
+    --cat-guard_pass: #8ab4f8;
+    --cat-guard: #6dd58c;
+    --cat-submission: #f28b82;
+    --cat-escape: #c4b0ff;
+    --cat-transition: #67c8e0;
+    --cat-other: #9aa0a6;
+    --role-attack: #8ab4f8;
+    --role-defend: #fbbf24;
+    --role-neutral: #9aa0a6;
+    --outcome-sub: #6dd58c;
+    --outcome-gain: #8ab4f8;
+    --outcome-loss: #f28b82;
+    --outcome-neutral: #9aa0a6;
+  }
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: var(--text-base); line-height: var(--leading-body); -webkit-font-smoothing: antialiased; }
+body { min-height: 100vh; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+button { font: inherit; cursor: pointer; background: none; border: 0; color: inherit; }
+input, select, textarea { font: inherit; color: inherit; }
+img, svg { display: block; max-width: 100%; }
+:focus-visible { outline: none; box-shadow: var(--focus-ring); border-radius: 2px; }
+.num { font-variant-numeric: tabular-nums; }
+
+.shell { max-width: var(--container-max); margin: 0 auto; padding: 0 var(--container-gutter-desktop); }
+@media (max-width: 1024px) { .shell { padding: 0 var(--container-gutter-tablet); } }
+@media (max-width: 600px)  { .shell { padding: 0 var(--container-gutter-phone); } }
+
+/* ============================================================
+ * AppShell
+ * ============================================================ */
+.appshell { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; }
+@media (max-width: 900px) { .appshell { grid-template-columns: 1fr; } }
+
+.sidenav { background: var(--surface); border-right: 1px solid var(--border); padding: var(--space-6) var(--space-4); position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+@media (max-width: 900px) { .sidenav { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--border); } }
+.brand { display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-8); padding: 0 var(--space-2); text-decoration: none; color: inherit; }
+.brand-mark { width: 36px; height: 36px; border-radius: 8px; background: var(--accent); color: var(--accent-on); display: grid; place-items: center; font-family: var(--font-display); font-weight: 700; font-size: 18px; }
+.brand-text { font-family: var(--font-display); font-weight: 500; font-size: var(--text-lg); letter-spacing: -0.01em; }
+.brand-text small { display: block; font-size: 11px; color: var(--muted); font-weight: 400; letter-spacing: 0.04em; text-transform: uppercase; }
+
+.nav-group { margin-bottom: var(--space-6); }
+.nav-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; padding: 0 var(--space-3); margin-bottom: var(--space-2); font-weight: 500; }
+.nav-item { display: flex; align-items: center; gap: var(--space-3); padding: 10px 12px; border-radius: 9999px; color: var(--fg-2); font-size: var(--text-sm); font-weight: 500; margin-bottom: 2px; transition: background var(--motion-fast) var(--ease-standard); text-decoration: none; }
+.nav-item:hover { background: var(--surface-warm); text-decoration: none; }
+.nav-item.active { background: var(--surface-warm); color: var(--accent); }
+.nav-item svg { width: 20px; height: 20px; flex-shrink: 0; }
+.nav-item .badge { margin-left: auto; background: var(--surface-warm); color: var(--accent); font-size: 11px; padding: 2px 8px; border-radius: 9999px; font-weight: 500; }
+
+.main { display: flex; flex-direction: column; min-width: 0; }
+.topbar { display: flex; align-items: center; gap: var(--space-4); padding: var(--space-3) var(--container-gutter-desktop); background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 20; }
+@media (max-width: 1024px) { .topbar { padding: var(--space-3) var(--container-gutter-tablet); } }
+@media (max-width: 600px)  { .topbar { padding: var(--space-3) var(--container-gutter-phone); } }
+.crumb { font-size: var(--text-sm); color: var(--muted); }
+.crumb strong { color: var(--fg); font-weight: 500; }
+.topbar-spacer { flex: 1; }
+
+.search { display: flex; align-items: center; gap: var(--space-2); background: var(--surface-warm); border-radius: 9999px; padding: 6px 12px; min-width: 200px; }
+@media (max-width: 600px) { .search { display: none; } }
+.search input { background: transparent; border: 0; outline: 0; flex: 1; font-size: var(--text-sm); }
+.search svg { width: 16px; height: 16px; color: var(--muted); }
+
+.icon-btn { width: 40px; height: 40px; border-radius: 9999px; display: grid; place-items: center; transition: background var(--motion-fast) var(--ease-standard); }
+.icon-btn:hover { background: var(--surface-warm); }
+.icon-btn svg { width: 20px; height: 20px; }
+
+.avatar { width: 36px; height: 36px; border-radius: 9999px; background: linear-gradient(135deg, var(--accent), var(--cat-escape)); color: var(--accent-on); display: grid; place-items: center; font-family: var(--font-display); font-weight: 500; font-size: var(--text-sm); }
+
+/* ============================================================
+ * Page header
+ * ============================================================ */
+.page { padding: var(--section-y-desktop) 0; }
+@media (max-width: 1024px) { .page { padding: var(--section-y-tablet) 0; } }
+@media (max-width: 600px)  { .page { padding: var(--section-y-phone) 0; } }
+
+.page-head { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--space-6); margin-bottom: var(--space-8); flex-wrap: wrap; }
+.page-head h1 { font-family: var(--font-display); font-size: var(--text-3xl); line-height: var(--leading-tight); letter-spacing: -0.02em; font-weight: 500; }
+.page-head .sub { color: var(--muted); font-size: var(--text-base); margin-top: var(--space-2); max-width: 60ch; }
+.eyebrow { display: inline-flex; align-items: center; gap: var(--space-2); font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.12em; font-weight: 500; margin-bottom: var(--space-3); }
+.eyebrow .dot { width: 6px; height: 6px; border-radius: 9999px; background: var(--success); }
+
+.filterbar { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
+.segmented { display: inline-flex; background: var(--surface-warm); border-radius: 9999px; padding: 4px; }
+.segmented button { padding: 8px 16px; border-radius: 9999px; font-size: var(--text-sm); font-weight: 500; color: var(--fg-2); transition: background var(--motion-fast) var(--ease-standard), color var(--motion-fast) var(--ease-standard); }
+.segmented button[aria-pressed="true"] { background: var(--surface); color: var(--accent); box-shadow: var(--elev-raised); }
+.segmented button:hover:not([aria-pressed="true"]) { color: var(--accent); }
+@media (max-width: 600px) { .segmented { width: 100%; overflow-x: auto; } .segmented button { white-space: nowrap; } }
+
+.refresh-btn { display: inline-flex; align-items: center; gap: var(--space-2); padding: 10px 18px; border-radius: 9999px; background: var(--surface); color: var(--fg-2); font-size: var(--text-sm); font-weight: 500; border: 1px solid var(--border); transition: background var(--motion-fast) var(--ease-standard); }
+.refresh-btn:hover { background: var(--surface-warm); }
+.refresh-btn svg { width: 16px; height: 16px; }
+
+/* ============================================================
+ * Grid
+ * ============================================================ */
+.grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: var(--space-5); }
+@media (max-width: 1280px) { .grid { grid-template-columns: repeat(4, 1fr); } }
+@media (max-width: 768px)  { .grid { grid-template-columns: 1fr; } }
+
+.widget { background: var(--surface); border-radius: var(--radius-md); box-shadow: var(--elev-raised); padding: var(--space-6); display: flex; flex-direction: column; min-width: 0; }
+.widget.span-2 { grid-column: span 2; }
+.widget.span-3 { grid-column: span 3; }
+.widget.span-4 { grid-column: span 4; }
+.widget.span-6 { grid-column: span 6; }
+@media (max-width: 1280px) {
+  .widget.span-2 { grid-column: span 2; }
+  .widget.span-3 { grid-column: span 2; }
+  .widget.span-4 { grid-column: span 4; }
+  .widget.span-6 { grid-column: span 4; }
+}
+@media (max-width: 768px) {
+  .widget.span-2, .widget.span-3, .widget.span-4, .widget.span-6 { grid-column: span 1; }
+}
+
+.widget-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3); margin-bottom: var(--space-5); }
+.widget-title { font-family: var(--font-display); font-size: var(--text-lg); font-weight: 500; letter-spacing: -0.01em; }
+.widget-sub { font-size: var(--text-sm); color: var(--muted); margin-top: 2px; }
+.widget-icon { width: 36px; height: 36px; border-radius: 8px; background: var(--surface-warm); color: var(--accent); display: grid; place-items: center; flex-shrink: 0; }
+.widget-icon svg { width: 20px; height: 20px; }
+
+/* ============================================================
+ * Widget 1 — Last techniques
+ * ============================================================ */
+.hero-stat { display: flex; align-items: baseline; gap: var(--space-3); margin-bottom: var(--space-4); }
+.hero-stat .num { font-family: var(--font-display); font-size: var(--text-3xl); font-weight: 500; line-height: 1; color: var(--accent); }
+.hero-stat .label { font-size: var(--text-sm); color: var(--muted); }
+
+.tech-list { display: flex; flex-direction: column; gap: 2px; margin: 0 calc(var(--space-6) * -1) calc(var(--space-6) * -1); }
+.tech-row { display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-6); transition: background var(--motion-fast) var(--ease-standard); text-decoration: none; color: inherit; }
+.tech-row:hover { background: var(--surface-warm); text-decoration: none; }
+.tech-name { font-weight: 500; font-size: var(--text-sm); color: var(--fg); }
+.tech-meta { font-size: 12px; color: var(--muted); }
+.tech-count { font-family: var(--font-mono); font-size: var(--text-sm); font-weight: 500; color: var(--fg-2); min-width: 24px; text-align: right; }
+
+.chip { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 9999px; font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; border: 1px solid currentColor; background: transparent; }
+.chip .dot { width: 6px; height: 6px; border-radius: 9999px; background: currentColor; }
+.chip[data-cat="takedown"]   { color: var(--cat-takedown);   background: color-mix(in oklab, var(--cat-takedown)   10%, transparent); border-color: color-mix(in oklab, var(--cat-takedown)   30%, transparent); }
+.chip[data-cat="guard_pass"] { color: var(--cat-guard_pass); background: color-mix(in oklab, var(--cat-guard_pass) 10%, transparent); border-color: color-mix(in oklab, var(--cat-guard_pass) 30%, transparent); }
+.chip[data-cat="guard"]      { color: var(--cat-guard);      background: color-mix(in oklab, var(--cat-guard)      10%, transparent); border-color: color-mix(in oklab, var(--cat-guard)      30%, transparent); }
+.chip[data-cat="submission"] { color: var(--cat-submission); background: color-mix(in oklab, var(--cat-submission) 10%, transparent); border-color: color-mix(in oklab, var(--cat-submission) 30%, transparent); }
+.chip[data-cat="escape"]     { color: var(--cat-escape);     background: color-mix(in oklab, var(--cat-escape)     10%, transparent); border-color: color-mix(in oklab, var(--cat-escape)     30%, transparent); }
+.chip[data-cat="transition"] { color: var(--cat-transition); background: color-mix(in oklab, var(--cat-transition) 10%, transparent); border-color: color-mix(in oklab, var(--cat-transition) 30%, transparent); }
+.chip[data-cat="other"]      { color: var(--cat-other);      background: color-mix(in oklab, var(--cat-other)      10%, transparent); border-color: color-mix(in oklab, var(--cat-other)      30%, transparent); }
+
+.view-all { display: inline-flex; align-items: center; gap: 6px; padding: 8px 0; font-size: var(--text-sm); font-weight: 500; color: var(--accent); margin-top: var(--space-3); }
+.view-all:hover { text-decoration: underline; }
+
+/* ============================================================
+ * Widget 2 — Technique type uses
+ * ============================================================ */
+.donut-wrap { display: grid; grid-template-columns: 140px 1fr; gap: var(--space-5); align-items: center; }
+@media (max-width: 480px) { .donut-wrap { grid-template-columns: 1fr; } }
+.donut { width: 140px; height: 140px; position: relative; }
+.donut svg { transform: rotate(-90deg); }
+.donut .center { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; }
+.donut .center .n { font-family: var(--font-display); font-size: var(--text-2xl); font-weight: 500; line-height: 1; }
+.donut .center .l { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px; }
+.donut-track { stroke: var(--border-soft); }
+
+.legend { display: flex; flex-direction: column; gap: var(--space-2); }
+.legend-row { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: var(--space-3); padding: 4px 0; font-size: var(--text-sm); }
+.legend-row .swatch { width: 10px; height: 10px; border-radius: 3px; }
+.legend-row .name { font-weight: 500; }
+.legend-row .pct { font-family: var(--font-mono); color: var(--muted); }
+
+.insight { display: flex; align-items: flex-start; gap: var(--space-2); margin-top: var(--space-4); padding: var(--space-3); background: var(--surface-warm); border-radius: var(--radius-sm); font-size: var(--text-sm); color: var(--fg-2); }
+.insight svg { width: 16px; height: 16px; color: var(--accent); flex-shrink: 0; margin-top: 2px; }
+
+/* ============================================================
+ * Widget 3 — Role balance (stacked bar)
+ * ============================================================ */
+.role-stacked { display: flex; height: 12px; border-radius: 9999px; overflow: hidden; background: var(--border-soft); margin-bottom: var(--space-4); }
+.role-legend { display: flex; flex-direction: column; gap: var(--space-3); }
+.role-row { display: grid; grid-template-columns: 1fr auto; gap: var(--space-3); align-items: center; }
+.role-label { display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-sm); font-weight: 500; }
+.role-label .swatch { width: 10px; height: 10px; border-radius: 3px; }
+.role-value { font-family: var(--font-mono); font-size: var(--text-sm); color: var(--fg-2); }
+.role-pct-bar { height: 4px; background: var(--border-soft); border-radius: 9999px; overflow: hidden; margin-top: 4px; }
+.role-pct-fill { height: 100%; border-radius: 9999px; }
+
+/* ============================================================
+ * Widget 4 — Outcomes
+ * ============================================================ */
+.outcome-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-3); }
+.outcome-tile { padding: var(--space-4); border-radius: var(--radius-sm); display: flex; flex-direction: column; gap: var(--space-2); }
+.outcome-tile .label { display: flex; align-items: center; gap: var(--space-2); font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; font-weight: 500; }
+.outcome-tile .label .swatch { width: 8px; height: 8px; border-radius: 9999px; }
+.outcome-tile .value { font-family: var(--font-display); font-size: var(--text-2xl); font-weight: 500; line-height: 1; }
+.outcome-tile .pct-bar { height: 4px; background: var(--border-soft); border-radius: 9999px; overflow: hidden; }
+.outcome-tile .pct-fill { height: 100%; border-radius: 9999px; }
+.outcome-tile .n { font-size: 11px; color: var(--muted); }
+
+/* ============================================================
+ * Widget 5 — Roll flow
+ * ============================================================ */
+.flow { display: flex; flex-direction: column; gap: var(--space-2); }
+.flow-row { display: grid; grid-template-columns: 120px 1fr 120px; align-items: center; gap: var(--space-3); }
+@media (max-width: 600px) { .flow-row { grid-template-columns: 100px 1fr 100px; gap: var(--space-2); } }
+.flow-from, .flow-to { font-size: var(--text-sm); font-weight: 500; }
+.flow-to { text-align: right; }
+.flow-from { color: var(--fg-2); }
+.flow-to { color: var(--fg-2); }
+.flow-bar { height: 28px; background: var(--border-soft); border-radius: 9999px; position: relative; overflow: hidden; }
+.flow-fill { height: 100%; border-radius: 9999px; display: flex; align-items: center; justify-content: flex-end; padding-right: 10px; color: var(--accent-on); font-size: 11px; font-weight: 600; font-family: var(--font-mono); }
+.flow-foot { display: flex; justify-content: space-between; align-items: center; padding-top: var(--space-3); border-top: 1px solid var(--border-soft); margin-top: var(--space-2); font-size: 12px; color: var(--muted); flex-wrap: wrap; gap: var(--space-2); }
+
+/* ============================================================
+ * Foot
+ * ============================================================ */
+.foot { padding: var(--space-6) 0; border-top: 1px solid var(--border); font-size: 12px; color: var(--muted); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--space-3); margin-top: var(--space-8); }
+.foot .stamp { display: flex; align-items: center; gap: var(--space-2); }
+.foot .stamp .dot { width: 8px; height: 8px; border-radius: 9999px; background: var(--success); }
+
+@media (max-width: 768px) {
+  .page-head h1 { font-size: var(--text-2xl); }
+  .donut { width: 120px; height: 120px; }
+}
+</style>
+</head>
+<body>
+<div class="appshell">
+
+  <!-- ===================== Side nav ===================== -->
+  <aside class="sidenav" aria-label="Navegación principal">
+    <a href="#dashboard" class="brand">
+      <div class="brand-mark">TR</div>
+      <div class="brand-text">Training Records<small>BLUE BELT</small></div>
+    </a>
+
+    <div class="nav-group">
+      <div class="nav-label">Entrenamiento</div>
+      <a href="#workouts" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        Workouts
+      </a>
+      <a href="#dashboard" class="nav-item active" aria-current="page">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-5"/></svg>
+        BJJ Dashboard
+      </a>
+      <a href="#belt" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0116 0v1"/></svg>
+        Blue Belt
+        <span class="badge">12/24</span>
+      </a>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-label">Catálogo</div>
+      <a href="#techniques" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+        Técnicas
+      </a>
+      <a href="#curriculum" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2zM22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+        Curriculum
+      </a>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-label">Sesión</div>
+      <a href="#settings" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        Ajustes
+      </a>
+    </div>
+  </aside>
+
+  <!-- ===================== Main ===================== -->
+  <main class="main">
+
+    <header class="topbar">
+      <div class="crumb">Training Records <span style="margin: 0 6px; color: var(--border);">/</span> <strong>BJJ Dashboard</strong></div>
+      <div class="topbar-spacer"></div>
+      <div class="search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input type="text" placeholder="Search techniques, workouts…" aria-label="Search" />
+      </div>
+      <button class="icon-btn" aria-label="Tema (sigue el sistema)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+      </button>
+      <button class="icon-btn" aria-label="Notificaciones">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0112 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 004 0"/></svg>
+      </button>
+      <div class="avatar" aria-hidden="true">FS</div>
+    </header>
+
+    <div class="page">
+      <div class="shell">
+
+        <!-- Page head -->
+        <div class="page-head">
+          <div>
+            <div class="eyebrow"><span class="dot"></span> Evolution · active window</div>
+            <h1>{{data.title}}</h1>
+            <p class="sub">{{data.subtitle}}</p>
+          </div>
+          <div class="filterbar">
+            <div class="segmented" role="tablist" aria-label="Ventana de tiempo">
+              <button data-window="7d"  role="tab">7 days</button>
+              <button data-window="30d" role="tab" aria-pressed="true">30 days</button>
+              <button data-window="90d" role="tab">90 days</button>
+              <button data-window="10r" role="tab">10 rolls</button>
+            </div>
+            <button class="refresh-btn" type="button" aria-label="Refresh">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+              Refresh
+            </button>
+          </div>
+        </div>
+
+        <!-- Widget grid -->
+        <div class="grid">
+
+          <!-- Widget 1 — Last techniques -->
+          <section class="widget span-3" id="w-last-techniques">
+            <div class="widget-head">
+              <div>
+                <div class="widget-title">Recently practiced techniques</div>
+                <div class="widget-sub">Sorted by most recent practice</div>
+              </div>
+              <div class="widget-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+              </div>
+            </div>
+            <div class="hero-stat">
+              <span class="num">{{data.last_techniques.total}}</span>
+              <span class="label">distinct techniques practiced</span>
+            </div>
+            <div class="tech-list">
+              <div class="tech-row" data-od-repeat="t in data.last_techniques.items">
+                <div>
+                  <div class="tech-name">{{t.name}}</div>
+                  <div class="tech-meta">
+                    <span class="chip" data-cat="{{t.category}}"><span class="dot"></span> {{t.category_label}}</span>
+                    · {{t.last_label}}
+                  </div>
+                </div>
+                <div class="tech-count num">×{{t.count}}</div>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px; height:18px; color: var(--muted);"><path d="M9 6l6 6-6 6"/></svg>
+              </div>
+            </div>
+            <a class="view-all" href="#all-techniques">View all practiced techniques →</a>
+          </section>
+
+          <!-- Widget 2 — Technique type uses -->
+          <section class="widget span-3" id="w-technique-types">
+            <div class="widget-head">
+              <div>
+                <div class="widget-title">Technique types</div>
+                <div class="widget-sub">Grouped by Blue Belt categories</div>
+              </div>
+              <div class="widget-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 11-9-9 9 9 0 019 9z"/><path d="M12 3v9h9"/></svg>
+              </div>
+            </div>
+            <div class="donut-wrap">
+              <div class="donut">
+                <svg viewBox="0 0 120 120" width="140" height="140" aria-label="Distribución por tipo">
+                  <circle cx="60" cy="60" r="50" fill="none" stroke="var(--border-soft)" stroke-width="18"/>
+                  <circle data-od-repeat="seg in data.technique_types.segments" cx="60" cy="60" r="50" fill="none" stroke="{{seg.color}}" stroke-width="18" stroke-dasharray="{{seg.dasharray}}" stroke-dashoffset="{{seg.dashoffset}}" stroke-linecap="butt"/>
+                </svg>
+                <div class="center">
+                  <div>
+                    <div class="n num">{{data.technique_types.total}}</div>
+                    <div class="l">Practices</div>
+                  </div>
+                </div>
+              </div>
+              <div class="legend">
+                <div class="legend-row" data-od-repeat="seg in data.technique_types.legend">
+                  <span class="swatch" style="background: {{seg.color}};"></span>
+                  <span class="name">{{seg.label}}</span>
+                  <span class="pct num">{{seg.pct}}%</span>
+                </div>
+              </div>
+            </div>
+            <div class="insight" data-od-repeat="seg in data.technique_types.insight_rows" style="{{seg.show_style}}">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+              <span>{{seg.text}}</span>
+            </div>
+          </section>
+
+          <!-- Widget 3 — Role balance -->
+          <section class="widget span-2" id="w-role-balance">
+            <div class="widget-head">
+              <div>
+                <div class="widget-title">Role balance</div>
+                <div class="widget-sub">Attacking vs Defending vs Neutral</div>
+              </div>
+              <div class="widget-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M12 3v18"/></svg>
+              </div>
+            </div>
+            <div class="role-stacked" aria-label="Distribución de rol">
+              <div data-od-repeat="r in data.role_balance.segments" style="width: {{r.pct}}%; background: {{r.color}};" title="{{r.label}}: {{r.pct}}%"></div>
+            </div>
+            <div class="role-legend">
+              <div data-od-repeat="r in data.role_balance.legend">
+                <div class="role-row">
+                  <div class="role-label">
+                    <span class="swatch" style="background: {{r.color}};"></span>
+                    {{r.label}}
+                  </div>
+                  <div class="role-value num">{{r.pct}}%</div>
+                </div>
+                <div class="role-pct-bar"><div class="role-pct-fill" style="width: {{r.pct}}%; background: {{r.color}};"></div></div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Widget 4 — Outcomes -->
+          <section class="widget span-4" id="w-outcomes">
+            <div class="widget-head">
+              <div>
+                <div class="widget-title">Roll outcomes</div>
+                <div class="widget-sub">How your sparring rounds end in this window</div>
+              </div>
+              <div class="widget-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3 7h7l-5.5 4.5 2 7L12 16l-6.5 4.5 2-7L2 9h7z"/></svg>
+              </div>
+            </div>
+            <div class="outcome-grid">
+              <div class="outcome-tile" data-od-repeat="o in data.outcomes.tiles" style="background: color-mix(in oklab, {{o.color}} 8%, var(--surface));">
+                <div class="label">
+                  <span class="swatch" style="background: {{o.color}};"></span>
+                  {{o.label}}
+                </div>
+                <div class="value num">{{o.pct}}%</div>
+                <div class="pct-bar"><div class="pct-fill" style="width: {{o.pct}}%; background: {{o.color}};"></div></div>
+                <div class="n num">{{o.n}} rollos</div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Widget 5 — Roll flow -->
+          <section class="widget span-6" id="w-roll-flow">
+            <div class="widget-head">
+              <div>
+                <div class="widget-title">Roll flow</div>
+                <div class="widget-sub">Most common position transitions during sparring</div>
+              </div>
+              <div class="widget-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </div>
+            </div>
+            <div class="flow">
+              <div class="flow-row" data-od-repeat="edge in data.roll_flow.edges">
+                <div class="flow-from">{{edge.from}}</div>
+                <div class="flow-bar">
+                  <div class="flow-fill" style="width: {{edge.pct}}%; background: {{edge.color}};">{{edge.count}}x</div>
+                </div>
+                <div class="flow-to">{{edge.to}}</div>
+              </div>
+            </div>
+            <div class="flow-foot">
+              <span><span class="num">{{data.roll_flow.total_transitions}}</span> transiciones en <span class="num">{{data.roll_flow.total_rolls}}</span> rollos</span>
+              <span>Top <span class="num">{{data.roll_flow.top_n}}</span> flujos</span>
+            </div>
+          </section>
+
+        </div>
+
+        <div class="foot">
+          <div class="stamp">
+            <span class="dot"></span>
+            Live data · last updated <span class="num">{{data.generated_at}}</span>
+          </div>
+          <div>BJJ Evolution Dashboard · v0.1 · Material UI</div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+</div>
+</body>
+</html>
