@@ -89,3 +89,24 @@ npx prettier --write src/
 ```
 
 **CSS:** Tailwind utility classes only — no custom CSS files unless strictly necessary.
+
+### Pre-commit lint hook
+
+A [husky](https://typicode.github.io/husky/) pre-commit hook runs [lint-staged](https://github.com/lint-staged/lint-staged) automatically before every `git commit`. It applies `eslint --fix` to staged `*.{ts,tsx}` files only:
+
+- **Auto-fixable issues** (unused imports, whitespace, simple style) are fixed in-place and included in the commit.
+- **Non-fixable errors** abort the commit and print ESLint output so you can fix them manually.
+- **Non-TypeScript files** (`.md`, `.json`, etc.) are not linted by the hook.
+
+```bash
+npm run lint:fix   # manually fix all auto-fixable issues in the project
+npm run lint       # full project lint check (no --fix) — mirrors what CI runs
+```
+
+To bypass the hook in exceptional cases (e.g. a work-in-progress commit or hotfix):
+
+```bash
+git commit --no-verify -m "wip: ..."
+```
+
+> **CI is the authoritative gate.** `npm run lint` (no `--fix`) runs on every push and PR. The pre-commit hook is a convenience to catch issues early — passing the hook does not guarantee CI will pass.
