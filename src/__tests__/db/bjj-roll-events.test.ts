@@ -165,6 +165,6 @@ describe('bjj_roll_events migration — updated_at trigger', () => {
     expect(sql).toMatch(
       /create\s+trigger\s+\S*bjj_roll_events_updated_at\s+before\s+update\s+on\s+public\.bjj_roll_events/i,
     )
-    expect(sql).toMatch(/new\.updated_at\s*:=\s*now\(\)/i)
+    expect(sql).toMatch(/new\.updated_at\s*=\s*now\(\)/i)
   })
 })
