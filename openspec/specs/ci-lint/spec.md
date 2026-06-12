@@ -25,13 +25,13 @@ The repository MUST have zero `@typescript-eslint/no-unused-vars` errors in
 - GIVEN `src/features/auth/pages/__tests__/AcceptInvitePage.test.tsx` contains an unused `ReactNode` import
 - AND `src/features/bjj/__tests__/BJJSectionEditor.test.tsx` contains an unused `const user = userEvent.setup()`
 - WHEN both declarations are removed
-- THEN `npm run lint` exits with code 0
+- THEN `pnpm run lint` exits with code 0
 - AND the GitHub Actions Lint step passes on the next PR
 
 #### Scenario: Lint remains clean after fix
 
 - GIVEN the two unused declarations have been removed
-- WHEN `npm run lint` is executed on the repository
+- WHEN `pnpm run lint` is executed on the repository
 - THEN no ESLint errors are reported for those files
 - AND no regressions are introduced in other files
 
@@ -68,10 +68,10 @@ be blocked.
 - THEN lint-staged runs no ESLint tasks
 - AND the commit proceeds normally
 
-#### Scenario: Hook is initialized after npm install
+#### Scenario: Hook is initialized after pnpm install
 
-- GIVEN a developer clones the repository and runs `npm install`
-- WHEN the `prepare` npm lifecycle hook runs
+- GIVEN a developer clones the repository and runs `pnpm install`
+- WHEN the `prepare` lifecycle hook runs
 - THEN husky installs the `.husky/pre-commit` hook
 - AND subsequent `git commit` calls invoke lint-staged
 
@@ -80,7 +80,7 @@ be blocked.
 - GIVEN a developer needs to commit without running lint
 - WHEN they run `git commit --no-verify`
 - THEN lint-staged is skipped
-- AND CI still runs the full `npm run lint` on the PR
+- AND CI still runs the full `pnpm run lint` on the PR
 
 ---
 
@@ -109,12 +109,12 @@ noise from generated coverage output. `package.json` MAY include a
 #### Scenario: Coverage output does not trigger lint warnings
 
 - GIVEN `coverage` is added to `globalIgnores` in `eslint.config.js`
-- WHEN `npm run lint` is executed after `npm run test:coverage`
+- WHEN `pnpm run lint` is executed after `pnpm run test:coverage`
 - THEN no ESLint warnings are reported for files under `coverage/`
 
 #### Scenario: Developer runs full-project auto-fix
 
 - GIVEN `"lint:fix": "eslint . --fix"` is present in `package.json` scripts
-- WHEN a developer runs `npm run lint:fix`
+- WHEN a developer runs `pnpm run lint:fix`
 - THEN ESLint applies auto-fixes across the entire project
 - AND exits 0 if no unfixable errors remain

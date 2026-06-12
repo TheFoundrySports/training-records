@@ -37,7 +37,7 @@ See [Architecture](ARCHITECTURE.md) for the full technology stack.
 - **Forms:** React Hook Form + Zod v4
 - **Data fetching:** TanStack Query v5
 - **Routing:** React Router v7
-- **Package manager:** npm
+- **Package manager:** pnpm
 
 ### Backend (BaaS)
 
@@ -50,7 +50,7 @@ See [Architecture](ARCHITECTURE.md) for the full technology stack.
 
 ```bash
 npx supabase start   # start local Supabase stack
-npm run dev          # start Vite dev server
+pnpm run dev         # start Vite dev server
 ```
 
 See [README.md](../README.md) for full setup instructions.
@@ -63,9 +63,9 @@ See [README.md](../README.md) for full setup instructions.
 | E2E (manual) | Playwright |
 
 ```bash
-npm test            # run all unit tests (watch mode)
-npm test -- --run   # run all unit tests (CI mode)
-npm run test:e2e    # run Playwright smoke tests (requires running app)
+pnpm test           # run all unit tests (watch mode)
+pnpm test -- --run  # run all unit tests (CI mode)
+pnpm run test:e2e   # run Playwright smoke tests (requires running app)
 ```
 
 Tests live next to the source files they test (`*.test.tsx` / `*.test.ts`). Playwright specs live in `e2e/`.
@@ -79,13 +79,13 @@ Each feature has a dedicated spec in `docs/features/`. Features are listed in [d
 **TypeScript/JavaScript:** ESLint with TypeScript-ESLint and Prettier integration.
 
 ```bash
-npm run lint        # check
+pnpm run lint       # check
 ```
 
 **Formatting:** Prettier. Run via editor integration or:
 
 ```bash
-npx prettier --write src/
+pnpm exec prettier --write src/
 ```
 
 **CSS:** Tailwind utility classes only — no custom CSS files unless strictly necessary.
@@ -99,8 +99,8 @@ A [husky](https://typicode.github.io/husky/) pre-commit hook runs [lint-staged](
 - **Non-TypeScript files** (`.md`, `.json`, etc.) are not linted by the hook.
 
 ```bash
-npm run lint:fix   # manually fix all auto-fixable issues in the project
-npm run lint       # full project lint check (no --fix) — mirrors what CI runs
+pnpm run lint:fix  # manually fix all auto-fixable issues in the project
+pnpm run lint      # full project lint check (no --fix) — mirrors what CI runs
 ```
 
 To bypass the hook in exceptional cases (e.g. a work-in-progress commit or hotfix):
@@ -109,4 +109,4 @@ To bypass the hook in exceptional cases (e.g. a work-in-progress commit or hotfi
 git commit --no-verify -m "wip: ..."
 ```
 
-> **CI is the authoritative gate.** `npm run lint` (no `--fix`) runs on every push and PR. The pre-commit hook is a convenience to catch issues early — passing the hook does not guarantee CI will pass.
+> **CI is the authoritative gate.** `pnpm run lint` (no `--fix`) runs on every push and PR. The pre-commit hook is a convenience to catch issues early — passing the hook does not guarantee CI will pass.
