@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils'
 import type { ProgressionSection as ProgressionSectionType } from '../types/belt-progression.types'
 import { ProgressionChecklistItem } from './ProgressionChecklistItem'
 import { ProgressionProgressBar } from './ProgressionProgressBar'
+import { categoryLabel } from '../../category-labels'
 
 interface ProgressionSectionProps {
   section: ProgressionSectionType
@@ -167,23 +168,21 @@ function renderChecklistItems(
   const categoryMap = new Map<string, CategoryGroup>()
   const categoryOrder: string[] = []
 
-  // Category labels (Spanish, matching the reference site)
-  const categoryLabels: Record<string, string> = {
-    takedown: 'Comienzo de la lucha',
-    guard_pass: 'Pasados',
-    guard: 'Guardia',
-    submission: 'Sumisiones',
-    escape: 'Escapes y salidas',
-  }
+  // Category labels now come from the shared `categoryLabel(category, 'es')`
+  // helper (src/features/bjj/category-labels.ts). The previous inline
+  // Spanish map (lines 171-177 of the pre-PR-3 file) is superseded; the
+  // shared map is bilingual and the dashboard consumes the English side.
 
   for (const item of section.items) {
     const category = 'category' in item && item.category ? item.category : 'other'
-    
+
     if (!categoryMap.has(category)) {
       categoryOrder.push(category)
       categoryMap.set(category, {
         category,
-        label: categoryLabels[category] ?? 'Otros',
+        // categoryLabel is typed against BJJCategory; the `as never` keeps
+        // the legacy 'other' fallback working for the inline test data.
+        label: categoryLabel(category as never, 'es'),
         items: [],
       })
     }
