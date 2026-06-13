@@ -8,11 +8,17 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { TechniqueSearch } from './TechniqueSearch'
 import { AIPreviewPanel } from './AIPreviewPanel'
 import { useBJJSectionAI } from '../hooks/useBJJSectionAI'
-import type { BJJWorkoutFormValues } from '../bjj.schema'
+import type { BJJWorkoutFormValues, BJJRollProposal } from '../bjj.schema'
 
 interface AIPreview {
   ai_description: string
   matched_technique_ids: string[]
+  /**
+   * Proposed roll events from the EF. Populated by the hook in PR 3
+   * (Q1 from PR 2 handoff). PR 7 will mount <RollReviewPanel> below
+   * <AIPreviewPanel> when this array is non-empty.
+   */
+  rolls: BJJRollProposal[]
 }
 
 interface BJJSectionEditorProps {

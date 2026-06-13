@@ -10,6 +10,7 @@ export const BJJ_CATEGORIES = [
   'guard_pass',
   'other',
 ] as const
+export type BJJCategory = (typeof BJJ_CATEGORIES)[number]
 
 // ── Canonical position keys (REQ-PV2) ────────────────────
 // MUST stay in sync with supabase/migrations/20260612000002_bjj_positions.sql
@@ -32,6 +33,7 @@ export const BJJ_POSITION_KEYS = [
   'other',
 ] as const
 export const BJJPositionKeySchema = z.enum(BJJ_POSITION_KEYS)
+export type BJJPositionKey = (typeof BJJ_POSITION_KEYS)[number]
 
 // ── Roll capture (REQ-RE6) ───────────────────────────────
 // LLM + mock fallback emit a `rolls[]` array. The schema is the

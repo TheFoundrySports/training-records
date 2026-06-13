@@ -49,7 +49,7 @@ function makeWrapper() {
 
 const VALID_RESPONSE = {
   ai_description: 'You drilled the scissor sweep from closed guard.',
-  matched_technique_ids: ['11111111-1111-1111-1111-111111111111'],
+  matched_technique_ids: ['11111111-1111-4111-8111-111111111111'],
   rolls: [
     {
       roll_index: 1,
@@ -135,14 +135,28 @@ describe('useBJJSectionAI \u2014 Q1: surface rolls[] on the result (PR 2 handoff
     expect(captured?.rolls).toEqual([])
   })
 
-  it('surfaces an error when the EF response is missing the rolls field', async () => {
-    // Backward-compat: a future EF regression that drops `rolls` should
-    // fail at the parse boundary, not silently return a partial shape.
+  it('surfaces an error when the EF response shape regresses (parse boundary)', async () => {
+    // Backward-compat: a future EF regression that breaks the contract
+    // should fail at the parse boundary, not silently return a partial
+    // shape. We send an invalid `confidence` value (1.5 is out of [0,1])
+    // so Zod rejects the row \u2014 the missing-rolls case is fine because
+    // the schema has `.default([])` for that field.
     mockInvoke.mockResolvedValue({
       data: {
         ai_description: 'old shape',
         matched_technique_ids: [],
-        // rolls field intentionally missing
+        rolls: [
+          {
+            roll_index: 1,
+            role: 'attacking',
+            outcome: 'submission',
+            position_from: 'closed_guard',
+            position_to: null,
+            technique_names: [],
+            confidence: 1.5, // out of [0,1] \u2014 must be rejected
+            raw_excerpt: 'x',
+          },
+        ],
       },
       error: null,
     })

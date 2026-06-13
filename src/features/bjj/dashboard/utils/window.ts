@@ -13,7 +13,7 @@
  * Refs: REQ-BD2 (time window filter), design \u00a73.4 (window resolution).
  */
 
-import type { BJJPositionKey } from '../bjj.schema'
+import type { BJJPositionKey } from '../../bjj.schema'
 
 /** The 4 time-window presets the dashboard exposes. */
 export type BJJDashboardWindow = '7d' | '30d' | '90d' | '10r'
