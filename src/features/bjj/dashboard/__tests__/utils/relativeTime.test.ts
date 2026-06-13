@@ -12,7 +12,7 @@
  * design §3.4 (client formats).
  */
 import { describe, it, expect } from 'vitest'
-import { relativeTimeEn } from '../relativeTime'
+import { relativeTimeEn } from '../../utils/relativeTime'
 
 const NOW = new Date('2026-06-12T12:00:00.000Z')
 

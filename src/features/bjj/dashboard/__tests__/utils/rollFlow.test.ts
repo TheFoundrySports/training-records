@@ -15,7 +15,7 @@
  * Refs: REQ-BD3 (roll_flow shape), design §3.4 (pct normalization).
  */
 import { describe, it, expect } from 'vitest'
-import { topTransitions } from '../rollFlow'
+import { topTransitions } from '../../utils/rollFlow'
 
 interface RawTransition {
   from: string

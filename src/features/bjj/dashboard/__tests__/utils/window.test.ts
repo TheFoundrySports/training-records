@@ -14,7 +14,7 @@
  * Refs: REQ-BD2 (time window filter), design §3.4 (window resolution).
  */
 import { describe, it, expect } from 'vitest'
-import { windowToRange } from '../window'
+import { windowToRange } from '../../utils/window'
 
 // Fixed "now" to make date math deterministic across CI timezones
 const NOW = new Date('2026-06-12T12:00:00.000Z')
