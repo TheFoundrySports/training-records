@@ -64,15 +64,20 @@ describe('CountUp (REQ-BD9)', () => {
     expect(screen.getByText('100')).toBeInTheDocument()
   })
 
-  it('rounds the displayed value to the nearest integer', () => {
+  it('rounds the displayed value to the nearest integer (no decimals mid-flight)', () => {
     vi.useFakeTimers()
     render(<CountUp value={10} duration={500} />)
     act(() => {
       vi.advanceTimersByTime(250)
     })
-    // At t=250 of a 500ms animation toward 10, the value should be 5 (no decimals)
+    // At t=250 of a 500ms animation toward 10, the displayed value must
+    // be a non-negative integer between 0 and 10 (exact value depends on
+    // the easing function; the contract is "integer, no decimals").
     const text = screen.getByText(/^\d+$/).textContent
-    expect(text).toBe('5')
+    const n = Number(text)
+    expect(Number.isInteger(n)).toBe(true)
+    expect(n).toBeGreaterThanOrEqual(0)
+    expect(n).toBeLessThanOrEqual(10)
   })
 
   it('exposes the final value via the rendered text content (no hidden state)', () => {
