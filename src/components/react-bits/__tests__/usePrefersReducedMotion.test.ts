@@ -11,7 +11,7 @@
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
-import { usePrefersReducedMotion } from '../../usePrefersReducedMotion'
+import { usePrefersReducedMotion } from '../usePrefersReducedMotion'
 
 type Listener = (e: { matches: boolean; media: string }) => void
 

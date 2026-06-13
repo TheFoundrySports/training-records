@@ -11,7 +11,7 @@
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
-import { useDashboardColorScheme } from '../../useDashboardColorScheme'
+import { useDashboardColorScheme } from '../../theme/useDashboardColorScheme'
 
 // Minimal matchMedia shim that satisfies the hook's contract.
 // The setup file already provides a default no-op matchMedia, but we
