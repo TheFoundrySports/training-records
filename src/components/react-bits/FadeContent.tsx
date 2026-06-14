@@ -28,6 +28,8 @@ export function FadeContent({ children, duration = DEFAULT_DURATION, className }
 
   useEffect(() => {
     if (reduced) {
+      // Reduced-motion sync: full opacity on mount, no transition.
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional, must mirror matchMedia sync read
       setOpacity(1)
       return
     }

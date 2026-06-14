@@ -75,9 +75,8 @@ export function getPositionLabel(key: BJJPositionKey, locale: Locale): string {
 
   // Production: warn + fallback. We still log the unknown key so
   // dashboards can spot drift.
-  // eslint-disable-next-line no-console
   console.warn(
-    `[position-vocabulary] unknown position key "${String(key)}" \u2014 ` +
+    `[position-vocabulary] unknown position key "${String(key)}" — ` +
       `falling back to "other" (${locale})`,
   )
   return LABELS.other[locale]

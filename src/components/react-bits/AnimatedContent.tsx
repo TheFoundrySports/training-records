@@ -41,8 +41,8 @@ export function AnimatedContent({
 
   useEffect(() => {
     if (reduced) {
-      // Reduced motion: the wrapper is permanently visible. Trigger
-      // is still a public prop, but the animation is gone.
+      // Reduced-motion sync: wrapper permanently visible, no transition.
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional, must mirror matchMedia sync read
       setMounted(true)
       setClosing(false)
       return

@@ -35,6 +35,8 @@ export function CountUp({ value, duration = DEFAULT_DURATION, className }: Count
 
   useEffect(() => {
     if (reduced) {
+      // Reduced-motion sync: snap to the final value on mount / prop change.
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional, must mirror matchMedia sync read
       setDisplay(value)
       return
     }
