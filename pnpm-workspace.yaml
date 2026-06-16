@@ -1,3 +1,5 @@
+packages:
+  - .
 allowBuilds:
   chromedriver: true
   msw: true
