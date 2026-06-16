@@ -132,7 +132,7 @@ describe('useBJJSectionAI \u2014 Q1: surface rolls[] on the result (PR 2 handoff
       )
       await waitFor(() => expect(captured).not.toBeNull())
     })
-    expect(captured?.rolls).toEqual([])
+    expect(captured).toMatchObject({ rolls: [] })
   })
 
   it('surfaces an error when the EF response shape regresses (parse boundary)', async () => {

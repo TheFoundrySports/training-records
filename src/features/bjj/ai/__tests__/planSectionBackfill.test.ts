@@ -35,8 +35,8 @@ const ROLL_1 = {
   roll_index: 1,
   role: 'attacking' as const,
   outcome: 'position_gain' as const,
-  position_from: 'closed_guard',
-  position_to: 'mount',
+  position_from: 'closed_guard' as const,
+  position_to: 'mount' as const,
   technique_names: ['Scissor Sweep'],
   confidence: 0.85,
   raw_excerpt: 'I swept from closed guard to mount.',
@@ -46,8 +46,8 @@ const ROLL_2 = {
   roll_index: 2,
   role: 'defending' as const,
   outcome: 'position_loss' as const,
-  position_from: 'mount',
-  position_to: 'back_control',
+  position_from: 'mount' as const,
+  position_to: 'back_control' as const,
   technique_names: [],
   confidence: 0.7,
   raw_excerpt: 'Got swept to back.',
@@ -77,8 +77,8 @@ describe('planSectionBackfill — confirmed rows are sacred', () => {
       sectionId: 'sec-1',
       proposedRolls: [ROLL_1],
       existingRows: [
-        { roll_index: 1, status: 'proposed', source: 'manual', confidence: 0 },
-        { roll_index: 2, status: 'confirmed', source: 'ai_confirmed', confidence: 0.9 },
+        { roll_index: 1, status: 'proposed' as const, source: 'manual' as const, confidence: 0 },
+        { roll_index: 2, status: 'confirmed' as const, source: 'ai_confirmed' as const, confidence: 0.9 },
       ],
     })
     expect(plan).toEqual({ action: 'skip', reason: 'has_confirmed_rolls' })
@@ -93,7 +93,7 @@ describe('planSectionBackfill — confirmed rows are sacred', () => {
       sectionId: 'sec-1',
       proposedRolls: [ROLL_1],
       existingRows: [
-        { roll_index: 1, status: 'confirmed', source: 'ai_confirmed', confidence: 0.9 },
+        { roll_index: 1, status: 'confirmed' as const, source: 'ai_confirmed' as const, confidence: 0.9 },
       ],
     })
     expect(plan.action).toBe('skip')
@@ -108,7 +108,7 @@ describe('planSectionBackfill — UPSERT over PR 1 stub rows', () => {
       sectionId: 'sec-1',
       proposedRolls: [ROLL_1],
       existingRows: [
-        { roll_index: 1, status: 'proposed', source: 'manual', confidence: 0 },
+        { roll_index: 1, status: 'proposed' as const, source: 'manual' as const, confidence: 0 },
       ],
     })
     expect(plan.action).toBe('upsert')
@@ -127,7 +127,7 @@ describe('planSectionBackfill — UPSERT over PR 1 stub rows', () => {
       sectionId: 'sec-1',
       proposedRolls: [ROLL_1],
       existingRows: [
-        { roll_index: 1, status: 'proposed', source: 'manual', confidence: 0 },
+        { roll_index: 1, status: 'proposed' as const, source: 'manual' as const, confidence: 0 },
       ],
     })
     if (plan.action === 'upsert') {
@@ -159,9 +159,9 @@ describe('planSectionBackfill — DELETE beyond max roll_index', () => {
       sectionId: 'sec-1',
       proposedRolls: [ROLL_1], // roll_index=1
       existingRows: [
-        { roll_index: 1, status: 'proposed', source: 'manual', confidence: 0 },
-        { roll_index: 2, status: 'proposed', source: 'manual', confidence: 0 },
-        { roll_index: 3, status: 'proposed', source: 'manual', confidence: 0 },
+        { roll_index: 1, status: 'proposed' as const, source: 'manual' as const, confidence: 0 },
+        { roll_index: 2, status: 'proposed' as const, source: 'manual' as const, confidence: 0 },
+        { roll_index: 3, status: 'proposed' as const, source: 'manual' as const, confidence: 0 },
       ],
     })
     expect(plan.action).toBe('upsert')
@@ -177,8 +177,8 @@ describe('planSectionBackfill — DELETE beyond max roll_index', () => {
       sectionId: 'sec-1',
       proposedRolls: [ROLL_1, ROLL_2], // max=2
       existingRows: [
-        { roll_index: 1, status: 'proposed', source: 'manual', confidence: 0 },
-        { roll_index: 2, status: 'proposed', source: 'manual', confidence: 0 },
+        { roll_index: 1, status: 'proposed' as const, source: 'manual' as const, confidence: 0 },
+        { roll_index: 2, status: 'proposed' as const, source: 'manual' as const, confidence: 0 },
       ],
     })
     if (plan.action === 'upsert') {
@@ -205,7 +205,7 @@ describe('planSectionBackfill — no-op cases', () => {
       sectionId: 'sec-1',
       proposedRolls: [],
       existingRows: [
-        { roll_index: 1, status: 'proposed', source: 'manual', confidence: 0 },
+        { roll_index: 1, status: 'proposed' as const, source: 'manual' as const, confidence: 0 },
       ],
     })
     expect(plan).toEqual({ action: 'skip', reason: 'no_proposed_rolls' })
@@ -220,7 +220,7 @@ describe('planSectionBackfill — idempotency', () => {
       sectionId: 'sec-1',
       proposedRolls: [ROLL_1, ROLL_2],
       existingRows: [
-        { roll_index: 1, status: 'proposed', source: 'manual', confidence: 0 },
+        { roll_index: 1, status: 'proposed' as const, source: 'manual' as const, confidence: 0 },
       ],
     }
     const plan1 = planSectionBackfill(input)
