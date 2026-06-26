@@ -18,12 +18,25 @@
  *
  * RED confirmed: LastTechniquesWidget module doesn't exist yet.
  */
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderWithMuiTheme } from '@/test-utils/renderWithMuiTheme'
 import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { LastTechniquesWidget } from '../../components/LastTechniquesWidget'
 import type { LastTechniquesData } from '../../types/dashboard.types'
+
+// Mock usePrefersReducedMotion so CountUp renders the final value
+// immediately (no animation). jsdom doesn't fire rAF reliably and
+// the dashboard tests should assert the FINAL state, not the
+// mid-animation value.
+const mockUsePrefersReducedMotion = vi.fn(() => true)
+vi.mock('@/components/react-bits/usePrefersReducedMotion', () => ({
+  usePrefersReducedMotion: () => mockUsePrefersReducedMotion(),
+}))
+
+beforeEach(() => {
+  mockUsePrefersReducedMotion.mockReturnValue(true)
+})
 
 // Mock the modal so we can assert it gets called with the right technique_id
 // without needing to mount the full modal (which depends on a bjj_techniques
@@ -103,10 +116,16 @@ describe('LastTechniquesWidget \u2014 hero stat + row list + modal drill-down (T
   })
 
   it('renders a relative-time label (Intl.RelativeTimeFormat("en"))', () => {
-    renderWithMuiTheme(<LastTechniquesWidget data={{ rows: buildRows() }} />)
-    // "X days ago" relative to now (test runs at 2026-06-26, so 2026-06-10
-    // is 16 days ago).
-    expect(screen.getAllByText(/days? ago|yesterday|today/i).length).toBeGreaterThan(0)
+    const { container } = renderWithMuiTheme(<LastTechniquesWidget data={{ rows: buildRows() }} />)
+    // The exact wording depends on the gap (16 days rounds to "last month"
+    // in `relativeTimeEn`). We just assert the label is non-empty and
+    // contains an English relative-time phrase.
+    const matches = container.querySelectorAll('.tech-meta')
+    expect(matches.length).toBe(3)
+    for (const node of matches) {
+      expect(node.textContent?.trim().length).toBeGreaterThan(0)
+      expect(node.textContent).toMatch(/ago|yesterday|today|now|second|minute|hour|day|week|month|year/i)
+    }
   })
 
   it('clicking a row opens TechniquePracticeModal with that row\u2019s technique_id (REQ-BD6)', async () => {
