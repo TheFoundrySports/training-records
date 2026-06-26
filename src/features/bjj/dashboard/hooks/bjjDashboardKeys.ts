@@ -23,7 +23,7 @@
 import type { DashboardWindow } from '../types/dashboard.types'
 
 export const bjjDashboardKeys = {
-  /** Root namespace \u2014 invalidate-everything scope. */
+  /** Root namespace — invalidate-everything scope. */
   all: ['bjj-dashboard'] as const,
 
   /** Prefix for every list-shaped query (today: just `list(window)`). */
@@ -31,4 +31,19 @@ export const bjjDashboardKeys = {
 
   /** The dashboard data query for a given window preset. */
   list: (window: DashboardWindow) => [...bjjDashboardKeys.lists(), window] as const,
+
+  /**
+   * The bjj_positions lookup query used by the dashboard widgets and
+   * (in PR 7) by `RollReviewPanel`'s position selects.
+   *
+   * Why a sibling branch (not a separate `bjjPositionsKeys` factory):
+   *  - The dashboard subtree is the only consumer of `bjj_positions`
+   *    today. Putting it under the same `all` namespace means a single
+   *    `invalidateQueries({ queryKey: bjjDashboardKeys.all })` refreshes
+   *    both the dashboard data and the position lookup together.
+   *  - This matches the design.md §7.4 contract literally.
+   *
+   * No args: the query is the same 11-row static lookup for every page.
+   */
+  positions: () => [...bjjDashboardKeys.all, 'positions'] as const,
 } as const
