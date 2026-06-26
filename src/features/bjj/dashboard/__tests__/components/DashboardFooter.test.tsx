@@ -18,10 +18,12 @@ import { DashboardFooter } from '../../components/DashboardFooter'
 
 describe('DashboardFooter \u2014 last-refresh stamp (T5.9)', () => {
   it('renders the generatedAt timestamp verbatim', () => {
-    renderWithMuiTheme(<DashboardFooter generatedAt="Jun 12, 2026 \u00b7 12:00 PM" />)
-    expect(
-      screen.getByText('Jun 12, 2026 \u00b7 12:00 PM'),
-    ).toBeInTheDocument()
+    const stamp = 'Jun 12, 2026 · 12:00 PM'
+    renderWithMuiTheme(<DashboardFooter generatedAt={stamp} />)
+    // The timestamp is wrapped in <strong> for emphasis; find by its
+    // exact text content within the strong tag.
+    const strong = screen.getByText(stamp)
+    expect(strong.tagName).toBe('STRONG')
   })
 
   it('renders inside the .foot container', () => {
