@@ -15,8 +15,9 @@
  * RED confirmed: BJJDashboardPage module doesn't exist yet.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { renderWithMuiTheme } from '@/test-utils/renderWithMuiTheme'
-import { screen } from '@testing-library/react'
+import React from 'react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { render, screen, type RenderResult } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { BJJDashboardPage } from '../../pages/BJJDashboardPage'
 
@@ -46,6 +47,22 @@ function buildPayload(overrides: Record<string, unknown> = {}) {
   }
 }
 
+// The page mounts its own ThemeProvider so we only need to wrap with
+// QueryClientProvider (for the useQueryClient call) + a minimal CSS
+// reset so the dashboard grid class works.
+function renderWithProviders(): RenderResult {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+  })
+  return render(
+    React.createElement(
+      QueryClientProvider,
+      { client: queryClient },
+      React.createElement(BJJDashboardPage),
+    ),
+  )
+}
+
 beforeEach(() => {
   mockUseBJJDashboard.mockReturnValue({
     data: buildPayload(),
@@ -58,19 +75,19 @@ beforeEach(() => {
 
 describe('BJJDashboardPage \u2014 page assembly (T5.14)', () => {
   it('renders the page title', () => {
-    renderWithMuiTheme(<BJJDashboardPage />)
+    renderWithProviders()
     expect(
       screen.getByRole('heading', { level: 1, name: /bjj evolution dashboard/i }),
     ).toBeInTheDocument()
   })
 
   it('renders the subtitle derived from the resolved window + workout count', () => {
-    renderWithMuiTheme(<BJJDashboardPage />)
+    renderWithProviders()
     expect(screen.getByText(/14 workouts/)).toBeInTheDocument()
   })
 
   it('renders the DashboardTimeFilter with 4 toggle buttons', () => {
-    renderWithMuiTheme(<BJJDashboardPage />)
+    renderWithProviders()
     expect(screen.getByRole('button', { name: '7d' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '30d' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '90d' })).toBeInTheDocument()
@@ -78,12 +95,12 @@ describe('BJJDashboardPage \u2014 page assembly (T5.14)', () => {
   })
 
   it('renders 5 widget shells (REQ-BD4 5-widget grid)', () => {
-    const { container } = renderWithMuiTheme(<BJJDashboardPage />)
+    const { container } = renderWithProviders()
     const widgets = container.querySelectorAll('.widget')
     expect(widgets.length).toBe(5)
   })
 
-  it('renders the LastTechniquesWidget hero stat when rows exist', () => {
+  it('renders the LastTechniquesWidget rows when rows exist', () => {
     mockUseBJJDashboard.mockReturnValue({
       data: buildPayload({
         last_techniques: {
@@ -103,21 +120,20 @@ describe('BJJDashboardPage \u2014 page assembly (T5.14)', () => {
       error: null,
       refetch: vi.fn(),
     })
-    renderWithMuiTheme(<BJJDashboardPage />)
+    renderWithProviders()
     expect(screen.getByText('Triangle Choke')).toBeInTheDocument()
   })
 
   it('renders the DashboardFooter with the generated_at stamp', () => {
-    renderWithMuiTheme(<BJJDashboardPage />)
+    renderWithProviders()
     const strong = screen.getByText('Jun 12, 2026 \u00b7 12:00 PM')
     expect(strong.tagName).toBe('STRONG')
   })
 
-  it('window change re-fetches via the hook with the new window', async () => {
+  it('window change calls the hook with the new window', async () => {
     const user = userEvent.setup()
-    renderWithMuiTheme(<BJJDashboardPage />)
+    renderWithProviders()
     await user.click(screen.getByRole('button', { name: '7d' }))
-    // The hook is called with the new window.
     const calls = mockUseBJJDashboard.mock.calls
     expect(calls.some((c) => c[0] === '7d')).toBe(true)
   })
@@ -130,7 +146,7 @@ describe('BJJDashboardPage \u2014 page assembly (T5.14)', () => {
       error: null,
       refetch: vi.fn(),
     })
-    renderWithMuiTheme(<BJJDashboardPage />)
+    renderWithProviders()
     expect(screen.getByRole('status', { busy: true })).toBeInTheDocument()
   })
 
@@ -142,7 +158,7 @@ describe('BJJDashboardPage \u2014 page assembly (T5.14)', () => {
       error: new Error('boom'),
       refetch: vi.fn(),
     })
-    renderWithMuiTheme(<BJJDashboardPage />)
+    renderWithProviders()
     expect(screen.getAllByText(/boom/i).length).toBeGreaterThan(0)
   })
 })

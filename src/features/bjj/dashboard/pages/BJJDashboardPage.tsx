@@ -1,0 +1,152 @@
+/**
+ * `BJJDashboardPage` \u2014 the BJJ Evolution Dashboard route component.
+ *
+ * Composes the 5-widget grid, page header, time filter, and footer.
+ * The page is the ONLY place MUI's `ThemeProvider` mounts in the app
+ * (REQ-BD7: MUI scoping).
+ *
+ * Responsibilities:
+ *  1. Mount `<ThemeProvider theme={createDashboardTheme(mode)}>` so
+ *     MUI components in the dashboard subtree get the right palette.
+ *     The follow-up `theme-context-unified` change replaces
+ *     `useDashboardColorScheme`'s body; this file stays unchanged.
+ *  2. Manage the active window preset (lifted state so the filter and
+ *     the data hook agree).
+ *  3. Fetch the dashboard data via `useBJJDashboard(window)`.
+ *  4. Compose the header + filter + 5-widget grid + footer.
+ *  5. Show the DashboardSkeleton while loading; show per-widget
+ *     error/empty states via `DashboardWidgetShell`.
+ *
+ * The 4 widgets that aren't yet implemented (TechniqueTypeWidget,
+ * RoleBalanceWidget, OutcomesWidget, RollFlowWidget) are rendered as
+ * `DashboardWidgetShell` instances with a placeholder heading + empty
+ * copy. PR 6a and PR 6b swap the children for the real widgets.
+ *
+ * Refs: T5.14, REQ-BD1 (route), REQ-BD3 (data shape), REQ-BD4 (grid),
+ * REQ-BD5 (loading/empty/error), REQ-BD7 (MUI scoping), REQ-BD9
+ * (React Bits via LastTechniquesWidget's CountUp hero).
+ */
+import { useCallback, useMemo, useState } from 'react'
+import { ThemeProvider } from '@mui/material/styles'
+import CssBaseline from '@mui/material/CssBaseline'
+import { createDashboardTheme } from '../theme/mui-dashboard-theme'
+import { useDashboardColorScheme } from '../theme/useDashboardColorScheme'
+import { useBJJDashboard } from '../hooks/useBJJDashboard'
+import { bjjDashboardKeys } from '../hooks/bjjDashboardKeys'
+import { DashboardPageHeader } from '../components/DashboardPageHeader'
+import { DashboardTimeFilter } from '../components/DashboardTimeFilter'
+import { DashboardSkeleton } from '../components/DashboardSkeleton'
+import { DashboardFooter } from '../components/DashboardFooter'
+import { DashboardWidgetShell } from '../components/DashboardWidgetShell'
+import { LastTechniquesWidget } from '../components/LastTechniquesWidget'
+import { DEFAULT_DASHBOARD_WINDOW, type DashboardWindow } from '../components/DashboardTimeFilter'
+import type { QueryClient } from '@tanstack/react-query'
+
+// useQueryClient is imported lazily inside the component to avoid pulling
+// @tanstack/react-query into the public types if the file is mocked in
+// tests.
+import { useQueryClient } from '@tanstack/react-query'
+import type { LastTechniquesData, BJJDashboardData } from '../types/dashboard.types'
+
+interface StubWidgetCopy {
+  title: string
+  sub: string
+}
+
+const STUB_WIDGETS: StubWidgetCopy[] = [
+  { title: 'Technique Types', sub: 'Coming in PR 6a' },
+  { title: 'Role Balance', sub: 'Coming in PR 6b' },
+  { title: 'Outcomes', sub: 'Coming in PR 6b' },
+  { title: 'Roll Flow', sub: 'Coming in PR 6b' },
+]
+
+function formatRangeLabel(data: BJJDashboardData | undefined): string {
+  if (!data) return DEFAULT_DASHBOARD_WINDOW
+  if (data.window === '10r') {
+    return `Last ${data.total_workouts} workouts \u00b7 ${data.total_rolls} confirmed rolls`
+  }
+  if (!data.start_date || !data.end_date) {
+    return `${data.total_workouts} workouts \u00b7 ${data.total_rolls} confirmed rolls`
+  }
+  // YYYY-MM-DD \u2192 "Mon DD" by parsing the strings directly.
+  const start = new Date(`${data.start_date}T00:00:00Z`)
+  const end = new Date(`${data.end_date}T00:00:00Z`)
+  const fmt = (d: Date) =>
+    d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' })
+  return `${fmt(start)} \u2013 ${fmt(end)} \u00b7 ${data.total_workouts} workouts`
+}
+
+export function BJJDashboardPage() {
+  const mode = useDashboardColorScheme()
+  const theme = useMemo(() => createDashboardTheme(mode), [mode])
+
+  const [window, setWindow] = useState<DashboardWindow>(DEFAULT_DASHBOARD_WINDOW)
+  const queryClient: QueryClient = useQueryClient()
+
+  const { data, isLoading, isError, error, refetch } = useBJJDashboard(window)
+
+  const handleWindowChange = useCallback((next: DashboardWindow) => {
+    setWindow(next)
+  }, [])
+
+  const handleRefresh = useCallback(() => {
+    void queryClient.invalidateQueries({ queryKey: bjjDashboardKeys.lists() })
+    void refetch()
+  }, [queryClient, refetch])
+
+  const subtitle = formatRangeLabel(data)
+  const generatedAt = data?.generated_at ?? '\u2014'
+
+  return (
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <div className="page">
+        <DashboardPageHeader
+          subtitle={subtitle}
+          actions={<DashboardTimeFilter window={window} onChange={handleWindowChange} onRefresh={handleRefresh} />}
+        />
+
+        {isLoading ? (
+          <DashboardSkeleton />
+        ) : (
+          <div className="grid">
+            {isError ? (
+              <DashboardWidgetShell
+                span={6}
+                heading="Dashboard"
+                error={error ?? new Error('Failed to load dashboard')}
+                onRetry={handleRefresh}
+              >
+                <></>
+              </DashboardWidgetShell>
+            ) : (
+              <>
+                <DashboardWidgetShell
+                  span={3}
+                  heading="Last Techniques"
+                  sub={`From your ${data?.total_workouts ?? 0} most recent workouts`}
+                  data={data?.last_techniques ?? { rows: [] } as LastTechniquesData}
+                >
+                  {data ? <LastTechniquesWidget data={data.last_techniques} /> : null}
+                </DashboardWidgetShell>
+                {STUB_WIDGETS.map((stub, idx) => (
+                  <DashboardWidgetShell
+                    key={stub.title}
+                    span={idx === 0 ? 3 : idx === 1 ? 2 : idx === 2 ? 4 : 6}
+                    heading={stub.title}
+                    sub={stub.sub}
+                    data={[]}
+                  >
+                    <></>
+                  </DashboardWidgetShell>
+                ))}
+              </>
+            )}
+          </div>
+        )}
+
+        <DashboardFooter generatedAt={generatedAt} />
+      </div>
+    </ThemeProvider>
+  )
+}
