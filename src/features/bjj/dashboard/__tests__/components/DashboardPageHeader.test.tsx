@@ -34,12 +34,9 @@ describe('DashboardPageHeader \u2014 page title + subtitle (T5.5)', () => {
   })
 
   it('renders the subtitle text verbatim', () => {
-    renderWithMuiTheme(
-      <DashboardPageHeader subtitle="May 13 \u2013 Jun 12 \u00b7 14 workouts" />,
-    )
-    expect(
-      screen.getByText('May 13 \u2013 Jun 12 \u00b7 14 workouts'),
-    ).toBeInTheDocument()
+    const subtitle = 'May 13 – Jun 12 · 14 workouts'
+    renderWithMuiTheme(<DashboardPageHeader subtitle={subtitle} />)
+    expect(screen.getByText(subtitle)).toBeInTheDocument()
   })
 
   it('renders inside the .page-head container', () => {
