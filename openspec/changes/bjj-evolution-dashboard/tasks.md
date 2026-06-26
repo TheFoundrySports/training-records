@@ -318,53 +318,53 @@ Chain strategy: stacked-to-main
 
 #### Tasks
 
-1. **T5.1 — `src/features/bjj/dashboard/types/dashboard.types.ts`** (feat, ~80 lines)
+1. **T5.1 — `src/features/bjj/dashboard/types/dashboard.types.ts`** (feat, ~80 lines) ✅
    - `BJJDashboardData`, `BJJDashboardWindow`, `BJJRollProposal`, `LastTechniquesData`, `TechniqueTypesData`, `RoleBalanceData`, `OutcomesData`, `RollFlowData` — matching PRD §6.11
-2. **T5.2 — Test: `bjjDashboardKeys` factory** (test, ~15 lines)
+2. **T5.2 — Test: `bjjDashboardKeys` factory** (test, ~15 lines) ✅
    - File: `src/features/bjj/dashboard/__tests__/hooks/bjjDashboardKeys.test.ts`
    - Assert: `bjjDashboardKeys.summary('30d')` = `['bjj-dashboard', '30d']`
-3. **T5.3 — `src/features/bjj/dashboard/hooks/useBJJDashboard.ts`** (feat, ~50 lines)
+3. **T5.3 — `src/features/bjj/dashboard/hooks/useBJJDashboard.ts`** (feat, ~50 lines) ✅
    - `useQuery({ queryKey: bjjDashboardKeys.summary(window), queryFn: () => supabase.rpc('bjj_dashboard_data', { p_window: window }), staleTime: 60_000 })`; export `bjjDashboardKeys`
-4. **T5.4 — Test: `useBJJDashboard` calls RPC and sets staleTime** (test, ~30 lines)
+4. **T5.4 — Test: `useBJJDashboard` calls RPC and sets staleTime** (test, ~30 lines) ✅
    - File: `src/features/bjj/dashboard/__tests__/hooks/useBJJDashboard.test.ts`
    - Mock `supabase.rpc`; assert call args + queryKey; assert `staleTime: 60_000`
-5. **T5.5 — `src/features/bjj/dashboard/components/DashboardPageHeader.tsx`** (feat, ~30 lines)
+5. **T5.5 — `src/features/bjj/dashboard/components/DashboardPageHeader.tsx`** (feat, ~30 lines) ✅
    - `<Stack>` eyebrow + h1 + subtitle; uses `.page-head` class; reads `data.subtitle`
-6. **T5.6 — Test: `DashboardPageHeader` renders subtitle** (test, ~15 lines)
-7. **T5.7 — `src/features/bjj/dashboard/components/DashboardTimeFilter.tsx`** (feat, ~60 lines)
+6. **T5.6 — Test: `DashboardPageHeader` renders subtitle** (test, ~15 lines) ✅
+7. **T5.7 — `src/features/bjj/dashboard/components/DashboardTimeFilter.tsx`** (feat, ~60 lines) ✅
    - MUI `ToggleButtonGroup` with 4 presets + Refresh `IconButton`; reads/writes `localStorage['bjj-dashboard-window']`; default `'30d'`; calls `onChange`/`onRefresh`
-8. **T5.8 — Test: `DashboardTimeFilter` reads localStorage on mount, writes on change** (test, ~30 lines)
-9. **T5.9 — `src/features/bjj/dashboard/components/DashboardFooter.tsx`** (feat, ~15 lines)
+8. **T5.8 — Test: `DashboardTimeFilter` reads localStorage on mount, writes on change** (test, ~30 lines) ✅
+9. **T5.9 — `src/features/bjj/dashboard/components/DashboardFooter.tsx`** (feat, ~15 lines) ✅
    - "Live data · last updated …" text with `generated_at` prop
-10. **T5.10 — `src/features/bjj/dashboard/components/DashboardSkeleton.tsx`** (feat, ~30 lines)
+10. **T5.10 — `src/features/bjj/dashboard/components/DashboardSkeleton.tsx`** (feat, ~30 lines) ✅
     - 5-card grid skeleton matching desktop spans
-11. **T5.11 — `src/features/bjj/dashboard/components/DashboardWidgetShell.tsx`** (feat, ~50 lines)
+11. **T5.11 — `src/features/bjj/dashboard/components/DashboardWidgetShell.tsx`** (feat, ~50 lines) ✅
     - Props `{ span, data, isLoading, error, onRetry, children }`; renders skeleton/empty state/error fallback; `react-error-boundary` `ErrorBoundary` per widget
-12. **T5.12 — `src/features/bjj/dashboard/components/LastTechniquesWidget.tsx`** (feat, ~80 lines)
+12. **T5.12 — `src/features/bjj/dashboard/components/LastTechniquesWidget.tsx`** (feat, ~80 lines) ✅
     - Hero `<CountUp>` total + 5–10 row list; row click → `TechniquePracticeModal`; uses `usePrefersReducedMotion`
-13. **T5.13 — Test: `LastTechniquesWidget` renders mock data, opens modal on row click** (test, ~40 lines)
-14. **T5.14 — `src/features/bjj/dashboard/pages/BJJDashboardPage.tsx`** (feat, ~90 lines)
+13. **T5.13 — Test: `LastTechniquesWidget` renders mock data, opens modal on row click** (test, ~40 lines) ✅
+14. **T5.14 — `src/features/bjj/dashboard/pages/BJJDashboardPage.tsx`** (feat, ~90 lines) ✅
     - Page wrapper: imports `material-dashboard.css` + Roboto font; `<ThemeProvider theme={createDashboardTheme(mode)}>`; `<DashboardBackfillBanner>` (placeholder for PR 8); `<DashboardPageHeader>`; `<DashboardTimeFilter>`; `<DashboardGrid>` with 5 `<DashboardWidgetShell>` (only LastTechniques real; other 4 are stubbed with empty-state copy); `<DashboardFooter>`; uses `useDashboardColorScheme`
-15. **T5.15 — Update `src/app/router.tsx`: add `/bjj/dashboard` lazy + Suspense** (feat, ~10 lines)
+15. **T5.15 — Update `src/app/router.tsx`: add `/bjj/dashboard` lazy + Suspense** (feat, ~10 lines) ✅
     - Import `lazy`, `Suspense`; lazy-import `BJJDashboardPage`; insert route under `AppShell` children
-16. **T5.16 — Update `src/app/AppShell.tsx`: add "BJJ Dashboard" to `NAV_ITEMS` + desktop nav** (feat, ~6 lines)
-17. **T5.17 — Playwright smoke test: dashboard loads with 1 widget** (test, ~40 lines)
+16. **T5.16 — Update `src/app/AppShell.tsx`: add "BJJ Dashboard" to `NAV_ITEMS` + desktop nav** (feat, ~6 lines) ✅
+17. **T5.17 — Playwright smoke test: dashboard loads with 1 widget** (test, ~40 lines) ✅
     - File: `e2e/bjj-dashboard.d1.spec.ts`
     - Seed 1 BJJ workout + 2 confirmed rolls + 2 techniques; assert page header + filter + 1 widget render
 
 #### Commit plan
 
-- **c1:** `feat(types): add BJJDashboardData and related TypeScript types` — T5.1
-- **c2:** `test(hooks): add bjjDashboardKeys factory tests` — T5.2
-- **c3:** `feat(hooks): add useBJJDashboard with bjjDashboardKeys query key factory` — T5.3
-- **c4:** `test(hooks): assert useBJJDashboard calls RPC and sets 60s staleTime` — T5.4
-- **c5:** `feat(dashboard): add DashboardPageHeader, DashboardFooter, DashboardSkeleton components with tests` — T5.5, T5.6, T5.9, T5.10
-- **c6:** `feat(dashboard): add DashboardTimeFilter with localStorage persistence + tests` — T5.7, T5.8
-- **c7:** `feat(dashboard): add DashboardWidgetShell with error boundary, skeleton, empty state` — T5.11
-- **c8:** `feat(dashboard): add LastTechniquesWidget with CountUp hero + technique rows + tests` — T5.12, T5.13
-- **c9:** `feat(dashboard): add BJJDashboardPage with MUI ThemeProvider, grid, 1 real widget + 4 stubs` — T5.14
-- **c10:** `feat(router): lazy-import /bjj/dashboard with Suspense skeleton; add AppShell nav entry` — T5.15, T5.16
-- **c11:** `test(e2e): Playwright smoke — dashboard loads with 1 widget and seeded data` — T5.17
+- **c1:** `feat(types): add BJJDashboardData and related TypeScript types` — T5.1 ✅
+- **c2:** `test(hooks): add bjjDashboardKeys factory tests` — T5.2 ✅
+- **c3:** `feat(hooks): add useBJJDashboard with bjjDashboardKeys query key factory` — T5.3 ✅ (split into c3+bjjDashboardKeys + c5+useBJJDashboard for separate RED+GREEN per file)
+- **c4:** `test(hooks): assert useBJJDashboard calls RPC and sets 60s staleTime` — T5.4 ✅
+- **c5:** `feat(dashboard): add DashboardPageHeader, DashboardFooter, DashboardSkeleton components with tests` — T5.5, T5.6, T5.9, T5.10 ✅ (split per component for separate RED+GREEN)
+- **c6:** `feat(dashboard): add DashboardTimeFilter with localStorage persistence + tests` — T5.7, T5.8 ✅
+- **c7:** `feat(dashboard): add DashboardWidgetShell with error boundary, skeleton, empty state` — T5.11 ✅
+- **c8:** `feat(dashboard): add LastTechniquesWidget with CountUp hero + technique rows + tests` — T5.12, T5.13 ✅
+- **c9:** `feat(dashboard): add BJJDashboardPage with MUI ThemeProvider, grid, 1 real widget + 4 stubs` — T5.14 ✅
+- **c10:** `feat(router): lazy-import /bjj/dashboard with Suspense skeleton; add AppShell nav entry` — T5.15, T5.16 ✅
+- **c11:** `test(e2e): Playwright smoke — dashboard loads with 1 widget and seeded data` — T5.17 ✅
 
 #### PR checklist
 
