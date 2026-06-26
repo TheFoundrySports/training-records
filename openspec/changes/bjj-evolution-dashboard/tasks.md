@@ -384,22 +384,22 @@ Chain strategy: stacked-to-main
 **Forecast lines:** ~250
 **Stacked-to-main:** yes
 **Acceptance:**
-- [ ] `TechniqueTypeWidget` renders donut (custom SVG, no chart lib) + legend + insight rows
-- [ ] Drill-down: legend row click → `useNavigate('/bjj/blue-belt-progression?category={key}')`
-- [ ] Donut `dasharray`/`dashoffset` computed from `data.pct` (C=2πr, r=50)
-- [ ] Visual parity: screenshot of donut matches `template.html` lines 460–500
+- [x] `TechniqueTypeWidget` renders donut (custom SVG, no chart lib) + legend + insight rows
+- [x] Drill-down: legend row click → `useNavigate('/bjj/blue-belt-progression?category={key}')`
+- [x] Donut `dasharray`/`dashoffset` computed from `data.pct` (C=2πr, r=50)
+- [ ] Visual parity: screenshot of donut matches `template.html` lines 460–500 (deferred to PR 6b when all 5 widgets render)
 
 #### Tasks
 
-1. **T6a.1 — `src/features/bjj/dashboard/components/TechniqueTypeWidget.tsx`** (feat, ~120 lines)
+1. **T6a.1 — `src/features/bjj/dashboard/components/TechniqueTypeWidget.tsx`** (feat, ~120 lines) ✅
    - Custom SVG donut (r=50, `strokeDasharray="X 314"` where X = `pct * 3.14`); legend with per-category chip + pct; insight rows from `data.insight_rows`
-2. **T6a.2 — Test: `TechniqueTypeWidget` renders donut + legend; navigates on click** (test, ~40 lines)
+2. **T6a.2 — Test: `TechniqueTypeWidget` renders donut + legend; navigates on click** (test, ~40 lines) ✅
    - Mock `useNavigate`; assert legend click → call with `/bjj/blue-belt-progression?category=submission`
-3. **T6a.3 — Test: `useBJJPositions` reads from `bjj_positions` ordered by `display_order`** (test, ~25 lines)
+3. **T6a.3 — Test: `useBJJPositions` reads from `bjj_positions` ordered by `display_order`** (test, ~25 lines) ✅
    - File: `src/features/bjj/dashboard/__tests__/hooks/useBJJPositions.test.ts`
-4. **T6a.4 — `src/features/bjj/dashboard/hooks/useBJJPositions.ts`** (feat, ~20 lines)
+4. **T6a.4 — `src/features/bjj/dashboard/hooks/useBJJPositions.ts`** (feat, ~20 lines) ✅
    - `useQuery` with 1h staleTime; ordered by `display_order`
-5. **T6a.5 — Playwright: legend click navigates to progression page** (test, ~25 lines)
+5. **T6a.5 — Playwright: legend click navigates to progression page** (test, ~25 lines) ✅
    - Extend `e2e/bjj-dashboard.d1.spec.ts`
 
 #### Commit plan
