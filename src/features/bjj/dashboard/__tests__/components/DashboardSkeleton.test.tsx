@@ -14,23 +14,23 @@
  */
 import { describe, it, expect } from 'vitest'
 import { renderWithMuiTheme } from '@/test-utils/renderWithMuiTheme'
-import { container as tlContainer, screen } from '@testing-library/react'
+import { screen } from '@testing-library/react'
 import { DashboardSkeleton } from '../../components/DashboardSkeleton'
 
 describe('DashboardSkeleton \u2014 5-card grid placeholder (T5.10, REQ-BD4)', () => {
   it('renders 5 widget placeholders', () => {
-    renderWithMuiTheme(<DashboardSkeleton />)
+    const { container } = renderWithMuiTheme(<DashboardSkeleton />)
     // The skeleton uses `.widget` cards (same class as real widgets).
     // Count by querying the grid and counting .widget children.
-    const grid = tlContainer.querySelector('.grid')
+    const grid = container.querySelector('.grid')
     expect(grid).not.toBeNull()
     const widgets = grid?.querySelectorAll(':scope > .widget')
     expect(widgets?.length).toBe(5)
   })
 
   it('uses the desktop span classes (3/3/2/4/6) per REQ-BD4', () => {
-    renderWithMuiTheme(<DashboardSkeleton />)
-    const grid = tlContainer.querySelector('.grid')
+    const { container } = renderWithMuiTheme(<DashboardSkeleton />)
+    const grid = container.querySelector('.grid')
     const widgets = grid?.querySelectorAll(':scope > .widget') ?? []
     const spans = Array.from(widgets).map((w) =>
       Array.from(w.classList).find((c) => c.startsWith('span-')),
