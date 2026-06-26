@@ -15,7 +15,9 @@
  * RED confirmed: DashboardTimeFilter module doesn't exist yet.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { fireEvent, renderWithMuiTheme, screen } from '@/test-utils/renderWithMuiTheme'
+import { fireEvent, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { renderWithMuiTheme } from '@/test-utils/renderWithMuiTheme'
 import { DashboardTimeFilter } from '../../components/DashboardTimeFilter'
 import type { DashboardWindow } from '../../types/dashboard.types'
 
@@ -72,13 +74,14 @@ describe('DashboardTimeFilter \u2014 4-preset segmented control (T5.7, REQ-BD2)'
     expect(screen.getByRole('button', { name: '90d' })).toHaveAttribute('aria-pressed', 'true')
   })
 
-  it('writes the new window to localStorage on change', () => {
+  it('writes the new window to localStorage on change', async () => {
+    const user = userEvent.setup()
     setStoredWindow('30d')
     const onChange = vi.fn()
     renderWithMuiTheme(
       <DashboardTimeFilter window="30d" onChange={onChange} onRefresh={() => {}} />,
     )
-    fireEvent.click(screen.getByRole('button', { name: '7d' }))
+    await user.click(screen.getByRole('button', { name: '7d' }))
     expect(window.localStorage.getItem(STORAGE_KEY)).toBe('7d')
     expect(onChange).toHaveBeenCalledWith('7d')
   })
