@@ -57,3 +57,61 @@ test.describe('BJJ Dashboard shell (PR 5)', () => {
     await expect(page.getByRole('button', { name: '30d' })).toHaveAttribute('aria-pressed', 'false')
   })
 })
+
+/**
+ * BJJ Dashboard \u2014 Technique Types widget (PR 6a / T6a.5).
+ *
+ * Asserts the second widget (Technique Types, REQ-BD4 row 1, span-3)
+ * is wired into the grid and renders either the donut chart (when the
+ * user has confirmed rolls) or the empty-state copy (brand-new account).
+ * If a legend row is visible, clicking it MUST navigate to the
+ * progression page with the `?category={key}` query param (REQ-BD6).
+ */
+test.describe('BJJ Dashboard \u2014 Technique Types widget (PR 6a)', () => {
+  test('renders the Technique Types widget heading on the dashboard', async ({ page }) => {
+    await page.goto('/bjj/dashboard')
+
+    // Heading is in the second widget card (the first is Last Techniques).
+    // Use a scoped locator to disambiguate from the page H1.
+    const techniqueTypesHeading = page.locator('.widget', {
+      has: page.getByRole('heading', { name: 'Technique Types', level: 2 }),
+    })
+    await expect(techniqueTypesHeading).toBeVisible()
+  })
+
+  test('renders either the donut chart or the empty-state copy', async ({ page }) => {
+    await page.goto('/bjj/dashboard')
+
+    const techniqueTypesWidget = page.locator('.widget', {
+      has: page.getByRole('heading', { name: 'Technique Types', level: 2 }),
+    })
+
+    // The donut is present when segments exist (cumulative technique distribution).
+    // Otherwise the empty-state copy renders. Either is acceptable per the
+    // smoke-test contract (REQ-BD5).
+    const donut = techniqueTypesWidget.locator('.donut')
+    const emptyCopy = techniqueTypesWidget.getByText(/log a bjj workout/i)
+
+    const hasDonut = await donut.isVisible().catch(() => false)
+    const hasEmptyCopy = await emptyCopy.isVisible().catch(() => false)
+
+    expect(hasDonut || hasEmptyCopy).toBe(true)
+  })
+
+  test('clicking a legend row navigates to /bjj/blue-belt-progression?category={key} (REQ-BD6)', async ({
+    page,
+  }) => {
+    await page.goto('/bjj/dashboard')
+
+    // Only meaningful if the donut is rendered (i.e. the user has data).
+    // Otherwise skip \u2014 the smoke contract accepts either state.
+    const firstLegendRow = page.locator('.widget .legend-row').first()
+    const isVisible = await firstLegendRow.isVisible().catch(() => false)
+    test.skip(!isVisible, 'No legend rows to click \u2014 user has no confirmed rolls in window')
+
+    // The accessible name pattern is "{Category}, {pct}%", e.g.
+    // "Submissions, 40%". Click the first one and verify navigation.
+    await firstLegendRow.click()
+    await expect(page).toHaveURL(/\/bjj\/blue-belt-progression\?category=[a-z_]+$/)
+  })
+})

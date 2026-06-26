@@ -79,14 +79,11 @@ describe('TechniqueTypeWidget — custom SVG donut + legend + drill-down (T6a.1,
     const circles = Array.from(container.querySelectorAll('circle'))
     const segments = circles.filter((c) => c.getAttribute('stroke-dasharray'))
     expect(segments.length).toBe(4)
-    // C = 2πr, r=50 → ~314.159
-    const C = 2 * Math.PI * 50
-    // First segment (submission 40%): arc = 0.4 * C
-    const submissionArc = 0.4 * C
+    // C = 2πr, r=50 → ~314.159; first segment (submission 40%): arc = 0.4 * C ≈ 125.66
     expect(segments[0]?.getAttribute('stroke-dasharray')).toMatch(/^125/)
     // stroke-dashoffset of the first segment is 0 (it starts at the top).
     expect(segments[0]?.getAttribute('stroke-dashoffset')).toBe('0')
-    // Second segment (guard 25%) starts after 40% → offset = -(0.4 * C) = -125.66
+    // Second segment (guard 25%) starts after 40% → offset = -(0.4 * C) ≈ -125.66
     expect(segments[1]?.getAttribute('stroke-dashoffset')).toMatch(/^-125/)
   })
 

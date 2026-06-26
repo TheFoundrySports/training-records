@@ -22,7 +22,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import React from 'react'
 import { useBJJPositions } from '../../hooks/useBJJPositions'
 import { bjjDashboardKeys } from '../../hooks/bjjDashboardKeys'
-import { supabase } from '@/lib/supabase'
 
 // Track the chained supabase calls so we can assert on the `.order()` arg.
 const mockOrder = vi.fn()
