@@ -22,6 +22,7 @@ import { RegisterPage } from '@/features/auth/pages/RegisterPage'
 import { AcceptInvitePage } from '@/features/auth/pages/AcceptInvitePage'
 import { CreateUserPage } from '@/features/admin/create-user/pages/CreateUserPage'
 import { RegistrationSettingsPage } from '@/features/admin/registration-settings/pages/RegistrationSettingsPage'
+import { BJJDashboardRoute } from './DashboardRoute'
 
 export const router = createBrowserRouter([
   {
@@ -140,6 +141,13 @@ export const router = createBrowserRouter([
           {
             path: 'bjj/blue-belt-progression',
             element: <BeltProgressionPage />,
+          },
+          {
+            // Code-split dashboard route (NFR-05). The lazy + Suspense
+            // boundary lives in DashboardRoute.tsx so this module only
+            // exports the router (Fast Refresh requirement).
+            path: 'bjj/dashboard',
+            element: <BJJDashboardRoute />,
           },
         ],
       },

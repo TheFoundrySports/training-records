@@ -30,7 +30,7 @@
  *
  * Refs: T5.11, REQ-BD5 (loading/empty/error states).
  */
-import { useState, type ReactNode } from 'react'
+import { type ReactNode } from 'react'
 import { Alert, Button, Skeleton, Stack } from '@mui/material'
 import type { WidgetSpan } from '../types/dashboard.types'
 
@@ -91,9 +91,6 @@ export function DashboardWidgetShell<T>({
   children,
 }: DashboardWidgetShellProps<T>) {
   const slot = resolveSlot(isLoading, error, data)
-  // Defensive render guard: if children throw, render the error slot.
-  const [renderError, setRenderError] = useState<Error | null>(null)
-  const effectiveError = error ?? renderError
 
   let body: ReactNode
   switch (slot) {
@@ -117,7 +114,7 @@ export function DashboardWidgetShell<T>({
               Retry
             </Button>
           ) : undefined}>
-            {effectiveError?.message ?? 'Failed to load widget'}
+            {error?.message ?? 'Failed to load widget'}
           </Alert>
         </div>
       )
@@ -131,19 +128,7 @@ export function DashboardWidgetShell<T>({
       break
     case 'content':
     default:
-      try {
-        body = <div className="widget-content">{children}</div>
-      } catch (e) {
-        setRenderError(e instanceof Error ? e : new Error(String(e)))
-        return (
-          <div className={`widget span-${span}`}>
-            <WidgetHead heading={heading} sub={sub} />
-            <div className="widget-error">
-              <Alert severity="error">{effectiveError?.message ?? 'Render error'}</Alert>
-            </div>
-          </div>
-        )
-      }
+      body = <div className="widget-content">{children}</div>
   }
 
   return (

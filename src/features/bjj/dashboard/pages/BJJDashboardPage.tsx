@@ -39,7 +39,8 @@ import { DashboardSkeleton } from '../components/DashboardSkeleton'
 import { DashboardFooter } from '../components/DashboardFooter'
 import { DashboardWidgetShell } from '../components/DashboardWidgetShell'
 import { LastTechniquesWidget } from '../components/LastTechniquesWidget'
-import { DEFAULT_DASHBOARD_WINDOW, type DashboardWindow } from '../components/DashboardTimeFilter'
+import { DEFAULT_DASHBOARD_WINDOW } from '../components/DashboardTimeFilter.constants'
+import type { DashboardWindow } from '../types/dashboard.types'
 import type { QueryClient } from '@tanstack/react-query'
 
 // useQueryClient is imported lazily inside the component to avoid pulling

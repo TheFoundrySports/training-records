@@ -14,6 +14,7 @@ const NAV_ITEMS = [
   { label: 'Calendar', to: '/calendar' },
   { label: 'Exercises', to: '/exercises' },
   { label: 'Blue Belt', to: '/bjj/blue-belt-progression' },
+  { label: 'BJJ Dashboard', to: '/bjj/dashboard' },
 ]
 
 export function AppShell() {
@@ -54,6 +55,12 @@ export function AppShell() {
                 className="text-foreground/60 transition-colors hover:text-foreground"
               >
                 Blue Belt
+              </Link>
+              <Link
+                to="/bjj/dashboard"
+                className="text-foreground/60 transition-colors hover:text-foreground"
+              >
+                BJJ Dashboard
               </Link>
               {role === 'admin' && (
                 <Link

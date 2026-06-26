@@ -38,15 +38,11 @@ import {
 } from '@mui/material'
 import SyncIcon from '@mui/icons-material/Sync'
 import type { DashboardWindow } from '../types/dashboard.types'
-
-/** The 4 window presets the dashboard exposes, in display order. */
-export const DASHBOARD_WINDOWS: readonly DashboardWindow[] = ['7d', '30d', '90d', '10r'] as const
-
-/** localStorage key for the persisted window selection. */
-export const DASHBOARD_WINDOW_STORAGE_KEY = 'bjj-dashboard-window'
-
-/** Default window preset when localStorage is empty. */
-export const DEFAULT_DASHBOARD_WINDOW: DashboardWindow = '30d'
+import {
+  DASHBOARD_WINDOWS,
+  DASHBOARD_WINDOW_STORAGE_KEY,
+  DEFAULT_DASHBOARD_WINDOW,
+} from './DashboardTimeFilter.constants'
 
 /**
  * Read the persisted window from localStorage. Falls back to the default
@@ -104,6 +100,7 @@ export function DashboardTimeFilter({
   useEffect(() => {
     if (windowProp) {
       // Controlled mode: parent owns the truth, no hydration.
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional, must mirror controlled prop on first render
       setWindowState(windowProp)
       return
     }
