@@ -39,6 +39,7 @@ import { DashboardSkeleton } from '../components/DashboardSkeleton'
 import { DashboardFooter } from '../components/DashboardFooter'
 import { DashboardWidgetShell } from '../components/DashboardWidgetShell'
 import { LastTechniquesWidget } from '../components/LastTechniquesWidget'
+import { TechniqueTypeWidget } from '../components/TechniqueTypeWidget'
 import { DEFAULT_DASHBOARD_WINDOW } from '../components/DashboardTimeFilter.constants'
 import type { DashboardWindow } from '../types/dashboard.types'
 import type { QueryClient } from '@tanstack/react-query'
@@ -54,8 +55,18 @@ interface StubWidgetCopy {
   sub: string
 }
 
+/**
+ * Stubs for the 3 widgets that haven't shipped yet. The PR 6a scope
+ * replaces the "Technique Types" stub with the real `TechniqueTypeWidget`
+ * (sibling of `LastTechniquesWidget` in row 1 of the grid); PR 6b
+ * replaces these 3 with `RoleBalanceWidget`, `OutcomesWidget`, and
+ * `RollFlowWidget`.
+ *
+ * Span mapping is index-driven (idx 0 → 2 cols, idx 1 → 4 cols, idx 2
+ * → 6 cols) to mirror the REQ-BD4 desktop layout: Row 2 = RoleBalance
+ * (2) | Outcomes (4), Row 3 = RollFlow (6, full-width).
+ */
 const STUB_WIDGETS: StubWidgetCopy[] = [
-  { title: 'Technique Types', sub: 'Coming in PR 6a' },
   { title: 'Role Balance', sub: 'Coming in PR 6b' },
   { title: 'Outcomes', sub: 'Coming in PR 6b' },
   { title: 'Roll Flow', sub: 'Coming in PR 6b' },
@@ -122,6 +133,7 @@ export function BJJDashboardPage() {
               </DashboardWidgetShell>
             ) : (
               <>
+                {/* Row 1: LastTechniques (span-3) | TechniqueType (span-3) — REQ-BD4 */}
                 <DashboardWidgetShell
                   span={3}
                   heading="Last Techniques"
@@ -130,10 +142,24 @@ export function BJJDashboardPage() {
                 >
                   {data ? <LastTechniquesWidget data={data.last_techniques} /> : null}
                 </DashboardWidgetShell>
+                <DashboardWidgetShell
+                  span={3}
+                  heading="Technique Types"
+                  sub={`${data?.total_rolls ?? 0} rolls across categories`}
+                  data={data?.technique_types ?? null}
+                >
+                  {data ? (
+                    <TechniqueTypeWidget
+                      data={data.technique_types}
+                      totalRolls={data.total_rolls}
+                    />
+                  ) : null}
+                </DashboardWidgetShell>
+                {/* Row 2 + Row 3: stubbed widgets pending PR 6b (RoleBalance, Outcomes, RollFlow) */}
                 {STUB_WIDGETS.map((stub, idx) => (
                   <DashboardWidgetShell
                     key={stub.title}
-                    span={idx === 0 ? 3 : idx === 1 ? 2 : idx === 2 ? 4 : 6}
+                    span={idx === 0 ? 2 : idx === 1 ? 4 : 6}
                     heading={stub.title}
                     sub={stub.sub}
                     data={[]}

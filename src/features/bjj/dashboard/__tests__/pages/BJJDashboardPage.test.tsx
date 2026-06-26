@@ -17,6 +17,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import React from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { MemoryRouter } from 'react-router'
 import { render, screen, type RenderResult } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { BJJDashboardPage } from '../../pages/BJJDashboardPage'
@@ -56,9 +57,13 @@ function renderWithProviders(): RenderResult {
   })
   return render(
     React.createElement(
-      QueryClientProvider,
-      { client: queryClient },
-      React.createElement(BJJDashboardPage),
+      MemoryRouter,
+      null,
+      React.createElement(
+        QueryClientProvider,
+        { client: queryClient },
+        React.createElement(BJJDashboardPage),
+      ),
     ),
   )
 }
