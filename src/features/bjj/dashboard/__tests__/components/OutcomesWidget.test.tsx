@@ -31,10 +31,22 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderWithMuiTheme } from '@/test-utils/renderWithMuiTheme'
+import { MemoryRouter } from 'react-router'
 import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { OutcomesWidget } from '../../components/OutcomesWidget'
 import type { OutcomesData } from '../../types/dashboard.types'
+
+/**
+ * The widget uses `<Link>` (an anchor) for drill-down, so the test
+ * render needs a Router context. `renderWithMuiTheme` does not
+ * install one (it intentionally stays Router-free so widget tests
+ * that don't need navigation can use it). We wrap with
+ * `MemoryRouter` here only.
+ */
+function renderWithRouter(ui: React.ReactElement) {
+  return renderWithMuiTheme(<MemoryRouter>{ui}</MemoryRouter>)
+}
 
 function buildTiles(): OutcomesData['tiles'] {
   return [
@@ -47,7 +59,7 @@ function buildTiles(): OutcomesData['tiles'] {
 
 describe('OutcomesWidget — 2x2 tile grid + drill-down (T6b.3, REQ-BD6)', () => {
   it('renders exactly 4 tiles, one per outcome type', () => {
-    const { container } = renderWithMuiTheme(
+    const { container } = renderWithRouter(
       <OutcomesWidget data={{ tiles: buildTiles(), total_rolls: 60 }} />,
     )
     const grid = container.querySelector('.outcome-grid')
@@ -57,7 +69,7 @@ describe('OutcomesWidget — 2x2 tile grid + drill-down (T6b.3, REQ-BD6)', () =>
   })
 
   it('renders each tile as an accessible link with the outcome label, count, and pct', () => {
-    renderWithMuiTheme(
+    renderWithRouter(
       <OutcomesWidget data={{ tiles: buildTiles(), total_rolls: 60 }} />,
     )
     // Tiles are <a> elements (react-router <Link>) — queryable by role 'link'.
@@ -77,7 +89,7 @@ describe('OutcomesWidget — 2x2 tile grid + drill-down (T6b.3, REQ-BD6)', () =>
   })
 
   it('renders each tile label with the matching --outcome-* CSS variable on the swatch', () => {
-    const { container } = renderWithMuiTheme(
+    const { container } = renderWithRouter(
       <OutcomesWidget data={{ tiles: buildTiles(), total_rolls: 60 }} />,
     )
     const swatches = container.querySelectorAll('.outcome-tile .label .swatch')
@@ -89,7 +101,7 @@ describe('OutcomesWidget — 2x2 tile grid + drill-down (T6b.3, REQ-BD6)', () =>
   })
 
   it('renders each tile pct-fill with width = pct% and matching --outcome-* color', () => {
-    const { container } = renderWithMuiTheme(
+    const { container } = renderWithRouter(
       <OutcomesWidget data={{ tiles: buildTiles(), total_rolls: 60 }} />,
     )
     const fills = container.querySelectorAll('.outcome-tile .pct-fill')
@@ -106,7 +118,7 @@ describe('OutcomesWidget — 2x2 tile grid + drill-down (T6b.3, REQ-BD6)', () =>
 
   it('clicking a tile navigates to /workouts?outcome={key} (REQ-BD6 drill-down)', async () => {
     const user = userEvent.setup()
-    renderWithMuiTheme(
+    renderWithRouter(
       <OutcomesWidget data={{ tiles: buildTiles(), total_rolls: 60 }} />,
     )
     // Click the Submission tile.
@@ -118,7 +130,7 @@ describe('OutcomesWidget — 2x2 tile grid + drill-down (T6b.3, REQ-BD6)', () =>
   })
 
   it('renders no tiles when tiles is empty (REQ-BD5 empty-state contract)', () => {
-    const { container } = renderWithMuiTheme(
+    const { container } = renderWithRouter(
       <OutcomesWidget data={{ tiles: [], total_rolls: 0 }} />,
     )
     expect(container.querySelectorAll('.outcome-tile').length).toBe(0)
