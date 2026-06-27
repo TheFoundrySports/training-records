@@ -423,11 +423,11 @@ Chain strategy: stacked-to-main
 **Forecast lines:** ~350
 **Stacked-to-main:** yes
 **Acceptance:**
-- [ ] `RoleBalanceWidget` (row 2 left) with stacked bar + legend
-- [ ] `OutcomesWidget` (row 2 right) with 2×2 tile grid
-- [ ] `RollFlowWidget` (row 3 full width) with top 7 transitions + animated bars
-- [ ] All 3 widgets render real data from RPC; empty state copy correct
-- [ ] Visual parity: full dashboard screenshot vs `template.html`
+- [x] `RoleBalanceWidget` (row 2 left) with stacked bar + legend
+- [x] `OutcomesWidget` (row 2 right) with 2×2 tile grid
+- [x] `RollFlowWidget` (row 3 full width) with top 7 transitions + animated bars
+- [x] All 3 widgets render real data from RPC; empty state copy correct
+- [ ] Visual parity: full dashboard screenshot vs `template.html` (**DEFERRED — human review pause point**)
 
 #### Tasks
 
