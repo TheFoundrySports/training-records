@@ -27,11 +27,11 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderWithMuiTheme } from '@/test-utils/renderWithMuiTheme'
-import { screen, within } from '@testing-library/react'
+import { within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { getPositionLabel } from '../../../position-vocabulary'
 import { RollFlowWidget } from '../../components/RollFlowWidget'
-import type { RollFlowData, RollFlowEdge } from '../../types/dashboard.types'
+import type { RollFlowEdge } from '../../types/dashboard.types'
 
 const mockNavigate = vi.fn()
 

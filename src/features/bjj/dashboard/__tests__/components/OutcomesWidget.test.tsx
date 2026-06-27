@@ -29,7 +29,7 @@
  *
  * Refs: T6b.3, T6b.4, REQ-BD4 (grid spans), REQ-BD6 (drill-down).
  */
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import { renderWithMuiTheme } from '@/test-utils/renderWithMuiTheme'
 import { MemoryRouter } from 'react-router'
 import { screen } from '@testing-library/react'
