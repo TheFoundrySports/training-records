@@ -167,3 +167,108 @@ describe('BJJDashboardPage \u2014 page assembly (T5.14)', () => {
     expect(screen.getAllByText(/boom/i).length).toBeGreaterThan(0)
   })
 })
+
+/**
+ * PR 6b integration tests — verify the 3 new widgets (RoleBalance,
+ * Outcomes, RollFlow) render with real data when the RPC payload
+ * includes segments / tiles / edges.
+ */
+describe('BJJDashboardPage — PR 6b 3-widget integration (T6b.7)', () => {
+  it('renders the RoleBalance stacked bar + legend when role_balance has segments', () => {
+    mockUseBJJDashboard.mockReturnValue({
+      data: buildPayload({
+        role_balance: {
+          segments: [
+            { role: 'attacking', pct: 60, count: 47 },
+            { role: 'defending', pct: 30, count: 23 },
+            { role: 'neutral', pct: 10, count: 8 },
+          ],
+          total_rolls: 78,
+        },
+      }),
+      isLoading: false,
+      isError: false,
+      error: null,
+      refetch: vi.fn(),
+    })
+    const { container } = renderWithProviders()
+    // The .role-stacked wrapper + 3 segment children render inside the
+    // RoleBalance widget shell.
+    const stacked = container.querySelector('.role-stacked')
+    expect(stacked).not.toBeNull()
+    expect(stacked?.children.length).toBe(3)
+    expect(screen.getByText('Attacking')).toBeInTheDocument()
+    expect(screen.getByText('Defending')).toBeInTheDocument()
+    expect(screen.getByText('Neutral')).toBeInTheDocument()
+  })
+
+  it('renders the Outcomes 2x2 tile grid when outcomes has tiles', () => {
+    mockUseBJJDashboard.mockReturnValue({
+      data: buildPayload({
+        outcomes: {
+          tiles: [
+            { outcome: 'submission', count: 12, pct: 20 },
+            { outcome: 'position_gain', count: 22, pct: 37 },
+            { outcome: 'position_loss', count: 18, pct: 30 },
+            { outcome: 'neutral', count: 8, pct: 13 },
+          ],
+          total_rolls: 60,
+        },
+      }),
+      isLoading: false,
+      isError: false,
+      error: null,
+      refetch: vi.fn(),
+    })
+    const { container } = renderWithProviders()
+    const grid = container.querySelector('.outcome-grid')
+    expect(grid).not.toBeNull()
+    expect(container.querySelectorAll('.outcome-tile').length).toBe(4)
+  })
+
+  it('renders the RollFlow top-7 rows when roll_flow has edges', () => {
+    mockUseBJJDashboard.mockReturnValue({
+      data: buildPayload({
+        roll_flow: {
+          edges: [
+            { from: 'closed_guard', to: 'mount', count: 10, pct: 100 },
+            { from: 'half_guard', to: 'side_control', count: 7, pct: 70 },
+          ],
+          total_rolls: 17,
+        },
+      }),
+      isLoading: false,
+      isError: false,
+      error: null,
+      refetch: vi.fn(),
+    })
+    const { container } = renderWithProviders()
+    const rows = container.querySelectorAll('.flow-row')
+    expect(rows.length).toBe(2)
+    // Footer shows total_rolls.
+    const foot = container.querySelector('.flow-foot')
+    expect(foot).not.toBeNull()
+  })
+
+  it('applies the correct grid spans (2 / 4 / 6) for the PR 6b widgets', () => {
+    mockUseBJJDashboard.mockReturnValue({
+      data: buildPayload({
+        role_balance: { segments: [{ role: 'attacking', pct: 100, count: 1 }], total_rolls: 1 },
+        outcomes: { tiles: [{ outcome: 'submission', count: 1, pct: 100 }], total_rolls: 1 },
+        roll_flow: { edges: [{ from: 'standing', to: 'mount', count: 1, pct: 100 }], total_rolls: 1 },
+      }),
+      isLoading: false,
+      isError: false,
+      error: null,
+      refetch: vi.fn(),
+    })
+    const { container } = renderWithProviders()
+    // Each PR 6b widget card carries the correct span class.
+    const span2 = container.querySelector('.widget.span-2')
+    const span4 = container.querySelector('.widget.span-4')
+    const span6 = container.querySelector('.widget.span-6')
+    expect(span2).not.toBeNull()
+    expect(span4).not.toBeNull()
+    expect(span6).not.toBeNull()
+  })
+})
