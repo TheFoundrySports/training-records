@@ -95,7 +95,7 @@ describe('useUpdateBJJWorkout', () => {
       p_sections: [
         {
           id: 'section-1',
-          section_number: 0,
+          section_number: 1,
           goal: 'Guard retention',
           raw_description: null,
           duration_minutes: null,
@@ -104,7 +104,7 @@ describe('useUpdateBJJWorkout', () => {
         },
         {
           id: null,
-          section_number: 1,
+          section_number: 2,
           goal: 'Pass guard',
           raw_description: null,
           duration_minutes: null,
