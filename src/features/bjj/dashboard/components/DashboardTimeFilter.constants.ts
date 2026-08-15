@@ -18,3 +18,11 @@ export const DASHBOARD_WINDOW_STORAGE_KEY = 'bjj-dashboard-window'
 
 /** Default window preset when localStorage is empty. */
 export const DEFAULT_DASHBOARD_WINDOW: DashboardWindow = '30d'
+
+/** Visible labels matching open-design `template.html` segmented control. */
+export const DASHBOARD_WINDOW_LABELS: Record<DashboardWindow, string> = {
+  '7d': '7 days',
+  '30d': '30 days',
+  '90d': '90 days',
+  '10r': '10 rolls',
+}

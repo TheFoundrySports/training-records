@@ -17,6 +17,7 @@
  * lazy import).
  */
 import { lazy, Suspense } from 'react'
+import '@/features/bjj/dashboard/theme/load-dashboard-styles'
 
 const BJJDashboardPage = lazy(() =>
   import('@/features/bjj/dashboard/pages/BJJDashboardPage').then((m) => ({
@@ -26,12 +27,13 @@ const BJJDashboardPage = lazy(() =>
 
 function DashboardFallback() {
   return (
-    <div className="page" role="status" aria-busy="true" aria-label="Loading dashboard">
+    <div className="page bjj-dashboard" role="status" aria-busy="true" aria-label="Loading dashboard">
+      <div className="shell">
       <div className="page-head">
         <div>
           <p className="eyebrow">
             <span className="dot" aria-hidden="true" />
-            Loading\u2026
+            Loading…
           </p>
           <h1>BJJ Evolution Dashboard</h1>
         </div>
@@ -42,6 +44,7 @@ function DashboardFallback() {
         <div className="widget span-2" style={{ minHeight: 220 }} aria-hidden="true" />
         <div className="widget span-4" style={{ minHeight: 220 }} aria-hidden="true" />
         <div className="widget span-6" style={{ minHeight: 220 }} aria-hidden="true" />
+      </div>
       </div>
     </div>
   )

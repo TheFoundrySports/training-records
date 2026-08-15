@@ -63,9 +63,7 @@ function RoleLegendRow({ segment }: { segment: RoleBalanceSegment }) {
           <span className="swatch" aria-hidden="true" style={{ background: fillVar }} />
           {ROLE_LABEL[segment.role]}
         </span>
-        <span className="role-value">
-          {segment.pct}% · {segment.count}
-        </span>
+        <span className="role-value num">{segment.pct}%</span>
       </div>
       <div className="role-pct-bar" aria-hidden="true">
         <span
@@ -78,7 +76,7 @@ function RoleLegendRow({ segment }: { segment: RoleBalanceSegment }) {
 }
 
 export function RoleBalanceWidget({ data }: RoleBalanceWidgetProps) {
-  const segments = data.segments
+  const segments = data?.segments ?? []
 
   return (
     <>

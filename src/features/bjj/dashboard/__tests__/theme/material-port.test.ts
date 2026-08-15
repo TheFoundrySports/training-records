@@ -133,14 +133,16 @@ const REQUIRED_CLASSES = [
   // Outcomes
   '.outcome-grid',
   '.outcome-tile',
-  // Flow (RollFlow)
-  '.flow',
-  '.flow-row',
-  '.flow-from',
-  '.flow-to',
-  '.flow-bar',
-  '.flow-fill',
-  '.flow-foot',
+  // Flow (RollFlow sequence timeline)
+  '.flow-head',
+  '.flow-steps',
+  '.flow-step',
+  '.flow-body',
+  '.flow-lane',
+  '.flow-chain',
+  '.flow-circle',
+  '.flow-summary',
+  '.tag',
   // Footer
   '.foot',
 ] as const
@@ -171,5 +173,68 @@ describe('material-dashboard.css — class-name coverage (REQ-BD7)', () => {
         `.chip[data-cat="${cat}"]`,
       )
     }
+  })
+})
+
+describe('dashboard style entry — wired into the page', () => {
+  it('BJJDashboardPage imports load-dashboard-styles so widget classes resolve', () => {
+    const pagePath = resolve(__dirname, '../../pages/BJJDashboardPage.tsx')
+    const contents = readFileSync(pagePath, 'utf-8')
+    expect(contents).toMatch(/load-dashboard-styles/)
+  })
+})
+
+// Task 4.2 RED: CSS scoping per design D2 (REQ-BD9)
+describe('material-dashboard.css — scoped tokens and element resets (Task 4.2, D2)', () => {
+  const contents = readFileSync(CSS_PATH, 'utf-8')
+
+  it('scopes :root tokens under .bjj-dashboard in light mode', () => {
+    // Light mode tokens must be under .bjj-dashboard { ... }
+    expect(contents).toMatch(/\.bjj-dashboard\s*\{[^}]*--bg:\s*#f8fafd/)
+  })
+
+  it('scopes :root tokens under .bjj-dashboard in dark mode', () => {
+    // Dark mode tokens must be under @media (prefers-color-scheme: dark) { .bjj-dashboard { ... } }
+    expect(contents).toMatch(/@media\s*\(prefers-color-scheme:\s*dark\)[^}]*\.bjj-dashboard\s*\{[^}]*--bg:\s*#101418/)
+  })
+
+  it('does NOT have bare :root token definitions (they must be scoped)', () => {
+    // The file should NOT have ":root { --bg: ..." directly
+    // (It should have ".bjj-dashboard { --bg: ..." instead)
+    const rootTokenMatch = contents.match(/:root\s*\{[^}]*--bg:/)
+    expect(rootTokenMatch).toBeNull()
+  })
+
+  it('scopes * reset under .bjj-dashboard (not bare "*")', () => {
+    // Should have ".bjj-dashboard * { box-sizing: ..."
+    // Should NOT have bare "* { box-sizing: ..." at top level
+    expect(contents).toMatch(/\.bjj-dashboard\s+\*\s*\{[^}]*box-sizing:\s*border-box/)
+    // Ensure there's no bare "* { box-sizing: ..." without .bjj-dashboard scope
+    const bareReset = contents.match(/^[^.]*\*\s*\{[^}]*box-sizing/)
+    expect(bareReset).toBeNull()
+  })
+
+  it('scopes html, body reset under .bjj-dashboard (not bare "html, body")', () => {
+    // Should have ".bjj-dashboard html, .bjj-dashboard body { ..." or similar descendant scoping
+    expect(contents).toMatch(/\.bjj-dashboard\s+(html|body)/)
+  })
+})
+
+describe('material-dashboard.css — Roll flow sequence timeline (mat-bjj-app.html)', () => {
+  const contents = readFileSync(CSS_PATH, 'utf-8')
+
+  it('lays out lanes as 110px meta + 6-node chain', () => {
+    expect(contents).toMatch(
+      /\.flow-lane\s*\{[^}]*grid-template-columns:\s*110px\s+minmax\(0,\s*1fr\)/,
+    )
+    expect(contents).toMatch(
+      /\.flow-chain\s*\{[^}]*grid-template-columns:\s*repeat\(6,\s*minmax\(0,\s*1fr\)\)/,
+    )
+  })
+
+  it('styles peak / end / loss circles and the connecting line', () => {
+    expect(contents).toMatch(/\.flow-circle\.peak\s*\{/)
+    expect(contents).toMatch(/\.flow-circle\.end\s*\{/)
+    expect(contents).toMatch(/\.flow-chain::before\s*\{/)
   })
 })

@@ -1,8 +1,8 @@
 // @ts-nocheck — Deno global types not available in editor
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { buildSystemPrompt, type BJJTechniqueRow } from './prompt.ts'
-import { type BJJSectionAIResponse } from '../../../src/features/bjj/bjj.schema.ts'
-import { parseBJJSectionAIResponse } from '../../../src/features/bjj/ai/parseBJJSectionAIResponse.ts'
+import { type BJJSectionAIResponse } from './bjj.schema.ts'
+import { parseBJJSectionAIResponse } from './parseBJJSectionAIResponse.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',

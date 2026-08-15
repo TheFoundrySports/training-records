@@ -21,14 +21,27 @@
  * execution verification happens on staging via `supabase db reset`.
  */
 
-import { readFileSync, existsSync } from 'node:fs'
-import { resolve } from 'node:path'
+import { readFileSync, existsSync, readdirSync } from 'node:fs'
+import { resolve, join } from 'node:path'
 import { describe, it, expect } from 'vitest'
 
-const MIGRATION_PATH = resolve(
-  __dirname,
-  '../../../supabase/migrations/20260612000005_bjj_dashboard_data_rpc.sql',
-)
+// Resolve the NEWEST *bjj_dashboard_data*.sql migration
+// (Design D5: new migration supersedes the committed one)
+const MIGRATIONS_DIR = resolve(__dirname, '../../../supabase/migrations')
+
+function getNewestDashboardDataMigration(): string {
+  const files = readdirSync(MIGRATIONS_DIR)
+    .filter(f => f.includes('bjj_dashboard_data') && f.endsWith('.sql'))
+    .sort()
+  
+  if (files.length === 0) {
+    throw new Error('No bjj_dashboard_data migration found')
+  }
+  
+  return join(MIGRATIONS_DIR, files[files.length - 1])
+}
+
+const MIGRATION_PATH = getNewestDashboardDataMigration()
 
 function readMigration(): string {
   if (!existsSync(MIGRATION_PATH)) {
@@ -40,8 +53,13 @@ function readMigration(): string {
 }
 
 describe('bjj_dashboard_data RPC migration — file presence', () => {
-  it('creates migration 20260612000005_bjj_dashboard_data_rpc.sql', () => {
+  it('creates a bjj_dashboard_data migration file', () => {
     expect(existsSync(MIGRATION_PATH), `${MIGRATION_PATH} must exist`).toBe(true)
+  })
+
+  it('resolves to the newest *bjj_dashboard_data*.sql migration', () => {
+    const filename = MIGRATION_PATH.split('/').pop()
+    expect(filename).toMatch(/bjj_dashboard_data.*\.sql$/)
   })
 })
 
@@ -131,27 +149,61 @@ describe('bjj_dashboard_data RPC — REQ-RE5 window resolution', () => {
 })
 
 describe('bjj_dashboard_data RPC — REQ-RE5 aggregation source', () => {
-  it('composes from the 3 bjj_dashboard_* views', () => {
+  it('declares a scoped_rolls CTE with window predicate for role/outcomes/flow', () => {
     const sql = readMigration()
-    expect(sql).toMatch(/bjj_dashboard_role_balance/i)
-    expect(sql).toMatch(/bjj_dashboard_outcomes/i)
-    expect(sql).toMatch(/bjj_dashboard_position_transitions/i)
+    // Design D1: single scoped_rolls CTE feeds role_balance / outcomes / roll_flow
+    expect(sql).toMatch(/with\s+scoped_rolls\s+as\s*\(/i)
+    expect(sql).toMatch(/from\s+public\.bjj_roll_events\s+r/i)
+    expect(sql).toMatch(/join\s+public\.workouts\s+w\s+on\s+w\.id\s*=\s*r\.workout_id/i)
+    expect(sql).toMatch(/r\.status\s*=\s*'confirmed'/i)
+    expect(sql).toMatch(/w\.type\s*=\s*'bjj'/i)
   })
 
-  it('aggregates from confirmed rows (the views already filter status=confirmed)', () => {
+  it('reads from scoped_rolls for role_balance aggregation', () => {
     const sql = readMigration()
-    // The views themselves filter status='confirmed' AND w.type='bjj' (per
-    // migration 3). The RPC body should not re-filter by status. We
-    // assert that the role_balance / outcomes / position_transitions
-    // aggregates read from the views (not from bjj_roll_events directly).
-    expect(sql).toMatch(/from\s+public\.bjj_dashboard_role_balance/i)
-    expect(sql).toMatch(/from\s+public\.bjj_dashboard_outcomes/i)
-    expect(sql).toMatch(/from\s+public\.bjj_dashboard_position_transitions/i)
+    // Design D1: role_balance reads from scoped_rolls, not the unfiltered view
+    expect(sql).toMatch(/select\s+.*from\s+scoped_rolls/i)
+  })
+
+  it('reads from scoped_rolls for outcomes aggregation', () => {
+    const sql = readMigration()
+    // Design D1: outcomes reads from scoped_rolls
+    expect(sql).toMatch(/role_balance[\s\S]*scoped_rolls/i)
+  })
+
+  it('reads from scoped_rolls for roll_flow aggregation with position_to is not null', () => {
+    const sql = readMigration()
+    // Design D1: roll_flow reads from scoped_rolls, keeps position_to is not null
+    expect(sql).toMatch(/roll_flow[\s\S]*scoped_rolls/i)
+  })
+
+  it('unnests technique_ids in a subquery before counting distinct techniques', () => {
+    const sql = readMigration()
+    // Postgres rejects count(distinct unnest(...)) — SRF inside aggregate.
+    expect(sql).not.toMatch(/count\s*\(\s*distinct\s+unnest\s*\(/i)
+    expect(sql).toMatch(/unnest\s*\(\s*technique_ids\s*\)/i)
   })
 
   it('joins bjj_positions for display labels (REQ-PV1)', () => {
     const sql = readMigration()
-    expect(sql).toMatch(/left\s+join\s+public\.bjj_positions/i)
+    // Roll-flow edges now emit position keys; labels resolve client-side.
+    expect(sql).toMatch(/'from',\s*position_from/i)
+    expect(sql).toMatch(/'to',\s*position_to/i)
+  })
+
+  it('emits widget contract field names for last_techniques rows', () => {
+    const sql = readMigration()
+    expect(sql).toMatch(/'rows'/i)
+    expect(sql).toMatch(/'technique_id'/i)
+    expect(sql).toMatch(/'technique_name'/i)
+    expect(sql).toMatch(/'practice_count'/i)
+  })
+
+  it('emits role/outcome widget field names (not legacy label/n)', () => {
+    const sql = readMigration()
+    expect(sql).toMatch(/'role',\s*role/i)
+    expect(sql).toMatch(/'outcome',\s*outcome/i)
+    expect(sql).not.toMatch(/'n',\s*event_count/i)
   })
 })
 

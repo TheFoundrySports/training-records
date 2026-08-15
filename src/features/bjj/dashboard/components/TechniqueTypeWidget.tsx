@@ -45,23 +45,22 @@
  * NFR-07 (English copy).
  */
 import { useNavigate } from 'react-router'
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import { categoryLabel } from '../../category-labels'
+import { WIDGET_COPY } from '../copy/dashboard-copy'
+import { InsightIcon } from './InsightIcon'
 import type { BJJCategory } from '../../bjj.schema'
-import type { TechniqueTypesData, TechniqueTypesInsight } from '../types/dashboard.types'
+import type { TechniqueTypesData } from '../types/dashboard.types'
 
 export interface TechniqueTypeWidgetProps {
   /** Donut segments + insight rows from the dashboard RPC. */
   data: TechniqueTypesData
-  /** Total confirmed rolls for the selected window (center label). */
-  totalRolls: number
 }
 
 /** Circumference of the donut at r=50 (in the viewBox coordinate system). */
 const DONUT_CIRCUMFERENCE = 2 * Math.PI * 50
 
-/** SVG stroke width (in viewBox units). */
-const DONUT_STROKE_WIDTH = 20
+/** SVG stroke width (in viewBox units). Task 4.3: updated from 20 to 18 per D3. */
+const DONUT_STROKE_WIDTH = 18
 
 /**
  * Compute the `stroke-dasharray` + `stroke-dashoffset` for each segment.
@@ -85,22 +84,20 @@ function computeDonutSegments(
   })
 }
 
-function InsightRow({ insight }: { insight: TechniqueTypesInsight }) {
+function InsightRow({ text }: { text: string }) {
   return (
     <div className="insight" role="note">
-      <InfoOutlinedIcon fontSize="small" aria-hidden="true" />
-      <div>
-        <strong>{insight.title}</strong>
-        <div>{insight.body}</div>
-      </div>
+      <InsightIcon />
+      <span>{text}</span>
     </div>
   )
 }
 
-export function TechniqueTypeWidget({ data, totalRolls }: TechniqueTypeWidgetProps) {
+export function TechniqueTypeWidget({ data }: TechniqueTypeWidgetProps) {
   const navigate = useNavigate()
-  const segments = data.segments
-  const insights = data.insights
+  const segments = data?.segments ?? []
+  const insights = data?.insights ?? []
+  const practiceTotal = data?.total ?? segments.reduce((sum, segment) => sum + segment.count, 0)
   const segmentLayout = computeDonutSegments(segments)
 
   const handleLegendClick = (category: BJJCategory) => {
@@ -111,12 +108,12 @@ export function TechniqueTypeWidget({ data, totalRolls }: TechniqueTypeWidgetPro
     <>
       <div className="donut-wrap">
         <div className="donut" data-testid="donut" aria-label="Technique type distribution donut chart">
-          <svg viewBox="0 0 100 100" width="100%" height="100%" aria-hidden="true">
+          <svg viewBox="0 0 120 120" width="100%" height="100%" aria-hidden="true">
             {/* Track (the unfilled portion of the ring) */}
             <circle
               className="donut-track"
-              cx={50}
-              cy={50}
+              cx={60}
+              cy={60}
               r={50}
               fill="none"
               strokeWidth={DONUT_STROKE_WIDTH}
@@ -125,20 +122,23 @@ export function TechniqueTypeWidget({ data, totalRolls }: TechniqueTypeWidgetPro
             {segments.map((segment, idx) => (
               <circle
                 key={segment.category}
-                cx={50}
-                cy={50}
+                cx={60}
+                cy={60}
                 r={50}
                 fill="none"
                 stroke={`var(--cat-${segment.category})`}
                 strokeWidth={DONUT_STROKE_WIDTH}
                 strokeDasharray={segmentLayout[idx]?.dasharray ?? '0 0'}
                 strokeDashoffset={segmentLayout[idx]?.offset ?? 0}
+                strokeLinecap="butt"
               />
             ))}
           </svg>
           <div className="center">
-            <span className="n">{totalRolls}</span>
-            <span className="l">total rolls</span>
+            <div>
+              <div className="n num">{practiceTotal}</div>
+              <div className="l">{WIDGET_COPY.techniqueTypes.donutLabel}</div>
+            </div>
           </div>
         </div>
 
@@ -167,7 +167,7 @@ export function TechniqueTypeWidget({ data, totalRolls }: TechniqueTypeWidgetPro
       {insights.length > 0 ? (
         <div>
           {insights.map((insight, idx) => (
-            <InsightRow key={`${insight.title}-${idx}`} insight={insight} />
+            <InsightRow key={`${insight.text}-${idx}`} text={insight.text} />
           ))}
         </div>
       ) : null}

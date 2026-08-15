@@ -32,16 +32,18 @@ vi.mock('../../hooks/useBJJDashboard', () => ({
 function buildPayload(overrides: Record<string, unknown> = {}) {
   return {
     window: '30d' as const,
+    title: 'BJJ Evolution Dashboard',
+    subtitle: 'Your game over 30 days: techniques, role balance, and how your rolls end.',
     start_date: '2026-05-13',
     end_date: '2026-06-12',
     total_rolls: 78,
     total_workouts: 14,
     total_techniques: 23,
     last_techniques: { rows: [] },
-    technique_types: { segments: [], insights: [] },
+    technique_types: { total: 0, segments: [], insights: [] },
     role_balance: { segments: [], total_rolls: 0 },
     outcomes: { tiles: [], total_rolls: 0 },
-    roll_flow: { edges: [], total_rolls: 0 },
+    roll_flow: { edges: [], total_transitions: 0, top_n: 7 },
     generated_at: 'Jun 12, 2026 \u00b7 12:00 PM',
     generated_at_tz: 'UTC',
     ...overrides,
@@ -86,17 +88,19 @@ describe('BJJDashboardPage \u2014 page assembly (T5.14)', () => {
     ).toBeInTheDocument()
   })
 
-  it('renders the subtitle derived from the resolved window + workout count', () => {
+  it('renders the narrative subtitle for the active window', () => {
     renderWithProviders()
-    expect(screen.getByText(/14 workouts/)).toBeInTheDocument()
+    expect(
+      screen.getByText(/Your game over 30 days: techniques, role balance, and how your rolls end\./),
+    ).toBeInTheDocument()
   })
 
   it('renders the DashboardTimeFilter with 4 toggle buttons', () => {
     renderWithProviders()
-    expect(screen.getByRole('button', { name: '7d' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '30d' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '90d' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '10r' })).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: '7 days' })).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: '30 days' })).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: '90 days' })).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: '10 rolls' })).toBeInTheDocument()
   })
 
   it('renders 5 widget shells (REQ-BD4 5-widget grid)', () => {
@@ -131,14 +135,14 @@ describe('BJJDashboardPage \u2014 page assembly (T5.14)', () => {
 
   it('renders the DashboardFooter with the generated_at stamp', () => {
     renderWithProviders()
-    const strong = screen.getByText('Jun 12, 2026 \u00b7 12:00 PM')
-    expect(strong.tagName).toBe('STRONG')
+    expect(screen.getByText(/Live data · last updated/)).toBeInTheDocument()
+    expect(screen.getByText('Jun 12, 2026 · 12:00 PM')).toBeInTheDocument()
   })
 
   it('window change calls the hook with the new window', async () => {
     const user = userEvent.setup()
     renderWithProviders()
-    await user.click(screen.getByRole('button', { name: '7d' }))
+    await user.click(screen.getByRole('tab', { name: '7 days' }))
     const calls = mockUseBJJDashboard.mock.calls
     expect(calls.some((c) => c[0] === '7d')).toBe(true)
   })
@@ -234,7 +238,9 @@ describe('BJJDashboardPage — PR 6b 3-widget integration (T6b.7)', () => {
             { from: 'closed_guard', to: 'mount', count: 10, pct: 100 },
             { from: 'half_guard', to: 'side_control', count: 7, pct: 70 },
           ],
-          total_rolls: 17,
+          total_transitions: 17,
+          total_rolls: 78,
+          top_n: 7,
         },
       }),
       isLoading: false,
@@ -243,11 +249,10 @@ describe('BJJDashboardPage — PR 6b 3-widget integration (T6b.7)', () => {
       refetch: vi.fn(),
     })
     const { container } = renderWithProviders()
-    const rows = container.querySelectorAll('.flow-row')
-    expect(rows.length).toBe(2)
-    // Footer shows total_rolls.
-    const foot = container.querySelector('.flow-foot')
-    expect(foot).not.toBeNull()
+    const lanes = container.querySelectorAll('.flow-lane')
+    expect(lanes.length).toBe(2)
+    const summary = container.querySelector('.flow-summary')
+    expect(summary).not.toBeNull()
   })
 
   it('applies the correct grid spans (2 / 4 / 6) for the PR 6b widgets', () => {
@@ -255,7 +260,12 @@ describe('BJJDashboardPage — PR 6b 3-widget integration (T6b.7)', () => {
       data: buildPayload({
         role_balance: { segments: [{ role: 'attacking', pct: 100, count: 1 }], total_rolls: 1 },
         outcomes: { tiles: [{ outcome: 'submission', count: 1, pct: 100 }], total_rolls: 1 },
-        roll_flow: { edges: [{ from: 'standing', to: 'mount', count: 1, pct: 100 }], total_rolls: 1 },
+        roll_flow: {
+          edges: [{ from: 'standing', to: 'mount', count: 1, pct: 100 }],
+          total_transitions: 1,
+          total_rolls: 78,
+          top_n: 7,
+        },
       }),
       isLoading: false,
       isError: false,

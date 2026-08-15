@@ -20,6 +20,7 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderWithMuiTheme } from '@/test-utils/renderWithMuiTheme'
+import { MemoryRouter } from 'react-router'
 import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { LastTechniquesWidget } from '../../components/LastTechniquesWidget'
@@ -87,36 +88,51 @@ function buildRows(): LastTechniquesData['rows'] {
   ]
 }
 
+function renderWidget(data: LastTechniquesData, distinctCount = 3) {
+  return renderWithMuiTheme(
+    <MemoryRouter>
+      <LastTechniquesWidget data={data} distinctCount={distinctCount} />
+    </MemoryRouter>,
+  )
+}
+
 describe('LastTechniquesWidget \u2014 hero stat + row list + modal drill-down (T5.12, REQ-BD6)', () => {
-  it('renders the hero stat with the total practice count', () => {
-    renderWithMuiTheme(<LastTechniquesWidget data={{ rows: buildRows() }} />)
-    // 12 + 7 + 3 = 22
-    expect(screen.getByText('22')).toBeInTheDocument()
+  it('renders the hero stat with distinct technique count', () => {
+    renderWidget({ rows: buildRows() }, 14)
+    expect(screen.getByText('14')).toBeInTheDocument()
+    expect(screen.getByText('distinct techniques practiced')).toBeInTheDocument()
   })
 
   it('renders one row per data row', () => {
-    renderWithMuiTheme(<LastTechniquesWidget data={{ rows: buildRows() }} />)
+    renderWidget({ rows: buildRows() })
     expect(screen.getByText('Triangle Choke')).toBeInTheDocument()
     expect(screen.getByText('Scissor Sweep')).toBeInTheDocument()
     expect(screen.getByText('Hip Escape')).toBeInTheDocument()
   })
 
-  it('renders the per-row practice count', () => {
-    renderWithMuiTheme(<LastTechniquesWidget data={{ rows: buildRows() }} />)
-    expect(screen.getByText('12')).toBeInTheDocument()
-    expect(screen.getByText('7')).toBeInTheDocument()
-    expect(screen.getByText('3')).toBeInTheDocument()
+  it('renders the per-row practice count with a multiply prefix', () => {
+    renderWidget({ rows: buildRows() })
+    expect(screen.getByText('×12')).toBeInTheDocument()
+    expect(screen.getByText('×7')).toBeInTheDocument()
+    expect(screen.getByText('×3')).toBeInTheDocument()
+  })
+
+  it('renders English category labels in chips (REQ-PV5)', () => {
+    renderWidget({ rows: buildRows() })
+    expect(screen.getByText('Submissions')).toBeInTheDocument()
+    expect(screen.getByText('Guard')).toBeInTheDocument()
+    expect(screen.getByText('Escapes')).toBeInTheDocument()
   })
 
   it('renders each category chip with the right data-cat attribute (REQ-PV5)', () => {
-    renderWithMuiTheme(<LastTechniquesWidget data={{ rows: buildRows() }} />)
+    renderWidget({ rows: buildRows() })
     expect(document.querySelector('.chip[data-cat="submission"]')).not.toBeNull()
     expect(document.querySelector('.chip[data-cat="guard"]')).not.toBeNull()
     expect(document.querySelector('.chip[data-cat="escape"]')).not.toBeNull()
   })
 
   it('renders a relative-time label (Intl.RelativeTimeFormat("en"))', () => {
-    const { container } = renderWithMuiTheme(<LastTechniquesWidget data={{ rows: buildRows() }} />)
+    const { container } = renderWidget({ rows: buildRows() })
     // The exact wording depends on the gap (16 days rounds to "last month"
     // in `relativeTimeEn`). We just assert the label is non-empty and
     // contains an English relative-time phrase.
@@ -130,7 +146,7 @@ describe('LastTechniquesWidget \u2014 hero stat + row list + modal drill-down (T
 
   it('clicking a row opens TechniquePracticeModal with that row\u2019s technique_id (REQ-BD6)', async () => {
     const user = userEvent.setup()
-    renderWithMuiTheme(<LastTechniquesWidget data={{ rows: buildRows() }} />)
+    renderWidget({ rows: buildRows() })
 
     // No modal yet
     expect(screen.queryByTestId('practice-modal')).toBeNull()
@@ -143,7 +159,11 @@ describe('LastTechniquesWidget \u2014 hero stat + row list + modal drill-down (T
   })
 
   it('does not crash on empty rows', () => {
-    renderWithMuiTheme(<LastTechniquesWidget data={{ rows: [] }} />)
+    renderWithMuiTheme(
+      <MemoryRouter>
+        <LastTechniquesWidget data={{ rows: [] }} distinctCount={0} />
+      </MemoryRouter>,
+    )
     // Hero should be 0 (still rendered)
     expect(screen.getByText('0')).toBeInTheDocument()
   })

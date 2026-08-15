@@ -41,6 +41,10 @@ export interface DashboardWidgetShellProps<T> {
   heading: string
   /** Optional sub-line under the heading (e.g. "from 14 workouts"). */
   sub?: ReactNode
+  /** Optional icon in the widget-head (open-design template parity). */
+  icon?: ReactNode
+  /** Optional right-side slot in the widget-head (e.g. a window tag). */
+  aside?: ReactNode
   /**
    * The payload the widget consumes. When this is null/undefined/empty-array,
    * the empty slot is rendered (unless loading or errored).
@@ -83,6 +87,8 @@ export function DashboardWidgetShell<T>({
   span,
   heading,
   sub,
+  icon,
+  aside,
   data,
   isLoading,
   error,
@@ -133,19 +139,30 @@ export function DashboardWidgetShell<T>({
 
   return (
     <section className={`widget span-${span}`}>
-      <WidgetHead heading={heading} sub={sub} />
+      <WidgetHead heading={heading} sub={sub} icon={icon} aside={aside} />
       {body}
     </section>
   )
 }
 
-function WidgetHead({ heading, sub }: { heading: string; sub?: ReactNode }) {
+function WidgetHead({
+  heading,
+  sub,
+  icon,
+  aside,
+}: {
+  heading: string
+  sub?: ReactNode
+  icon?: ReactNode
+  aside?: ReactNode
+}) {
   return (
     <div className="widget-head">
       <div>
         <h2 className="widget-title">{heading}</h2>
         {sub ? <p className="widget-sub">{sub}</p> : null}
       </div>
+      {aside ?? (icon ? <div className="widget-icon">{icon}</div> : null)}
     </div>
   )
 }

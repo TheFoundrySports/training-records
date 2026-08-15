@@ -10,8 +10,9 @@
  *  - sets `staleTime: 60_000` (REQ: 60s \u2014 the global queryClient default
  *    is 5min, but the dashboard refreshes more eagerly because the
  *    user's rolls change every workout)
- *  - surfaces PostgREST errors as a thrown `Error` so the widget's
- *    ErrorBoundary can render the failure state
+ *  - normalizes the RPC payload via `normalizeBJJDashboardData` so widgets
+ *    always receive `{ rows }`, `role`, `outcome`, and position keys even
+ *    when an older migration revision returns legacy field names
  *
  * Why no Zod parse at the hook boundary:
  *  - The RPC is the source of truth; if a future PR tightens the SQL
@@ -26,6 +27,7 @@
 import { useQuery, type UseQueryResult } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import type { BJJDashboardData } from '../types/dashboard.types'
+import { normalizeBJJDashboardData } from '../utils/normalizeBJJDashboardData'
 import { bjjDashboardKeys } from './bjjDashboardKeys'
 
 /** 60-second staleTime: dashboard reflects workout activity within a minute. */
@@ -47,7 +49,7 @@ async function fetchBJJDashboard(window: BJJDashboardData['window']): Promise<BJ
     throw new Error(error.message || 'Failed to load dashboard data')
   }
 
-  return data as BJJDashboardData
+  return normalizeBJJDashboardData(data)
 }
 
 /**

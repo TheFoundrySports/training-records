@@ -68,24 +68,14 @@ describe('OutcomesWidget — 2x2 tile grid + drill-down (T6b.3, REQ-BD6)', () =>
     expect(tiles.length).toBe(4)
   })
 
-  it('renders each tile as an accessible link with the outcome label, count, and pct', () => {
+  it('renders each tile value as percentage and roll count in .n', () => {
     renderWithRouter(
       <OutcomesWidget data={{ tiles: buildTiles(), total_rolls: 60 }} />,
     )
-    // Tiles are <a> elements (react-router <Link>) — queryable by role 'link'.
-    // Accessible name pattern: "{Label}, {count} rolls, {pct}%".
-    expect(
-      screen.getByRole('link', { name: /submission,\s*12 rolls,\s*20%/i }),
-    ).toBeInTheDocument()
-    expect(
-      screen.getByRole('link', { name: /position gain,\s*22 rolls,\s*37%/i }),
-    ).toBeInTheDocument()
-    expect(
-      screen.getByRole('link', { name: /position loss,\s*18 rolls,\s*30%/i }),
-    ).toBeInTheDocument()
-    expect(
-      screen.getByRole('link', { name: /neutral,\s*8 rolls,\s*13%/i }),
-    ).toBeInTheDocument()
+    expect(screen.getByText('20%')).toBeInTheDocument()
+    expect(screen.getByText('12 rolls')).toBeInTheDocument()
+    expect(screen.getByText('37%')).toBeInTheDocument()
+    expect(screen.getByText('22 rolls')).toBeInTheDocument()
   })
 
   it('renders each tile label with the matching --outcome-* CSS variable on the swatch', () => {

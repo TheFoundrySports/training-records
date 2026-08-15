@@ -53,10 +53,6 @@ export interface LastTechniquesData {
   rows: LastTechniqueRow[]
 }
 
-/**
- * Technique-type distribution. The donut SVG in PR 6a reads `segments`;
- * the insight rows panel reads `insights`.
- */
 export interface TechniqueTypesSegment {
   category: BJJCategory
   /** 0..100, sum of segments <= 100 (the remaining = "untagged"). */
@@ -66,13 +62,13 @@ export interface TechniqueTypesSegment {
 }
 
 export interface TechniqueTypesInsight {
-  /** Headline line. */
-  title: string
-  /** One-sentence explanation. */
-  body: string
+  /** Flat insight sentence (template `insight_rows[].text`). */
+  text: string
 }
 
 export interface TechniqueTypesData {
+  /** Total technique practices in the window (donut center). */
+  total: number
   segments: TechniqueTypesSegment[]
   insights: TechniqueTypesInsight[]
 }
@@ -113,12 +109,18 @@ export interface RollFlowEdge {
   count: number
   /** 0..100, normalized to max in result set. */
   pct: number
+  /** Bar fill color (template `edge.color`). */
+  color?: string
 }
 
 export interface RollFlowData {
   edges: RollFlowEdge[]
-  /** Total confirmed rolls that produced an edge (for the footer "Nx total"). */
+  /** Sum of transition counts across edges in the window. */
+  total_transitions: number
+  /** Confirmed rolls in the window (footer denominator). */
   total_rolls: number
+  /** Display limit echoed from RPC (default 7). */
+  top_n: number
 }
 
 // ── Top-level RPC payload ────────────────────────────────────────────
@@ -135,6 +137,10 @@ export interface RollFlowData {
 export interface BJJDashboardData {
   /** Window the RPC was invoked with; echoes back so the page can render the subtitle. */
   window: DashboardWindow
+  /** Page title echoed from RPC (REQ-BD3). */
+  title: string
+  /** Narrative subtitle for the active window (REQ-BD2 / template.html). */
+  subtitle: string
   /** ISO start of the resolved range; null for "10r". */
   start_date: string | null
   /** ISO end of the resolved range (today, UTC midnight); null for "10r". */

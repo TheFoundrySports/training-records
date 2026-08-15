@@ -60,11 +60,21 @@ function buildSegments(): TechniqueTypesData['segments'] {
   ]
 }
 
+function buildTechniqueData(
+  overrides: Partial<TechniqueTypesData> = {},
+): TechniqueTypesData {
+  return {
+    total: 78,
+    segments: buildSegments(),
+    insights: [],
+    ...overrides,
+  }
+}
+
 function buildInsights(): TechniqueTypesData['insights'] {
   return [
     {
-      title: 'Submissions are 40% of your game',
-      body: 'Strong submission focus — keep building from the guard.',
+      text: 'Low practice of Takedowns (10%) in this period — 6 workouts, 3-week gap.',
     },
   ]
 }
@@ -72,7 +82,7 @@ function buildInsights(): TechniqueTypesData['insights'] {
 describe('TechniqueTypeWidget — custom SVG donut + legend + drill-down (T6a.1, REQ-BD6)', () => {
   it('renders one <circle> per segment with the right stroke-dasharray math', () => {
     const { container } = renderWithMuiTheme(
-      <TechniqueTypeWidget data={{ segments: buildSegments(), insights: [] }} totalRolls={78} />,
+      <TechniqueTypeWidget data={buildTechniqueData()} />,
     )
     // 4 segments → 4 circle elements (the donut-track is also a circle, so
     // we filter to those that have a stroke-dasharray attribute set).
@@ -89,17 +99,17 @@ describe('TechniqueTypeWidget — custom SVG donut + legend + drill-down (T6a.1,
 
   it('renders the center label with the total roll count', () => {
     const { container } = renderWithMuiTheme(
-      <TechniqueTypeWidget data={{ segments: buildSegments(), insights: [] }} totalRolls={78} />,
+      <TechniqueTypeWidget data={buildTechniqueData()} />,
     )
     const center = container.querySelector('.donut .center')
     expect(center).not.toBeNull()
     expect(center?.querySelector('.n')?.textContent).toBe('78')
-    expect(center?.querySelector('.l')?.textContent).toMatch(/total rolls/i)
+    expect(center?.querySelector('.l')?.textContent).toMatch(/Practices/i)
   })
 
   it('renders one legend row per segment with the localized label and percentage', () => {
     renderWithMuiTheme(
-      <TechniqueTypeWidget data={{ segments: buildSegments(), insights: [] }} totalRolls={78} />,
+      <TechniqueTypeWidget data={buildTechniqueData()} />,
     )
     // categoryLabel('en') returns: submission=Submissions, guard=Guard,
     // escape=Escapes, transition=Transitions (PR 3 map)
@@ -116,7 +126,7 @@ describe('TechniqueTypeWidget — custom SVG donut + legend + drill-down (T6a.1,
 
   it('colors each legend swatch with the CSS variable --cat-{category}', () => {
     const { container } = renderWithMuiTheme(
-      <TechniqueTypeWidget data={{ segments: buildSegments(), insights: [] }} totalRolls={78} />,
+      <TechniqueTypeWidget data={buildTechniqueData()} />,
     )
     const swatches = container.querySelectorAll('.legend-row .swatch')
     // submission → --cat-submission, guard → --cat-guard, etc.
@@ -130,19 +140,15 @@ describe('TechniqueTypeWidget — custom SVG donut + legend + drill-down (T6a.1,
 
   it('renders the insight row(s) when data.insights is non-empty', () => {
     renderWithMuiTheme(
-      <TechniqueTypeWidget
-        data={{ segments: buildSegments(), insights: buildInsights() }}
-        totalRolls={78}
-      />,
+      <TechniqueTypeWidget data={buildTechniqueData({ insights: buildInsights() })} />,
     )
-    expect(screen.getByText(/Submissions are 40%/)).toBeInTheDocument()
-    expect(screen.getByText(/Strong submission focus/)).toBeInTheDocument()
+    expect(screen.getByText(/Low practice of Takedowns/)).toBeInTheDocument()
   })
 
   it('clicking a legend row navigates to /bjj/blue-belt-progression?category={key} (REQ-BD6)', async () => {
     const user = userEvent.setup()
     renderWithMuiTheme(
-      <TechniqueTypeWidget data={{ segments: buildSegments(), insights: [] }} totalRolls={78} />,
+      <TechniqueTypeWidget data={buildTechniqueData()} />,
     )
 
     // Click the Submissions legend row (button role, not link)
@@ -155,7 +161,7 @@ describe('TechniqueTypeWidget — custom SVG donut + legend + drill-down (T6a.1,
   it('clicking the Guard legend row navigates with category=guard', async () => {
     const user = userEvent.setup()
     renderWithMuiTheme(
-      <TechniqueTypeWidget data={{ segments: buildSegments(), insights: [] }} totalRolls={78} />,
+      <TechniqueTypeWidget data={buildTechniqueData()} />,
     )
 
     await user.click(screen.getByRole('button', { name: /^guard/i }))
@@ -165,7 +171,7 @@ describe('TechniqueTypeWidget — custom SVG donut + legend + drill-down (T6a.1,
 
   it('renders each legend row as a button (keyboard-focusable, no <a> tag)', () => {
     const { container } = renderWithMuiTheme(
-      <TechniqueTypeWidget data={{ segments: buildSegments(), insights: [] }} totalRolls={78} />,
+      <TechniqueTypeWidget data={buildTechniqueData()} />,
     )
     const rows = container.querySelectorAll('.legend-row')
     for (const row of rows) {
@@ -175,7 +181,7 @@ describe('TechniqueTypeWidget — custom SVG donut + legend + drill-down (T6a.1,
 
   it('does not crash on empty segments (renders the donut skeleton)', () => {
     const { container } = renderWithMuiTheme(
-      <TechniqueTypeWidget data={{ segments: [], insights: [] }} totalRolls={0} />,
+      <TechniqueTypeWidget data={buildTechniqueData({ segments: [], total: 0 })} />,
     )
     const center = container.querySelector('.donut .center')
     expect(center?.querySelector('.n')?.textContent).toBe('0')
@@ -188,7 +194,7 @@ describe('TechniqueTypeWidget — custom SVG donut + legend + drill-down (T6a.1,
 
   it('uses the legend row as the accessible label source for screen readers', () => {
     renderWithMuiTheme(
-      <TechniqueTypeWidget data={{ segments: buildSegments(), insights: [] }} totalRolls={78} />,
+      <TechniqueTypeWidget data={buildTechniqueData()} />,
     )
     // Each row has an accessible name that includes the category label + pct.
     const submission = screen.getByRole('button', { name: /submissions,?\s+40%/i })
@@ -196,5 +202,38 @@ describe('TechniqueTypeWidget — custom SVG donut + legend + drill-down (T6a.1,
     // The label includes the count too.
     const labeled = within(submission).getByText(/40%/)
     expect(labeled).toBeInTheDocument()
+  })
+
+  // Task 4.1 RED: donut geometry per design D3 (template.html lines 468-470)
+  it('renders donut with viewBox 120x120, cx/cy 60, r 50, strokeWidth 18, strokeLinecap butt', () => {
+    const { container } = renderWithMuiTheme(
+      <TechniqueTypeWidget data={buildTechniqueData()} />,
+    )
+    const svg = container.querySelector('.donut svg')
+    expect(svg).not.toBeNull()
+    // viewBox must be "0 0 120 120" (not "0 0 100 100")
+    expect(svg?.getAttribute('viewBox')).toBe('0 0 120 120')
+
+    // All circles (track + segments) must have cx=60, cy=60, r=50
+    const circles = Array.from(container.querySelectorAll('.donut circle'))
+    expect(circles.length).toBeGreaterThan(0)
+    for (const circle of circles) {
+      expect(circle.getAttribute('cx')).toBe('60')
+      expect(circle.getAttribute('cy')).toBe('60')
+      expect(circle.getAttribute('r')).toBe('50')
+    }
+
+    // Track circle must have strokeWidth=18
+    const track = container.querySelector('.donut-track')
+    expect(track).not.toBeNull()
+    expect(track?.getAttribute('stroke-width')).toBe('18')
+
+    // Segment circles must have strokeWidth=18 and strokeLinecap="butt"
+    const segments = container.querySelectorAll('.donut circle[stroke-dasharray]')
+    expect(segments.length).toBe(4)
+    for (const segment of segments) {
+      expect(segment.getAttribute('stroke-width')).toBe('18')
+      expect(segment.getAttribute('stroke-linecap')).toBe('butt')
+    }
   })
 })

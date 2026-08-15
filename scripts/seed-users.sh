@@ -133,6 +133,19 @@ ON CONFLICT (id) DO NOTHING;
 "
 
 echo ""
+echo "Applying BJJ test data (seed-rolls.sql)..."
+# Apply via docker exec + psql because supabase CLI's `db seed` runs BEFORE
+# auth.users exists (so the user_id subqueries in seed-rolls.sql would fail).
+# After seed-users.sh creates athlete1, the subqueries resolve correctly.
+if [[ -f "$REPO_ROOT/supabase/seed-rolls.sql" ]]; then
+  docker exec -i supabase_db_training-records psql -U postgres -d postgres < "$REPO_ROOT/supabase/seed-rolls.sql" >/dev/null 2>&1 \
+    && echo "  ✓ BJJ workouts + sections + roll events seeded" \
+    || echo "  ✗ seed-rolls.sql failed (dashboard widgets will show empty states)"
+else
+  echo "  (supabase/seed-rolls.sql not found — skipping)"
+fi
+
+echo ""
 echo "Done! Users created:"
 echo "  athlete1@example.com / Password123!  (athlete)"
 echo "  athlete2@example.com / Password123!  (athlete)"

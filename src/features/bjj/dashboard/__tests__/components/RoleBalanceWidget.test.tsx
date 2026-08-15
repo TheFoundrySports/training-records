@@ -70,10 +70,9 @@ describe('RoleBalanceWidget — stacked bar + legend (T6b.1, REQ-BD4 row 2)', ()
     expect(screen.getByText('Attacking')).toBeInTheDocument()
     expect(screen.getByText('Defending')).toBeInTheDocument()
     expect(screen.getByText('Neutral')).toBeInTheDocument()
-    // Pct + count are concatenated in `.role-value` (e.g. "60% · 47").
-    expect(screen.getByText(/60%\s*·\s*47/)).toBeInTheDocument()
-    expect(screen.getByText(/30%\s*·\s*23/)).toBeInTheDocument()
-    expect(screen.getByText(/10%\s*·\s*8/)).toBeInTheDocument()
+    expect(screen.getByText('60%')).toBeInTheDocument()
+    expect(screen.getByText('30%')).toBeInTheDocument()
+    expect(screen.getByText('10%')).toBeInTheDocument()
   })
 
   it('renders each role swatch with the matching role-* CSS variable', () => {

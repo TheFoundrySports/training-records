@@ -43,18 +43,18 @@ describe('DashboardTimeFilter \u2014 4-preset segmented control (T5.7, REQ-BD2)'
     renderWithMuiTheme(
       <DashboardTimeFilter window="30d" onChange={() => {}} onRefresh={() => {}} />,
     )
-    expect(screen.getByRole('button', { name: '7d' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '30d' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '90d' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '10r' })).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: '7 days' })).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: '30 days' })).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: '90 days' })).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: '10 rolls' })).toBeInTheDocument()
   })
 
   it('marks the currently-selected window with aria-pressed=true', () => {
     renderWithMuiTheme(
       <DashboardTimeFilter window="90d" onChange={() => {}} onRefresh={() => {}} />,
     )
-    expect(screen.getByRole('button', { name: '90d' })).toHaveAttribute('aria-pressed', 'true')
-    expect(screen.getByRole('button', { name: '30d' })).toHaveAttribute('aria-pressed', 'false')
+    expect(screen.getByRole('tab', { name: '90 days' })).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByRole('tab', { name: '30 days' })).toHaveAttribute('aria-pressed', 'false')
   })
 
   it('defaults to 30d on first mount when localStorage is empty', () => {
@@ -63,7 +63,7 @@ describe('DashboardTimeFilter \u2014 4-preset segmented control (T5.7, REQ-BD2)'
     renderWithMuiTheme(<DashboardTimeFilter onChange={onChange} onRefresh={() => {}} />)
     // First effect-run may fire onChange for the hydration \u2014 but the
     // visible default is 30d.
-    expect(screen.getByRole('button', { name: '30d' })).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByRole('tab', { name: '30 days' })).toHaveAttribute('aria-pressed', 'true')
   })
 
   it('hydrates from localStorage on mount when a stored value exists', () => {
@@ -71,7 +71,7 @@ describe('DashboardTimeFilter \u2014 4-preset segmented control (T5.7, REQ-BD2)'
     renderWithMuiTheme(
       <DashboardTimeFilter onChange={() => {}} onRefresh={() => {}} />,
     )
-    expect(screen.getByRole('button', { name: '90d' })).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByRole('tab', { name: '90 days' })).toHaveAttribute('aria-pressed', 'true')
   })
 
   it('writes the new window to localStorage on change', async () => {
@@ -81,7 +81,7 @@ describe('DashboardTimeFilter \u2014 4-preset segmented control (T5.7, REQ-BD2)'
     renderWithMuiTheme(
       <DashboardTimeFilter window="30d" onChange={onChange} onRefresh={() => {}} />,
     )
-    await user.click(screen.getByRole('button', { name: '7d' }))
+    await user.click(screen.getByRole('tab', { name: '7 days' }))
     expect(window.localStorage.getItem(STORAGE_KEY)).toBe('7d')
     expect(onChange).toHaveBeenCalledWith('7d')
   })

@@ -25,6 +25,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import React from 'react'
+import { normalizeBJJDashboardData } from '../../utils/normalizeBJJDashboardData'
 import { useBJJDashboard } from '../../hooks/useBJJDashboard'
 import { bjjDashboardKeys } from '../../hooks/bjjDashboardKeys'
 import { supabase } from '@/lib/supabase'
@@ -50,16 +51,18 @@ function createWrapper() {
 function buildMockDashboardData(overrides: Record<string, unknown> = {}) {
   return {
     window: '30d',
+    title: 'BJJ Evolution Dashboard',
+    subtitle: 'Your game over 30 days: techniques, role balance, and how your rolls end.',
     start_date: '2026-05-13',
     end_date: '2026-06-12',
     total_rolls: 78,
     total_workouts: 14,
     total_techniques: 23,
     last_techniques: { rows: [] },
-    technique_types: { segments: [], insights: [] },
+    technique_types: { total: 0, segments: [], insights: [] },
     role_balance: { segments: [], total_rolls: 0 },
     outcomes: { tiles: [], total_rolls: 0 },
-    roll_flow: { edges: [], total_rolls: 0 },
+    roll_flow: { edges: [], total_transitions: 0, top_n: 7 },
     generated_at: '2026-06-12 12:00 PM',
     generated_at_tz: 'UTC',
     ...overrides,
@@ -105,7 +108,7 @@ describe('useBJJDashboard \u2014 RPC contract + staleTime (REQ-BD3, REQ-BD5)', (
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
-    expect(result.current.data).toEqual(buildMockDashboardData())
+    expect(result.current.data).toEqual(normalizeBJJDashboardData(buildMockDashboardData()))
     // We can't easily assert the queryKey directly without exposing the
     // query cache, but the unique-window contract is covered by the
     // distinct query keys (verified below).
@@ -166,7 +169,7 @@ describe('useBJJDashboard \u2014 RPC contract + staleTime (REQ-BD3, REQ-BD5)', (
     expect(String(result.current.error)).toMatch(/unauthenticated/i)
   })
 
-  it('returns the data payload on success (no double-parse, no schema gate)', async () => {
+  it('returns the normalized data payload on success', async () => {
     const data = buildMockDashboardData({ total_rolls: 42 })
     mockRpc.mockResolvedValueOnce({
       data,
@@ -182,7 +185,44 @@ describe('useBJJDashboard \u2014 RPC contract + staleTime (REQ-BD3, REQ-BD5)', (
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
-    expect(result.current.data).toEqual(data)
+    expect(result.current.data).toEqual(normalizeBJJDashboardData(data))
     expect(result.current.data?.total_rolls).toBe(42)
+    expect(result.current.data?.roll_flow.total_rolls).toBe(42)
+  })
+
+  it('normalizes legacy bare-array last_techniques from the RPC', async () => {
+    mockRpc.mockResolvedValueOnce({
+      data: {
+        window: '30d',
+        last_techniques: [
+          {
+            name: 'Triangle',
+            category: 'submission',
+            count: 3,
+            last_practiced_at: '2026-06-01T00:00:00Z',
+          },
+        ],
+      },
+      error: null,
+      count: null,
+      status: 200,
+      statusText: 'OK',
+    } as never)
+
+    const { result } = renderHook(() => useBJJDashboard('30d'), {
+      wrapper: createWrapper(),
+    })
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true))
+
+    expect(result.current.data?.last_techniques.rows).toEqual([
+      {
+        technique_id: '',
+        technique_name: 'Triangle',
+        category: 'submission',
+        last_practiced_at: '2026-06-01T00:00:00Z',
+        practice_count: 3,
+      },
+    ])
   })
 })
