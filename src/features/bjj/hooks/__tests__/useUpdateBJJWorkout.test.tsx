@@ -47,7 +47,14 @@ describe('useUpdateBJJWorkout', () => {
         }),
       }),
     } as unknown as ReturnType<typeof supabase.from>)
-    mockRpc.mockResolvedValueOnce({ data: null, error: null, count: null, status: 200, statusText: 'OK' })
+    mockRpc.mockResolvedValueOnce({
+      data: null,
+      error: null,
+      count: null,
+      status: 200,
+      statusText: 'OK',
+      success: true,
+    })
 
     const { result } = renderHook(() => useUpdateBJJWorkout(), {
       wrapper: createWrapper(),
@@ -114,7 +121,14 @@ describe('useUpdateBJJWorkout', () => {
         in: vi.fn().mockResolvedValue({ data: [], error: null }),
       }),
     } as unknown as ReturnType<typeof supabase.from>)
-    mockRpc.mockResolvedValueOnce({ data: null, error: null, count: null, status: 200, statusText: 'OK' })
+    mockRpc.mockResolvedValueOnce({
+      data: null,
+      error: null,
+      count: null,
+      status: 200,
+      statusText: 'OK',
+      success: true,
+    })
 
     const queryClient = new QueryClient({
       defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
@@ -151,8 +165,28 @@ describe('useUpdateBJJWorkout', () => {
         in: vi.fn().mockResolvedValue({ data: [], error: null }),
       }),
     } as unknown as ReturnType<typeof supabase.from>)
-    const rpcError = { message: 'Unauthorized', code: 'UNAUTHORIZED', details: '', hint: '', name: 'PostgrestError' }
-    mockRpc.mockResolvedValueOnce({ data: null, error: rpcError, count: null, status: 401, statusText: 'Unauthorized' })
+    const rpcError = {
+      message: 'Unauthorized',
+      code: 'UNAUTHORIZED',
+      details: '',
+      hint: '',
+      name: 'PostgrestError',
+      toJSON: () => ({
+        name: 'PostgrestError',
+        message: 'Unauthorized',
+        code: 'UNAUTHORIZED',
+        details: '',
+        hint: '',
+      }),
+    }
+    mockRpc.mockResolvedValueOnce({
+      data: null,
+      error: rpcError,
+      count: null,
+      status: 401,
+      statusText: 'Unauthorized',
+      success: false,
+    })
 
     const { result } = renderHook(() => useUpdateBJJWorkout(), {
       wrapper: createWrapper(),

@@ -26,4 +26,5 @@ export interface AcceptInviteResponse {
   success: boolean
   user_id?: string
   error?: string
+  warning?: string
 }
