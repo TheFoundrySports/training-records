@@ -1138,7 +1138,16 @@ values
   ('Back Escape',            'Escape de espalda',             'Girarse hacia el oponente y recuperar guardia o tomar posición superior desde el control de espalda.','escape'),
   ('Triangle Escape',        'Escape de triángulo',           'Mejorar la postura, apilar o usar la mecánica del autoestopista para escapar un triángulo.',    'escape'),
   ('Guillotine Escape',      'Escape de guillotina',           'Sacar la cabeza o tomar la espalda para aliviar la presión de una guillotina.',                 'escape'),
-  ('Armbar Escape',          'Escape de llave de codo',       'Apilar, autoestopista o rodar para escapar antes de que se alcance la extensión completa.',     'escape')
+  ('Armbar Escape',          'Escape de llave de codo',       'Apilar, autoestopista o rodar para escapar antes de que se alcance la extensión completa.',     'escape'),
+  -- Transitions
+  ('Guard Recovery',         'Recuperación de guardia',       'Retornar a la guardia desde una posición inferior usando camarón y reencuadre.',                  'transition'),
+  ('Scramble to Top',        'Pelea hacia arriba',           'Recuperar posición superior desde una posición neutral o inferior durante una pelea.',           'transition'),
+  ('Back Take',              'Toma de espalda',              'Tomar el control de la espalda del oponente desde guardia, control lateral o durante derribo.',  'transition'),
+  ('Sweep to Mount',         'Barrida a monte',              'Barrer al oponente desde la guardia cerrada o abierta y montar directamente.',                   'transition'),
+  -- Other
+  ('Positional Reset',       'Reinicio posicional',          'Reanudar desde una posición específica después de que la acción se detenga.',                     'other'),
+  ('Stand-up Defense',       'Defensa de pie',               'Volver a ponerse de pie desde la posición inferior.',                                            'other'),
+  ('Grip Fighting',          'Pelea de agarres',             'Controlar y romper agarres del oponente para dictar la dinámica del combate.',                  'other')
 on conflict (name) do update set name_es = excluded.name_es;
 
 -- Sample workout for athlete2 (only inserted if the seed user exists)

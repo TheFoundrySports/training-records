@@ -1,6 +1,8 @@
 // @ts-nocheck — Deno global types not available in editor
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { buildSystemPrompt, type BJJTechniqueRow } from './prompt.ts'
+import { type BJJSectionAIResponse } from './bjj.schema.ts'
+import { parseBJJSectionAIResponse } from './parseBJJSectionAIResponse.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -19,11 +21,6 @@ function jsonResponse(data: unknown, status = 200) {
     status,
     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   })
-}
-
-interface BJJSectionAIResponse {
-  ai_description: string
-  matched_technique_ids: string[]
 }
 
 // ── AI Provider Adapter ──────────────────────────────────────────────────────
@@ -155,18 +152,16 @@ function buildMockResponse(
   return {
     ai_description: `[Mock] Mejorado: "${raw_description.slice(0, 60)}…" — enfocado en ${section_goal}.`,
     matched_technique_ids: techniques.slice(0, 2).map((t) => t.id),
+    rolls: [],
   }
 }
 
 function isValidAIResponse(data: unknown): data is BJJSectionAIResponse {
-  if (typeof data !== 'object' || data === null) return false
-  const d = data as Record<string, unknown>
-  return (
-    typeof d.ai_description === 'string' &&
-    d.ai_description.length > 0 &&
-    Array.isArray(d.matched_technique_ids) &&
-    (d.matched_technique_ids as unknown[]).every((id) => typeof id === 'string')
-  )
+  // The pure function is the source of truth for the LLM response shape.
+  // Both the mock fallback and the LLM path go through parseBJJSectionAIResponse
+  // so the contract is uniform — the Zod schema is the boundary, and this
+  // function is the type-narrowing wrapper around it.
+  return parseBJJSectionAIResponse(data).ok
 }
 
 function extractKeywords(rawDescription: string): string[] {
@@ -309,15 +304,18 @@ Deno.serve(async (req) => {
 
     const parsed: unknown = JSON.parse(content)
 
-    if (!isValidAIResponse(parsed)) {
-      return errorResponse('UNPROCESSABLE_ENTITY', 'Invalid AI response shape', 422, {
+    const aiResult = parseBJJSectionAIResponse(parsed)
+    if (!aiResult.ok) {
+      return errorResponse('UNPROCESSABLE_ENTITY', aiResult.error.message, 422, {
         error: 'invalid_llm_response',
+        issues: aiResult.error.issues,
       })
     }
 
     return jsonResponse({
-      ai_description: parsed.ai_description,
-      matched_technique_ids: parsed.matched_technique_ids,
+      ai_description: aiResult.data.ai_description,
+      matched_technique_ids: aiResult.data.matched_technique_ids,
+      rolls: aiResult.data.rolls,
     })
   } catch (err) {
     // AI call failed (network error, timeout, provider 5xx, etc.) — fall back to mock

@@ -1,10 +1,28 @@
+/**
+ * `AIPreviewPanel` \u2014 the existing AI preview card. Renders
+ * `ai_description` + matched technique IDs with Apply/Discard actions.
+ *
+ * PR 3 (Q1 from PR 2 handoff): the panel accepts the new `rolls` field
+ * in the `AIPreview` prop, but does NOT render a roll review UI here.
+ * The actual `<RollReviewPanel>` ships in PR 7; this PR just plumbs the
+ * data so the editor's state shape is correct and PR 7 can pick it up
+ * without a refactor.
+ */
 import { useBJJTechniques } from '../hooks/useBJJTechniques'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import type { BJJRollProposal } from '../bjj.schema'
 
 interface AIPreview {
   ai_description: string
   matched_technique_ids: string[]
+  /**
+   * Proposed roll events from the EF. Populated by the hook in
+   * `BJJSectionEditor`; consumed by PR 7's `<RollReviewPanel>`.
+   * The current panel ignores this field \u2014 it's here so the state
+   * shape matches the hook's return type.
+   */
+  rolls?: BJJRollProposal[]
 }
 
 interface AIPreviewPanelProps {

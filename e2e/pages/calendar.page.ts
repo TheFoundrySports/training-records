@@ -34,12 +34,12 @@ export class CalendarPage {
   }
 
   /**
-   * All day cells in the calendar grid.
-   * CalendarGrid uses div.grid (not a list), so we locate the grid by its
-   * grid-cols-7 class and get its direct child divs (the CalendarCell components).
+   * Day cells in the month grid only (excludes the Mon–Sun header row).
+   * August 2026 is a 6-week month (42 cells); the header is another 7
+   * `.grid.grid-cols-7 > div` nodes, which used to inflate the count to 49.
    */
   get dayCells(): Locator {
-    return this.page.locator('.grid.grid-cols-7 > div')
+    return this.page.getByTestId('calendar-day-grid').locator(':scope > div')
   }
 
   /**
@@ -47,7 +47,7 @@ export class CalendarPage {
    * The day number is in a span inside each cell.
    */
   dayCell(date: number): Locator {
-    return this.page.locator('.grid.grid-cols-7 > div', { has: this.page.getByText(String(date), { exact: true }) })
+    return this.dayCells.filter({ has: this.page.getByText(String(date), { exact: true }) })
   }
 
   /**

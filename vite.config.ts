@@ -23,4 +23,23 @@ export default defineConfig({
       },
     },
   },
+  optimizeDeps: {
+    // PR 4 (bjj-evolution-dashboard / C2): pre-bundle MUI v6 + emotion
+    // so the dashboard route's first dev-server boot doesn't have to
+    // discover and resolve them on the fly. The deep paths for
+    // ThemeProvider (used by `mui-dashboard-theme.ts` and
+    // `renderWithMuiTheme.tsx`) and the refresh icon (used by
+    // `DashboardTimeFilter` in PR 5) are the only ones we know are
+    // imported at module-eval time; the rest of the MUI components
+    // (Card, Button, ToggleButtonGroup, Chip, Grid, Paper, Stack, Box,
+    // Typography, Alert) are reached via the top-level `@mui/material`
+    // export map and get discovered at first use.
+    include: [
+      '@mui/material',
+      '@mui/material/styles',
+      '@emotion/react',
+      '@emotion/styled',
+      '@mui/icons-material/Sync',
+    ],
+  },
 })

@@ -6,9 +6,14 @@ export function ProtectedRoute() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-      </div>
+      <main className="flex min-h-screen items-center justify-center">
+        <h1 className="sr-only">Loading</h1>
+        <div
+          role="status"
+          aria-label="Loading"
+          className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"
+        />
+      </main>
     )
   }
 
