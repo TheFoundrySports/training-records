@@ -140,7 +140,7 @@ const inferFinishAndResult = (
 
 const edgeToLane = (edge: RollFlowEdge, totalRolls: number): FlowLane => {
   const { finish, result, tone } = inferFinishAndResult(edge.to)
-  const peak = edge.to
+  const peak: FlowNode = edge.to
     ? positionNode(edge.to, 'peak')
     : { code: '—', label: '—', kind: 'end' }
 
