@@ -113,6 +113,14 @@ describe('buildCalendarDays — April 2026 (starts on Wednesday)', () => {
   })
 })
 
+describe('buildCalendarDays — August 2026 (six-week month)', () => {
+  it('grid has 42 cells', () => {
+    const days = buildCalendarDays(2026, 8, [])
+    // August 2026 starts Saturday; Monday-first grid is Jul 27 → Sep 6.
+    expect(days.length).toBe(42)
+  })
+})
+
 describe('buildCalendarDays — February 2026 (non-leap)', () => {
   // Feb 1 2026 is a Sunday. Monday-first grid starts on Jan 26 (Monday).
   // Feb 28 is a Saturday. The week ends on Mar 1 (Sunday).
