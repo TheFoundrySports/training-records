@@ -12,9 +12,9 @@
  *  - Renders the children inside the wrapper.
  *  - The wrapper provides a MUI ThemeProvider whose `theme.palette.mode`
  *    matches the requested mode (proves the provider is actually mounted).
- *  - \`mode: 'dark'\` produces a dark palette on the provider.
- *  - \`prefersReducedMotion: true\` stubs the
- *    \`prefers-reduced-motion: reduce\` media query.
+ *  - mode: 'dark' produces a dark palette on the provider.
+ *  - prefersReducedMotion: true stubs the
+ *    prefers-reduced-motion: reduce media query.
  *  - The default mode is 'light' (when no option is passed).
  *
  * Refs: design.md \u00a78 (MUI coexistence \u2014 the dashboard subtree is
@@ -50,7 +50,7 @@ describe('renderWithMuiTheme (test util for PR 5+ widget tests)', () => {
     expect(screen.getByTestId('mode')).toHaveTextContent('light')
   })
 
-  it('supports \`mode: "dark"\` and produces a dark palette on the provider', () => {
+  it('supports mode: "dark" and produces a dark palette on the provider', () => {
     renderWithMuiTheme(<ThemeProbe />, { mode: 'dark' })
     expect(screen.getByTestId('mode')).toHaveTextContent('dark')
   })
@@ -60,7 +60,7 @@ describe('renderWithMuiTheme (test util for PR 5+ widget tests)', () => {
     expect(screen.getByTestId('mode')).toHaveTextContent('light')
   })
 
-  it('stubs \`prefers-reduced-motion: reduce\` to \`false\` by default', () => {
+  it('stubs prefers-reduced-motion: reduce to false by default', () => {
     // The matchMedia stub returns matches=false for every query;
     // a usePrefersReducedMotion()-style hook would observe `false`.
     const mql = {
@@ -84,12 +84,12 @@ describe('renderWithMuiTheme (test util for PR 5+ widget tests)', () => {
     expect(calledQueries).toContain('(prefers-reduced-motion: reduce)')
   })
 
-  it('honors \`prefersReducedMotion: true\` by setting matches=true on the reduce query', () => {
+  it('honors prefersReducedMotion: true by setting matches=true on the reduce query', () => {
     // Capture the (query, mql) pairs the util creates, then assert the
     // reduce one has matches=true.
     const created: Array<{ query: string; mql: { matches: boolean } }> = []
     const matchMediaSpy = vi.spyOn(window, 'matchMedia').mockImplementation((query: string) => {
-      const mql: { matches: boolean; media: string; onchange: null; addEventListener: any; removeEventListener: any; addListener: any; removeListener: any; dispatchEvent: any } = {
+      const mql = {
         matches: query.includes('reduce'),
         media: query,
         onchange: null,
@@ -111,7 +111,7 @@ describe('renderWithMuiTheme (test util for PR 5+ widget tests)', () => {
     expect(reduce?.mql.matches).toBe(true)
   })
 
-  it('re-exports \`cleanup\` from @testing-library/react', () => {
+  it('re-exports cleanup from @testing-library/react', () => {
     expect(typeof cleanup).toBe('function')
   })
 })

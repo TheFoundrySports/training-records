@@ -5,7 +5,7 @@
  * `material-dashboard.css` (template.html filterbar) instead of MUI
  * toggle buttons so the control matches the artifact visually.
  */
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import type { DashboardWindow } from '../types/dashboard.types'
 import { readStoredDashboardWindow } from '../utils/readStoredDashboardWindow'
 import { RefreshIcon } from './RefreshIcon'
@@ -42,15 +42,9 @@ export function DashboardTimeFilter({
   onChange,
   onRefresh,
 }: DashboardTimeFilterProps) {
-  const [windowState, setWindowState] = useState<DashboardWindow>(() =>
-    windowProp ?? readStoredWindow(),
+  const [windowState, setWindowState] = useState<DashboardWindow>(
+    () => windowProp ?? readStoredWindow(),
   )
-
-  useEffect(() => {
-    if (windowProp) {
-      setWindowState(windowProp)
-    }
-  }, [windowProp])
 
   const active: DashboardWindow = windowProp ?? windowState ?? DEFAULT_DASHBOARD_WINDOW
 

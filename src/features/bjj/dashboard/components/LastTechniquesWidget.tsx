@@ -20,7 +20,7 @@ import { categoryLabel } from '../../category-labels'
 import { relativeTimeEn } from '../utils/relativeTime'
 import { LAST_TECHNIQUES_VIEW_ALL, WIDGET_COPY } from '../copy/dashboard-copy'
 import { TechniquePracticeModal } from '@/features/bjj/progression/components/TechniquePracticeModal'
-import type { LastTechniquesData, LastTechniqueRow } from '../types/dashboard.types'
+import type { LastTechniquesData } from '../types/dashboard.types'
 
 export interface LastTechniquesWidgetProps {
   data: LastTechniquesData
