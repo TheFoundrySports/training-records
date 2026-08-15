@@ -39,20 +39,29 @@ jobs:
       - name: Wait for dev server
         run: pnpm dlx wait-on http://localhost:5173 --timeout 30000
 
+      - name: Install ChromeDriver matching runner Chrome
+        run: |
+          MAJOR=$(google-chrome --product-version | cut -d. -f1)
+          mkdir -p /tmp/chromedriver-match
+          cd /tmp/chromedriver-match
+          npm init -y
+          npm install "chromedriver@${MAJOR}"
+          echo "CHROMEDRIVER_BIN=$(node -p "require('chromedriver').path")" >> "$GITHUB_ENV"
+
       - name: Run axe-core CLI on Login
-        run: pnpm exec axe http://localhost:5173/login --exit
+        run: pnpm exec axe http://localhost:5173/login --exit --chromedriver-path "$CHROMEDRIVER_BIN"
 
       - name: Run axe-core CLI on Workout List
-        run: pnpm exec axe http://localhost:5173/workouts --exit
+        run: pnpm exec axe http://localhost:5173/workouts --exit --chromedriver-path "$CHROMEDRIVER_BIN"
 
       - name: Run axe-core CLI on Workout Detail
-        run: pnpm exec axe http://localhost:5173/workouts/00000000-0000-0000-0000-000000000001 --exit
+        run: pnpm exec axe http://localhost:5173/workouts/00000000-0000-0000-0000-000000000001 --exit --chromedriver-path "$CHROMEDRIVER_BIN"
 
       - name: Run axe-core CLI on Workout Form
-        run: pnpm exec axe http://localhost:5173/workouts/new --exit
+        run: pnpm exec axe http://localhost:5173/workouts/new --exit --chromedriver-path "$CHROMEDRIVER_BIN"
 
       - name: Run axe-core CLI on Calendar
-        run: pnpm exec axe http://localhost:5173/calendar --exit
+        run: pnpm exec axe http://localhost:5173/calendar --exit --chromedriver-path "$CHROMEDRIVER_BIN"
 
       - name: Stop dev server
         if: always()
