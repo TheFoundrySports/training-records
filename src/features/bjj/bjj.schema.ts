@@ -73,8 +73,24 @@ export const BJJRollDraftSchema = BJJRollProposalSchema.extend({
   raw_excerpt: z.string().min(1).nullable(),
   validation_error: BJJRollValidationErrorSchema.nullable(),
   source: BJJRollSourceSchema,
+  /** Client-only: athlete confirmed this draft in roll review (stripped before API). */
+  reviewConfirmed: z.boolean().optional(),
 })
 export type BJJRollDraft = z.infer<typeof BJJRollDraftSchema>
+
+/** Mark one roll as reviewed and ready to persist on save. */
+export function confirmRollDraft(roll: BJJRollDraft): BJJRollDraft {
+  return {
+    ...roll,
+    reviewConfirmed: true,
+    source: roll.source === 'ai_edited' ? 'ai_edited' : 'ai_confirmed',
+  }
+}
+
+/** Mark all valid rolls as reviewed and ready to persist on save. */
+export function confirmRollDrafts(rolls: BJJRollDraft[]): BJJRollDraft[] {
+  return rolls.map((roll) => confirmRollDraft(roll))
+}
 
 /** Map EF proposal rows to form drafts (nullable validation_error + source). */
 export function proposalToDraft(
@@ -152,6 +168,11 @@ export const bjjSectionSchema = z.object({
 export type BJJSectionFormValues = z.infer<typeof bjjSectionSchema>
 
 // ── BJJ Workout form ─────────────────────────────────────
+/** Open Design recommended length — UI counter and near-limit styling. */
+export const BJJ_SESSION_NOTES_SOFT_MAX = 500
+/** Align with shared workout schema for edit-mode compatibility. */
+export const BJJ_SESSION_NOTES_MAX = 2000
+
 export const bjjWorkoutSchema = z
   .object({
     title: z.string().min(1, 'Title is required').max(200),
@@ -168,7 +189,10 @@ export const bjjWorkoutSchema = z
       .int()
       .min(1, 'Enter a duration between 1 and 300 minutes')
       .max(300, 'Duration cannot exceed 300 minutes'),
-    notes: z.string().max(2000, 'Session notes cannot exceed 2000 characters').optional(),
+    notes: z
+      .string()
+      .max(BJJ_SESSION_NOTES_MAX, `Session notes cannot exceed ${BJJ_SESSION_NOTES_MAX} characters`)
+      .optional(),
     rpe: z
       .number({ error: 'RPE must be a whole number between 1 and 10' })
       .int()

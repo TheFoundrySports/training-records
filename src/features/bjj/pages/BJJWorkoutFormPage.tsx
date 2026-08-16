@@ -7,8 +7,10 @@ import { createBjjWorkoutFormExampleValues } from '../bjjWorkoutFormExamples'
 import { useCreateBJJWorkout } from '../hooks/useBJJWorkoutMutations'
 import { useUpdateBJJWorkout } from '../hooks/useUpdateBJJWorkout'
 import { useConfirmRolls } from '../hooks/useConfirmRolls'
+import { useBJJWorkoutDraft } from '../hooks/useBJJWorkoutDraft'
 import { useWorkout } from '@/features/workouts/hooks/useWorkouts'
 import { useBJJSections } from '../hooks/useBJJSections'
+import { useAuth } from '@/features/auth/AuthContext'
 import { BJJSectionEditor } from '../components/BJJSectionEditor'
 import { MaterialScope } from '@/components/MaterialScope'
 import { Form } from '@/components/ui/form'
@@ -16,9 +18,12 @@ import type { BJJSection } from '../bjj.types'
 import { BJJFormStepper } from '../components/form/BJJFormStepper'
 import { BJJFormSummarySidebar } from '../components/form/BJJFormSummarySidebar'
 import { BJJFormActionBar } from '../components/form/BJJFormActionBar'
+import { BJJFormRollsCard } from '../components/form/BJJFormRollsCard'
+import { BJJSessionIntensityField } from '../components/form/BJJSessionIntensityField'
 import { MatFormField } from '../components/form/MatFormField'
 import { FormAlert } from '../components/form/FormAlert'
 import { useBJJFormProgress } from '../components/form/useBJJFormProgress'
+import { BJJ_SESSION_NOTES_MAX, BJJ_SESSION_NOTES_SOFT_MAX } from '../bjj.schema'
 
 const FORM_ID = 'bjj-workout-form'
 
@@ -26,6 +31,7 @@ export function BJJWorkoutFormPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const isEditMode = Boolean(id)
+  const { user } = useAuth()
 
   const createMutation = useCreateBJJWorkout()
   const updateMutation = useUpdateBJJWorkout()
@@ -55,6 +61,20 @@ export function BJJWorkoutFormPage() {
     (confirmRollsMutation.error as { message?: string } | null)?.message
 
   const progress = useBJJFormProgress(form.watch, mutationError ?? null)
+
+  const {
+    pendingRestore,
+    draftFeedback,
+    restoreDraft,
+    discardDraft,
+    saveDraft,
+    clearSavedDraft,
+  } = useBJJWorkoutDraft({
+    userId: user?.id,
+    enabled: !isEditMode,
+    getValues: form.getValues,
+    reset: form.reset,
+  })
 
   const hasPrefilledRef = useRef(false)
   useEffect(() => {
@@ -123,6 +143,7 @@ export function BJJWorkoutFormPage() {
         })
       }
 
+      clearSavedDraft()
       void navigate(`/workouts/${workoutId}`)
     } catch (error) {
       console.error('Save failed:', error)
@@ -141,6 +162,15 @@ export function BJJWorkoutFormPage() {
       ? `${watched.durationMinutes} min`
       : '—'
   const rpeLabel = watched.rpe != null ? `${watched.rpe} / 10` : '—'
+
+  function formatDraftSavedAt(iso: string): string {
+    const date = new Date(iso)
+    if (Number.isNaN(date.getTime())) return 'earlier'
+    return date.toLocaleString(undefined, {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    })
+  }
 
   function handleCancel() {
     void navigate(isEditMode && id ? `/workouts/${id}` : '/workouts')
@@ -185,6 +215,38 @@ export function BJJWorkoutFormPage() {
         {mutationError ? (
           <div ref={rootErrorRef} tabIndex={-1} aria-live="assertive">
             <FormAlert tone="error">{mutationError}</FormAlert>
+          </div>
+        ) : null}
+
+        {!isEditMode && pendingRestore ? (
+          <div className="banner warn draft-banner" role="status">
+            <svg
+              viewBox="0 0 20 20"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.6"
+              aria-hidden="true"
+            >
+              <path d="M10 2.8 18 17H2z" strokeLinejoin="round" />
+              <path d="M10 8v3.4M10 13.8h0" strokeLinecap="round" />
+            </svg>
+            <div className="draft-banner-copy">
+              <strong>Saved draft found.</strong> Restore your in-progress workout from{' '}
+              {formatDraftSavedAt(pendingRestore.savedAt)}?
+            </div>
+            <div className="draft-banner-actions">
+              <button type="button" className="btn btn-sm" onClick={restoreDraft} disabled={isPending}>
+                Restore draft
+              </button>
+              <button
+                type="button"
+                className="btn btn-sm btn-ghost"
+                onClick={discardDraft}
+                disabled={isPending}
+              >
+                Discard
+              </button>
+            </div>
           </div>
         ) : null}
 
@@ -280,59 +342,7 @@ export function BJJWorkoutFormPage() {
                   />
                 </div>
 
-                <div className="grid-2" style={{ marginTop: 'var(--space-5)' }}>
-                  <MatFormField
-                    control={form.control}
-                    name="rpe"
-                    label="RPE (1–10, optional)"
-                    disabled={isPending}
-                    render={({ id, field, 'aria-invalid': invalid, 'aria-describedby': describedBy, disabled }) => (
-                      <input
-                        id={id}
-                        type="number"
-                        min={1}
-                        max={10}
-                        className="input"
-                        placeholder="e.g. 7"
-                        aria-invalid={invalid}
-                        aria-describedby={describedBy}
-                        disabled={disabled}
-                        value={field.value ?? ''}
-                        onChange={(e) => {
-                          const val = e.target.value
-                          field.onChange(val === '' ? undefined : Number(val))
-                        }}
-                        onBlur={field.onBlur}
-                        name={field.name}
-                        ref={field.ref}
-                      />
-                    )}
-                  />
-                </div>
-
-                <MatFormField
-                  control={form.control}
-                  name="notes"
-                  label="Session notes (optional)"
-                  hint="General notes for the whole session."
-                  disabled={isPending}
-                  className=""
-                  render={({ id, field, 'aria-invalid': invalid, 'aria-describedby': describedBy, disabled }) => (
-                    <textarea
-                      id={id}
-                      className="textarea"
-                      placeholder="How did the session go overall?"
-                      aria-invalid={invalid}
-                      aria-describedby={describedBy}
-                      disabled={disabled}
-                      value={field.value ?? ''}
-                      onChange={field.onChange}
-                      onBlur={field.onBlur}
-                      name={field.name}
-                      ref={field.ref}
-                    />
-                  )}
-                />
+                <BJJSessionIntensityField control={form.control} disabled={isPending} />
               </section>
 
               <section className="card" id="cardSections" aria-labelledby="hSections">
@@ -350,7 +360,7 @@ export function BJJWorkoutFormPage() {
                       onRemove={() => remove(index)}
                       removeDisabled={fields.length === 1}
                       isPending={isPending}
-                      rollAnchorId={index === 0 ? 'cardRolls' : undefined}
+                      hideRollReview
                     />
                   ))}
                 </div>
@@ -382,17 +392,68 @@ export function BJJWorkoutFormPage() {
                 </button>
               </section>
 
+              <section className="card" id="cardRolls" aria-labelledby="hRolls">
+                <div className="card-head">
+                  <h2 id="hRolls">Roll review</h2>
+                  <span className="tag">Step 3</span>
+                </div>
+                <BJJFormRollsCard />
+              </section>
+
               <section className="card" id="cardReview" aria-labelledby="hReview">
                 <div className="card-head">
                   <h2 id="hReview">Review</h2>
                   <span className="tag">Step 4</span>
                 </div>
                 <p className="hint" style={{ fontSize: 'var(--text-sm)', color: 'var(--fg-2)' }}>
-                  When every section has a goal and roll positions are valid, save from the action
-                  bar below. AI-enhanced notes and confirmed rolls persist to your dashboard
-                  metrics.
+                  {progress.progressPct === 100
+                    ? 'Everything checks out — add optional session notes, then save from the action bar.'
+                    : 'When every section has a goal and roll positions are valid, save from the action bar below.'}
                 </p>
-                <div className="banner" style={{ marginTop: 'var(--space-5)' }}>
+                <div style={{ marginTop: 'var(--space-5)' }}>
+                <MatFormField
+                  control={form.control}
+                  name="notes"
+                  label="Session notes (optional)"
+                  hint="General notes for the whole session."
+                  disabled={isPending}
+                  render={({ id, field, 'aria-invalid': invalid, 'aria-describedby': describedBy, disabled }) => {
+                    const noteLength = (field.value ?? '').length
+
+                    return (
+                      <>
+                        <textarea
+                          id={id}
+                          className="textarea"
+                          placeholder="How did the session go overall?"
+                          aria-invalid={invalid}
+                          aria-describedby={describedBy}
+                          disabled={disabled}
+                          maxLength={BJJ_SESSION_NOTES_MAX}
+                          value={field.value ?? ''}
+                          onChange={field.onChange}
+                          onBlur={field.onBlur}
+                          name={field.name}
+                          ref={field.ref}
+                        />
+                        <div className="field-foot">
+                          <span
+                            className="count"
+                            aria-live="polite"
+                            data-near-limit={noteLength >= BJJ_SESSION_NOTES_SOFT_MAX - 50 ? 'true' : 'false'}
+                          >
+                            {noteLength} / {BJJ_SESSION_NOTES_SOFT_MAX}
+                          </span>
+                        </div>
+                      </>
+                    )
+                  }}
+                />
+                </div>
+                <div
+                  className={progress.progressPct === 100 ? 'banner ok' : 'banner'}
+                  style={{ marginTop: 'var(--space-5)' }}
+                >
                   <svg
                     viewBox="0 0 20 20"
                     fill="none"
@@ -409,7 +470,11 @@ export function BJJWorkoutFormPage() {
                     <strong>{progress.techniqueCount}</strong> linked technique
                     {progress.techniqueCount === 1 ? '' : 's'},{' '}
                     <strong>{progress.totalRolls}</strong> roll draft
-                    {progress.totalRolls === 1 ? '' : 's'} pending save.
+                    {progress.totalRolls === 1 ? '' : 's'}
+                    {progress.totalRolls > 0
+                      ? ` (${progress.confirmedRolls} of ${progress.totalRolls} confirmed)`
+                      : ''}{' '}
+                    pending save.
                   </span>
                 </div>
               </section>
@@ -429,6 +494,9 @@ export function BJJWorkoutFormPage() {
           isPending={isPending}
           formId={FORM_ID}
           onCancel={handleCancel}
+          showSaveDraft={!isEditMode}
+          onSaveDraft={saveDraft}
+          draftFeedback={draftFeedback}
         />
       </div>
     </MaterialScope>

@@ -5,7 +5,7 @@ import { AIPreviewPanel } from './AIPreviewPanel'
 import { RollReviewPanel } from './RollReviewPanel'
 import { useBJJSectionAI } from '../hooks/useBJJSectionAI'
 import type { BJJWorkoutFormValues, BJJRollDraft } from '../bjj.schema'
-import { proposalToDraft } from '../bjj.schema'
+import { confirmRollDraft, confirmRollDrafts, proposalToDraft } from '../bjj.schema'
 import { FormAlert } from './form/FormAlert'
 import { MatFormField } from './form/MatFormField'
 
@@ -21,8 +21,8 @@ interface BJJSectionEditorProps {
   onRemove: () => void
   removeDisabled: boolean
   isPending: boolean
-  /** First section exposes roll review anchor for stepper navigation. */
-  rollAnchorId?: string
+  /** When true, roll review renders in page-level #cardRolls instead. */
+  hideRollReview?: boolean
 }
 
 export function BJJSectionEditor({
@@ -31,7 +31,7 @@ export function BJJSectionEditor({
   onRemove,
   removeDisabled,
   isPending,
-  rollAnchorId,
+  hideRollReview = false,
 }: BJJSectionEditorProps) {
   const [preview, setPreview] = useState<AIPreview | null>(null)
   const [aiError, setAiError] = useState<string | null>(null)
@@ -60,10 +60,12 @@ export function BJJSectionEditor({
       {
         onSuccess: (result) => {
           setRollsReviewComplete(false)
+          const drafts = result.rolls.map((roll) => proposalToDraft(roll, 'manual'))
           setPreview({
             ...result,
-            rolls: result.rolls.map((roll) => proposalToDraft(roll, 'manual')),
+            rolls: drafts,
           })
+          setValue(`sections.${index}.rolls`, drafts, { shouldDirty: true })
         },
         onError: (err) => {
           const message = err instanceof Error ? err.message : 'AI enhancement failed'
@@ -89,18 +91,29 @@ export function BJJSectionEditor({
     setPreview(null)
   }
 
+  function handleConfirmRoll(rollIndex: number) {
+    const currentRolls = preview?.rolls ?? sectionRolls
+    const roll = currentRolls[rollIndex]
+    if (!roll || roll.validation_error != null) return
+
+    const updatedRolls = currentRolls.map((item, index) =>
+      index === rollIndex ? confirmRollDraft(item) : item,
+    )
+
+    setValue(`sections.${index}.rolls`, updatedRolls, { shouldDirty: true })
+    setRollsReviewComplete(updatedRolls.every((item) => item.reviewConfirmed === true))
+    setPreview((prev) => (prev ? { ...prev, rolls: updatedRolls } : null))
+  }
+
   function handleConfirmRolls() {
     const currentRolls = preview?.rolls ?? sectionRolls
     if (currentRolls.length === 0) return
     if (currentRolls.some((roll) => roll.validation_error != null)) return
 
-    const confirmedRolls: BJJRollDraft[] = currentRolls.map((roll) => ({
-      ...roll,
-      source: roll.source === 'ai_edited' ? 'ai_edited' : 'ai_confirmed',
-    }))
+    const confirmedRolls = confirmRollDrafts(currentRolls)
 
     setValue(`sections.${index}.rolls`, confirmedRolls, { shouldDirty: true })
-    setRollsReviewComplete(true)
+    setRollsReviewComplete(confirmedRolls.every((roll) => roll.reviewConfirmed === true))
     setPreview((prev) => (prev ? { ...prev, rolls: confirmedRolls } : null))
   }
 
@@ -119,6 +132,7 @@ export function BJJSectionEditor({
       return {
         ...roll,
         ...updates,
+        reviewConfirmed: false,
         source: updates.source ?? 'ai_edited',
       }
     })
@@ -138,7 +152,7 @@ export function BJJSectionEditor({
   }
 
   const activeRolls = preview?.rolls ?? sectionRolls
-  const showRollReview = activeRolls.length > 0
+  const showRollReview = !hideRollReview && activeRolls.length > 0
 
   return (
     <article
@@ -248,39 +262,22 @@ export function BJJSectionEditor({
         ) : null}
       </div>
 
-      <div
-        id={rollAnchorId}
-        style={{ marginTop: 'var(--space-5)' }}
-        aria-label={rollAnchorId ? 'Roll review' : undefined}
-      >
-        {showRollReview ? (
-          <RollReviewPanel
-            sectionLabel={`Section ${index + 1}`}
-            rolls={preview?.rolls ?? sectionRolls}
-            reviewComplete={rollsReviewComplete}
-            onConfirmAll={handleConfirmRolls}
-            onSkip={handleSkipRolls}
-            onChange={handleRollChange}
-            onDelete={handleRollDelete}
-          />
-        ) : rollAnchorId ? (
-          <div className="banner">
-            <svg
-              viewBox="0 0 20 20"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.6"
-              aria-hidden="true"
-            >
-              <circle cx="10" cy="10" r="8" />
-              <path d="M10 9v5M10 6.5h0" strokeLinecap="round" />
-            </svg>
-            <span>
-              Run <strong>Enhance with AI</strong> on a section to propose rolls for review here.
-            </span>
-          </div>
-        ) : null}
-      </div>
+      {!hideRollReview ? (
+        <div style={{ marginTop: 'var(--space-5)' }} aria-label="Roll review">
+          {showRollReview ? (
+            <RollReviewPanel
+              sectionLabel={`Section ${index + 1}`}
+              rolls={preview?.rolls ?? sectionRolls}
+              reviewComplete={rollsReviewComplete}
+              onConfirmRoll={handleConfirmRoll}
+              onConfirmAll={handleConfirmRolls}
+              onSkip={handleSkipRolls}
+              onChange={handleRollChange}
+              onDelete={handleRollDelete}
+            />
+          ) : null}
+        </div>
+      ) : null}
 
       <div className="grid-2" style={{ marginTop: 'var(--space-5)' }}>
         <MatFormField

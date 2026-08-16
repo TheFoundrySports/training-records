@@ -1,4 +1,5 @@
 import type { FormProgress } from './useBJJFormProgress'
+import { BJJFormPreferencesCard } from './BJJFormPreferencesCard'
 
 interface BJJFormSummarySidebarProps {
   progress: FormProgress
@@ -42,7 +43,7 @@ export function BJJFormSummarySidebar({
                 ? 'None yet'
                 : progress.invalidRolls > 0
                   ? `${progress.invalidRolls} need fix`
-                  : `${progress.totalRolls} ready`}
+                  : `${progress.confirmedRolls} of ${progress.totalRolls} confirmed`}
             </span>
           </div>
         </div>
@@ -63,6 +64,7 @@ export function BJJFormSummarySidebar({
         </div>
         <p className="sum-foot">{progress.summaryFoot}</p>
       </section>
+      <BJJFormPreferencesCard />
     </aside>
   )
 }

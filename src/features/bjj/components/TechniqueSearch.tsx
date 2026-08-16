@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
+import { BJJ_CATEGORIES } from '../bjj.schema'
 import { useBJJTechniques } from '../hooks/useBJJTechniques'
 import type { BJJCategory, BJJTechnique } from '../bjj.types'
 
@@ -40,7 +41,7 @@ function CloseIcon() {
 }
 
 /**
- * TechniqueSearch — controlled combobox with 300ms debounce.
+ * TechniqueSearch — controlled combobox with debounced search and category chips.
  * Populates nameMap from allTechniques so IDs set programmatically
  * (via setValue from AI enhance flow) resolve to names immediately.
  */
@@ -48,6 +49,8 @@ export function TechniqueSearch({ selectedIds, onChange, disabled }: TechniqueSe
   const [query, setQuery] = useState('')
   const [debouncedQuery, setDebouncedQuery] = useState('')
   const [open, setOpen] = useState(false)
+  const [activeCategory, setActiveCategory] = useState<BJJCategory | null>(null)
+  const [pickStatus, setPickStatus] = useState('')
   const containerRef = useRef<HTMLDivElement>(null)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -72,6 +75,13 @@ export function TechniqueSearch({ selectedIds, onChange, disabled }: TechniqueSe
     [allTechniques],
   )
 
+  const availableCategories = useMemo(() => {
+    const present = new Set(
+      allTechniques.map((technique) => technique.category).filter(Boolean) as BJJCategory[],
+    )
+    return BJJ_CATEGORIES.filter((category) => present.has(category))
+  }, [allTechniques])
+
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
@@ -93,6 +103,7 @@ export function TechniqueSearch({ selectedIds, onChange, disabled }: TechniqueSe
   function handleSelect(technique: BJJTechnique) {
     if (!selectedSet.has(technique.id)) {
       onChange([...selectedIds, technique.id])
+      setPickStatus(`Added ${technique.name}`)
     }
     setQuery('')
     setDebouncedQuery('')
@@ -100,16 +111,40 @@ export function TechniqueSearch({ selectedIds, onChange, disabled }: TechniqueSe
   }
 
   function handleRemove(id: string) {
+    const name = techniqueNameById.get(id) ?? id
     onChange(selectedIds.filter((sid) => sid !== id))
+    setPickStatus(`Removed ${name}`)
   }
 
-  const filteredResults = results.filter((t) => !selectedSet.has(t.id))
+  function handleCategoryToggle(category: BJJCategory) {
+    setActiveCategory((current) => (current === category ? null : category))
+    setOpen(true)
+  }
+
+  const filteredResults = results.filter((technique) => {
+    if (selectedSet.has(technique.id)) return false
+    if (activeCategory && technique.category !== activeCategory) return false
+    return true
+  })
 
   function resolveName(id: string): string {
     const name = techniqueNameById.get(id)
     const nameEs = techniqueNameEsById.get(id)
     if (nameEs) return `${name ?? id} / ${nameEs}`
     return name ?? id
+  }
+
+  function emptyMessage(): string {
+    if (activeCategory && debouncedQuery.trim()) {
+      return `No ${CATEGORY_LABELS[activeCategory].toLowerCase()} techniques match “${debouncedQuery.trim()}”.`
+    }
+    if (activeCategory) {
+      return `No ${CATEGORY_LABELS[activeCategory].toLowerCase()} techniques available.`
+    }
+    if (debouncedQuery.trim()) {
+      return `No techniques match “${debouncedQuery.trim()}”.`
+    }
+    return 'No techniques found'
   }
 
   return (
@@ -132,51 +167,74 @@ export function TechniqueSearch({ selectedIds, onChange, disabled }: TechniqueSe
           autoComplete="off"
         />
 
-        {open && filteredResults.length > 0 ? (
-          <div className="menu-panel">
-            <ul
-              id="technique-search-listbox"
-              role="listbox"
-              aria-label="Technique search results"
-              className="pick-list"
-            >
-              {filteredResults.map((technique) => {
-                const categoryLabel = formatCategory(technique.category)
-                return (
-                  <li key={technique.id} role="presentation">
-                    <button
-                      type="button"
-                      role="option"
-                      aria-selected={false}
-                      className="pick-row"
-                      onMouseDown={(e) => {
-                        e.preventDefault()
-                        handleSelect(technique)
-                      }}
-                    >
-                      <span className="pick-name">{technique.name}</span>
-                      {categoryLabel ? (
-                        <span className="pick-cat">{categoryLabel}</span>
-                      ) : (
-                        <span aria-hidden="true" />
-                      )}
-                      <span className="pick-add" aria-hidden="true">
-                        <PlusIcon />
-                      </span>
-                    </button>
-                  </li>
-                )
-              })}
-            </ul>
+        {!techniquesLoading && availableCategories.length > 0 ? (
+          <div className="chip-filters" role="group" aria-label="Filter by category">
+            {availableCategories.map((category) => (
+              <button
+                key={category}
+                type="button"
+                className="chip-filter"
+                data-active={activeCategory === category ? 'true' : 'false'}
+                aria-pressed={activeCategory === category}
+                disabled={disabled}
+                onClick={() => handleCategoryToggle(category)}
+              >
+                {CATEGORY_LABELS[category]}
+              </button>
+            ))}
           </div>
         ) : null}
 
-        {open && filteredResults.length === 0 ? (
+        {open ? (
           <div className="menu-panel">
-            <p className="empty-note">No techniques found</p>
+            {filteredResults.length > 0 ? (
+              <ul
+                id="technique-search-listbox"
+                role="listbox"
+                aria-label="Technique search results"
+                className="pick-list"
+              >
+                {filteredResults.map((technique) => {
+                  const categoryLabel = formatCategory(technique.category)
+                  return (
+                    <li key={technique.id} role="presentation">
+                      <button
+                        type="button"
+                        role="option"
+                        aria-selected={false}
+                        className="pick-row"
+                        onMouseDown={(e) => {
+                          e.preventDefault()
+                          handleSelect(technique)
+                        }}
+                      >
+                        <span className="pick-name">{technique.name}</span>
+                        {categoryLabel ? (
+                          <span className="pick-cat">{categoryLabel}</span>
+                        ) : (
+                          <span aria-hidden="true" />
+                        )}
+                        <span className="pick-add" aria-hidden="true">
+                          <PlusIcon />
+                        </span>
+                      </button>
+                    </li>
+                  )
+                })}
+              </ul>
+            ) : (
+              <p className="empty-note">{emptyMessage()}</p>
+            )}
           </div>
         ) : null}
       </div>
+
+      <p className="sr-only" aria-live="polite" aria-atomic="true">
+        {pickStatus}
+        {selectedIds.length > 0
+          ? ` ${selectedIds.length} technique${selectedIds.length === 1 ? '' : 's'} linked.`
+          : ''}
+      </p>
 
       {techniquesLoading ? (
         <p className="hint" style={{ marginTop: 'var(--space-3)' }}>

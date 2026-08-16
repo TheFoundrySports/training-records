@@ -1,6 +1,6 @@
 /**
- * RollReviewPanel — review and edit AI-proposed rolls (REQ-FRM1).
- * Hybrid OD styling: Material roll cards + canonical position model (Option A).
+ * RollReviewPanel — review and edit AI-proposed rolls (REQ-FRM1, REQ-WF5).
+ * Hybrid OD styling: read/edit toggle, per-roll Confirm · Edit · Discard.
  */
 
 import { useState } from 'react'
@@ -11,8 +11,9 @@ import type { BJJRollDraft, BJJRollRole, BJJRollOutcome } from '../bjj.schema'
 interface RollReviewPanelProps {
   sectionLabel?: string
   rolls: BJJRollDraft[]
-  /** User explicitly confirmed rolls in this review session. */
+  /** All rolls in this section are confirmed. */
   reviewComplete?: boolean
+  onConfirmRoll: (rollIndex: number) => void
   onConfirmAll: () => void
   onSkip: () => void
   onChange: (rollIndex: number, updates: Partial<BJJRollDraft>) => void
@@ -49,6 +50,7 @@ export function RollReviewPanel({
   sectionLabel,
   rolls,
   reviewComplete = false,
+  onConfirmRoll,
   onConfirmAll,
   onSkip,
   onChange,
@@ -56,15 +58,31 @@ export function RollReviewPanel({
 }: RollReviewPanelProps) {
   const { data: positions = [] } = useBJJPositions()
   const [expandedExcerpts, setExpandedExcerpts] = useState<Set<number>>(new Set())
+  const [editingIndices, setEditingIndices] = useState<Set<number>>(new Set())
 
   const hasValidationErrors = rolls.some((roll) => roll.validation_error != null)
-  const confirmedCount = reviewComplete ? rolls.length : 0
+  const confirmedCount = rolls.filter((roll) => roll.reviewConfirmed === true).length
+  const unconfirmedValidCount = rolls.filter(
+    (roll) => roll.reviewConfirmed !== true && roll.validation_error == null,
+  ).length
 
   function toggleExcerpt(rollIndex: number) {
     setExpandedExcerpts((prev) => {
       const next = new Set(prev)
       if (next.has(rollIndex)) next.delete(rollIndex)
       else next.add(rollIndex)
+      return next
+    })
+  }
+
+  function handleStartEdit(rollIndex: number) {
+    setEditingIndices((prev) => new Set(prev).add(rollIndex))
+  }
+
+  function handleDoneEdit(rollIndex: number) {
+    setEditingIndices((prev) => {
+      const next = new Set(prev)
+      next.delete(rollIndex)
       return next
     })
   }
@@ -79,6 +97,14 @@ export function RollReviewPanel({
     return positions.find((p) => p.key === key)?.display_en ?? key
   }
 
+  function panelTagLabel(): string {
+    if (rolls.length === 0) return 'No rolls'
+    if (hasValidationErrors) return `${rolls.length} need fix`
+    if (confirmedCount === rolls.length) return `${rolls.length} confirmed`
+    if (confirmedCount > 0) return `${confirmedCount} of ${rolls.length} confirmed`
+    return `${rolls.length} proposed`
+  }
+
   return (
     <div>
       <div className="card-head" style={{ paddingBottom: 'var(--space-3)', marginBottom: 'var(--space-4)' }}>
@@ -87,16 +113,10 @@ export function RollReviewPanel({
         </h4>
         <span
           className={`tag ${
-            hasValidationErrors ? 'pending' : reviewComplete ? 'ok' : rolls.length > 0 ? '' : ''
+            hasValidationErrors ? 'pending' : reviewComplete ? 'ok' : confirmedCount > 0 ? '' : ''
           }`}
         >
-          {rolls.length === 0
-            ? 'No rolls'
-            : hasValidationErrors
-              ? `${rolls.length} need fix`
-              : reviewComplete
-                ? `${rolls.length} confirmed`
-                : `${rolls.length} proposed`}
+          {panelTagLabel()}
         </span>
       </div>
 
@@ -106,21 +126,24 @@ export function RollReviewPanel({
           <path d="M10 9v5M10 6.5h0" strokeLinecap="round" />
         </svg>
         <span>
-          AI proposed <strong>{rolls.length}</strong> roll{rolls.length === 1 ? '' : 's'}. Map each
-          to valid positions — only confirmed rolls feed dashboard metrics.
+          AI proposed <strong>{rolls.length}</strong> roll{rolls.length === 1 ? '' : 's'}. Confirm
+          each roll after checking positions — only confirmed rolls feed dashboard metrics.
         </span>
       </div>
 
       <div className="roll-list" style={{ marginTop: 'var(--space-5)' }}>
         {rolls.map((roll, index) => {
           const hasError = roll.validation_error != null
+          const isConfirmed = roll.reviewConfirmed === true
+          const isEditing = editingIndices.has(index) || hasError
           const isExpanded = expandedExcerpts.has(index)
+          const rollState = hasError ? 'invalid' : isConfirmed ? 'confirmed' : 'proposed'
 
           return (
             <article
               key={`${roll.roll_index}-${index}`}
               className="roll"
-              data-state={hasError ? 'invalid' : 'proposed'}
+              data-state={rollState}
             >
               <div className="roll-head">
                 <span className="roll-title">
@@ -131,166 +154,220 @@ export function RollReviewPanel({
                     </span>
                   ) : null}
                 </span>
-                <span className={`tag ${hasError ? 'pending' : reviewComplete ? 'ok' : ''}`}>
-                  {hasError ? 'Invalid' : reviewComplete ? 'Confirmed' : 'Proposed'}
+                <span className={`tag ${hasError ? 'pending' : isConfirmed ? 'ok' : ''}`}>
+                  {hasError ? 'Invalid' : isConfirmed ? 'Confirmed' : 'Proposed'}
                 </span>
               </div>
 
-              <div className="roll-read">
-                <p>
-                  <strong>{ROLE_LABELS[roll.role]}</strong> · {OUTCOME_LABELS[roll.outcome]}
-                </p>
-                <p className="flow-read" style={{ marginTop: 'var(--space-2)' }}>
-                  {positionLabel(roll.position_from)}
-                  {roll.position_to ? ` → ${positionLabel(roll.position_to)}` : ''}
-                </p>
-              </div>
+              {!isEditing ? (
+                <div className="roll-read">
+                  <p>
+                    <strong>{ROLE_LABELS[roll.role]}</strong> · {OUTCOME_LABELS[roll.outcome]}
+                  </p>
+                  <p className="flow-read" style={{ marginTop: 'var(--space-2)' }}>
+                    {positionLabel(roll.position_from)}
+                    {roll.position_to ? ` → ${positionLabel(roll.position_to)}` : ''}
+                  </p>
+                </div>
+              ) : null}
 
-              {hasError ? (
+              {hasError && !isEditing ? (
                 <div className="banner warn" style={{ marginTop: 'var(--space-3)' }}>
                   <AlertCircle width={18} height={18} aria-hidden="true" />
                   <span>Position not recognized — select a valid position or remove this roll.</span>
                 </div>
               ) : null}
 
-              <div className="roll-body" style={{ marginTop: 'var(--space-4)' }}>
-                <div className="field">
-                  <label className="label" htmlFor={`roll-${index}-role`}>
-                    Role
-                  </label>
-                  <select
-                    id={`roll-${index}-role`}
-                    className="select"
-                    value={roll.role}
-                    aria-invalid={hasError}
-                    onChange={(e) =>
-                      onChange(index, { role: e.target.value as BJJRollDraft['role'] })
-                    }
-                  >
-                    {ROLE_OPTIONS.map((opt) => (
-                      <option key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="field">
-                  <label className="label" htmlFor={`roll-${index}-outcome`}>
-                    Outcome
-                  </label>
-                  <select
-                    id={`roll-${index}-outcome`}
-                    className="select"
-                    value={roll.outcome}
-                    onChange={(e) =>
-                      onChange(index, { outcome: e.target.value as BJJRollDraft['outcome'] })
-                    }
-                  >
-                    {OUTCOME_OPTIONS.map((opt) => (
-                      <option key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="field">
-                  <label className="label" htmlFor={`roll-${index}-from`}>
-                    From position
-                  </label>
-                  <select
-                    id={`roll-${index}-from`}
-                    className="select"
-                    value={roll.position_from ?? ''}
-                    aria-invalid={roll.validation_error === 'unknown_position_from'}
-                    onChange={(e) =>
-                      onChange(index, {
-                        position_from: e.target.value as BJJRollDraft['position_from'],
-                        validation_error:
-                          roll.validation_error === 'unknown_position_from'
-                            ? null
-                            : roll.validation_error,
-                        source: 'ai_edited',
-                      })
-                    }
-                  >
-                    <option value="">Select position…</option>
-                    {positions.map((pos) => (
-                      <option key={pos.key} value={pos.key}>
-                        {pos.display_en}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="field">
-                  <label className="label" htmlFor={`roll-${index}-to`}>
-                    To position
-                  </label>
-                  <select
-                    id={`roll-${index}-to`}
-                    className="select"
-                    value={roll.position_to ?? ''}
-                    aria-invalid={roll.validation_error === 'unknown_position_to'}
-                    onChange={(e) =>
-                      onChange(index, {
-                        position_to: (e.target.value || null) as BJJRollDraft['position_to'],
-                        validation_error:
-                          roll.validation_error === 'unknown_position_to'
-                            ? null
-                            : roll.validation_error,
-                        source: 'ai_edited',
-                      })
-                    }
-                  >
-                    <option value="">None</option>
-                    {positions.map((pos) => (
-                      <option key={pos.key} value={pos.key}>
-                        {pos.display_en}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+              {isEditing ? (
+                <div className="roll-body" style={{ marginTop: 'var(--space-4)' }}>
+                  {hasError ? (
+                    <div className="banner warn span-all">
+                      <AlertCircle width={18} height={18} aria-hidden="true" />
+                      <span>Position not recognized — select a valid position or remove this roll.</span>
+                    </div>
+                  ) : null}
 
-                {roll.technique_names.length > 0 ? (
-                  <div className="field span-all">
-                    <span className="label">Techniques</span>
-                    <p className="flow-read">{roll.technique_names.join(' · ')}</p>
-                  </div>
-                ) : null}
-
-                {roll.raw_excerpt ? (
-                  <div className="field span-all">
-                    <button
-                      type="button"
-                      className="btn btn-sm btn-ghost"
-                      onClick={() => toggleExcerpt(index)}
-                      aria-expanded={isExpanded}
+                  <div className="field">
+                    <label className="label" htmlFor={`roll-${index}-role`}>
+                      Role
+                    </label>
+                    <select
+                      id={`roll-${index}-role`}
+                      className="select"
+                      value={roll.role}
+                      aria-invalid={hasError}
+                      onChange={(e) =>
+                        onChange(index, { role: e.target.value as BJJRollDraft['role'] })
+                      }
                     >
-                      {isExpanded ? (
-                        <ChevronUp width={14} height={14} aria-hidden="true" />
-                      ) : (
-                        <ChevronDown width={14} height={14} aria-hidden="true" />
-                      )}
-                      <span style={{ marginLeft: 6 }}>AI context</span>
-                    </button>
-                    {isExpanded ? (
-                      <p className="hint" style={{ marginTop: 'var(--space-2)', fontStyle: 'italic' }}>
-                        &ldquo;{roll.raw_excerpt}&rdquo;
-                      </p>
-                    ) : null}
+                      {ROLE_OPTIONS.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </option>
+                      ))}
+                    </select>
                   </div>
-                ) : null}
-              </div>
+                  <div className="field">
+                    <label className="label" htmlFor={`roll-${index}-outcome`}>
+                      Outcome
+                    </label>
+                    <select
+                      id={`roll-${index}-outcome`}
+                      className="select"
+                      value={roll.outcome}
+                      onChange={(e) =>
+                        onChange(index, { outcome: e.target.value as BJJRollDraft['outcome'] })
+                      }
+                    >
+                      {OUTCOME_OPTIONS.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="field">
+                    <label className="label" htmlFor={`roll-${index}-from`}>
+                      From position
+                    </label>
+                    <select
+                      id={`roll-${index}-from`}
+                      className="select"
+                      value={roll.position_from ?? ''}
+                      aria-invalid={roll.validation_error === 'unknown_position_from'}
+                      onChange={(e) =>
+                        onChange(index, {
+                          position_from: e.target.value as BJJRollDraft['position_from'],
+                          validation_error:
+                            roll.validation_error === 'unknown_position_from'
+                              ? null
+                              : roll.validation_error,
+                          source: 'ai_edited',
+                        })
+                      }
+                    >
+                      <option value="">Select position…</option>
+                      {positions.map((pos) => (
+                        <option key={pos.key} value={pos.key}>
+                          {pos.display_en}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="field">
+                    <label className="label" htmlFor={`roll-${index}-to`}>
+                      To position
+                    </label>
+                    <select
+                      id={`roll-${index}-to`}
+                      className="select"
+                      value={roll.position_to ?? ''}
+                      aria-invalid={roll.validation_error === 'unknown_position_to'}
+                      onChange={(e) =>
+                        onChange(index, {
+                          position_to: (e.target.value || null) as BJJRollDraft['position_to'],
+                          validation_error:
+                            roll.validation_error === 'unknown_position_to'
+                              ? null
+                              : roll.validation_error,
+                          source: 'ai_edited',
+                        })
+                      }
+                    >
+                      <option value="">None</option>
+                      {positions.map((pos) => (
+                        <option key={pos.key} value={pos.key}>
+                          {pos.display_en}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {roll.technique_names.length > 0 ? (
+                    <div className="field span-all">
+                      <span className="label">Techniques</span>
+                      <p className="flow-read">{roll.technique_names.join(' · ')}</p>
+                    </div>
+                  ) : null}
+
+                  {roll.raw_excerpt ? (
+                    <div className="field span-all">
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-ghost"
+                        onClick={() => toggleExcerpt(index)}
+                        aria-expanded={isExpanded}
+                      >
+                        {isExpanded ? (
+                          <ChevronUp width={14} height={14} aria-hidden="true" />
+                        ) : (
+                          <ChevronDown width={14} height={14} aria-hidden="true" />
+                        )}
+                        <span style={{ marginLeft: 6 }}>AI context</span>
+                      </button>
+                      {isExpanded ? (
+                        <p className="hint" style={{ marginTop: 'var(--space-2)', fontStyle: 'italic' }}>
+                          &ldquo;{roll.raw_excerpt}&rdquo;
+                        </p>
+                      ) : null}
+                    </div>
+                  ) : null}
+                </div>
+              ) : null}
 
               <div className="roll-foot">
-                <button
-                  type="button"
-                  className="btn btn-sm btn-danger-text"
-                  onClick={() => onDelete(index)}
-                  aria-label={`Remove roll ${roll.roll_index}`}
-                >
-                  <Trash2 width={14} height={14} aria-hidden="true" />
-                  <span style={{ marginLeft: 6 }}>Discard</span>
-                </button>
+                {!isEditing ? (
+                  <>
+                    {!isConfirmed ? (
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-primary"
+                        onClick={() => onConfirmRoll(index)}
+                        disabled={hasError}
+                        title={hasError ? 'Fix positions before confirming' : undefined}
+                      >
+                        Confirm
+                      </button>
+                    ) : null}
+                    <button
+                      type="button"
+                      className="btn btn-sm"
+                      onClick={() => handleStartEdit(index)}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-sm btn-danger-text"
+                      onClick={() => onDelete(index)}
+                      aria-label={`Discard roll ${roll.roll_index}`}
+                    >
+                      <Trash2 width={14} height={14} aria-hidden="true" />
+                      <span style={{ marginLeft: 6 }}>Discard</span>
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    {!hasError ? (
+                      <button
+                        type="button"
+                        className="btn btn-sm"
+                        onClick={() => handleDoneEdit(index)}
+                      >
+                        Done editing
+                      </button>
+                    ) : null}
+                    <button
+                      type="button"
+                      className="btn btn-sm btn-danger-text"
+                      onClick={() => onDelete(index)}
+                      aria-label={`Discard roll ${roll.roll_index}`}
+                    >
+                      <Trash2 width={14} height={14} aria-hidden="true" />
+                      <span style={{ marginLeft: 6 }}>Discard</span>
+                    </button>
+                  </>
+                )}
               </div>
             </article>
           )
@@ -310,17 +387,19 @@ export function RollReviewPanel({
         </div>
       ) : (
         <div className="roll-foot">
-          <button
-            type="button"
-            className="btn btn-sm btn-primary"
-            onClick={onConfirmAll}
-            disabled={hasValidationErrors || rolls.length === 0}
-            title={
-              hasValidationErrors ? 'Fix or remove invalid rolls before confirming' : undefined
-            }
-          >
-            Confirm all ({confirmedCount}/{rolls.length})
-          </button>
+          {unconfirmedValidCount > 0 ? (
+            <button
+              type="button"
+              className="btn btn-sm"
+              onClick={onConfirmAll}
+              disabled={hasValidationErrors || rolls.length === 0}
+              title={
+                hasValidationErrors ? 'Fix or remove invalid rolls before confirming' : undefined
+              }
+            >
+              Confirm all ({confirmedCount}/{rolls.length})
+            </button>
+          ) : null}
           <button type="button" className="btn btn-sm" onClick={onSkip}>
             Skip for now
           </button>

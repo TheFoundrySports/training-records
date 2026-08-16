@@ -281,7 +281,7 @@ describe('BJJSectionEditor — REQ-306, REQ-315', () => {
                   onRemove={vi.fn()}
                   removeDisabled={true}
                   isPending={false}
-                  rollAnchorId="cardRolls"
+                  hideRollReview={false}
                 />
               </form>
             </Form>

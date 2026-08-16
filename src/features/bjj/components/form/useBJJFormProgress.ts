@@ -22,6 +22,7 @@ export interface FormProgress {
   actionTone: ActionTone
   canSubmit: boolean
   totalRolls: number
+  confirmedRolls: number
   invalidRolls: number
   sectionCount: number
   techniqueCount: number
@@ -44,7 +45,10 @@ export function useBJJFormProgress(
 
     const allRolls = sections.flatMap((s) => s.rolls ?? [])
     const invalidRolls = allRolls.filter((r) => r.validation_error != null).length
+    const confirmedRolls = allRolls.filter((r) => r.reviewConfirmed === true).length
     const rollsOk = invalidRolls === 0
+    const rollsConfirmedOk =
+      allRolls.length === 0 || confirmedRolls === allRolls.length
 
     const techniqueCount = sections.reduce((sum, s) => sum + (s.techniqueIds?.length ?? 0), 0)
 
@@ -97,8 +101,12 @@ export function useBJJFormProgress(
           ? 'Fix 1 roll position before saving.'
           : `Fix ${invalidRolls} roll positions before saving.`
     } else if (allRolls.length > 0) {
-      actionMessage = `${allRolls.length} roll${allRolls.length === 1 ? '' : 's'} ready to save.`
-      actionTone = 'ok'
+      if (confirmedRolls === allRolls.length) {
+        actionMessage = `${allRolls.length} roll${allRolls.length === 1 ? '' : 's'} confirmed — ready to save.`
+        actionTone = 'ok'
+      } else {
+        actionMessage = `Confirm ${allRolls.length - confirmedRolls} roll${allRolls.length - confirmedRolls === 1 ? '' : 's'} before saving.`
+      }
     } else {
       actionMessage = 'Ready to save — run AI enhance to propose rolls.'
       actionTone = progressPct === 100 ? 'ok' : 'warn'
@@ -115,8 +123,9 @@ export function useBJJFormProgress(
       summaryFoot,
       actionMessage,
       actionTone,
-      canSubmit: sessionOk && techniquesOk && rollsOk && !formError,
+      canSubmit: sessionOk && techniquesOk && rollsOk && rollsConfirmedOk && !formError,
       totalRolls: allRolls.length,
+      confirmedRolls,
       invalidRolls,
       sectionCount: sections.length,
       techniqueCount,
