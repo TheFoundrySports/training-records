@@ -73,7 +73,7 @@ export function BJJWorkoutFormPage() {
         id: section.id,
         goal: section.goal,
         rawDescription: section.rawDescription ?? '',
-        enhancedNotes: section.enhancedNotes ?? '',
+        enhancedNotes: section.enhancedNotes ?? section.aiDescription ?? '',
         durationMinutes: section.durationMinutes,
         techniqueIds: section.techniques.map((t) => t.id),
         rolls: [], // Edit mode doesn't load existing rolls into the form
@@ -95,7 +95,7 @@ export function BJJWorkoutFormPage() {
     try {
       let workoutId: string
 
-      // Task 3.3 & 3.10: Save workout first, then confirm rolls (REQ-RE10)
+      // Save workout first, then confirm rolls (REQ-RE10)
       if (isEditMode && id) {
         await updateMutation.mutateAsync({
           workoutId: id,
@@ -109,6 +109,9 @@ export function BJJWorkoutFormPage() {
             goal: s.goal,
             orderIndex: idx,
             techniqueIds: s.techniqueIds,
+            rawDescription: s.rawDescription,
+            durationMinutes: s.durationMinutes,
+            enhancedNotes: s.enhancedNotes,
           })),
         })
         workoutId = id
@@ -116,7 +119,6 @@ export function BJJWorkoutFormPage() {
         workoutId = await createMutation.mutateAsync(values)
       }
 
-      // Check if any sections have roll drafts to confirm
       const sectionsWithRolls = values.sections
         .map((section, index) => ({
           sectionNumber: index + 1, // section_number is 1-based
@@ -124,7 +126,6 @@ export function BJJWorkoutFormPage() {
         }))
         .filter((section) => section.rolls.length > 0)
 
-      // If there are rolls to confirm, call useConfirmRolls
       if (sectionsWithRolls.length > 0) {
         await confirmRollsMutation.mutateAsync({
           workoutId,
@@ -132,7 +133,6 @@ export function BJJWorkoutFormPage() {
         })
       }
 
-      // Navigate after successful save + roll confirmation
       void navigate(`/workouts/${workoutId}`)
     } catch (error) {
       // Mutation errors are already tracked by the mutations
