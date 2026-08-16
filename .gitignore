@@ -45,6 +45,8 @@ deno.lock
 .engram/
 .pi-lens/
 e2e/.pi-lens/
+.codegraph/
+.opencode/
 
 # Editor directories and files
 .vscode/*
