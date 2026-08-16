@@ -51,6 +51,49 @@ export interface UpdateBJJTechniqueInput extends Partial<CreateBJJTechniqueInput
   id: string
 }
 
+// ── Task 1.5: Export BJJRollDraft type ──────────────────────────────────────
+export type { BJJRollDraft } from './bjj.schema'
+
+// ── Task 1.7: Interfaces for roll confirmation ──────────────────────────────
+
+/** Input for confirming roll drafts after workout save (REQ-FRM1) */
+export interface ConfirmRollsInput {
+  workoutId: string
+  sections: Array<{
+    sectionNumber: number
+    rolls: Array<{
+      roll_index: number
+      role: string
+      outcome: string
+      position_from: string
+      position_to: string | null
+      technique_names: string[]
+      confidence: number | null
+      raw_excerpt: string | null
+      validation_error: string | null
+      source: string
+    }>
+  }>
+}
+
+/** Plan for confirming rolls - delete proposed, insert confirmed with offset indices (D4) */
+export interface RollConfirmationPlan {
+  sectionId: string
+  deleteProposed: boolean
+  inserts: Array<{
+    roll_index: number
+    role: string
+    outcome: string
+    position_from: string
+    position_to: string | null
+    technique_ids: string[]
+    status: 'confirmed'
+    source: string
+    confidence: number | null
+    raw_excerpt: string | null
+  }>
+}
+
 // Re-export technique tracking types (PR 2)
 export type {
   TechniqueLearningStatus,

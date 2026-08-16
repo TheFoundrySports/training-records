@@ -39,6 +39,7 @@ export type BJJPositionKey = (typeof BJJ_POSITION_KEYS)[number]
 // LLM + mock fallback emit a `rolls[]` array. The schema is the
 // boundary contract — anything that crosses the EF→client wire is
 // parsed through BJJSectionAIResponseSchema.
+export const BJJRollSourceSchema = z.enum(['ai_confirmed', 'ai_edited', 'manual'])
 export const BJJRollRoleSchema = z.enum(['attacking', 'defending', 'neutral'])
 export const BJJRollOutcomeSchema = z.enum([
   'submission',
@@ -63,6 +64,14 @@ export const BJJRollProposalSchema = z.object({
   validation_error: BJJRollValidationErrorSchema.optional(),
 })
 export type BJJRollProposal = z.infer<typeof BJJRollProposalSchema>
+
+export const BJJRollDraftSchema = BJJRollProposalSchema.extend({
+  confidence: z.number().min(0).max(1).nullable(),
+  raw_excerpt: z.string().min(1).nullable(),
+  validation_error: BJJRollValidationErrorSchema.nullable(),
+  source: BJJRollSourceSchema,
+})
+export type BJJRollDraft = z.infer<typeof BJJRollDraftSchema>
 
 export const BJJSectionAIResponseSchema = z.object({
   ai_description: z.string().min(1, 'ai_description is required'),
@@ -115,23 +124,42 @@ export const bjjSectionSchema = z.object({
   /** Array of technique IDs selected via TechniqueSearch */
   techniqueIds: z.array(z.string().uuid()).default([]),
   enhancedNotes: z.string().max(4000).optional(),
+  /** Roll drafts from AI preview (REQ-FRM1) */
+  rolls: z.array(BJJRollDraftSchema).default([]),
 })
 export type BJJSectionFormValues = z.infer<typeof bjjSectionSchema>
 
 // ── BJJ Workout form ─────────────────────────────────────
-export const bjjWorkoutSchema = z.object({
-  title: z.string().min(1, 'Title is required').max(200),
-  performedAt: z
-    .string()
-    .transform((val) => {
-      // Reuse existing normalizeDateTime logic
-      if (/[Z+-]\d*(\d{2}:\d{2})?$/.test(val)) return val
-      return val.length === 16 ? `${val}:00.000Z` : `${val}.000Z`
+export const bjjWorkoutSchema = z
+  .object({
+    title: z.string().min(1, 'Title is required').max(200),
+    performedAt: z
+      .string()
+      .transform((val) => {
+        // Reuse existing normalizeDateTime logic
+        if (/[Z+-]\d*(\d{2}:\d{2})?$/.test(val)) return val
+        return val.length === 16 ? `${val}:00.000Z` : `${val}.000Z`
+      })
+      .pipe(z.string().datetime({ message: 'Invalid date' })),
+    durationMinutes: z.number().int().min(1).max(300),
+    notes: z.string().max(2000).optional(),
+    rpe: z.number().int().min(1).max(10).optional(),
+    sections: z.array(bjjSectionSchema).min(1, 'At least one section is required'),
+  })
+  .superRefine((data, ctx) => {
+    // Task 1.4 (D2): Block submission if any roll has validation_error != null
+    data.sections.forEach((section, sectionIndex) => {
+      section.rolls?.forEach((roll, rollIndex) => {
+        if (roll.validation_error != null) {
+          const fieldName =
+            roll.validation_error === 'unknown_position_from' ? 'position_from' : 'position_to'
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: `Roll has unmappable position - correct or remove before confirming`,
+            path: ['sections', sectionIndex, 'rolls', rollIndex, fieldName],
+          })
+        }
+      })
     })
-    .pipe(z.string().datetime({ message: 'Invalid date' })),
-  durationMinutes: z.number().int().min(1).max(300),
-  notes: z.string().max(2000).optional(),
-  rpe: z.number().int().min(1).max(10).optional(),
-  sections: z.array(bjjSectionSchema).min(1, 'At least one section is required'),
-})
+  })
 export type BJJWorkoutFormValues = z.infer<typeof bjjWorkoutSchema>
