@@ -87,7 +87,8 @@ describe('tokensForScheme — returns the right bundle for the mode', () => {
 
 // ── material-dashboard.css — class-name coverage lock ───────────
 
-const CSS_PATH = resolve(__dirname, '../../theme/material-dashboard.css')
+// PR 4: theme files moved to shared src/theme/, re-exports left at old path
+const CSS_PATH = resolve(__dirname, '../../../../../theme/material-dashboard.css')
 
 const REQUIRED_CLASSES = [
   // AppShell
