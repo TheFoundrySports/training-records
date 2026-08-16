@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router'
 import { useForm, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { bjjWorkoutSchema, type BJJWorkoutFormValues } from '../bjj.schema'
+import { createBjjWorkoutFormExampleValues } from '../bjjWorkoutFormExamples'
 import { useCreateBJJWorkout } from '../hooks/useBJJWorkoutMutations'
 import { useUpdateBJJWorkout } from '../hooks/useUpdateBJJWorkout'
 import { useConfirmRolls } from '../hooks/useConfirmRolls'
@@ -10,18 +11,16 @@ import { useWorkout } from '@/features/workouts/hooks/useWorkouts'
 import { useBJJSections } from '../hooks/useBJJSections'
 import { BJJSectionEditor } from '../components/BJJSectionEditor'
 import { MaterialScope } from '@/components/MaterialScope'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form'
+import { Form } from '@/components/ui/form'
 import type { BJJSection } from '../bjj.types'
+import { BJJFormStepper } from '../components/form/BJJFormStepper'
+import { BJJFormSummarySidebar } from '../components/form/BJJFormSummarySidebar'
+import { BJJFormActionBar } from '../components/form/BJJFormActionBar'
+import { MatFormField } from '../components/form/MatFormField'
+import { FormAlert } from '../components/form/FormAlert'
+import { useBJJFormProgress } from '../components/form/useBJJFormProgress'
+
+const FORM_ID = 'bjj-workout-form'
 
 export function BJJWorkoutFormPage() {
   const { id } = useParams<{ id: string }>()
@@ -31,31 +30,16 @@ export function BJJWorkoutFormPage() {
   const createMutation = useCreateBJJWorkout()
   const updateMutation = useUpdateBJJWorkout()
   const confirmRollsMutation = useConfirmRolls()
-  const isPending = createMutation.isPending || updateMutation.isPending || confirmRollsMutation.isPending
+  const isPending =
+    createMutation.isPending || updateMutation.isPending || confirmRollsMutation.isPending
 
-  // Fetch existing workout for edit mode
   const { data: existingWorkout, isLoading: loadingWorkout } = useWorkout(id ?? '')
   const { data: existingSections } = useBJJSections(id ?? '')
 
   const form = useForm<BJJWorkoutFormValues>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(bjjWorkoutSchema) as any,
-    defaultValues: {
-      title: '',
-      performedAt: new Date().toISOString().slice(0, 16),
-      durationMinutes: 60,
-      notes: '',
-      rpe: undefined,
-      sections: [
-        {
-          goal: '',
-          rawDescription: '',
-          durationMinutes: undefined,
-          techniqueIds: [],
-          rolls: [],
-        },
-      ],
-    },
+    defaultValues: createBjjWorkoutFormExampleValues(),
   })
 
   const { fields, append, remove } = useFieldArray({
@@ -64,7 +48,14 @@ export function BJJWorkoutFormPage() {
     name: 'sections',
   })
 
-  // Pre-fill form when editing — run only once after data loads
+  const watched = form.watch()
+  const mutationError =
+    (createMutation.error as { error?: { message?: string } } | null)?.error?.message ??
+    (updateMutation.error as { error?: { message?: string } } | null)?.error?.message ??
+    (confirmRollsMutation.error as { message?: string } | null)?.message
+
+  const progress = useBJJFormProgress(form.watch, mutationError ?? null)
+
   const hasPrefilledRef = useRef(false)
   useEffect(() => {
     if (isEditMode && existingWorkout && existingSections && !hasPrefilledRef.current) {
@@ -76,7 +67,7 @@ export function BJJWorkoutFormPage() {
         enhancedNotes: section.enhancedNotes ?? section.aiDescription ?? '',
         durationMinutes: section.durationMinutes,
         techniqueIds: section.techniques.map((t) => t.id),
-        rolls: [], // Edit mode doesn't load existing rolls into the form
+        rolls: [],
       }))
 
       form.reset({
@@ -95,7 +86,6 @@ export function BJJWorkoutFormPage() {
     try {
       let workoutId: string
 
-      // Save workout first, then confirm rolls (REQ-RE10)
       if (isEditMode && id) {
         await updateMutation.mutateAsync({
           workoutId: id,
@@ -121,7 +111,7 @@ export function BJJWorkoutFormPage() {
 
       const sectionsWithRolls = values.sections
         .map((section, index) => ({
-          sectionNumber: index + 1, // section_number is 1-based
+          sectionNumber: index + 1,
           rolls: section.rolls ?? [],
         }))
         .filter((section) => section.rolls.length > 0)
@@ -135,33 +125,39 @@ export function BJJWorkoutFormPage() {
 
       void navigate(`/workouts/${workoutId}`)
     } catch (error) {
-      // Mutation errors are already tracked by the mutations
-      // and will be displayed via mutationError below
       console.error('Save failed:', error)
     }
   }
 
-  const mutationError =
-    (createMutation.error as { error?: { message?: string } } | null)?.error?.message ??
-    (updateMutation.error as { error?: { message?: string } } | null)?.error?.message ??
-    (confirmRollsMutation.error as { message?: string } | null)?.message
-
   const rootErrorRef = useRef<HTMLDivElement>(null)
-
-  // Focus error summary on submit failure
   useEffect(() => {
     if (rootErrorRef.current && mutationError) {
       rootErrorRef.current.focus()
     }
   }, [mutationError])
 
+  const durationLabel =
+    Number.isFinite(watched.durationMinutes) && watched.durationMinutes > 0
+      ? `${watched.durationMinutes} min`
+      : '—'
+  const rpeLabel = watched.rpe != null ? `${watched.rpe} / 10` : '—'
+
+  function handleCancel() {
+    void navigate(isEditMode && id ? `/workouts/${id}` : '/workouts')
+  }
+
   if (isEditMode && loadingWorkout) {
     return (
       <MaterialScope>
-        <div className="container mx-auto px-4 py-8 max-w-2xl">
-          <div role="status" aria-label="Loading workout" className="space-y-4">
-            <div className="h-8 w-48 rounded bg-muted animate-pulse" aria-hidden="true" />
-            <div className="h-64 rounded-xl bg-muted animate-pulse" aria-hidden="true" />
+        <div className="bjj-form">
+          <div className="shell">
+            <div role="status" aria-label="Loading workout" className="form-page-head">
+              <div
+                className="card"
+                style={{ height: 240, background: 'var(--surface-warm)' }}
+                aria-hidden="true"
+              />
+            </div>
           </div>
         </div>
       </MaterialScope>
@@ -170,202 +166,270 @@ export function BJJWorkoutFormPage() {
 
   return (
     <MaterialScope>
-      <div className="container mx-auto px-4 py-8 max-w-2xl">
-        <h1
-          style={{
-            fontFamily: 'var(--font-display)',
-            fontSize: 'var(--text-2xl)',
-            fontWeight: 500,
-            marginBottom: 'var(--space-6)',
-            color: 'var(--fg)',
-          }}
-        >
-          {isEditMode ? 'Edit BJJ Workout' : 'Log BJJ Workout'}
-        </h1>
+      <div className="bjj-form">
+        <div className="shell">
+        <header className="form-page-head">
+          <span className="form-eyebrow">
+            {isEditMode ? 'Edit · workout' : 'Log · new workout'}
+          </span>
+          <h1 className="form-page-title">
+            {isEditMode ? 'Edit BJJ workout' : 'Log your BJJ workout'}
+          </h1>
+          <p className="form-page-sub">
+            Record session details, link techniques per section, and confirm AI-proposed rolls.
+            Confirmed rolls feed your evolution dashboard.
+          </p>
+          <BJJFormStepper steps={progress.steps} />
+        </header>
 
-        {mutationError && (
-          <div
-            ref={rootErrorRef}
-            role="alert"
-            aria-live="assertive"
-            tabIndex={-1}
-            style={{
-              marginBottom: 'var(--space-4)',
-              borderRadius: 'var(--radius-md)',
-              border: '1px solid var(--danger)',
-              backgroundColor: 'color-mix(in oklab, var(--danger) 10%, transparent)',
-              padding: 'var(--space-4)',
-              color: 'var(--danger)',
-              fontSize: 'var(--text-sm)',
-              outline: 'none',
-            }}
+        {mutationError ? (
+          <div ref={rootErrorRef} tabIndex={-1} aria-live="assertive">
+            <FormAlert tone="error">{mutationError}</FormAlert>
+          </div>
+        ) : null}
+
+        <Form {...form}>
+          <form
+            id={FORM_ID}
+            className="form-grid"
+            onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
+            noValidate
           >
-            {mutationError}
-          </div>
-        )}
+            <div className="form-col">
+              <section className="card" id="cardSession" aria-labelledby="hSession">
+                <div className="card-head">
+                  <h2 id="hSession">Session details</h2>
+                  <span className="tag">Step 1</span>
+                </div>
 
-      <Form {...form}>
-        <form
-          onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
-          className="space-y-5"
-          noValidate
-        >
-          {/* Title */}
-          <FormField
-            control={form.control}
-            name="title"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Title</FormLabel>
-                <FormControl>
-                  <Input placeholder="e.g. Morning BJJ" {...field} disabled={isPending} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+                <MatFormField
+                  control={form.control}
+                  name="title"
+                  label="Title"
+                  required
+                  disabled={isPending}
+                  render={({ id, field, 'aria-invalid': invalid, 'aria-required': requiredMark, 'aria-describedby': describedBy, disabled }) => (
+                    <input
+                      id={id}
+                      className="input"
+                      placeholder="e.g. Morning BJJ"
+                      aria-invalid={invalid}
+                      aria-required={requiredMark}
+                      aria-describedby={describedBy}
+                      disabled={disabled}
+                      value={field.value ?? ''}
+                      onChange={field.onChange}
+                      onBlur={field.onBlur}
+                      name={field.name}
+                      ref={field.ref}
+                    />
+                  )}
+                />
 
-          {/* Date & Time */}
-          <FormField
-            control={form.control}
-            name="performedAt"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Date &amp; Time</FormLabel>
-                <FormControl>
-                  <Input type="datetime-local" {...field} disabled={isPending} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Duration */}
-          <FormField
-            control={form.control}
-            name="durationMinutes"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Duration (minutes)</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    min={1}
-                    max={300}
-                    {...field}
-                    onChange={(e) => field.onChange(e.target.valueAsNumber)}
+                <div className="grid-2" style={{ marginTop: 'var(--space-5)' }}>
+                  <MatFormField
+                    control={form.control}
+                    name="performedAt"
+                    label="Date & time"
+                    required
                     disabled={isPending}
+                    render={({ id, field, 'aria-invalid': invalid, 'aria-required': requiredMark, 'aria-describedby': describedBy, disabled }) => (
+                      <input
+                        id={id}
+                        type="datetime-local"
+                        className="input"
+                        aria-invalid={invalid}
+                        aria-required={requiredMark}
+                        aria-describedby={describedBy}
+                        disabled={disabled}
+                        value={field.value ?? ''}
+                        onChange={field.onChange}
+                        onBlur={field.onBlur}
+                        name={field.name}
+                        ref={field.ref}
+                      />
+                    )}
                   />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Notes */}
-          <FormField
-            control={form.control}
-            name="notes"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Notes (optional)</FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder="General session notes…"
-                    {...field}
-                    value={field.value ?? ''}
+                  <MatFormField
+                    control={form.control}
+                    name="durationMinutes"
+                    label="Duration (minutes)"
+                    required
+                    hint="Between 1 and 300 minutes."
                     disabled={isPending}
+                    render={({ id, field, 'aria-invalid': invalid, 'aria-describedby': describedBy, disabled }) => (
+                      <input
+                        id={id}
+                        type="number"
+                        min={1}
+                        max={300}
+                        className="input"
+                        aria-invalid={invalid}
+                        aria-describedby={describedBy}
+                        disabled={disabled}
+                        value={field.value ?? ''}
+                        onChange={(e) => {
+                          const val = e.target.value
+                          field.onChange(val === '' ? undefined : Number(val))
+                        }}
+                        onBlur={field.onBlur}
+                        name={field.name}
+                        ref={field.ref}
+                      />
+                    )}
                   />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+                </div>
 
-          {/* RPE */}
-          <FormField
-            control={form.control}
-            name="rpe"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>RPE (1–10, optional)</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    min={1}
-                    max={10}
-                    placeholder="e.g. 7"
-                    {...field}
-                    value={field.value ?? ''}
-                    onChange={(e) => {
-                      const val = e.target.value
-                      field.onChange(val === '' ? undefined : Number(val))
-                    }}
+                <div className="grid-2" style={{ marginTop: 'var(--space-5)' }}>
+                  <MatFormField
+                    control={form.control}
+                    name="rpe"
+                    label="RPE (1–10, optional)"
                     disabled={isPending}
+                    render={({ id, field, 'aria-invalid': invalid, 'aria-describedby': describedBy, disabled }) => (
+                      <input
+                        id={id}
+                        type="number"
+                        min={1}
+                        max={10}
+                        className="input"
+                        placeholder="e.g. 7"
+                        aria-invalid={invalid}
+                        aria-describedby={describedBy}
+                        disabled={disabled}
+                        value={field.value ?? ''}
+                        onChange={(e) => {
+                          const val = e.target.value
+                          field.onChange(val === '' ? undefined : Number(val))
+                        }}
+                        onBlur={field.onBlur}
+                        name={field.name}
+                        ref={field.ref}
+                      />
+                    )}
                   />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+                </div>
 
-          {/* Sections */}
-          <fieldset className="space-y-4">
-            <legend className="text-lg font-medium">Sections</legend>
-            {fields.map((field, index) => (
-              <BJJSectionEditor
-                key={field.id}
-                index={index}
-                control={form.control}
-                onRemove={() => remove(index)}
-                removeDisabled={fields.length === 1}
-                isPending={isPending}
-              />
-            ))}
+                <MatFormField
+                  control={form.control}
+                  name="notes"
+                  label="Session notes (optional)"
+                  hint="General notes for the whole session."
+                  disabled={isPending}
+                  className=""
+                  render={({ id, field, 'aria-invalid': invalid, 'aria-describedby': describedBy, disabled }) => (
+                    <textarea
+                      id={id}
+                      className="textarea"
+                      placeholder="How did the session go overall?"
+                      aria-invalid={invalid}
+                      aria-describedby={describedBy}
+                      disabled={disabled}
+                      value={field.value ?? ''}
+                      onChange={field.onChange}
+                      onBlur={field.onBlur}
+                      name={field.name}
+                      ref={field.ref}
+                    />
+                  )}
+                />
+              </section>
 
-            {form.formState.errors.sections?.root?.message && (
-              <p className="text-sm text-destructive">
-                {form.formState.errors.sections.root.message}
-              </p>
-            )}
-            {typeof form.formState.errors.sections?.message === 'string' && (
-              <p className="text-sm text-destructive">{form.formState.errors.sections.message}</p>
-            )}
+              <section className="card" id="cardSections" aria-labelledby="hSections">
+                <div className="card-head">
+                  <h2 id="hSections">Training sections</h2>
+                  <span className="tag">Step 2</span>
+                </div>
 
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() =>
-                append({
-                  goal: '',
-                  rawDescription: '',
-                  durationMinutes: undefined,
-                  techniqueIds: [],
-                  rolls: [],
-                })
-              }
-              disabled={isPending || fields.length >= 10}
-            >
-              + Add Section
-            </Button>
-          </fieldset>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-5)' }}>
+                  {fields.map((field, index) => (
+                    <BJJSectionEditor
+                      key={field.id}
+                      index={index}
+                      control={form.control}
+                      onRemove={() => remove(index)}
+                      removeDisabled={fields.length === 1}
+                      isPending={isPending}
+                      rollAnchorId={index === 0 ? 'cardRolls' : undefined}
+                    />
+                  ))}
+                </div>
 
-          {/* Submit */}
-          <div className="flex gap-3 pt-2">
-            <Button type="submit" disabled={isPending}>
-              {isPending ? 'Saving…' : 'Save'}
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => void navigate(isEditMode && id ? `/workouts/${id}` : '/workouts')}
-              disabled={isPending}
-            >
-              Cancel
-            </Button>
-          </div>
-        </form>
-      </Form>
+                {(form.formState.errors.sections?.root?.message ||
+                  typeof form.formState.errors.sections?.message === 'string') && (
+                  <FormAlert tone="error" style={{ marginTop: 'var(--space-4)' }}>
+                    {form.formState.errors.sections?.root?.message ??
+                      form.formState.errors.sections?.message}
+                  </FormAlert>
+                )}
+
+                <button
+                  type="button"
+                  className="btn"
+                  style={{ marginTop: 'var(--space-5)' }}
+                  onClick={() =>
+                    append({
+                      goal: '',
+                      rawDescription: '',
+                      durationMinutes: undefined,
+                      techniqueIds: [],
+                      rolls: [],
+                    })
+                  }
+                  disabled={isPending || fields.length >= 10}
+                >
+                  + Add section
+                </button>
+              </section>
+
+              <section className="card" id="cardReview" aria-labelledby="hReview">
+                <div className="card-head">
+                  <h2 id="hReview">Review</h2>
+                  <span className="tag">Step 4</span>
+                </div>
+                <p className="hint" style={{ fontSize: 'var(--text-sm)', color: 'var(--fg-2)' }}>
+                  When every section has a goal and roll positions are valid, save from the action
+                  bar below. AI-enhanced notes and confirmed rolls persist to your dashboard
+                  metrics.
+                </p>
+                <div className="banner" style={{ marginTop: 'var(--space-5)' }}>
+                  <svg
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.6"
+                    aria-hidden="true"
+                  >
+                    <circle cx="10" cy="10" r="8" />
+                    <path d="M10 9v5M10 6.5h0" strokeLinecap="round" />
+                  </svg>
+                  <span>
+                    <strong>{progress.sectionCount}</strong> section
+                    {progress.sectionCount === 1 ? '' : 's'},{' '}
+                    <strong>{progress.techniqueCount}</strong> linked technique
+                    {progress.techniqueCount === 1 ? '' : 's'},{' '}
+                    <strong>{progress.totalRolls}</strong> roll draft
+                    {progress.totalRolls === 1 ? '' : 's'} pending save.
+                  </span>
+                </div>
+              </section>
+            </div>
+
+            <BJJFormSummarySidebar
+              progress={progress}
+              durationLabel={durationLabel}
+              rpeLabel={rpeLabel}
+            />
+          </form>
+        </Form>
+        </div>
+
+        <BJJFormActionBar
+          progress={progress}
+          isPending={isPending}
+          formId={FORM_ID}
+          onCancel={handleCancel}
+        />
       </div>
     </MaterialScope>
   )

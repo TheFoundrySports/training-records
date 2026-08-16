@@ -76,6 +76,10 @@
   --outcome-gain: #1a73e8;
   --outcome-loss: #d93025;
   --outcome-neutral: #5f6368;
+  --tint-success: color-mix(in oklab, var(--success), var(--surface) 88%);
+  --tint-warn: color-mix(in oklab, var(--warn), var(--surface) 88%);
+  --tint-danger: color-mix(in oklab, var(--danger), var(--surface) 90%);
+  --elev-raised-up: 0 -3px 8px rgba(60, 64, 67, 0.12);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -111,6 +115,10 @@
     --outcome-gain: #8ab4f8;
     --outcome-loss: #f28b82;
     --outcome-neutral: #9aa0a6;
+    --tint-success: color-mix(in oklab, var(--success), var(--surface) 84%);
+    --tint-warn: color-mix(in oklab, var(--warn), var(--surface) 84%);
+    --tint-danger: color-mix(in oklab, var(--danger), var(--surface) 86%);
+    --elev-raised-up: 0 -3px 8px rgba(0, 0, 0, 0.4);
   }
 }
 
@@ -321,4 +329,197 @@
 @media (max-width: 768px) {
   .page-head h1 { font-size: var(--text-2xl); }
   .donut { width: 120px; height: 120px; }
+}
+
+/* ============================================================
+ * BJJ workout form — ported from Open Design forms.html (hybrid shell)
+ * ============================================================ */
+.bjj-form { padding-bottom: 120px; }
+.bjj-form .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+
+.bjj-form .form-page-head { padding: var(--space-8) 0 var(--space-4); }
+.bjj-form .form-page-title { font-family: var(--font-display); font-size: clamp(32px, 4.4vw, var(--text-3xl)); line-height: var(--leading-tight); font-weight: 500; color: var(--fg); }
+.bjj-form .form-page-sub { font-family: var(--font-body); font-size: var(--text-sm); color: var(--muted); margin-top: var(--space-2); max-width: 62ch; }
+.bjj-form .form-eyebrow { font-family: var(--font-body); font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; font-size: var(--text-xs); color: var(--accent-active); display: inline-block; padding: 2px 0; margin-bottom: var(--space-3); }
+
+.bjj-form .stepper { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-2); margin-top: var(--space-5); list-style: none; padding: 0; }
+.bjj-form .step { display: flex; flex-direction: column; gap: var(--space-2); }
+.bjj-form .step-bar { height: 4px; border-radius: var(--radius-pill); background: var(--border-soft); }
+.bjj-form .step[data-state="done"] .step-bar { background: var(--success); }
+.bjj-form .step[data-state="current"] .step-bar { background: var(--accent); }
+.bjj-form .step-btn { display: flex; align-items: center; gap: var(--space-2); text-align: left; padding: 2px 0; border-radius: var(--radius-sm); background: none; border: 0; cursor: pointer; color: inherit; font: inherit; }
+.bjj-form .step-idx { width: 22px; height: 22px; flex: 0 0 22px; border-radius: var(--radius-pill); background: var(--surface-warm); color: var(--muted); font-family: var(--font-mono); font-size: 11px; display: grid; place-items: center; transition: background var(--motion-fast) var(--ease-standard), color var(--motion-fast) var(--ease-standard); }
+.bjj-form .step[data-state="current"] .step-idx { background: var(--accent); color: var(--accent-on); }
+.bjj-form .step[data-state="done"] .step-idx { background: var(--success); color: var(--surface); }
+.bjj-form .step-name { font-family: var(--font-body); font-weight: 500; font-size: var(--text-sm); color: var(--muted); }
+.bjj-form .step[data-state="current"] .step-name { color: var(--fg); }
+.bjj-form .step[data-state="done"] .step-name { color: var(--fg-2); }
+.bjj-form .step-btn:hover .step-name { color: var(--fg); }
+@media (max-width: 700px) { .bjj-form .stepper { gap: 6px; } .bjj-form .step-name { display: none; } }
+
+.bjj-form .form-grid { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: var(--space-5); margin-top: var(--space-6); align-items: start; }
+@media (max-width: 1024px) { .bjj-form .form-grid { grid-template-columns: 1fr; } }
+.bjj-form .form-col { display: flex; flex-direction: column; gap: var(--space-5); min-width: 0; }
+.bjj-form .side-col { display: flex; flex-direction: column; gap: var(--space-5); position: sticky; top: 84px; }
+@media (max-width: 1024px) { .bjj-form .side-col { position: static; } }
+
+.bjj-form .card { background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--elev-raised); padding: var(--space-6); border: 1px solid var(--border-soft); }
+.bjj-form .card-head { display: flex; align-items: center; justify-content: space-between; padding-bottom: var(--space-4); margin-bottom: var(--space-5); gap: var(--space-3); flex-wrap: wrap; border-bottom: 1px solid var(--border-soft); }
+.bjj-form .card-head h2 { font-family: var(--font-display); font-size: var(--text-lg); line-height: var(--leading-tight); font-weight: 500; margin: 0; }
+.bjj-form .tag { font-family: var(--font-body); font-weight: 500; font-size: var(--text-xs); padding: 4px 10px; border-radius: var(--radius-pill); background: var(--surface-warm); color: var(--accent); white-space: nowrap; }
+.bjj-form .tag.ok { background: var(--tint-success); color: var(--success); }
+.bjj-form .tag.pending { background: var(--tint-warn); color: color-mix(in oklab, var(--warn), var(--fg) 45%); }
+@media (prefers-color-scheme: dark) {
+  .bjj-form .form-eyebrow { color: var(--accent); }
+  .bjj-form .tag.pending { color: var(--warn); }
+}
+
+.bjj-form .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
+@media (max-width: 600px) { .bjj-form .grid-2 { grid-template-columns: 1fr; } }
+.bjj-form .field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.bjj-form .label { font-family: var(--font-body); font-weight: 500; font-size: var(--text-sm); color: var(--fg-2); display: flex; align-items: center; gap: 6px; }
+.bjj-form .req { color: var(--danger); font-size: var(--text-xs); }
+.bjj-form .input, .bjj-form .select, .bjj-form .textarea {
+  width: 100%; background: var(--surface); color: var(--fg);
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  padding: 11px var(--space-4); font-size: var(--text-sm);
+  transition: border-color var(--motion-fast) var(--ease-standard), box-shadow var(--motion-fast) var(--ease-standard);
+}
+.bjj-form .input::placeholder, .bjj-form .textarea::placeholder { color: var(--muted); }
+.bjj-form .input:hover, .bjj-form .select:hover, .bjj-form .textarea:hover { border-color: var(--fg-2); }
+.bjj-form .input:focus-visible, .bjj-form .select:focus-visible, .bjj-form .textarea:focus-visible { border-color: var(--accent); box-shadow: var(--focus-ring); outline: none; }
+.bjj-form .input[aria-invalid="true"], .bjj-form .textarea[aria-invalid="true"], .bjj-form .select[aria-invalid="true"] { border-color: var(--danger); border-width: 2px; padding: 10px 15px; }
+.bjj-form .textarea { min-height: 108px; resize: vertical; line-height: var(--leading-body); }
+.bjj-form .select { appearance: none; padding-right: 40px; background-image: linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%); background-position: right 20px center, right 15px center; background-size: 5px 5px, 5px 5px; background-repeat: no-repeat; cursor: pointer; }
+.bjj-form .select option { font-family: var(--font-body); font-size: var(--text-sm); color: var(--fg); background: var(--surface); padding: 8px; }
+
+/* Combobox / technique picker (Open Design forms.html) */
+.bjj-form .search-wrap { position: relative; }
+.bjj-form .menu-panel {
+  position: absolute;
+  z-index: 50;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--elev-raised);
+  padding: 6px;
+  max-height: 260px;
+  overflow: hidden;
+}
+.bjj-form .menu-panel .pick-list { margin-top: 0; max-height: 248px; }
+.bjj-form .pick-list { display: flex; flex-direction: column; gap: 6px; margin-top: var(--space-4); max-height: 244px; overflow-y: auto; padding-right: 2px; list-style: none; margin-bottom: 0; padding-left: 0; }
+.bjj-form .pick-row,
+.bjj-form button.pick-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: var(--space-3);
+  align-items: center;
+  padding: 10px var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--surface-warm);
+  width: 100%;
+  margin: 0;
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  transition: background var(--motion-fast) var(--ease-standard), box-shadow var(--motion-fast) var(--ease-standard);
+}
+.bjj-form button.pick-row:hover { background: color-mix(in oklab, var(--surface-warm), var(--accent) 10%); }
+.bjj-form button.pick-row:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.bjj-form .pick-name { font-family: var(--font-display); font-weight: 500; font-size: var(--text-sm); color: var(--fg); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.bjj-form .pick-cat { font-family: var(--font-body); font-weight: 500; font-size: 11px; padding: 2px 8px; border-radius: var(--radius-pill); background: var(--surface); color: var(--accent); text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap; flex-shrink: 0; }
+.bjj-form .pick-add { width: 28px; height: 28px; border-radius: var(--radius-pill); background: var(--surface); color: var(--accent); display: grid; place-items: center; border: 1px solid var(--border); flex-shrink: 0; pointer-events: none; }
+.bjj-form button.pick-row:hover .pick-add { background: var(--accent); color: var(--accent-on); border-color: var(--accent); }
+.bjj-form .pick-add svg { width: 14px; height: 14px; }
+.bjj-form .selected-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: var(--space-3); }
+.bjj-form .chip-sel { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-body); font-weight: 500; font-size: var(--text-xs); padding: 6px 8px 6px 12px; border-radius: var(--radius-pill); background: var(--surface-warm); color: var(--accent); border: 0; cursor: default; }
+.bjj-form .chip-x { width: 18px; height: 18px; border-radius: var(--radius-pill); display: grid; place-items: center; color: inherit; background: transparent; border: 0; padding: 0; cursor: pointer; transition: background var(--motion-fast) var(--ease-standard), color var(--motion-fast) var(--ease-standard); }
+.bjj-form .chip-x:hover { background: var(--accent); color: var(--accent-on); }
+.bjj-form .chip-x svg { width: 10px; height: 10px; }
+.bjj-form .empty-note { font-family: var(--font-body); font-size: var(--text-sm); color: var(--muted); padding: var(--space-4); text-align: center; margin: 0; }
+.bjj-form .hint { font-family: var(--font-body); font-size: var(--text-xs); color: var(--muted); margin: 0; line-height: var(--leading-body); }
+.bjj-form .field-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--tint-danger);
+  border: 1px solid color-mix(in oklab, var(--danger), var(--border) 70%);
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  line-height: var(--leading-body);
+  color: var(--fg-2);
+}
+.bjj-form .field-error svg { width: 14px; height: 14px; flex: 0 0 14px; margin-top: 1px; color: var(--danger); }
+.bjj-form .field-error span { min-width: 0; }
+
+.bjj-form .banner { display: flex; gap: var(--space-3); padding: var(--space-4); border-radius: var(--radius-md); background: var(--surface-warm); font-size: var(--text-sm); line-height: var(--leading-body); color: var(--fg-2); align-items: flex-start; margin-top: var(--space-4); border: 1px solid var(--border-soft); }
+.bjj-form .banner svg { width: 18px; height: 18px; flex: 0 0 18px; margin-top: 2px; color: var(--accent); }
+.bjj-form .banner span { min-width: 0; }
+.bjj-form .banner.warn { background: var(--tint-warn); border-color: color-mix(in oklab, var(--warn), var(--border) 65%); }
+.bjj-form .banner.warn svg { color: color-mix(in oklab, var(--warn), var(--fg) 35%); }
+.bjj-form .banner.ok { background: var(--tint-success, color-mix(in oklab, var(--success), var(--surface) 88%)); border-color: color-mix(in oklab, var(--success), var(--border) 65%); }
+.bjj-form .banner.ok svg { color: var(--success); }
+.bjj-form .banner.error { background: var(--tint-danger); border-color: color-mix(in oklab, var(--danger), var(--border) 65%); color: var(--fg-2); }
+.bjj-form .banner.error svg { color: var(--danger); }
+@media (prefers-color-scheme: dark) {
+  .bjj-form .banner.warn svg { color: var(--warn); }
+}
+
+.bjj-form .roll-list { display: flex; flex-direction: column; gap: var(--space-4); }
+.bjj-form .roll { border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-4); background: var(--surface); transition: border-color var(--motion-base) var(--ease-standard), background var(--motion-base) var(--ease-standard); }
+.bjj-form .roll[data-state="invalid"] { border-color: var(--danger); background: var(--tint-danger); }
+.bjj-form .roll-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); flex-wrap: wrap; margin-bottom: var(--space-4); }
+.bjj-form .roll-title { font-family: var(--font-display); font-weight: 500; font-size: var(--text-sm); color: var(--fg); }
+.bjj-form .roll-body { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
+@media (max-width: 700px) { .bjj-form .roll-body { grid-template-columns: 1fr; } }
+.bjj-form .roll-body .span-all { grid-column: 1 / -1; }
+.bjj-form .roll-foot { display: flex; gap: var(--space-2); margin-top: var(--space-4); flex-wrap: wrap; align-items: center; }
+.bjj-form .flow-read { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--fg-2); background: var(--surface-warm); padding: 8px 10px; border-radius: var(--radius-sm); display: inline-block; }
+
+.bjj-form .btn { font-family: var(--font-body); font-weight: 500; font-size: var(--text-sm); padding: 10px 20px; border-radius: var(--radius-pill); background: var(--surface); color: var(--accent); border: 1px solid var(--border); transition: background var(--motion-fast) var(--ease-standard), color var(--motion-fast) var(--ease-standard), border-color var(--motion-fast) var(--ease-standard), box-shadow var(--motion-fast) var(--ease-standard); cursor: pointer; }
+.bjj-form .btn:hover { background: var(--surface-warm); border-color: var(--fg-2); }
+.bjj-form .btn-primary { background: var(--accent); color: var(--accent-on); border-color: var(--accent); box-shadow: var(--elev-raised); }
+.bjj-form .btn-primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+.bjj-form .btn-ghost { background: transparent; border-color: transparent; color: var(--fg-2); box-shadow: none; }
+.bjj-form .btn-ghost:hover { background: var(--surface-warm); border-color: transparent; color: var(--fg); }
+.bjj-form .btn-sm { padding: 7px 14px; font-size: var(--text-xs); }
+.bjj-form .btn-danger-text { color: var(--danger); border-color: transparent; background: transparent; }
+.bjj-form .btn-danger-text:hover { background: var(--tint-danger); border-color: transparent; }
+.bjj-form .btn:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; }
+
+.bjj-form .sum-list { display: flex; flex-direction: column; gap: var(--space-3); }
+.bjj-form .sum-row { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-3); }
+.bjj-form .sum-label { font-family: var(--font-body); font-size: var(--text-sm); color: var(--muted); }
+.bjj-form .sum-val { font-family: var(--font-display); font-weight: 500; font-size: var(--text-lg); color: var(--fg); font-variant-numeric: tabular-nums; }
+.bjj-form .sum-track { height: 8px; border-radius: var(--radius-pill); background: var(--surface-warm); overflow: hidden; margin-top: var(--space-4); }
+.bjj-form .sum-fill { height: 100%; width: 0%; background: var(--accent); border-radius: var(--radius-pill); transition: width var(--motion-base) var(--ease-standard); }
+.bjj-form .sum-fill[data-complete="true"] { background: var(--success); }
+.bjj-form .sum-foot { font-family: var(--font-body); font-size: var(--text-xs); color: var(--muted); margin-top: var(--space-2); }
+
+.bjj-form .action-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--surface); border-top: 1px solid var(--border); z-index: 60; box-shadow: var(--elev-raised-up); }
+.bjj-form .action-inner { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); padding: var(--space-3) 0; flex-wrap: wrap; }
+.bjj-form .action-status { font-family: var(--font-body); font-size: var(--text-sm); color: var(--muted); display: flex; align-items: center; gap: 8px; min-width: 0; margin: 0; flex: 1 1 12rem; }
+.bjj-form .action-status svg { width: 16px; height: 16px; flex: 0 0 16px; }
+.bjj-form .action-status span { min-width: 0; line-height: var(--leading-body); }
+.bjj-form .action-status[data-tone="warn"] { color: color-mix(in oklab, var(--warn), var(--fg) 35%); }
+.bjj-form .action-status[data-tone="ok"] { color: var(--success); }
+.bjj-form .action-btns { display: flex; gap: var(--space-2); flex-wrap: wrap; flex: 0 0 auto; flex-shrink: 0; }
+@media (min-width: 601px) {
+  .bjj-form .action-inner { flex-wrap: nowrap; }
+}
+@media (prefers-color-scheme: dark) {
+  .bjj-form .action-status[data-tone="warn"] { color: var(--warn); }
+}
+@media (max-width: 600px) {
+  .bjj-form .action-inner { padding: var(--space-3) 0; gap: var(--space-2); }
+  .bjj-form .action-status { font-size: var(--text-xs); order: 2; width: 100%; flex: 1 1 100%; }
+  .bjj-form .action-btns { order: 1; width: 100%; }
+  .bjj-form .action-btns .btn { flex: 1 1 auto; }
 }

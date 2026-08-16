@@ -1,25 +1,18 @@
 /**
- * RollReviewPanel — review and edit AI-proposed rolls (REQ-FRM1 PR 2b, Task 2.7-2.12).
- *
- * Features:
- * - Per-row controls: role, outcome, position_from/to, techniques, delete
- * - Displays AI confidence + raw excerpt
- * - Shows validation_error warnings with red borders (Option A blocking)
- * - Disables "Confirm all" when any roll has validation_error
- * - "Skip for now" clears all drafts from RHF state
- *
- * Material styling aligned with dashboard roll flow patterns.
+ * RollReviewPanel — review and edit AI-proposed rolls (REQ-FRM1).
+ * Hybrid OD styling: Material roll cards + canonical position model (Option A).
  */
 
 import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { AlertCircle, ChevronDown, ChevronUp, Trash2 } from 'lucide-react'
 import { useBJJPositions } from '../dashboard/hooks/useBJJPositions'
 import type { BJJRollDraft, BJJRollRole, BJJRollOutcome } from '../bjj.schema'
 
 interface RollReviewPanelProps {
+  sectionLabel?: string
   rolls: BJJRollDraft[]
+  /** User explicitly confirmed rolls in this review session. */
+  reviewComplete?: boolean
   onConfirmAll: () => void
   onSkip: () => void
   onChange: (rollIndex: number, updates: Partial<BJJRollDraft>) => void
@@ -34,34 +27,44 @@ const ROLE_OPTIONS: Array<{ value: BJJRollRole; label: string }> = [
 
 const OUTCOME_OPTIONS: Array<{ value: BJJRollOutcome; label: string }> = [
   { value: 'submission', label: 'Submission' },
-  { value: 'position_gain', label: 'Position Gain' },
-  { value: 'position_loss', label: 'Position Loss' },
+  { value: 'position_gain', label: 'Position gain' },
+  { value: 'position_loss', label: 'Position loss' },
   { value: 'neutral', label: 'Neutral' },
 ]
 
+const ROLE_LABELS: Record<BJJRollRole, string> = {
+  attacking: 'Attacking',
+  defending: 'Defending',
+  neutral: 'Neutral',
+}
+
+const OUTCOME_LABELS: Record<BJJRollOutcome, string> = {
+  submission: 'Submission',
+  position_gain: 'Position gain',
+  position_loss: 'Position loss',
+  neutral: 'Neutral',
+}
+
 export function RollReviewPanel({
+  sectionLabel,
   rolls,
+  reviewComplete = false,
   onConfirmAll,
   onSkip,
   onChange,
   onDelete,
 }: RollReviewPanelProps) {
   const { data: positions = [] } = useBJJPositions()
-
-  // Track which roll excerpts are expanded
   const [expandedExcerpts, setExpandedExcerpts] = useState<Set<number>>(new Set())
 
-  // Check if any roll has validation errors
   const hasValidationErrors = rolls.some((roll) => roll.validation_error != null)
+  const confirmedCount = reviewComplete ? rolls.length : 0
 
   function toggleExcerpt(rollIndex: number) {
     setExpandedExcerpts((prev) => {
       const next = new Set(prev)
-      if (next.has(rollIndex)) {
-        next.delete(rollIndex)
-      } else {
-        next.add(rollIndex)
-      }
+      if (next.has(rollIndex)) next.delete(rollIndex)
+      else next.add(rollIndex)
       return next
     })
   }
@@ -71,74 +74,98 @@ export function RollReviewPanel({
     return `${Math.round(confidence * 100)}%`
   }
 
+  function positionLabel(key: string | null | undefined): string {
+    if (!key) return '—'
+    return positions.find((p) => p.key === key)?.display_en ?? key
+  }
+
   return (
-    <div className="rounded-md border bg-muted/50 px-3 py-3 space-y-3">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <p className="text-xs font-medium text-muted-foreground">
-          AI Roll Proposals ({rolls.length} {rolls.length === 1 ? 'roll' : 'rolls'})
-        </p>
+    <div>
+      <div className="card-head" style={{ paddingBottom: 'var(--space-3)', marginBottom: 'var(--space-4)' }}>
+        <h4 style={{ fontSize: 'var(--text-base)', margin: 0 }}>
+          Roll review{sectionLabel ? ` · ${sectionLabel}` : ''}
+        </h4>
+        <span
+          className={`tag ${
+            hasValidationErrors ? 'pending' : reviewComplete ? 'ok' : rolls.length > 0 ? '' : ''
+          }`}
+        >
+          {rolls.length === 0
+            ? 'No rolls'
+            : hasValidationErrors
+              ? `${rolls.length} need fix`
+              : reviewComplete
+                ? `${rolls.length} confirmed`
+                : `${rolls.length} proposed`}
+        </span>
       </div>
 
-      {/* Roll list */}
-      <div className="space-y-3">
+      <div className="banner">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
+          <circle cx="10" cy="10" r="8" />
+          <path d="M10 9v5M10 6.5h0" strokeLinecap="round" />
+        </svg>
+        <span>
+          AI proposed <strong>{rolls.length}</strong> roll{rolls.length === 1 ? '' : 's'}. Map each
+          to valid positions — only confirmed rolls feed dashboard metrics.
+        </span>
+      </div>
+
+      <div className="roll-list" style={{ marginTop: 'var(--space-5)' }}>
         {rolls.map((roll, index) => {
           const hasError = roll.validation_error != null
           const isExpanded = expandedExcerpts.has(index)
 
           return (
-            <div
-              key={index}
-              className={`rounded-md border p-3 space-y-2 ${
-                hasError ? 'border-destructive bg-destructive/5' : 'border-border bg-surface'
-              }`}
+            <article
+              key={`${roll.roll_index}-${index}`}
+              className="roll"
+              data-state={hasError ? 'invalid' : 'proposed'}
             >
-              {/* Roll header with confidence and delete */}
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium">Roll {roll.roll_index}</span>
-                  {roll.confidence != null && (
-                    <Badge variant="secondary" className="text-xs">
-                      {formatConfidence(roll.confidence)}
-                    </Badge>
-                  )}
-                  {hasError && (
-                    <div className="flex items-center gap-1 text-xs text-destructive">
-                      <AlertCircle className="h-3 w-3" />
-                      <span>Invalid position</span>
-                    </div>
-                  )}
-                </div>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onDelete(index)}
-                  aria-label={`Remove roll ${roll.roll_index}`}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+              <div className="roll-head">
+                <span className="roll-title">
+                  Roll {roll.roll_index}
+                  {roll.confidence != null ? (
+                    <span className="mono" style={{ marginLeft: 6 }}>
+                      {formatConfidence(roll.confidence)} confidence
+                    </span>
+                  ) : null}
+                </span>
+                <span className={`tag ${hasError ? 'pending' : reviewComplete ? 'ok' : ''}`}>
+                  {hasError ? 'Invalid' : reviewComplete ? 'Confirmed' : 'Proposed'}
+                </span>
               </div>
 
-              {/* Validation error message */}
-              {hasError && (
-                <div className="rounded-md bg-destructive/10 px-2 py-1.5 text-xs text-destructive">
-                  Position not recognized — select a valid position or remove this roll
-                </div>
-              )}
+              <div className="roll-read">
+                <p>
+                  <strong>{ROLE_LABELS[roll.role]}</strong> · {OUTCOME_LABELS[roll.outcome]}
+                </p>
+                <p className="flow-read" style={{ marginTop: 'var(--space-2)' }}>
+                  {positionLabel(roll.position_from)}
+                  {roll.position_to ? ` → ${positionLabel(roll.position_to)}` : ''}
+                </p>
+              </div>
 
-              {/* Role and Outcome selects */}
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="text-xs text-muted-foreground mb-1 block">Role</label>
+              {hasError ? (
+                <div className="banner warn" style={{ marginTop: 'var(--space-3)' }}>
+                  <AlertCircle width={18} height={18} aria-hidden="true" />
+                  <span>Position not recognized — select a valid position or remove this roll.</span>
+                </div>
+              ) : null}
+
+              <div className="roll-body" style={{ marginTop: 'var(--space-4)' }}>
+                <div className="field">
+                  <label className="label" htmlFor={`roll-${index}-role`}>
+                    Role
+                  </label>
                   <select
+                    id={`roll-${index}-role`}
+                    className="select"
                     value={roll.role}
+                    aria-invalid={hasError}
                     onChange={(e) =>
-                      onChange(index, {
-                        role: e.target.value as BJJRollDraft['role'],
-                      })
+                      onChange(index, { role: e.target.value as BJJRollDraft['role'] })
                     }
-                    className="w-full text-sm rounded-md border border-border bg-background px-2 py-1.5"
                   >
                     {ROLE_OPTIONS.map((opt) => (
                       <option key={opt.value} value={opt.value}>
@@ -147,16 +174,17 @@ export function RollReviewPanel({
                     ))}
                   </select>
                 </div>
-                <div>
-                  <label className="text-xs text-muted-foreground mb-1 block">Outcome</label>
+                <div className="field">
+                  <label className="label" htmlFor={`roll-${index}-outcome`}>
+                    Outcome
+                  </label>
                   <select
+                    id={`roll-${index}-outcome`}
+                    className="select"
                     value={roll.outcome}
                     onChange={(e) =>
-                      onChange(index, {
-                        outcome: e.target.value as BJJRollDraft['outcome'],
-                      })
+                      onChange(index, { outcome: e.target.value as BJJRollDraft['outcome'] })
                     }
-                    className="w-full text-sm rounded-md border border-border bg-background px-2 py-1.5"
                   >
                     {OUTCOME_OPTIONS.map((opt) => (
                       <option key={opt.value} value={opt.value}>
@@ -165,32 +193,27 @@ export function RollReviewPanel({
                     ))}
                   </select>
                 </div>
-              </div>
-
-              {/* Position selects */}
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="text-xs text-muted-foreground mb-1 block">From Position</label>
+                <div className="field">
+                  <label className="label" htmlFor={`roll-${index}-from`}>
+                    From position
+                  </label>
                   <select
+                    id={`roll-${index}-from`}
+                    className="select"
                     value={roll.position_from ?? ''}
-                    onChange={(e) => {
-                      const newValue = e.target.value
+                    aria-invalid={roll.validation_error === 'unknown_position_from'}
+                    onChange={(e) =>
                       onChange(index, {
-                        position_from: newValue as BJJRollDraft['position_from'],
-                        // Clear validation error if user is fixing the position
+                        position_from: e.target.value as BJJRollDraft['position_from'],
                         validation_error:
-                          roll.validation_error === 'unknown_position_from' ? null : roll.validation_error,
-                        // Mark as edited when user changes the position
+                          roll.validation_error === 'unknown_position_from'
+                            ? null
+                            : roll.validation_error,
                         source: 'ai_edited',
                       })
-                    }}
-                    className={`w-full text-sm rounded-md border px-2 py-1.5 ${
-                      roll.validation_error === 'unknown_position_from'
-                        ? 'border-destructive bg-destructive/5'
-                        : 'border-border bg-background'
-                    }`}
+                    }
                   >
-                    <option value="">Select position...</option>
+                    <option value="">Select position…</option>
                     {positions.map((pos) => (
                       <option key={pos.key} value={pos.key}>
                         {pos.display_en}
@@ -198,26 +221,25 @@ export function RollReviewPanel({
                     ))}
                   </select>
                 </div>
-                <div>
-                  <label className="text-xs text-muted-foreground mb-1 block">To Position</label>
+                <div className="field">
+                  <label className="label" htmlFor={`roll-${index}-to`}>
+                    To position
+                  </label>
                   <select
+                    id={`roll-${index}-to`}
+                    className="select"
                     value={roll.position_to ?? ''}
-                    onChange={(e) => {
-                      const newValue = e.target.value || null
+                    aria-invalid={roll.validation_error === 'unknown_position_to'}
+                    onChange={(e) =>
                       onChange(index, {
-                        position_to: newValue as BJJRollDraft['position_to'],
-                        // Clear validation error if user is fixing the position
+                        position_to: (e.target.value || null) as BJJRollDraft['position_to'],
                         validation_error:
-                          roll.validation_error === 'unknown_position_to' ? null : roll.validation_error,
-                        // Mark as edited when user changes the position
+                          roll.validation_error === 'unknown_position_to'
+                            ? null
+                            : roll.validation_error,
                         source: 'ai_edited',
                       })
-                    }}
-                    className={`w-full text-sm rounded-md border px-2 py-1.5 ${
-                      roll.validation_error === 'unknown_position_to'
-                        ? 'border-destructive bg-destructive/5'
-                        : 'border-border bg-background'
-                    }`}
+                    }
                   >
                     <option value="">None</option>
                     {positions.map((pos) => (
@@ -227,68 +249,83 @@ export function RollReviewPanel({
                     ))}
                   </select>
                 </div>
+
+                {roll.technique_names.length > 0 ? (
+                  <div className="field span-all">
+                    <span className="label">Techniques</span>
+                    <p className="flow-read">{roll.technique_names.join(' · ')}</p>
+                  </div>
+                ) : null}
+
+                {roll.raw_excerpt ? (
+                  <div className="field span-all">
+                    <button
+                      type="button"
+                      className="btn btn-sm btn-ghost"
+                      onClick={() => toggleExcerpt(index)}
+                      aria-expanded={isExpanded}
+                    >
+                      {isExpanded ? (
+                        <ChevronUp width={14} height={14} aria-hidden="true" />
+                      ) : (
+                        <ChevronDown width={14} height={14} aria-hidden="true" />
+                      )}
+                      <span style={{ marginLeft: 6 }}>AI context</span>
+                    </button>
+                    {isExpanded ? (
+                      <p className="hint" style={{ marginTop: 'var(--space-2)', fontStyle: 'italic' }}>
+                        &ldquo;{roll.raw_excerpt}&rdquo;
+                      </p>
+                    ) : null}
+                  </div>
+                ) : null}
               </div>
 
-              {/* Techniques (display only for now - multi-select would be complex) */}
-              {roll.technique_names.length > 0 && (
-                <div>
-                  <label className="text-xs text-muted-foreground mb-1 block">Techniques</label>
-                  <div className="flex flex-wrap gap-1">
-                    {roll.technique_names.map((name, techIndex) => (
-                      <Badge key={techIndex} variant="secondary" className="text-xs">
-                        {name}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Raw excerpt collapsible */}
-              {roll.raw_excerpt && (
-                <div>
-                  <button
-                    type="button"
-                    onClick={() => toggleExcerpt(index)}
-                    className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
-                  >
-                    {isExpanded ? (
-                      <ChevronUp className="h-3 w-3" />
-                    ) : (
-                      <ChevronDown className="h-3 w-3" />
-                    )}
-                    <span>AI Context</span>
-                  </button>
-                  {isExpanded && (
-                    <p className="mt-1 text-xs text-muted-foreground italic">
-                      "{roll.raw_excerpt}"
-                    </p>
-                  )}
-                </div>
-              )}
-            </div>
+              <div className="roll-foot">
+                <button
+                  type="button"
+                  className="btn btn-sm btn-danger-text"
+                  onClick={() => onDelete(index)}
+                  aria-label={`Remove roll ${roll.roll_index}`}
+                >
+                  <Trash2 width={14} height={14} aria-hidden="true" />
+                  <span style={{ marginLeft: 6 }}>Discard</span>
+                </button>
+              </div>
+            </article>
           )
         })}
       </div>
 
-      {/* Action buttons */}
-      <div className="flex gap-2 pt-1">
-        <Button
-          type="button"
-          size="sm"
-          onClick={onConfirmAll}
-          disabled={hasValidationErrors || rolls.length === 0}
-          title={
-            hasValidationErrors
-              ? 'Fix or remove invalid rolls before confirming'
-              : undefined
-          }
-        >
-          Confirm All
-        </Button>
-        <Button type="button" size="sm" variant="outline" onClick={onSkip}>
-          Skip for Now
-        </Button>
-      </div>
+      {reviewComplete ? (
+        <div className="banner ok" style={{ marginTop: 'var(--space-4)' }}>
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
+            <path d="M6.5 10.2 8.8 12.5 13.5 7.8" strokeLinecap="round" strokeLinejoin="round" />
+            <circle cx="10" cy="10" r="8" />
+          </svg>
+          <span>
+            <strong>{rolls.length}</strong> roll{rolls.length === 1 ? '' : 's'} confirmed — ready to
+            save with this workout.
+          </span>
+        </div>
+      ) : (
+        <div className="roll-foot">
+          <button
+            type="button"
+            className="btn btn-sm btn-primary"
+            onClick={onConfirmAll}
+            disabled={hasValidationErrors || rolls.length === 0}
+            title={
+              hasValidationErrors ? 'Fix or remove invalid rolls before confirming' : undefined
+            }
+          >
+            Confirm all ({confirmedCount}/{rolls.length})
+          </button>
+          <button type="button" className="btn btn-sm" onClick={onSkip}>
+            Skip for now
+          </button>
+        </div>
+      )}
     </div>
   )
 }

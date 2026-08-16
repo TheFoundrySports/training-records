@@ -311,7 +311,7 @@ describe('bjjWorkoutSchema', () => {
       expect(result.success).toBe(false)
       if (!result.success) {
         const dateError = result.error.issues.find((i) => i.path.includes('performedAt'))
-        expect(dateError?.message).toBe('Invalid date')
+        expect(dateError?.message).toBe('Enter a valid date and time')
       }
     })
   })

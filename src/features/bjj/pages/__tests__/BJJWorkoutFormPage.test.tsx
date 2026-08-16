@@ -130,7 +130,7 @@ describe('BJJWorkoutFormPage', () => {
       renderWithRouter('/bjj/workouts/new')
 
       // Page title
-      expect(screen.getByRole('heading', { name: /log bjj workout/i })).toBeInTheDocument()
+      expect(screen.getByRole('heading', { name: /log your bjj workout/i })).toBeInTheDocument()
 
       // Form fields (use getAllByLabelText for fields that appear multiple times)
       expect(screen.getByLabelText(/title/i)).toBeInTheDocument()
@@ -147,11 +147,11 @@ describe('BJJWorkoutFormPage', () => {
       expect(screen.getByLabelText(/rpe \(1–10, optional\)/i)).toBeInTheDocument()
 
       // Section editor
-      expect(screen.getByText(/sections/i)).toBeInTheDocument()
-      expect(screen.getByText(/section 1/i)).toBeInTheDocument()
+      expect(screen.getByText(/training sections/i)).toBeInTheDocument()
+      expect(screen.getByRole('heading', { level: 3, name: /section 1/i })).toBeInTheDocument()
 
       // Submit button
-      expect(screen.getByRole('button', { name: /save/i })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /save workout/i })).toBeInTheDocument()
       expect(screen.getByRole('button', { name: /cancel/i })).toBeInTheDocument()
     })
 
@@ -159,7 +159,7 @@ describe('BJJWorkoutFormPage', () => {
       renderWithRouter('/bjj/workouts/new')
 
       // Section fields
-      expect(screen.getByLabelText(/^goal$/i)).toBeInTheDocument()
+      expect(screen.getByLabelText(/^goal\b/i)).toBeInTheDocument()
       expect(screen.getByLabelText(/enhanced notes \(ai, optional\)/i)).toBeInTheDocument()
       expect(screen.getByText(/techniques \(optional\)/i)).toBeInTheDocument()
 
@@ -199,7 +199,7 @@ describe('BJJWorkoutFormPage', () => {
       })
 
       // Check section fields are prefilled
-      const goalInput = screen.getByLabelText(/^goal$/i) as HTMLInputElement
+      const goalInput = screen.getByLabelText(/^goal\b/i) as HTMLInputElement
       expect(goalInput.value).toBe('Guard passing')
 
       // Task 5.8 specific: verify enhancedNotes prefill
@@ -230,17 +230,20 @@ describe('BJJWorkoutFormPage', () => {
       expect(scopedCssBaseline).toBeInTheDocument()
     })
 
-    it('heading uses inline Material typography tokens', () => {
+    it('heading uses Material typography classes', () => {
       renderWithRouter('/bjj/workouts/new')
 
-      const heading = screen.getByRole('heading', { name: /log bjj workout/i })
+      const heading = screen.getByRole('heading', { name: /log your bjj workout/i })
+      expect(heading).toHaveClass('form-page-title')
+    })
 
-      // Verify inline styles reference Material CSS variables
-      expect(heading).toHaveStyle({
-        fontFamily: 'var(--font-display)',
-        fontSize: 'var(--text-2xl)',
-        fontWeight: '500',
-      })
+    it('renders hybrid form shell (stepper, summary, action bar)', () => {
+      const { container } = renderWithRouter('/bjj/workouts/new')
+
+      expect(container.querySelector('.stepper')).toBeInTheDocument()
+      expect(container.querySelector('.side-col')).toBeInTheDocument()
+      expect(container.querySelector('.action-bar')).toBeInTheDocument()
+      expect(container.querySelector('.bjj-form')).toBeInTheDocument()
     })
   })
 
@@ -275,16 +278,10 @@ describe('BJJWorkoutFormPage', () => {
       const user = userEvent.setup()
       renderWithRouter('/bjj/workouts/new')
 
-      // Fill in form
-      await user.type(screen.getByLabelText(/title/i), 'Morning BJJ')
-      await user.type(screen.getByLabelText(/^goal$/i), 'Submissions from mount')
+      await user.click(screen.getByRole('button', { name: /save workout/i }))
 
-      // Submit
-      await user.click(screen.getByRole('button', { name: /save/i }))
-
-      // Should navigate after successful save
       await waitFor(() => {
-        expect(screen.queryByText(/log bjj workout/i)).not.toBeInTheDocument()
+        expect(screen.queryByText(/log your bjj workout/i)).not.toBeInTheDocument()
       })
     })
 
@@ -304,7 +301,7 @@ describe('BJJWorkoutFormPage', () => {
       const user = userEvent.setup()
       renderWithRouter('/bjj/workouts/new')
 
-      expect(screen.getByText(/section 1/i)).toBeInTheDocument()
+      expect(screen.getByRole('heading', { level: 3, name: /section 1/i })).toBeInTheDocument()
       expect(screen.queryByText(/section 2/i)).not.toBeInTheDocument()
 
       // Add second section
@@ -344,16 +341,16 @@ describe('BJJWorkoutFormPage', () => {
       renderWithRouter('/bjj/workouts/new')
 
       // Main heading
-      expect(screen.getByRole('heading', { name: /log bjj workout/i })).toBeInTheDocument()
+      expect(screen.getByRole('heading', { name: /log your bjj workout/i })).toBeInTheDocument()
 
       // Buttons have proper labels
-      expect(screen.getByRole('button', { name: /save/i })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /save workout/i })).toBeInTheDocument()
       expect(screen.getByRole('button', { name: /cancel/i })).toBeInTheDocument()
       expect(screen.getByRole('button', { name: /remove section 1/i })).toBeInTheDocument()
 
       // Input fields have labels
       expect(screen.getByLabelText(/title/i)).toBeInTheDocument()
-      expect(screen.getByLabelText(/^goal$/i)).toBeInTheDocument()
+      expect(screen.getByLabelText(/^goal\b/i)).toBeInTheDocument()
     })
 
     it.skip('focuses error summary when mutation fails (manual verification)', async () => {

@@ -1,13 +1,42 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import { useBJJTechniques } from '../hooks/useBJJTechniques'
-import { Badge } from '@/components/ui/badge'
-import { Input } from '@/components/ui/input'
-import type { BJJTechnique } from '../bjj.types'
+import type { BJJCategory, BJJTechnique } from '../bjj.types'
 
 interface TechniqueSearchProps {
   selectedIds: string[]
   onChange: (ids: string[]) => void
   disabled?: boolean
+}
+
+const CATEGORY_LABELS: Record<BJJCategory, string> = {
+  guard: 'Guard',
+  takedown: 'Takedown',
+  submission: 'Submission',
+  escape: 'Escape',
+  transition: 'Transition',
+  guard_pass: 'Pass',
+  other: 'Other',
+}
+
+function formatCategory(category?: BJJCategory): string | null {
+  if (!category) return null
+  return CATEGORY_LABELS[category] ?? category
+}
+
+function PlusIcon() {
+  return (
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+      <path d="M8 3.5v9M3.5 8h9" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+function CloseIcon() {
+  return (
+    <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+      <path d="M3 3l6 6M9 3 3 9" strokeLinecap="round" />
+    </svg>
+  )
 }
 
 /**
@@ -22,11 +51,8 @@ export function TechniqueSearch({ selectedIds, onChange, disabled }: TechniqueSe
   const containerRef = useRef<HTMLDivElement>(null)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // Load ALL techniques (no search filter) so we can resolve names for
-  // IDs that were set programmatically (e.g., from AI enhance)
   const { data: allTechniques = [], isLoading: techniquesLoading } = useBJJTechniques()
 
-  // Debounce the search query
   const handleQueryChange = useCallback((value: string) => {
     setQuery(value)
     if (debounceRef.current) clearTimeout(debounceRef.current)
@@ -35,10 +61,8 @@ export function TechniqueSearch({ selectedIds, onChange, disabled }: TechniqueSe
     }, 300)
   }, [])
 
-  // Results for the dropdown search
   const { data: results = [] } = useBJJTechniques({ search: debouncedQuery || undefined })
 
-// Build lookups from all techniques for display and name resolution
   const techniqueNameById = useMemo(
     () => new Map(allTechniques.map((t) => [t.id, t.name])),
     [allTechniques],
@@ -48,7 +72,6 @@ export function TechniqueSearch({ selectedIds, onChange, disabled }: TechniqueSe
     [allTechniques],
   )
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
@@ -59,7 +82,6 @@ export function TechniqueSearch({ selectedIds, onChange, disabled }: TechniqueSe
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  // Cleanup debounce on unmount
   useEffect(() => {
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current)
@@ -91,9 +113,11 @@ export function TechniqueSearch({ selectedIds, onChange, disabled }: TechniqueSe
   }
 
   return (
-    <div ref={containerRef} className="space-y-2">
-      <div className="relative">
-        <Input
+    <div ref={containerRef}>
+      <div className="search-wrap">
+        <input
+          id="technique-search-input"
+          className="input"
           value={query}
           onChange={(e) => {
             handleQueryChange(e.target.value)
@@ -103,65 +127,78 @@ export function TechniqueSearch({ selectedIds, onChange, disabled }: TechniqueSe
           placeholder="Search techniques…"
           disabled={disabled}
           aria-label="Search techniques"
+          aria-expanded={open}
+          aria-controls="technique-search-listbox"
           autoComplete="off"
         />
-        {open && filteredResults.length > 0 && (
-          <div className="absolute z-50 mt-1 w-full rounded-lg border bg-popover shadow-md">
+
+        {open && filteredResults.length > 0 ? (
+          <div className="menu-panel">
             <ul
+              id="technique-search-listbox"
               role="listbox"
               aria-label="Technique search results"
-              className="max-h-48 overflow-y-auto py-1"
+              className="pick-list"
             >
-              {filteredResults.map((technique) => (
-                <li key={technique.id}>
-                  <button
-                    type="button"
-                    role="option"
-                    aria-selected={false}
-                    className="w-full px-3 py-2 text-left text-sm hover:bg-accent focus:bg-accent outline-none"
-                    onMouseDown={(e) => {
-                      e.preventDefault()
-                      handleSelect(technique)
-                    }}
-                  >
-                    <span className="font-medium">{technique.name}</span>
-                    {technique.category && (
-                      <span className="ml-2 text-xs text-muted-foreground capitalize">
-                        {technique.category}
+              {filteredResults.map((technique) => {
+                const categoryLabel = formatCategory(technique.category)
+                return (
+                  <li key={technique.id} role="presentation">
+                    <button
+                      type="button"
+                      role="option"
+                      aria-selected={false}
+                      className="pick-row"
+                      onMouseDown={(e) => {
+                        e.preventDefault()
+                        handleSelect(technique)
+                      }}
+                    >
+                      <span className="pick-name">{technique.name}</span>
+                      {categoryLabel ? (
+                        <span className="pick-cat">{categoryLabel}</span>
+                      ) : (
+                        <span aria-hidden="true" />
+                      )}
+                      <span className="pick-add" aria-hidden="true">
+                        <PlusIcon />
                       </span>
-                    )}
-                  </button>
-                </li>
-              ))}
+                    </button>
+                  </li>
+                )
+              })}
             </ul>
           </div>
-        )}
-        {open && filteredResults.length === 0 && (
-          <div className="absolute z-50 mt-1 w-full rounded-lg border bg-popover shadow-md">
-            <p className="px-3 py-2 text-sm text-muted-foreground">No techniques found</p>
+        ) : null}
+
+        {open && filteredResults.length === 0 ? (
+          <div className="menu-panel">
+            <p className="empty-note">No techniques found</p>
           </div>
-        )}
+        ) : null}
       </div>
 
       {techniquesLoading ? (
-        <p className="text-xs text-muted-foreground">Loading techniques…</p>
+        <p className="hint" style={{ marginTop: 'var(--space-3)' }}>
+          Loading techniques…
+        </p>
       ) : selectedIds.length > 0 ? (
-        <div className="flex flex-wrap gap-2" aria-label="Selected techniques">
+        <div className="selected-chips" aria-label="Selected techniques">
           {selectedIds.map((id) => {
             const name = resolveName(id)
             return (
-              <Badge key={id} variant="secondary" className="gap-1">
+              <span key={id} className="chip-sel">
                 {name}
                 <button
                   type="button"
                   aria-label={`Remove ${name}`}
-                  className="ml-1 rounded-full hover:bg-muted-foreground/20 focus:outline-none"
+                  className="chip-x"
                   onClick={() => handleRemove(id)}
                   disabled={disabled}
                 >
-                  &times;
+                  <CloseIcon />
                 </button>
-              </Badge>
+              </span>
             )
           })}
         </div>

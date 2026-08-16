@@ -67,7 +67,7 @@ describe('RollReviewPanel', () => {
       />
     )
 
-    expect(screen.getByText(/1 roll/i)).toBeInTheDocument()
+    expect(screen.getByText(/1 proposed/i)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /confirm all/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /skip for now/i })).toBeInTheDocument()
   })
@@ -90,13 +90,11 @@ describe('RollReviewPanel', () => {
     )
 
     // Confidence should be displayed as percentage
-    expect(screen.getByText('82%')).toBeInTheDocument()
-    
-    // Raw excerpt should be behind "AI Context" button (collapsed by default)
-    expect(screen.getByText('AI Context')).toBeInTheDocument()
-    
-    // Click to expand
-    const contextButton = screen.getByText('AI Context')
+    expect(screen.getByText(/82% confidence/i)).toBeInTheDocument()
+
+    expect(screen.getByText(/ai context/i)).toBeInTheDocument()
+
+    const contextButton = screen.getByText(/ai context/i)
     await user.click(contextButton)
     
     // Now excerpt should be visible
@@ -203,10 +201,27 @@ describe('RollReviewPanel', () => {
       />
     )
 
-    const confirmButton = screen.getByRole('button', { name: /confirm all/i })
+    const confirmButton = screen.getByRole('button', { name: /confirm all \(0\/1\)/i })
     await user.click(confirmButton)
 
     expect(onConfirmAll).toHaveBeenCalledOnce()
+  })
+
+  it('shows confirmed state when reviewComplete is true', () => {
+    renderWithProviders(
+      <RollReviewPanel
+        rolls={[mockValidRoll]}
+        reviewComplete
+        onConfirmAll={vi.fn()}
+        onSkip={vi.fn()}
+        onChange={vi.fn()}
+        onDelete={vi.fn()}
+      />
+    )
+
+    expect(screen.getByText(/1 confirmed/i)).toBeInTheDocument()
+    expect(screen.getByText(/ready to save with this workout/i)).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /confirm all/i })).not.toBeInTheDocument()
   })
 
   it('calls onDelete when delete button is clicked', async () => {
@@ -250,7 +265,7 @@ describe('RollReviewPanel', () => {
       />
     )
 
-    expect(screen.getByText(/2 rolls/i)).toBeInTheDocument()
+    expect(screen.getByText(/2 proposed/i)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /remove roll 1/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /remove roll 2/i })).toBeInTheDocument()
   })

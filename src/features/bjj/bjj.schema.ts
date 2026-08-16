@@ -162,10 +162,19 @@ export const bjjWorkoutSchema = z
         if (/[Z+-]\d*(\d{2}:\d{2})?$/.test(val)) return val
         return val.length === 16 ? `${val}:00.000Z` : `${val}.000Z`
       })
-      .pipe(z.string().datetime({ message: 'Invalid date' })),
-    durationMinutes: z.number().int().min(1).max(300),
-    notes: z.string().max(2000).optional(),
-    rpe: z.number().int().min(1).max(10).optional(),
+      .pipe(z.string().datetime({ message: 'Enter a valid date and time' })),
+    durationMinutes: z
+      .number({ error: 'Enter a duration between 1 and 300 minutes' })
+      .int()
+      .min(1, 'Enter a duration between 1 and 300 minutes')
+      .max(300, 'Duration cannot exceed 300 minutes'),
+    notes: z.string().max(2000, 'Session notes cannot exceed 2000 characters').optional(),
+    rpe: z
+      .number({ error: 'RPE must be a whole number between 1 and 10' })
+      .int()
+      .min(1, 'RPE must be between 1 and 10')
+      .max(10, 'RPE must be between 1 and 10')
+      .optional(),
     sections: z.array(bjjSectionSchema).min(1, 'At least one section is required'),
   })
   .superRefine((data, ctx) => {
@@ -177,7 +186,7 @@ export const bjjWorkoutSchema = z
             roll.validation_error === 'unknown_position_from' ? 'position_from' : 'position_to'
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
-            message: `Roll has unmappable position - correct or remove before confirming`,
+            message: 'Choose a valid position or remove this roll.',
             path: ['sections', sectionIndex, 'rolls', rollIndex, fieldName],
           })
         }
