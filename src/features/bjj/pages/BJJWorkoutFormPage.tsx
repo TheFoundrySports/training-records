@@ -71,6 +71,7 @@ export function BJJWorkoutFormPage() {
         rawDescription: section.rawDescription ?? '',
         durationMinutes: section.durationMinutes,
         techniqueIds: section.techniques.map((t) => t.id),
+        enhancedNotes: section.enhancedNotes ?? section.aiDescription ?? '',
       }))
 
       form.reset({
@@ -99,6 +100,9 @@ export function BJJWorkoutFormPage() {
           goal: s.goal,
           orderIndex: idx,
           techniqueIds: s.techniqueIds,
+          rawDescription: s.rawDescription,
+          durationMinutes: s.durationMinutes,
+          enhancedNotes: s.enhancedNotes,
         })),
       })
       void navigate(`/workouts/${id}`)

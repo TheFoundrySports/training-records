@@ -6,6 +6,9 @@ interface BJJSectionInput {
   goal: string
   orderIndex: number
   techniqueIds: string[]
+  rawDescription?: string
+  durationMinutes?: number
+  enhancedNotes?: string
 }
 
 export interface UpdateBJJWorkoutPayload {
@@ -51,13 +54,13 @@ export function useUpdateBJJWorkout() {
           id: s.id ?? null,
           section_number: s.orderIndex + 1,  // 1-indexed to match bjj_sections_section_number_check (>= 1)
           goal: s.goal,
-          raw_description: null,
-          duration_minutes: null,
+          raw_description: s.rawDescription ?? null,
+          duration_minutes: s.durationMinutes ?? null,
           technique_names: s.techniqueIds.flatMap((id) => {
               const name = techIdToName.get(id)
               return name ? [name] : []
             }),
-          enhanced_notes: null,
+          enhanced_notes: s.enhancedNotes ?? null,
         })),
       })
 
