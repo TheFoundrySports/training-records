@@ -9,17 +9,14 @@ import { TechniqueSearch } from './TechniqueSearch'
 import { AIPreviewPanel } from './AIPreviewPanel'
 import { RollReviewPanel } from './RollReviewPanel'
 import { useBJJSectionAI } from '../hooks/useBJJSectionAI'
-import type { BJJWorkoutFormValues, BJJRollProposal, BJJRollDraft } from '../bjj.schema'
+import type { BJJWorkoutFormValues, BJJRollDraft } from '../bjj.schema'
+import { proposalToDraft } from '../bjj.schema'
 
 interface AIPreview {
   ai_description: string
   matched_technique_ids: string[]
-  /**
-   * Proposed roll events from the EF. Populated by the hook in PR 3
-   * (Q1 from PR 2 handoff). PR 7 will mount <RollReviewPanel> below
-   * <AIPreviewPanel> when this array is non-empty.
-   */
-  rolls: BJJRollProposal[]
+  /** Roll drafts under review (converted from EF proposals on enhance). */
+  rolls: BJJRollDraft[]
 }
 
 interface BJJSectionEditorProps {
@@ -65,7 +62,10 @@ export function BJJSectionEditor({
       },
       {
         onSuccess: (result) => {
-          setPreview(result)
+          setPreview({
+            ...result,
+            rolls: result.rolls.map((roll) => proposalToDraft(roll)),
+          })
         },
         onError: (err) => {
           const message = err instanceof Error ? err.message : 'AI enhancement failed'
@@ -98,11 +98,7 @@ export function BJJSectionEditor({
     if (!preview) return
     // Write rolls to RHF state (sections[index].rolls)
     // Convert BJJRollProposal to BJJRollDraft by adding source
-    const drafts: BJJRollDraft[] = preview.rolls.map((roll) => ({
-      ...roll,
-      source: 'ai_confirmed' as const,
-    }))
-    setValue(`sections.${index}.rolls`, drafts)
+    setValue(`sections.${index}.rolls`, preview.rolls)
     // Keep preview open so user can still see AI description
   }
 
@@ -116,14 +112,12 @@ export function BJJSectionEditor({
     if (rollIndex >= currentRolls.length) return
 
     const updatedRolls: BJJRollDraft[] = currentRolls.map((roll, i) => {
-      if (i !== rollIndex) {
-        return { ...roll, source: 'ai_confirmed' as const }
-      }
+      if (i !== rollIndex) return roll
       return {
         ...roll,
         ...updates,
         source: updates.source ?? 'ai_edited',
-      } as BJJRollDraft
+      }
     })
 
     // Update preview state
@@ -139,11 +133,7 @@ export function BJJSectionEditor({
     // Update preview state
     setPreview((prev) => (prev ? { ...prev, rolls: updatedRolls } : null))
     // Also update RHF state
-    const drafts: BJJRollDraft[] = updatedRolls.map((roll) => ({
-      ...roll,
-      source: 'ai_confirmed' as const,
-    }))
-    setValue(`sections.${index}.rolls`, drafts)
+    setValue(`sections.${index}.rolls`, updatedRolls)
   }
 
   return (
@@ -256,10 +246,7 @@ export function BJJSectionEditor({
               {/* Task 3.1: Mount RollReviewPanel below AIPreviewPanel when rolls exist */}
               {preview.rolls.length > 0 && (
                 <RollReviewPanel
-                  rolls={preview.rolls.map((roll) => ({
-                    ...roll,
-                    source: 'ai_confirmed' as const,
-                  }))}
+                  rolls={preview.rolls}
                   onConfirmAll={handleConfirmRolls}
                   onSkip={handleSkipRolls}
                   onChange={handleRollChange}

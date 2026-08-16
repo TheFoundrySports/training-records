@@ -40,13 +40,16 @@ export type BJJPositionKey = (typeof BJJ_POSITION_KEYS)[number]
 // boundary contract — anything that crosses the EF→client wire is
 // parsed through BJJSectionAIResponseSchema.
 export const BJJRollSourceSchema = z.enum(['ai_confirmed', 'ai_edited', 'manual'])
+export type BJJRollSource = z.infer<typeof BJJRollSourceSchema>
 export const BJJRollRoleSchema = z.enum(['attacking', 'defending', 'neutral'])
+export type BJJRollRole = z.infer<typeof BJJRollRoleSchema>
 export const BJJRollOutcomeSchema = z.enum([
   'submission',
   'position_gain',
   'position_loss',
   'neutral',
 ])
+export type BJJRollOutcome = z.infer<typeof BJJRollOutcomeSchema>
 export const BJJRollValidationErrorSchema = z.enum([
   'unknown_position_from',
   'unknown_position_to',
@@ -72,6 +75,25 @@ export const BJJRollDraftSchema = BJJRollProposalSchema.extend({
   source: BJJRollSourceSchema,
 })
 export type BJJRollDraft = z.infer<typeof BJJRollDraftSchema>
+
+/** Map EF proposal rows to form drafts (nullable validation_error + source). */
+export function proposalToDraft(
+  roll: BJJRollProposal,
+  source: BJJRollSource = 'ai_confirmed',
+): BJJRollDraft {
+  return {
+    roll_index: roll.roll_index,
+    role: roll.role,
+    outcome: roll.outcome,
+    position_from: roll.position_from,
+    position_to: roll.position_to,
+    technique_names: roll.technique_names,
+    confidence: roll.confidence,
+    raw_excerpt: roll.raw_excerpt,
+    validation_error: roll.validation_error ?? null,
+    source,
+  }
+}
 
 export const BJJSectionAIResponseSchema = z.object({
   ai_description: z.string().min(1, 'ai_description is required'),

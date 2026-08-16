@@ -16,7 +16,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { AlertCircle, ChevronDown, ChevronUp, Trash2 } from 'lucide-react'
 import { useBJJPositions } from '../dashboard/hooks/useBJJPositions'
-import type { BJJRollDraft, BJJRollRoleSchema, BJJRollOutcomeSchema } from '../bjj.schema'
+import type { BJJRollDraft, BJJRollRole, BJJRollOutcome } from '../bjj.schema'
 
 interface RollReviewPanelProps {
   rolls: BJJRollDraft[]
@@ -26,13 +26,13 @@ interface RollReviewPanelProps {
   onDelete: (rollIndex: number) => void
 }
 
-const ROLE_OPTIONS: Array<{ value: BJJRollRoleSchema; label: string }> = [
+const ROLE_OPTIONS: Array<{ value: BJJRollRole; label: string }> = [
   { value: 'attacking', label: 'Attacking' },
   { value: 'defending', label: 'Defending' },
   { value: 'neutral', label: 'Neutral' },
 ]
 
-const OUTCOME_OPTIONS: Array<{ value: BJJRollOutcomeSchema; label: string }> = [
+const OUTCOME_OPTIONS: Array<{ value: BJJRollOutcome; label: string }> = [
   { value: 'submission', label: 'Submission' },
   { value: 'position_gain', label: 'Position Gain' },
   { value: 'position_loss', label: 'Position Loss' },
