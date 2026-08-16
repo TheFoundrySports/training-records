@@ -11,7 +11,7 @@ export function useBJJSections(workoutId: string) {
         .select(
           `
           id, workout_id, section_number, goal,
-          raw_description, ai_description, duration_minutes, created_at,
+          raw_description, ai_description, duration_minutes, enhanced_notes, created_at,
           bjj_section_techniques (
             bjj_techniques (
               id, name, description, category, youtube_url, created_at, updated_at

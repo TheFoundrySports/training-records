@@ -34,6 +34,7 @@ interface BJJSectionRow {
   raw_description: string | null
   ai_description: string | null
   duration_minutes: number | null
+  enhanced_notes: string | null
   created_at: string
   bjj_section_techniques: Array<{ bjj_techniques: BJJTechniqueRow }>
 }
@@ -47,6 +48,7 @@ export function mapSectionRow(row: BJJSectionRow): BJJSection {
     rawDescription: row.raw_description ?? undefined,
     aiDescription: row.ai_description ?? undefined,
     durationMinutes: row.duration_minutes ?? undefined,
+    enhancedNotes: row.enhanced_notes ?? undefined,
     techniques: row.bjj_section_techniques.map((jt) => mapTechniqueRow(jt.bjj_techniques)),
     createdAt: row.created_at,
   }

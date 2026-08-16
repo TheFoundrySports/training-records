@@ -34,7 +34,7 @@ describe('useUpdateBJJWorkout', () => {
     vi.clearAllMocks()
   })
 
-  it('calls bjj_update_workout RPC with correct payload', async () => {
+  it('preserves section fields in edit mode (round-trip)', async () => {
     // Mock technique name lookup
     vi.mocked(supabase.from).mockReturnValue({
       select: vi.fn().mockReturnValue({
@@ -73,11 +73,17 @@ describe('useUpdateBJJWorkout', () => {
           goal: 'Guard retention',
           orderIndex: 0,
           techniqueIds: ['tech-1', 'tech-2'],
+          rawDescription: 'Worked on closed guard fundamentals',
+          durationMinutes: 30,
+          enhancedNotes: 'Partner was giving good resistance',
         },
         {
           goal: 'Pass guard',
           orderIndex: 1,
           techniqueIds: [],
+          rawDescription: 'Practiced stack pass variations',
+          durationMinutes: 15,
+          enhancedNotes: undefined,
         },
       ],
     }
@@ -97,17 +103,17 @@ describe('useUpdateBJJWorkout', () => {
           id: 'section-1',
           section_number: 1,
           goal: 'Guard retention',
-          raw_description: null,
-          duration_minutes: null,
+          raw_description: 'Worked on closed guard fundamentals',
+          duration_minutes: 30,
           technique_names: ['Arm Bar', 'Kimura'],
-          enhanced_notes: null,
+          enhanced_notes: 'Partner was giving good resistance',
         },
         {
           id: null,
           section_number: 2,
           goal: 'Pass guard',
-          raw_description: null,
-          duration_minutes: null,
+          raw_description: 'Practiced stack pass variations',
+          duration_minutes: 15,
           technique_names: [],
           enhanced_notes: null,
         },
