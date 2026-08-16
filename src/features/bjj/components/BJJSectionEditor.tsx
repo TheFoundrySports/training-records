@@ -7,8 +7,9 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { TechniqueSearch } from './TechniqueSearch'
 import { AIPreviewPanel } from './AIPreviewPanel'
+import { RollReviewPanel } from './RollReviewPanel'
 import { useBJJSectionAI } from '../hooks/useBJJSectionAI'
-import type { BJJWorkoutFormValues, BJJRollProposal } from '../bjj.schema'
+import type { BJJWorkoutFormValues, BJJRollProposal, BJJRollDraft } from '../bjj.schema'
 
 interface AIPreview {
   ai_description: string
@@ -90,6 +91,59 @@ export function BJJSectionEditor({
 
   function handleDiscard() {
     setPreview(null)
+  }
+
+  // Task 3.2: Wire handlers for RollReviewPanel
+  function handleConfirmRolls() {
+    if (!preview) return
+    // Write rolls to RHF state (sections[index].rolls)
+    // Convert BJJRollProposal to BJJRollDraft by adding source
+    const drafts: BJJRollDraft[] = preview.rolls.map((roll) => ({
+      ...roll,
+      source: 'ai_confirmed' as const,
+    }))
+    setValue(`sections.${index}.rolls`, drafts)
+    // Keep preview open so user can still see AI description
+  }
+
+  function handleSkipRolls() {
+    // Task 3.4: Clear rolls from RHF state
+    setValue(`sections.${index}.rolls`, [])
+  }
+
+  function handleRollChange(rollIndex: number, updates: Partial<BJJRollDraft>) {
+    const currentRolls = preview?.rolls ?? []
+    if (rollIndex >= currentRolls.length) return
+
+    const updatedRolls: BJJRollDraft[] = currentRolls.map((roll, i) => {
+      if (i !== rollIndex) {
+        return { ...roll, source: 'ai_confirmed' as const }
+      }
+      return {
+        ...roll,
+        ...updates,
+        source: updates.source ?? 'ai_edited',
+      } as BJJRollDraft
+    })
+
+    // Update preview state
+    setPreview((prev) => (prev ? { ...prev, rolls: updatedRolls } : null))
+    // Also update RHF state
+    setValue(`sections.${index}.rolls`, updatedRolls)
+  }
+
+  function handleRollDelete(rollIndex: number) {
+    const currentRolls = preview?.rolls ?? []
+    const updatedRolls = currentRolls.filter((_, i) => i !== rollIndex)
+
+    // Update preview state
+    setPreview((prev) => (prev ? { ...prev, rolls: updatedRolls } : null))
+    // Also update RHF state
+    const drafts: BJJRollDraft[] = updatedRolls.map((roll) => ({
+      ...roll,
+      source: 'ai_confirmed' as const,
+    }))
+    setValue(`sections.${index}.rolls`, drafts)
   }
 
   return (
@@ -193,11 +247,26 @@ export function BJJSectionEditor({
           )}
 
           {preview && !aiError && (
-            <AIPreviewPanel
-              preview={preview}
-              onApply={handleApply}
-              onDiscard={handleDiscard}
-            />
+            <>
+              <AIPreviewPanel
+                preview={preview}
+                onApply={handleApply}
+                onDiscard={handleDiscard}
+              />
+              {/* Task 3.1: Mount RollReviewPanel below AIPreviewPanel when rolls exist */}
+              {preview.rolls.length > 0 && (
+                <RollReviewPanel
+                  rolls={preview.rolls.map((roll) => ({
+                    ...roll,
+                    source: 'ai_confirmed' as const,
+                  }))}
+                  onConfirmAll={handleConfirmRolls}
+                  onSkip={handleSkipRolls}
+                  onChange={handleRollChange}
+                  onDelete={handleRollDelete}
+                />
+              )}
+            </>
           )}
         </div>
 

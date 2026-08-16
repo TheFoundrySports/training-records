@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { bjjWorkoutSchema, type BJJWorkoutFormValues } from '../bjj.schema'
 import { useCreateBJJWorkout } from '../hooks/useBJJWorkoutMutations'
 import { useUpdateBJJWorkout } from '../hooks/useUpdateBJJWorkout'
+import { useConfirmRolls } from '../hooks/useConfirmRolls'
 import { useWorkout } from '@/features/workouts/hooks/useWorkouts'
 import { useBJJSections } from '../hooks/useBJJSections'
 import { BJJSectionEditor } from '../components/BJJSectionEditor'
@@ -28,7 +29,8 @@ export function BJJWorkoutFormPage() {
 
   const createMutation = useCreateBJJWorkout()
   const updateMutation = useUpdateBJJWorkout()
-  const isPending = createMutation.isPending || updateMutation.isPending
+  const confirmRollsMutation = useConfirmRolls()
+  const isPending = createMutation.isPending || updateMutation.isPending || confirmRollsMutation.isPending
 
   // Fetch existing workout for edit mode
   const { data: existingWorkout, isLoading: loadingWorkout } = useWorkout(id ?? '')
@@ -49,6 +51,7 @@ export function BJJWorkoutFormPage() {
           rawDescription: '',
           durationMinutes: undefined,
           techniqueIds: [],
+          rolls: [],
         },
       ],
     },
@@ -71,6 +74,7 @@ export function BJJWorkoutFormPage() {
         rawDescription: section.rawDescription ?? '',
         durationMinutes: section.durationMinutes,
         techniqueIds: section.techniques.map((t) => t.id),
+        rolls: [], // Edit mode doesn't load existing rolls into the form
       }))
 
       form.reset({
@@ -86,31 +90,59 @@ export function BJJWorkoutFormPage() {
   }, [isEditMode, existingWorkout, existingSections])
 
   async function onSubmit(values: BJJWorkoutFormValues) {
-    if (isEditMode && id) {
-      await updateMutation.mutateAsync({
-        workoutId: id,
-        title: values.title,
-        performedAt: new Date(values.performedAt).toISOString(),
-        durationMin: values.durationMinutes,
-        notes: values.notes ?? '',
-        rpe: values.rpe,
-        sections: values.sections.map((s, idx) => ({
-          id: s.id,
-          goal: s.goal,
-          orderIndex: idx,
-          techniqueIds: s.techniqueIds,
-        })),
-      })
-      void navigate(`/workouts/${id}`)
-    } else {
-      const workoutId = await createMutation.mutateAsync(values)
+    try {
+      let workoutId: string
+
+      // Task 3.3 & 3.10: Save workout first, then confirm rolls (REQ-RE10)
+      if (isEditMode && id) {
+        await updateMutation.mutateAsync({
+          workoutId: id,
+          title: values.title,
+          performedAt: new Date(values.performedAt).toISOString(),
+          durationMin: values.durationMinutes,
+          notes: values.notes ?? '',
+          rpe: values.rpe,
+          sections: values.sections.map((s, idx) => ({
+            id: s.id,
+            goal: s.goal,
+            orderIndex: idx,
+            techniqueIds: s.techniqueIds,
+          })),
+        })
+        workoutId = id
+      } else {
+        workoutId = await createMutation.mutateAsync(values)
+      }
+
+      // Check if any sections have roll drafts to confirm
+      const sectionsWithRolls = values.sections
+        .map((section, index) => ({
+          sectionNumber: index + 1, // section_number is 1-based
+          rolls: section.rolls ?? [],
+        }))
+        .filter((section) => section.rolls.length > 0)
+
+      // If there are rolls to confirm, call useConfirmRolls
+      if (sectionsWithRolls.length > 0) {
+        await confirmRollsMutation.mutateAsync({
+          workoutId,
+          sections: sectionsWithRolls,
+        })
+      }
+
+      // Navigate after successful save + roll confirmation
       void navigate(`/workouts/${workoutId}`)
+    } catch (error) {
+      // Mutation errors are already tracked by the mutations
+      // and will be displayed via mutationError below
+      console.error('Save failed:', error)
     }
   }
 
   const mutationError =
     (createMutation.error as { error?: { message?: string } } | null)?.error?.message ??
-    (updateMutation.error as { error?: { message?: string } } | null)?.error?.message
+    (updateMutation.error as { error?: { message?: string } } | null)?.error?.message ??
+    (confirmRollsMutation.error as { message?: string } | null)?.message
 
   const rootErrorRef = useRef<HTMLDivElement>(null)
 
@@ -285,6 +317,7 @@ export function BJJWorkoutFormPage() {
                   rawDescription: '',
                   durationMinutes: undefined,
                   techniqueIds: [],
+                  rolls: [],
                 })
               }
               disabled={isPending || fields.length >= 10}
