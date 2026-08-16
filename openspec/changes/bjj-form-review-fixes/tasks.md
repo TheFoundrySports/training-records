@@ -17,5 +17,5 @@
 
 ## P2 — Branch hygiene (manual)
 
-- [ ] T-R10 Feature branch + commit parity work (exclude `test-rpc-30d.sql`)
-- [ ] T-R11 Split unrelated commits from BJJ MR
+- [x] T-R10 Feature branch + commit parity work (exclude `test-rpc-30d.sql`)
+- [x] T-R11 Split unrelated commits from BJJ MR → `chore/local-tooling-and-ci-lint-docs`
