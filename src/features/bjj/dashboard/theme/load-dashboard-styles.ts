@@ -1,8 +1,8 @@
 /**
- * Side-effect entry: loads the Open Design CSS port + dashboard fonts.
- * Import once from `BJJDashboardPage` (and the route fallback) so widget
- * class names resolve to the Material token system.
+ * Re-export shim for load-dashboard-styles.ts.
+ *
+ * The theme files were moved to shared src/theme/ in PR 4 (MaterialScope
+ * foundation). This shim keeps the dashboard + tests green during the
+ * migration. All new imports should use '@/theme/load-dashboard-styles'.
  */
-import '@fontsource-variable/roboto'
-import '@fontsource-variable/roboto-mono'
-import './material-dashboard.css'
+import '@/theme/load-dashboard-styles'

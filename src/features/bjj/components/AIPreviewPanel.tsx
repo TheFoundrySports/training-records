@@ -11,18 +11,13 @@
 import { useBJJTechniques } from '../hooks/useBJJTechniques'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import type { BJJRollProposal } from '../bjj.schema'
+import type { BJJRollDraft } from '../bjj.schema'
 
 interface AIPreview {
   ai_description: string
   matched_technique_ids: string[]
-  /**
-   * Proposed roll events from the EF. Populated by the hook in
-   * `BJJSectionEditor`; consumed by PR 7's `<RollReviewPanel>`.
-   * The current panel ignores this field \u2014 it's here so the state
-   * shape matches the hook's return type.
-   */
-  rolls?: BJJRollProposal[]
+  /** Roll drafts under review; ignored by this panel (RollReviewPanel renders them). */
+  rolls?: BJJRollDraft[]
 }
 
 interface AIPreviewPanelProps {
