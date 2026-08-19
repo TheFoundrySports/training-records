@@ -5,6 +5,7 @@ import type { ReactNode } from 'react'
 import { MemoryRouter, Route, Routes } from 'react-router'
 import { AppShell } from './AppShell'
 import { AuthProvider } from '@/features/auth/AuthContext'
+import { ThemeProvider } from '@/theme/ThemeContext'
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -20,7 +21,9 @@ function makeWrapper(queryClient: QueryClient) {
   return function Wrapper({ children }: { children: ReactNode }) {
     return (
       <QueryClientProvider client={queryClient}>
-        <AuthProvider>{children}</AuthProvider>
+        <ThemeProvider>
+          <AuthProvider>{children}</AuthProvider>
+        </ThemeProvider>
       </QueryClientProvider>
     )
   }
@@ -57,6 +60,13 @@ describe('AppShell', () => {
   it('renders AppShell with logo link', () => {
     renderWithRouter()
     expect(screen.getByText('Training Records')).toBeInTheDocument()
+  })
+
+  it('renders theme toggle in the header', () => {
+    renderWithRouter()
+    expect(
+      screen.getByRole('button', { name: /switch to (light|dark) mode/i }),
+    ).toBeInTheDocument()
   })
 
   it('renders hamburger button visible at mobile (md:hidden class present)', () => {

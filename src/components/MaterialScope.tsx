@@ -10,8 +10,7 @@
  *  - D6: ScopedCssBaseline prevents global body resets that would conflict
  *    with shadcn pages. The CSS variable system is class-scoped already.
  *  - D7: Theme modules moved to src/theme/ (shared) from dashboard feature.
- *  - D8: Dark mode uses useDashboardColorScheme() (prefers-color-scheme).
- *    No in-app toggle until the deferred `theme-context-unified` change.
+ *  - D8: Dark mode uses ThemeProvider + `html.dark` (shadcn + Material tokens).
  *
  * Usage:
  * ```tsx
