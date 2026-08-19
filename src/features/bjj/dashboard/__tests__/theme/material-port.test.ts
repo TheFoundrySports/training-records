@@ -161,9 +161,9 @@ describe('material-dashboard.css — class-name coverage (REQ-BD7)', () => {
     }
   })
 
-  it('contains the prefers-color-scheme dark media query (system color scheme)', () => {
+  it('contains html.dark selectors for manual theme toggling', () => {
     const contents = readFileSync(CSS_PATH, 'utf-8')
-    expect(contents).toMatch(/@media\s*\(prefers-color-scheme:\s*dark\)/)
+    expect(contents).toMatch(/html\.dark\s+\.bjj-dashboard\s*\{[^}]*--bg:\s*#101418/)
   })
 
   it('contains the data-cat attribute selectors for category chips', () => {
@@ -195,8 +195,7 @@ describe('material-dashboard.css — scoped tokens and element resets (Task 4.2,
   })
 
   it('scopes :root tokens under .bjj-dashboard in dark mode', () => {
-    // Dark mode tokens must be under @media (prefers-color-scheme: dark) { .bjj-dashboard { ... } }
-    expect(contents).toMatch(/@media\s*\(prefers-color-scheme:\s*dark\)[^}]*\.bjj-dashboard\s*\{[^}]*--bg:\s*#101418/)
+    expect(contents).toMatch(/html\.dark\s+\.bjj-dashboard\s*\{[^}]*--bg:\s*#101418/)
   })
 
   it('does NOT have bare :root token definitions (they must be scoped)', () => {

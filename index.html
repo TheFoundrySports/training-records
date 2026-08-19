@@ -5,6 +5,22 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Training Records</title>
+    <script>
+      ;(function () {
+        try {
+          var key = 'theme:v1'
+          var pref = localStorage.getItem(key)
+          var dark =
+            pref === 'dark'
+              ? true
+              : pref === 'light'
+                ? false
+                : window.matchMedia('(prefers-color-scheme: dark)').matches
+          document.documentElement.classList.toggle('dark', dark)
+          document.documentElement.style.colorScheme = dark ? 'dark' : 'light'
+        } catch (e) {}
+      })()
+    </script>
   </head>
   <body>
     <div id="root"></div>

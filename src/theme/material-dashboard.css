@@ -82,8 +82,7 @@
   --elev-raised-up: 0 -3px 8px rgba(60, 64, 67, 0.12);
 }
 
-@media (prefers-color-scheme: dark) {
-  .bjj-dashboard {
+html.dark .bjj-dashboard {
     --bg: #101418;
     --surface: #1a1d22;
     --surface-warm: #1f2733;
@@ -119,7 +118,6 @@
     --tint-warn: color-mix(in oklab, var(--warn), var(--surface) 84%);
     --tint-danger: color-mix(in oklab, var(--danger), var(--surface) 86%);
     --elev-raised-up: 0 -3px 8px rgba(0, 0, 0, 0.4);
-  }
 }
 
 /* Task 4.5: Scope element resets under .bjj-dashboard (D2) */
@@ -369,10 +367,8 @@
 .bjj-form .tag { font-family: var(--font-body); font-weight: 500; font-size: var(--text-xs); padding: 4px 10px; border-radius: var(--radius-pill); background: var(--surface-warm); color: var(--accent); white-space: nowrap; }
 .bjj-form .tag.ok { background: var(--tint-success); color: var(--success); }
 .bjj-form .tag.pending { background: var(--tint-warn); color: color-mix(in oklab, var(--warn), var(--fg) 45%); }
-@media (prefers-color-scheme: dark) {
-  .bjj-form .form-eyebrow { color: var(--accent); }
-  .bjj-form .tag.pending { color: var(--warn); }
-}
+html.dark .bjj-form .form-eyebrow { color: var(--accent); }
+html.dark .bjj-form .tag.pending { color: var(--warn); }
 
 .bjj-form .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
 @media (max-width: 600px) { .bjj-form .grid-2 { grid-template-columns: 1fr; } }
@@ -540,9 +536,7 @@
 .bjj-form .banner.ok svg { color: var(--success); }
 .bjj-form .banner.error { background: var(--tint-danger); border-color: color-mix(in oklab, var(--danger), var(--border) 65%); color: var(--fg-2); }
 .bjj-form .banner.error svg { color: var(--danger); }
-@media (prefers-color-scheme: dark) {
-  .bjj-form .banner.warn svg { color: var(--warn); }
-}
+html.dark .bjj-form .banner.warn svg { color: var(--warn); }
 
 .bjj-form .roll-list { display: flex; flex-direction: column; gap: var(--space-4); }
 .bjj-form .roll { border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-4); background: var(--surface); transition: border-color var(--motion-base) var(--ease-standard), background var(--motion-base) var(--ease-standard); }
@@ -667,9 +661,7 @@
 @media (min-width: 601px) {
   .bjj-form .action-inner { flex-wrap: nowrap; }
 }
-@media (prefers-color-scheme: dark) {
-  .bjj-form .action-status[data-tone="warn"] { color: var(--warn); }
-}
+html.dark .bjj-form .action-status[data-tone="warn"] { color: var(--warn); }
 @media (max-width: 600px) {
   .bjj-form .action-inner { padding: var(--space-3) 0; gap: var(--space-2); }
   .bjj-form .action-status { font-size: var(--text-xs); order: 2; width: 100%; flex: 1 1 100%; }

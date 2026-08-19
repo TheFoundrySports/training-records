@@ -21,6 +21,7 @@ import { MemoryRouter } from 'react-router'
 import { render, screen, type RenderResult } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { BJJDashboardPage } from '../../pages/BJJDashboardPage'
+import { ThemeProvider } from '@/theme/ThemeContext'
 
 // Stub the data hook so the page renders with controlled data without
 // requiring a real Supabase RPC.
@@ -64,7 +65,7 @@ function renderWithProviders(): RenderResult {
       React.createElement(
         QueryClientProvider,
         { client: queryClient },
-        React.createElement(BJJDashboardPage),
+        React.createElement(ThemeProvider, null, React.createElement(BJJDashboardPage)),
       ),
     ),
   )

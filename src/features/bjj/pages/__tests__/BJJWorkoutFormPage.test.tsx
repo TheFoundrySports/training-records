@@ -17,6 +17,7 @@ import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter, Routes, Route } from 'react-router'
 import { BJJWorkoutFormPage } from '../BJJWorkoutFormPage'
+import { ThemeProvider } from '@/theme/ThemeContext'
 import {
   writeBJJWorkoutDraft,
 } from '../../hooks/useBJJWorkoutDraft'
@@ -124,13 +125,15 @@ function renderWithRouter(initialRoute = '/bjj/workouts/new') {
 
   return render(
     <QueryClientProvider client={queryClient}>
-      <MemoryRouter initialEntries={[initialRoute]}>
-        <Routes>
-          <Route path="/bjj/workouts/new" element={<BJJWorkoutFormPage />} />
-          <Route path="/bjj/workouts/:id/edit" element={<BJJWorkoutFormPage />} />
-          <Route path="/workouts/:id" element={<div>Workout detail page</div>} />
-        </Routes>
-      </MemoryRouter>
+      <ThemeProvider>
+        <MemoryRouter initialEntries={[initialRoute]}>
+          <Routes>
+            <Route path="/bjj/workouts/new" element={<BJJWorkoutFormPage />} />
+            <Route path="/bjj/workouts/:id/edit" element={<BJJWorkoutFormPage />} />
+            <Route path="/workouts/:id" element={<div>Workout detail page</div>} />
+          </Routes>
+        </MemoryRouter>
+      </ThemeProvider>
     </QueryClientProvider>
   )
 }

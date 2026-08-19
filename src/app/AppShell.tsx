@@ -6,6 +6,7 @@ import { Separator } from '@/components/ui/separator'
 import { Dialog as DialogPrimitive } from '@base-ui/react/dialog'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/features/auth/AuthContext'
+import { ThemeToggle } from '@/theme/ThemeToggle'
 import { usePageFocus } from '@/hooks/usePageFocus'
 
 const NAV_ITEMS = [
@@ -73,6 +74,7 @@ export function AppShell() {
             </nav>
           </div>
           <div className="flex items-center gap-3">
+            <ThemeToggle />
             {user && (
               <span className="hidden sm:block text-sm text-muted-foreground">{user.email}</span>
             )}
