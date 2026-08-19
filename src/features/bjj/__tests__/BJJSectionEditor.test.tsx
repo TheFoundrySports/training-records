@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { bjjWorkoutSchema, type BJJWorkoutFormValues } from '../bjj.schema'
+import { createBjjWorkoutFormExampleValues } from '../bjjWorkoutFormExamples'
 import { BJJSectionEditor } from '../components/BJJSectionEditor'
 import { Form } from '@/components/ui/form'
 import { useBJJSectionAI } from '../hooks/useBJJSectionAI'
@@ -254,6 +255,49 @@ describe('BJJSectionEditor — REQ-306, REQ-315', () => {
       const btn = screen.getByRole('button', { name: /enhance with ai/i })
       fireEvent.click(btn)
       expect(enhanceMock).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('roll review confirm', () => {
+    it('confirms prefilled rolls without an AI preview session', async () => {
+      const user = userEvent.setup()
+      const example = createBjjWorkoutFormExampleValues()
+
+      function WrapperWithRolls() {
+        const form = useForm<BJJWorkoutFormValues>({
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          resolver: zodResolver(bjjWorkoutSchema) as any,
+          defaultValues: example,
+        })
+
+        return (
+          <QueryClientProvider client={createQueryClient()}>
+            <Form {...form}>
+              <form>
+                <BJJSectionEditor
+                  index={0}
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  control={form.control as any}
+                  onRemove={vi.fn()}
+                  removeDisabled={true}
+                  isPending={false}
+                  hideRollReview={false}
+                />
+              </form>
+            </Form>
+          </QueryClientProvider>
+        )
+      }
+
+      render(<WrapperWithRolls />)
+
+      expect(screen.getByRole('button', { name: /confirm all \(0\/2\)/i })).toBeInTheDocument()
+
+      await user.click(screen.getByRole('button', { name: /confirm all \(0\/2\)/i }))
+
+      expect(await screen.findByText(/ready to save with this workout/i)).toBeInTheDocument()
+      expect(screen.getByText('2 confirmed')).toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: /confirm all/i })).not.toBeInTheDocument()
     })
   })
 })

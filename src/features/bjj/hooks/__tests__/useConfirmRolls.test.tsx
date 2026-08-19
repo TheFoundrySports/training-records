@@ -21,8 +21,13 @@ import type { ConfirmRollsInput } from '../../bjj.types'
 vi.mock('@/lib/supabase', () => ({
   supabase: {
     from: vi.fn(),
+    auth: {
+      getUser: vi.fn(),
+    },
   },
 }))
+
+const MOCK_USER_ID = '550e8400-e29b-41d4-a716-446655440000'
 
 // Mock planRollConfirmation
 vi.mock('../../ai/planRollConfirmation', () => ({
@@ -71,6 +76,10 @@ describe('useConfirmRolls (PR 2a)', () => {
       },
     })
     vi.clearAllMocks()
+    vi.mocked(supabase.auth.getUser).mockResolvedValue({
+      data: { user: { id: MOCK_USER_ID } as never },
+      error: null,
+    })
   })
 
   it('returns no-op when input sections array is empty', async () => {
@@ -265,12 +274,54 @@ describe('useConfirmRolls (PR 2a)', () => {
     expect(mockInsert).toHaveBeenCalledWith(
       expect.arrayContaining([
         expect.objectContaining({
+          user_id: MOCK_USER_ID,
           technique_ids: ['tttttttt-3000-0000-0000-000000000001'],
           status: 'confirmed',
           source: 'ai_confirmed',
         }),
       ])
     )
+  })
+
+  it('fails when user is not authenticated', async () => {
+    vi.mocked(supabase.auth.getUser).mockResolvedValue({
+      data: { user: null },
+      error: null,
+    })
+
+    const input: ConfirmRollsInput = {
+      workoutId: 'aaaaaaaa-1000-0000-0000-000000000001',
+      sections: [
+        {
+          sectionNumber: 1,
+          rolls: [
+            {
+              roll_index: 1,
+              role: 'attacking',
+              outcome: 'submission',
+              position_from: 'closed_guard',
+              position_to: 'mount',
+              technique_names: [],
+              confidence: 0.85,
+              raw_excerpt: 'Roll 1',
+              validation_error: null,
+              source: 'ai_confirmed',
+            },
+          ],
+        },
+      ],
+    }
+
+    const { result } = renderHook(() => useConfirmRolls(), { wrapper })
+
+    result.current.mutate(input)
+
+    await waitFor(() => {
+      expect(result.current.isError).toBe(true)
+    })
+
+    expect(result.current.error?.message).toMatch(/signed in/i)
+    expect(supabase.from).not.toHaveBeenCalled()
   })
 
   it('invalidates bjj dashboard queries on success', async () => {

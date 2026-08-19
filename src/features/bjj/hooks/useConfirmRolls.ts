@@ -24,6 +24,17 @@ export function useConfirmRolls() {
 
   return useMutation({
     mutationFn: async (input: ConfirmRollsInput): Promise<void> => {
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser()
+
+      if (authError || !user) {
+        throw new Error('You must be signed in to save roll data.')
+      }
+
+      const userId = user.id
+
       // Early return if no sections
       if (input.sections.length === 0) {
         return
@@ -115,7 +126,7 @@ export function useConfirmRolls() {
             .filter((id): id is string => id != null)
 
           return {
-            user_id: undefined, // Will be set by RLS/trigger
+            user_id: userId,
             workout_id: input.workoutId,
             section_id: sectionId,
             roll_index: insert.roll_index,

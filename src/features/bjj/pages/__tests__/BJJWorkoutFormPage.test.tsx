@@ -12,11 +12,26 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter, Routes, Route } from 'react-router'
 import { BJJWorkoutFormPage } from '../BJJWorkoutFormPage'
+import {
+  writeBJJWorkoutDraft,
+} from '../../hooks/useBJJWorkoutDraft'
+import type { BJJWorkoutFormValues } from '../../bjj.schema'
+
+const MOCK_USER_ID = 'user-test-123'
+
+vi.mock('@/features/auth/AuthContext', () => ({
+  useAuth: () => ({
+    user: { id: MOCK_USER_ID },
+    session: { user: { id: MOCK_USER_ID } },
+    role: 'athlete',
+    isLoading: false,
+  }),
+}))
 
 // Mock hooks
 vi.mock('../../hooks/useBJJWorkoutMutations', () => ({
@@ -123,6 +138,7 @@ function renderWithRouter(initialRoute = '/bjj/workouts/new') {
 describe('BJJWorkoutFormPage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    window.localStorage.clear()
   })
 
   describe('Task 5.7: Basic rendering', () => {
@@ -130,7 +146,7 @@ describe('BJJWorkoutFormPage', () => {
       renderWithRouter('/bjj/workouts/new')
 
       // Page title
-      expect(screen.getByRole('heading', { name: /log bjj workout/i })).toBeInTheDocument()
+      expect(screen.getByRole('heading', { name: /log your bjj workout/i })).toBeInTheDocument()
 
       // Form fields (use getAllByLabelText for fields that appear multiple times)
       expect(screen.getByLabelText(/title/i)).toBeInTheDocument()
@@ -144,14 +160,15 @@ describe('BJJWorkoutFormPage', () => {
       const notesFields = screen.getAllByLabelText(/notes/i)
       expect(notesFields.length).toBeGreaterThanOrEqual(2)
       
-      expect(screen.getByLabelText(/rpe \(1–10, optional\)/i)).toBeInTheDocument()
+      expect(screen.getByLabelText(/intensity \(1–10, optional\)/i)).toBeInTheDocument()
+      expect(screen.getByLabelText(/session notes \(optional\)/i)).toBeInTheDocument()
 
       // Section editor
-      expect(screen.getByText(/sections/i)).toBeInTheDocument()
-      expect(screen.getByText(/section 1/i)).toBeInTheDocument()
+      expect(screen.getByText(/training sections/i)).toBeInTheDocument()
+      expect(screen.getByRole('heading', { level: 3, name: /section 1/i })).toBeInTheDocument()
 
       // Submit button
-      expect(screen.getByRole('button', { name: /save/i })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /save workout/i })).toBeInTheDocument()
       expect(screen.getByRole('button', { name: /cancel/i })).toBeInTheDocument()
     })
 
@@ -159,7 +176,7 @@ describe('BJJWorkoutFormPage', () => {
       renderWithRouter('/bjj/workouts/new')
 
       // Section fields
-      expect(screen.getByLabelText(/^goal$/i)).toBeInTheDocument()
+      expect(screen.getByLabelText(/^goal\b/i)).toBeInTheDocument()
       expect(screen.getByLabelText(/enhanced notes \(ai, optional\)/i)).toBeInTheDocument()
       expect(screen.getByText(/techniques \(optional\)/i)).toBeInTheDocument()
 
@@ -187,8 +204,12 @@ describe('BJJWorkoutFormPage', () => {
       const workoutDuration = durationInputs.find((input) => input.name === 'durationMinutes')
       expect(workoutDuration?.value).toBe('90')
 
-      const rpeInput = screen.getByLabelText(/rpe \(1–10, optional\)/i) as HTMLInputElement
-      expect(rpeInput.value).toBe('7')
+      const intensitySlider = screen.getByLabelText(/intensity \(1–10, optional\)/i) as HTMLInputElement
+      expect(intensitySlider.value).toBe('7')
+      expect(screen.getByLabelText(/intensity value/i)).toHaveValue(7)
+
+      const sessionNotes = screen.getByLabelText(/session notes \(optional\)/i) as HTMLTextAreaElement
+      expect(sessionNotes.value).toBe('Test notes')
     })
 
     it('prefills section fields including enhancedNotes', async () => {
@@ -199,7 +220,7 @@ describe('BJJWorkoutFormPage', () => {
       })
 
       // Check section fields are prefilled
-      const goalInput = screen.getByLabelText(/^goal$/i) as HTMLInputElement
+      const goalInput = screen.getByLabelText(/^goal\b/i) as HTMLInputElement
       expect(goalInput.value).toBe('Guard passing')
 
       // Task 5.8 specific: verify enhancedNotes prefill
@@ -230,17 +251,150 @@ describe('BJJWorkoutFormPage', () => {
       expect(scopedCssBaseline).toBeInTheDocument()
     })
 
-    it('heading uses inline Material typography tokens', () => {
+    it('heading uses Material typography classes', () => {
       renderWithRouter('/bjj/workouts/new')
 
-      const heading = screen.getByRole('heading', { name: /log bjj workout/i })
+      const heading = screen.getByRole('heading', { name: /log your bjj workout/i })
+      expect(heading).toHaveClass('form-page-title')
+    })
 
-      // Verify inline styles reference Material CSS variables
-      expect(heading).toHaveStyle({
-        fontFamily: 'var(--font-display)',
-        fontSize: 'var(--text-2xl)',
-        fontWeight: '500',
+    it('renders hybrid form shell (stepper, summary, action bar)', () => {
+      const { container } = renderWithRouter('/bjj/workouts/new')
+
+      expect(container.querySelector('.stepper')).toBeInTheDocument()
+      expect(container.querySelector('.side-col')).toBeInTheDocument()
+      expect(container.querySelector('.action-bar')).toBeInTheDocument()
+      expect(container.querySelector('.bjj-form')).toBeInTheDocument()
+    })
+
+    it('renders dedicated #cardRolls section for aggregated roll review', () => {
+      const { container } = renderWithRouter('/bjj/workouts/new')
+
+      const rollCard = container.querySelector('#cardRolls')
+      expect(rollCard).toBeInTheDocument()
+      expect(rollCard?.querySelector('#hRolls')).toHaveTextContent(/roll review/i)
+    })
+
+    it('shows prefilled rolls in #cardRolls with summary progress', () => {
+      renderWithRouter('/bjj/workouts/new')
+
+      expect(screen.getAllByText(/0 of 2 confirmed/i).length).toBeGreaterThan(0)
+      expect(screen.getByRole('button', { name: /confirm all \(0\/2\)/i })).toBeInTheDocument()
+      expect(screen.getAllByRole('button', { name: /^confirm$/i }).length).toBe(2)
+    })
+
+    it('renders session notes in #cardReview with a character counter', async () => {
+      const user = userEvent.setup()
+      const { container } = renderWithRouter('/bjj/workouts/new')
+
+      const reviewCard = container.querySelector('#cardReview')
+      expect(reviewCard).toBeInTheDocument()
+
+      const notesField = screen.getByLabelText(/session notes \(optional\)/i) as HTMLTextAreaElement
+      expect(reviewCard?.contains(notesField)).toBe(true)
+      expect(
+        screen.getByText(`${notesField.value.length} / 500`),
+      ).toBeInTheDocument()
+
+      await user.clear(notesField)
+      await user.type(notesField, 'Great session')
+      expect(screen.getByText('13 / 500')).toBeInTheDocument()
+    })
+
+    it('scrolls to #cardRolls when stepper step 3 is clicked', async () => {
+      const user = userEvent.setup()
+      const scrollTo = vi.fn()
+      const originalScrollTo = window.scrollTo
+      window.scrollTo = scrollTo
+
+      const getBoundingClientRect = vi.fn(() => ({
+        top: 240,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        width: 0,
+        height: 0,
+        x: 0,
+        y: 0,
+        toJSON: () => ({}),
+      }))
+
+      const cardRolls = document.createElement('section')
+      cardRolls.id = 'cardRolls'
+      cardRolls.getBoundingClientRect = getBoundingClientRect
+      document.body.appendChild(cardRolls)
+
+      renderWithRouter('/bjj/workouts/new')
+
+      await user.click(screen.getByRole('button', { name: /step 3 of 4: rolls/i }))
+
+      expect(getBoundingClientRect).toHaveBeenCalled()
+      expect(scrollTo).toHaveBeenCalledWith({ top: 164, behavior: 'smooth' })
+
+      window.scrollTo = originalScrollTo
+      cardRolls.remove()
+    })
+
+    it('disables save when rolls exist but are not all confirmed', () => {
+      renderWithRouter('/bjj/workouts/new')
+      expect(screen.getByRole('button', { name: /save workout/i })).toBeDisabled()
+    })
+
+    it('keeps intensity slider and number input in sync', () => {
+      renderWithRouter('/bjj/workouts/new')
+
+      const slider = screen.getByLabelText(/intensity \(1–10, optional\)/i)
+      const numberInput = screen.getByLabelText(/intensity value/i)
+
+      fireEvent.change(numberInput, { target: { value: '8' } })
+
+      expect(slider).toHaveValue('8')
+      expect(numberInput).toHaveValue(8)
+    })
+
+    it('shows save draft control on create form', () => {
+      renderWithRouter('/bjj/workouts/new')
+      expect(screen.getByRole('button', { name: /save draft/i })).toBeInTheDocument()
+    })
+
+    it('offers to restore a saved draft on new workout', async () => {
+      const draftValues: BJJWorkoutFormValues = {
+        title: 'Stored draft title',
+        performedAt: '2026-08-16T09:30',
+        durationMinutes: 45,
+        notes: 'Draft notes',
+        rpe: 5,
+        sections: [
+          {
+            goal: 'Stored goal',
+            rawDescription: '',
+            enhancedNotes: '',
+            durationMinutes: 20,
+            techniqueIds: [],
+            rolls: [],
+          },
+        ],
+      }
+
+      writeBJJWorkoutDraft(MOCK_USER_ID, draftValues)
+
+      renderWithRouter('/bjj/workouts/new')
+
+      expect(screen.getByText(/saved draft found/i)).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /restore draft/i })).toBeInTheDocument()
+
+      await userEvent.setup().click(screen.getByRole('button', { name: /restore draft/i }))
+
+      await waitFor(() => {
+        expect(screen.getByLabelText(/title/i)).toHaveValue('Stored draft title')
       })
+    })
+
+    it('renders preferences card in summary sidebar', () => {
+      renderWithRouter('/bjj/workouts/new')
+
+      expect(screen.getByRole('heading', { name: /^preferences$/i })).toBeInTheDocument()
+      expect(screen.getByRole('switch', { name: /show roll review tips/i })).toBeInTheDocument()
     })
   })
 
@@ -271,20 +425,17 @@ describe('BJJWorkoutFormPage', () => {
   })
 
   describe('Form submission', () => {
-    it('submits create form with valid data', async () => {
+    it('submits create form with valid data after rolls are confirmed', async () => {
       const user = userEvent.setup()
       renderWithRouter('/bjj/workouts/new')
 
-      // Fill in form
-      await user.type(screen.getByLabelText(/title/i), 'Morning BJJ')
-      await user.type(screen.getByLabelText(/^goal$/i), 'Submissions from mount')
+      await user.click(screen.getByRole('button', { name: /confirm all \(0\/2\)/i }))
+      expect(screen.getByRole('button', { name: /save workout/i })).not.toBeDisabled()
 
-      // Submit
-      await user.click(screen.getByRole('button', { name: /save/i }))
+      await user.click(screen.getByRole('button', { name: /save workout/i }))
 
-      // Should navigate after successful save
       await waitFor(() => {
-        expect(screen.queryByText(/log bjj workout/i)).not.toBeInTheDocument()
+        expect(screen.queryByText(/log your bjj workout/i)).not.toBeInTheDocument()
       })
     })
 
@@ -304,7 +455,7 @@ describe('BJJWorkoutFormPage', () => {
       const user = userEvent.setup()
       renderWithRouter('/bjj/workouts/new')
 
-      expect(screen.getByText(/section 1/i)).toBeInTheDocument()
+      expect(screen.getByRole('heading', { level: 3, name: /section 1/i })).toBeInTheDocument()
       expect(screen.queryByText(/section 2/i)).not.toBeInTheDocument()
 
       // Add second section
@@ -344,16 +495,16 @@ describe('BJJWorkoutFormPage', () => {
       renderWithRouter('/bjj/workouts/new')
 
       // Main heading
-      expect(screen.getByRole('heading', { name: /log bjj workout/i })).toBeInTheDocument()
+      expect(screen.getByRole('heading', { name: /log your bjj workout/i })).toBeInTheDocument()
 
       // Buttons have proper labels
-      expect(screen.getByRole('button', { name: /save/i })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /save workout/i })).toBeInTheDocument()
       expect(screen.getByRole('button', { name: /cancel/i })).toBeInTheDocument()
       expect(screen.getByRole('button', { name: /remove section 1/i })).toBeInTheDocument()
 
       // Input fields have labels
       expect(screen.getByLabelText(/title/i)).toBeInTheDocument()
-      expect(screen.getByLabelText(/^goal$/i)).toBeInTheDocument()
+      expect(screen.getByLabelText(/^goal\b/i)).toBeInTheDocument()
     })
 
     it.skip('focuses error summary when mutation fails (manual verification)', async () => {

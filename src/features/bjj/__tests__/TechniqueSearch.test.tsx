@@ -146,7 +146,7 @@ describe('TechniqueSearch — REQ-316, REQ-317', () => {
       await user.type(input, 'xyzunknown')
 
       await waitFor(() => {
-        expect(screen.getByText(/no techniques found/i)).toBeInTheDocument()
+        expect(screen.getByText(/no techniques match/i)).toBeInTheDocument()
       })
     })
   })
@@ -234,6 +234,81 @@ describe('TechniqueSearch — REQ-316, REQ-317', () => {
       await user.click(removeButton)
 
       expect(onChange).toHaveBeenLastCalledWith([])
+    })
+  })
+
+  describe('category chip filters — REQ-WF7', () => {
+    beforeEach(() => {
+      mockUseBJJTechniques.mockReturnValue({
+        data: sampleTechniques,
+        isLoading: false,
+        error: null,
+      })
+    })
+
+    it('renders category chips from the catalog', () => {
+      renderComponent()
+
+      expect(screen.getByRole('button', { name: 'Guard' })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Submission' })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Escape' })).toBeInTheDocument()
+    })
+
+    it('filters pick list when a category chip is selected', async () => {
+      const user = userEvent.setup()
+      renderComponent()
+
+      await user.click(screen.getByLabelText(/search techniques/i))
+      await user.click(screen.getByRole('button', { name: 'Guard' }))
+
+      await waitFor(() => {
+        expect(screen.getByText('Closed Guard')).toBeInTheDocument()
+        expect(screen.queryByText('Armbar')).not.toBeInTheDocument()
+      })
+    })
+
+    it('clears the category filter when the active chip is clicked again', async () => {
+      const user = userEvent.setup()
+      renderComponent()
+
+      await user.click(screen.getByLabelText(/search techniques/i))
+      await user.click(screen.getByRole('button', { name: 'Guard' }))
+      await user.click(screen.getByRole('button', { name: 'Guard' }))
+
+      await waitFor(() => {
+        expect(screen.getByText('Closed Guard')).toBeInTheDocument()
+        expect(screen.getByText('Armbar')).toBeInTheDocument()
+      })
+    })
+
+    it('shows a category-specific empty state when filter matches nothing', async () => {
+      mockUseBJJTechniques.mockImplementation((opts?: { search?: string }) => {
+        const data = opts === undefined ? sampleTechniques : [sampleTechniques[0]]
+        return { data, isLoading: false, error: null }
+      })
+
+      const user = userEvent.setup()
+      renderComponent()
+
+      await user.click(screen.getByLabelText(/search techniques/i))
+      await user.click(screen.getByRole('button', { name: 'Submission' }))
+
+      await waitFor(() => {
+        expect(screen.getByText(/no submission techniques available/i)).toBeInTheDocument()
+      })
+    })
+
+    it('announces selection changes for screen readers', async () => {
+      const onChange = vi.fn()
+      const user = userEvent.setup()
+      renderComponent([], onChange)
+
+      await user.click(screen.getByLabelText(/search techniques/i))
+      await user.pointer({ target: screen.getByText('Armbar'), keys: '[MouseLeft>]' })
+
+      await waitFor(() => {
+        expect(screen.getByText(/added armbar/i)).toBeInTheDocument()
+      })
     })
   })
 

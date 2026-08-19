@@ -73,8 +73,24 @@ export const BJJRollDraftSchema = BJJRollProposalSchema.extend({
   raw_excerpt: z.string().min(1).nullable(),
   validation_error: BJJRollValidationErrorSchema.nullable(),
   source: BJJRollSourceSchema,
+  /** Client-only: athlete confirmed this draft in roll review (stripped before API). */
+  reviewConfirmed: z.boolean().optional(),
 })
 export type BJJRollDraft = z.infer<typeof BJJRollDraftSchema>
+
+/** Mark one roll as reviewed and ready to persist on save. */
+export function confirmRollDraft(roll: BJJRollDraft): BJJRollDraft {
+  return {
+    ...roll,
+    reviewConfirmed: true,
+    source: roll.source === 'ai_edited' ? 'ai_edited' : 'ai_confirmed',
+  }
+}
+
+/** Mark all valid rolls as reviewed and ready to persist on save. */
+export function confirmRollDrafts(rolls: BJJRollDraft[]): BJJRollDraft[] {
+  return rolls.map((roll) => confirmRollDraft(roll))
+}
 
 /** Map EF proposal rows to form drafts (nullable validation_error + source). */
 export function proposalToDraft(
@@ -152,6 +168,11 @@ export const bjjSectionSchema = z.object({
 export type BJJSectionFormValues = z.infer<typeof bjjSectionSchema>
 
 // ── BJJ Workout form ─────────────────────────────────────
+/** Open Design recommended length — UI counter and near-limit styling. */
+export const BJJ_SESSION_NOTES_SOFT_MAX = 500
+/** Align with shared workout schema for edit-mode compatibility. */
+export const BJJ_SESSION_NOTES_MAX = 2000
+
 export const bjjWorkoutSchema = z
   .object({
     title: z.string().min(1, 'Title is required').max(200),
@@ -162,10 +183,22 @@ export const bjjWorkoutSchema = z
         if (/[Z+-]\d*(\d{2}:\d{2})?$/.test(val)) return val
         return val.length === 16 ? `${val}:00.000Z` : `${val}.000Z`
       })
-      .pipe(z.string().datetime({ message: 'Invalid date' })),
-    durationMinutes: z.number().int().min(1).max(300),
-    notes: z.string().max(2000).optional(),
-    rpe: z.number().int().min(1).max(10).optional(),
+      .pipe(z.string().datetime({ message: 'Enter a valid date and time' })),
+    durationMinutes: z
+      .number({ error: 'Enter a duration between 1 and 300 minutes' })
+      .int()
+      .min(1, 'Enter a duration between 1 and 300 minutes')
+      .max(300, 'Duration cannot exceed 300 minutes'),
+    notes: z
+      .string()
+      .max(BJJ_SESSION_NOTES_MAX, `Session notes cannot exceed ${BJJ_SESSION_NOTES_MAX} characters`)
+      .optional(),
+    rpe: z
+      .number({ error: 'RPE must be a whole number between 1 and 10' })
+      .int()
+      .min(1, 'RPE must be between 1 and 10')
+      .max(10, 'RPE must be between 1 and 10')
+      .optional(),
     sections: z.array(bjjSectionSchema).min(1, 'At least one section is required'),
   })
   .superRefine((data, ctx) => {
@@ -177,7 +210,7 @@ export const bjjWorkoutSchema = z
             roll.validation_error === 'unknown_position_from' ? 'position_from' : 'position_to'
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
-            message: `Roll has unmappable position - correct or remove before confirming`,
+            message: 'Choose a valid position or remove this roll.',
             path: ['sections', sectionIndex, 'rolls', rollIndex, fieldName],
           })
         }
