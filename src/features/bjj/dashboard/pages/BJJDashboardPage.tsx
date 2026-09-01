@@ -1,5 +1,9 @@
 /**
  * `BJJDashboardPage` — the BJJ Evolution Dashboard route component.
+ *
+ * The RollFlow ("Flujo de rollos") widget is admin-only; athletes see
+ * the other 4 widgets but not the roll-flow transitions. Gating happens
+ * at render time via `useAuth().role`.
  */
 import { useCallback, useMemo, useState } from 'react'
 import { ThemeProvider } from '@mui/material/styles'
@@ -8,6 +12,7 @@ import '../theme/load-dashboard-styles'
 import { createDashboardTheme } from '../theme/mui-dashboard-theme'
 import { useDashboardColorScheme } from '../theme/useDashboardColorScheme'
 import { useBJJDashboard } from '../hooks/useBJJDashboard'
+import { useAuth } from '@/features/auth/AuthContext'
 import { bjjDashboardKeys } from '../hooks/bjjDashboardKeys'
 import { DashboardPageHeader } from '../components/DashboardPageHeader'
 import { DashboardTimeFilter } from '../components/DashboardTimeFilter'
@@ -41,6 +46,8 @@ export function BJJDashboardPage() {
   const queryClient: QueryClient = useQueryClient()
 
   const { data, isLoading, isError, error, refetch } = useBJJDashboard(window)
+  const { role } = useAuth()
+  const isAdmin = role === 'admin'
 
   const handleWindowChange = useCallback((next: DashboardWindow) => {
     setWindow(next)
@@ -126,20 +133,22 @@ export function BJJDashboardPage() {
                   >
                     {data ? <OutcomesWidget data={data.outcomes} /> : null}
                   </DashboardWidgetShell>
-                  <DashboardWidgetShell
-                    span={6}
-                    heading={WIDGET_COPY.rollFlow.heading}
-                    aside={
-                      <span className="tag">
-                        {composeRollFlowTag(window, data?.total_rolls ?? 0)}
-                      </span>
-                    }
-                    data={data?.roll_flow ?? null}
-                  >
-                    {data ? (
-                      <RollFlowWidget data={data.roll_flow} window={window} />
-                    ) : null}
-                  </DashboardWidgetShell>
+                  {isAdmin ? (
+                    <DashboardWidgetShell
+                      span={6}
+                      heading={WIDGET_COPY.rollFlow.heading}
+                      aside={
+                        <span className="tag">
+                          {composeRollFlowTag(window, data?.total_rolls ?? 0)}
+                        </span>
+                      }
+                      data={data?.roll_flow ?? null}
+                    >
+                      {data ? (
+                        <RollFlowWidget data={data.roll_flow} window={window} />
+                      ) : null}
+                    </DashboardWidgetShell>
+                  ) : null}
                 </>
               )}
             </div>
