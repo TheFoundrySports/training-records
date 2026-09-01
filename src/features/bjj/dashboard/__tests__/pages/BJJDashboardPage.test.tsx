@@ -30,6 +30,14 @@ vi.mock('../../hooks/useBJJDashboard', () => ({
   useBJJDashboard: (window: string) => mockUseBJJDashboard(window),
 }))
 
+// Stub the auth context. Default to admin so the existing tests — which
+// were written assuming all widgets render — keep passing. Tests that
+// exercise the admin gating override this mock per-test.
+const mockUseAuth = vi.fn()
+vi.mock('@/features/auth/AuthContext', () => ({
+  useAuth: () => mockUseAuth(),
+}))
+
 function buildPayload(overrides: Record<string, unknown> = {}) {
   return {
     window: '30d' as const,
@@ -78,6 +86,12 @@ beforeEach(() => {
     isError: false,
     error: null,
     refetch: vi.fn(),
+  })
+  mockUseAuth.mockReturnValue({
+    session: { user: { id: 'admin-1', user_metadata: { role: 'admin' } } },
+    user: { id: 'admin-1', user_metadata: { role: 'admin' } },
+    role: 'admin',
+    isLoading: false,
   })
 })
 
@@ -281,5 +295,93 @@ describe('BJJDashboardPage — PR 6b 3-widget integration (T6b.7)', () => {
     expect(span2).not.toBeNull()
     expect(span4).not.toBeNull()
     expect(span6).not.toBeNull()
+  })
+})
+
+/**
+ * Admin-gated visibility for the RollFlow ("Flujo de rollos") widget.
+ * Athletes must not see roll-flow data; only admins do.
+ */
+describe('BJJDashboardPage — RollFlow widget admin gating', () => {
+  it('hides the RollFlow widget for non-admin users (athlete)', () => {
+    mockUseAuth.mockReturnValue({
+      session: { user: { id: 'athlete-1', user_metadata: { role: 'athlete' } } },
+      user: { id: 'athlete-1', user_metadata: { role: 'athlete' } },
+      role: 'athlete',
+      isLoading: false,
+    })
+    mockUseBJJDashboard.mockReturnValue({
+      data: buildPayload({
+        roll_flow: {
+          edges: [{ from: 'closed_guard', to: 'mount', count: 10, pct: 100 }],
+          total_transitions: 10,
+          total_rolls: 78,
+          top_n: 7,
+        },
+      }),
+      isLoading: false,
+      isError: false,
+      error: null,
+      refetch: vi.fn(),
+    })
+    const { container } = renderWithProviders()
+    // Athletes see 4 widgets (the RollFlow shell is gated out).
+    expect(container.querySelectorAll('.widget').length).toBe(4)
+    // No RollFlow markup leaks through.
+    expect(container.querySelector('.flow-lane')).toBeNull()
+    expect(container.querySelector('.flow-summary')).toBeNull()
+    expect(screen.queryByText('Flujo de rollos')).toBeNull()
+  })
+
+  it('hides the RollFlow widget when the user has no role yet', () => {
+    mockUseAuth.mockReturnValue({
+      session: null,
+      user: null,
+      role: null,
+      isLoading: false,
+    })
+    mockUseBJJDashboard.mockReturnValue({
+      data: buildPayload({
+        roll_flow: {
+          edges: [{ from: 'closed_guard', to: 'mount', count: 10, pct: 100 }],
+          total_transitions: 10,
+          total_rolls: 78,
+          top_n: 7,
+        },
+      }),
+      isLoading: false,
+      isError: false,
+      error: null,
+      refetch: vi.fn(),
+    })
+    const { container } = renderWithProviders()
+    expect(container.querySelectorAll('.widget').length).toBe(4)
+    expect(container.querySelector('.flow-lane')).toBeNull()
+  })
+
+  it('shows the RollFlow widget for admin users', () => {
+    // beforeEach already mocks role: 'admin'; supply roll_flow data.
+    mockUseBJJDashboard.mockReturnValue({
+      data: buildPayload({
+        roll_flow: {
+          edges: [
+            { from: 'closed_guard', to: 'mount', count: 10, pct: 100 },
+            { from: 'half_guard', to: 'side_control', count: 7, pct: 70 },
+          ],
+          total_transitions: 17,
+          total_rolls: 78,
+          top_n: 7,
+        },
+      }),
+      isLoading: false,
+      isError: false,
+      error: null,
+      refetch: vi.fn(),
+    })
+    const { container } = renderWithProviders()
+    // Admin sees 5 widgets, including RollFlow.
+    expect(container.querySelectorAll('.widget').length).toBe(5)
+    expect(container.querySelectorAll('.flow-lane').length).toBe(2)
+    expect(screen.getByText('Flujo de rollos')).toBeInTheDocument()
   })
 })
