@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import {
   Dialog,
@@ -13,63 +12,13 @@ import {
 import { Card, CardContent } from '@/components/ui/card'
 import { Loader2Icon } from 'lucide-react'
 import type { WorkoutHistoryEntry } from '../types/technique-tracking.types'
+import { useTechniqueWorkoutHistory } from '../hooks/useTechniqueWorkoutHistory'
 
 interface TechniquePracticeModalProps {
   techniqueId: string
   techniqueName: string
   open: boolean
   onClose: () => void
-}
-
-async function fetchTechniqueWorkoutHistory(
-  techniqueId: string,
-  userId: string,
-): Promise<WorkoutHistoryEntry[]> {
-  const { data, error } = await supabase
-    .from('bjj_section_techniques')
-    .select(
-      `
-      workouts!inner (
-        id,
-        performed_at,
-        user_id
-      ),
-      bjj_sections!inner (
-        section_number,
-        goal,
-        ai_description
-      )
-    `,
-    )
-    .eq('technique_id', techniqueId)
-    .eq('workouts.user_id', userId)
-    .order('workouts.performed_at', { ascending: false })
-    .limit(20)
-
-  if (error) {
-    throw {
-      error: {
-        code: error.code ?? 'UNKNOWN',
-        message: error.message,
-        details: error.details,
-      },
-    }
-  }
-
-  if (!data) return []
-
-  return (
-    data as unknown as Array<{
-      workouts: { id: string; performed_at: string; user_id: string }
-      bjj_sections: { section_number: number; goal: string; ai_description: string }
-    }>
-  ).map((row) => ({
-    workout_id: row.workouts.id,
-    performed_at: row.workouts.performed_at,
-    section_number: row.bjj_sections.section_number,
-    goal: row.bjj_sections.goal,
-    ai_description: row.bjj_sections.ai_description ?? '',
-  }))
 }
 
 function formatDate(isoString: string): string {
@@ -133,12 +82,7 @@ function TechniquePracticeModal({
     isLoading,
     isError,
     error,
-  } = useQuery({
-    queryKey: ['technique-workout-history', techniqueId, userId],
-    queryFn: () => fetchTechniqueWorkoutHistory(techniqueId, userId!),
-    staleTime: 30_000,
-    enabled: Boolean(techniqueId) && Boolean(userId),
-  })
+  } = useTechniqueWorkoutHistory(techniqueId, userId ?? '')
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
