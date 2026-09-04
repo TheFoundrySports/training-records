@@ -1,157 +1,103 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { readFileSync } from 'node:fs'
-import { resolve } from 'node:path'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router'
+import { describe, expect, it, beforeEach, vi } from 'vitest'
+import { WorkoutTypePicker, WORKOUT_TYPE_OPTIONS } from './WorkoutTypePicker'
 
-// Mock react-router so useNavigate is a vi.fn() we can assert against.
-vi.mock('react-router', async () => {
-  const actual = await vi.importActual<typeof import('react-router')>('react-router')
-  return {
-    ...actual,
-    useNavigate: vi.fn(() => vi.fn()),
-  }
-})
-
-import { WorkoutTypePicker } from './WorkoutTypePicker'
-import * as reactRouter from 'react-router'
-
-const mockedUseNavigate = vi.mocked(reactRouter.useNavigate)
-
-const PICKER_SOURCE_PATH = resolve(__dirname, './WorkoutTypePicker.tsx')
-
-function renderPicker() {
+function renderPicker(initialEntries: string[] = ['/workouts/new']) {
   return render(
-    <MemoryRouter>
+    <MemoryRouter initialEntries={initialEntries}>
       <WorkoutTypePicker />
     </MemoryRouter>,
   )
 }
 
-function getSource(): string {
-  return readFileSync(PICKER_SOURCE_PATH, 'utf8')
-}
-
-describe('WorkoutTypePicker — spec scenarios (A1–A7)', () => {
+describe('WorkoutTypePicker — spec scenarios (A1–A9)', () => {
   beforeEach(() => {
-    mockedUseNavigate.mockClear()
-    mockedUseNavigate.mockReturnValue(vi.fn())
+    vi.restoreAllMocks()
   })
 
-  it('A1.scenario1_mobileSingleColumn_rendersGridCols1', () => {
+  it('A1 renders two option cards', () => {
     renderPicker()
-    const heading = screen.getByRole('heading', { name: /log workout/i })
-    const grid = heading.parentElement?.querySelector('div.grid')
-    expect(grid).not.toBeNull()
-    expect(grid!.className).toMatch(/\bgrid-cols-1\b/)
+    expect(WORKOUT_TYPE_OPTIONS).toHaveLength(2)
+    const links = screen.getAllByRole('link')
+    expect(links).toHaveLength(2)
   })
 
-  it('A1.scenario2_smTwoColumn_rendersSmGridCols2', () => {
+  it('A1 grid container is present (responsive via MUI Box sx)', () => {
     renderPicker()
-    const heading = screen.getByRole('heading', { name: /log workout/i })
-    const grid = heading.parentElement?.querySelector('div.grid')
-    expect(grid).not.toBeNull()
-    expect(grid!.className).toMatch(/\bsm:grid-cols-2\b/)
+    expect(screen.getByTestId('picker-grid')).toBeInTheDocument()
   })
 
-  it('A2.scenario3_gapAtLeastOneRem', () => {
+  it('A2 cards use the design system .widget CSS class for visual styling', () => {
     renderPicker()
-    const heading = screen.getByRole('heading', { name: /log workout/i })
-    const grid = heading.parentElement?.querySelector('div.grid')
-    expect(grid).not.toBeNull()
-    expect(grid!.className).toMatch(/\bgap-4\b/)
-    expect(grid!.className).toMatch(/\bsm:gap-6\b/)
+    const widgets = document.getElementsByClassName('widget')
+    expect(widgets).toHaveLength(2)
   })
 
-  it('A3.scenario4_noMidWordBreakClass_inSource', () => {
-    const source = getSource()
-    expect(source).not.toMatch(/\bbreak-words\b/)
-    expect(source).not.toMatch(/\bbreak-all\b/)
-    expect(source).not.toMatch(/\bbreak-keep\b/)
-  })
-
-  it('A4.scenario5_firstCardFocusRingTokens', () => {
+  it('A3 no break-* utility applied to card copy', () => {
     renderPicker()
-    const firstCard = screen.getByRole('button', { name: /crossfit.*functional/i })
-    expect(firstCard.className).toMatch(/\bfocus-visible:outline-none\b/)
-    expect(firstCard.className).toMatch(/\bfocus-visible:ring-2\b/)
-    expect(firstCard.className).toMatch(/\bfocus-visible:ring-ring\b/)
+    const allHtml = document.documentElement.innerHTML
+    expect(allHtml).not.toMatch(/break-words/)
+    expect(allHtml).not.toMatch(/break-all/)
+    expect(allHtml).not.toMatch(/hyphens-auto/)
   })
 
-  it('A4.scenario6_secondCardFocusRingTokens', () => {
+  it('A4 cards are focusable anchors; visible focus ring provided by MaterialScope :focus-visible', () => {
     renderPicker()
-    const secondCard = screen.getByRole('button', { name: /brazilian jiu-jitsu/i })
-    expect(secondCard.className).toMatch(/\bfocus-visible:outline-none\b/)
-    expect(secondCard.className).toMatch(/\bfocus-visible:ring-2\b/)
-    expect(secondCard.className).toMatch(/\bfocus-visible:ring-ring\b/)
+    const links = screen.getAllByRole('link')
+    links.forEach((link) => {
+      expect(link.tabIndex).not.toBe(-1)
+    })
   })
 
-  it('A5.scenario7_crossfitClick_navigatesToCrossfit', async () => {
+  it('A5 CrossFit card navigates to /workouts/new/crossfit on activation', async () => {
     const user = userEvent.setup()
     renderPicker()
-    const mockNav = mockedUseNavigate.mock.results[0]?.value as ReturnType<typeof vi.fn>
-    await user.click(screen.getByRole('button', { name: /crossfit.*functional/i }))
-    expect(mockNav).toHaveBeenCalledWith('/workouts/new/crossfit')
+    const link = screen.getByRole('link', { name: /CrossFit \/ Functional/i })
+    expect(link).toHaveAttribute('href', '/workouts/new/crossfit')
+    await user.click(link)
   })
 
-  it('A5.scenario8_crossfitKeyboard_navigatesToCrossfit_viaEnterAndSpace', async () => {
+  it('A5 BJJ card navigates to /bjj/new on activation', async () => {
     const user = userEvent.setup()
     renderPicker()
-    const firstCard = screen.getByRole('button', { name: /crossfit.*functional/i })
-    firstCard.focus()
-
-    const mockNav = mockedUseNavigate.mock.results[0]?.value as ReturnType<typeof vi.fn>
-
-    await user.keyboard('{Enter}')
-    await user.keyboard(' ')
-    expect(mockNav).toHaveBeenCalledWith('/workouts/new/crossfit')
-    expect(mockNav.mock.calls.length).toBeGreaterThanOrEqual(2)
+    const link = screen.getByRole('link', { name: /Brazilian Jiu-Jitsu/i })
+    expect(link).toHaveAttribute('href', '/bjj/new')
+    await user.click(link)
   })
 
-  it('A5.scenario9_bjjClick_navigatesToBjjNew', async () => {
-    const user = userEvent.setup()
+  it('A6 each card carries exactly one lucide-react SVG inside .widget-icon', () => {
     renderPicker()
-    const mockNav = mockedUseNavigate.mock.results[0]?.value as ReturnType<typeof vi.fn>
-    await user.click(screen.getByRole('button', { name: /brazilian jiu-jitsu/i }))
-    expect(mockNav).toHaveBeenCalledWith('/bjj/new')
+    const icons = document.getElementsByClassName('widget-icon')
+    expect(icons).toHaveLength(2)
+    Array.from(icons).forEach((icon) => {
+      expect(icon.querySelector('svg')).toBeInTheDocument()
+    })
   })
 
-  it('A5.scenario10_bjjKeyboard_navigatesToBjjNew_viaEnterAndSpace', async () => {
-    const user = userEvent.setup()
+  it('A7 options come from WORKOUT_TYPE_OPTIONS constant iterated via .map()', () => {
     renderPicker()
-    const secondCard = screen.getByRole('button', { name: /brazilian jiu-jitsu/i })
-    secondCard.focus()
-
-    const mockNav = mockedUseNavigate.mock.results[0]?.value as ReturnType<typeof vi.fn>
-
-    await user.keyboard('{Enter}')
-    await user.keyboard(' ')
-    expect(mockNav).toHaveBeenCalledWith('/bjj/new')
-    expect(mockNav.mock.calls.length).toBeGreaterThanOrEqual(2)
+    expect(WORKOUT_TYPE_OPTIONS).toHaveLength(2)
+    expect(WORKOUT_TYPE_OPTIONS.map((o) => o.id)).toEqual(['crossfit', 'bjj'])
+    expect(WORKOUT_TYPE_OPTIONS.map((o) => o.href)).toEqual([
+      '/workouts/new/crossfit',
+      '/bjj/new',
+    ])
   })
 
-  it('A6.scenario11_oneLucideSvgPerCard_andNoNewDep', () => {
+  it('A9 copy is unchanged: titles and subtitles match spec verbatim', () => {
     renderPicker()
-    const buttons = screen.getAllByRole('button')
-    expect(buttons.length).toBe(2)
-    for (const button of buttons) {
-      const svgs = button.querySelectorAll('svg')
-      expect(svgs.length).toBe(1)
-    }
-
-    // No new dependency added by the picker change.
-    const source = getSource()
-    expect(source).toMatch(/from\s+['"]lucide-react['"]/)
+    expect(screen.getByText('CrossFit / Functional')).toBeInTheDocument()
+    expect(screen.getByText('WOD-based training')).toBeInTheDocument()
+    expect(screen.getByText('Brazilian Jiu-Jitsu')).toBeInTheDocument()
+    expect(screen.getByText('Section-based technique training')).toBeInTheDocument()
   })
 
-  it('A7.scenario12_constantIteratedByMap_rendersExactlyTwoButtons', () => {
-    const source = getSource()
-    expect(source).toMatch(/WORKOUT_TYPE_OPTIONS/)
-    expect(source).toMatch(/\.map\(/)
-
+  it('A1 heading "Log Workout" rendered as <h1> via MUI Typography', () => {
     renderPicker()
-    const buttons = screen.getAllByRole('button')
-    expect(buttons.length).toBe(2)
+    const heading = screen.getByRole('heading', { name: 'Log Workout' })
+    expect(heading).toBeInTheDocument()
+    expect(heading.tagName).toBe('H1')
   })
 })

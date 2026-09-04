@@ -668,3 +668,15 @@ html.dark .bjj-form .action-status[data-tone="warn"] { color: var(--warn); }
   .bjj-form .action-btns { order: 1; width: 100%; }
   .bjj-form .action-btns .btn { flex: 1 1 auto; }
 }
+
+/* WorkoutTypePicker card (hero picker on /workouts/new) — extends
+   `.widget` with link semantics, hover lift, and active press. */
+.bjj-dashboard .option-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(60, 64, 67, 0.22);
+}
+.bjj-dashboard .option-card:active {
+  transform: scale(0.99);
+}
+.bjj-dashboard .option-card .widget-title { margin: 0; }
+.bjj-dashboard .option-card .widget-sub { margin: 0; }

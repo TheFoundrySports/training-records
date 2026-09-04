@@ -7,6 +7,7 @@ import { WorkoutListPage } from '@/features/workouts/pages/WorkoutListPage'
 import { WorkoutDetailPage } from '@/features/workouts/pages/WorkoutDetailPage'
 import { WorkoutFormPage } from '@/features/workouts/pages/WorkoutFormPage'
 import { WorkoutTypePicker } from '@/features/workouts/components/WorkoutTypePicker'
+import { MaterialScope } from '@/components/MaterialScope'
 import { AIChatPage } from '@/features/ai/AIChatPage'
 import { ExerciseListPage, ExerciseFormPage } from '@/features/exercises/pages'
 import { CalendarPage } from '@/features/calendar'
@@ -54,7 +55,11 @@ export const router = createBrowserRouter([
           },
           {
             path: 'workouts/new',
-            element: <WorkoutTypePicker />,
+            element: (
+              <MaterialScope>
+                <WorkoutTypePicker />
+              </MaterialScope>
+            ),
           },
           {
             path: 'workouts/new/crossfit',
