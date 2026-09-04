@@ -97,7 +97,8 @@ test.describe('Workout with WOD format', () => {
     // Attempt to save
     await workoutFormPage.save()
 
-    // Should NOT navigate away — Zod validation requires at least 1 movement
-    await expect(page).toHaveURL('/workouts/new')
+    // Should NOT navigate away — Zod validation requires at least 1 movement.
+    // WorkoutFormPage.gotoNew() lands on /workouts/new/crossfit, not the picker route.
+    await expect(page).toHaveURL('/workouts/new/crossfit')
   })
 })
