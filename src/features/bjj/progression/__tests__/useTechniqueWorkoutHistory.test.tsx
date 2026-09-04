@@ -7,6 +7,7 @@ import { useTechniqueWorkoutHistory } from '../hooks/useTechniqueWorkoutHistory'
 let mockResponse: { data: unknown; error: unknown } = { data: [], error: null }
 const eqCalls: [string, string][] = []
 let selectArg: string | undefined
+let orderArg: string | undefined
 
 const { mockFrom, configureResponse, clearEqCalls } = vi.hoisted(() => {
   function configureResponse(data: unknown, error: unknown) {
@@ -27,7 +28,10 @@ const { mockFrom, configureResponse, clearEqCalls } = vi.hoisted(() => {
         eqCalls.push([column, value])
         return builder
       }),
-      order: vi.fn(() => builder),
+      order: vi.fn((arg: string) => {
+        orderArg = arg
+        return builder
+      }),
       limit: vi.fn(() => Promise.resolve(mockResponse)),
     }
 
@@ -106,6 +110,7 @@ describe('useTechniqueWorkoutHistory', () => {
     clearEqCalls()
     mockFrom.mockClear()
     selectArg = undefined
+    orderArg = undefined
   })
 
   it('queries bjj_sections (not the junction table, which has no FK to workouts)', async () => {
@@ -139,6 +144,24 @@ describe('useTechniqueWorkoutHistory', () => {
     expect(selectArg).toMatch(/workouts!inner\s*\(/)
     expect(selectArg).toMatch(/bjj_section_techniques!inner\s*\(/)
     expect(selectArg).toMatch(/performed_at/)
+  })
+
+  it('orders parent table by workouts(performed_at) using embedded-table parent-order syntax', async () => {
+    configureResponse(MOCK_HISTORY_ROWS, null)
+    const queryClient = makeQueryClient()
+
+    const { result } = renderHook(() => useTechniqueWorkoutHistory(TECHNIQUE_ID, USER_ID), {
+      wrapper: makeWrapper(queryClient),
+    })
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true), { timeout: 3000 })
+
+    // PostgREST's order-spec parser does NOT accept dotted column names like
+    // 'workouts.performed_at' — it expects the embedded-table parent-order
+    // form 'workouts(performed_at)'. The dotted form produces
+    // `?order=workouts.performed_at.desc` and fails with
+    // PGRST100 / "failed to parse order (workouts.performed_at.desc)".
+    expect(orderArg).toBe('workouts(performed_at)')
   })
 
   it('filters by workouts.user_id and bjj_section_techniques.technique_id', async () => {

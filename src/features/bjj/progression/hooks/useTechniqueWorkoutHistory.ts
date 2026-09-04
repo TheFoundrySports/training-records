@@ -15,11 +15,15 @@ type WorkoutHistoryRow = {
  *
  * Query path: `bjj_sections` is the only table in this graph that has direct
  * FKs to BOTH `workouts` (via `workout_id`) and `bjj_section_techniques`
- * (via `section_id`). The previous implementation queried from
- * `bjj_section_techniques`, which has no FK to `workouts` — PostgREST then
- * could not resolve the `workouts!inner` embed nor the
- * `.order('workouts.performed_at', …)` spec, surfacing as
- * "failed to parse order (workouts.performed_at.desc)".
+ * (via `section_id`).
+ *
+ * Order spec note: the column passed to `.order()` uses the embedded-table
+ * parent-order syntax `relation(column)`. The dotted form `relation.column`
+ * is NOT a valid PostgREST order spec — the parser treats `relation` as a
+ * top-level column and then expects `.asc|.desc`, so it bails on the second
+ * dot. The earlier implementation used `workouts.performed_at` and PostgREST
+ * returned `failed to parse order (workouts.performed_at.desc)` even after
+ * switching the FROM table.
  *
  * Returns up to 20 (section, workout) pairs where the section is linked
  * to the technique, ordered by workout.performed_at desc. A workout with
@@ -46,7 +50,7 @@ async function fetchTechniqueWorkoutHistory(
     `)
     .eq('workouts.user_id', userId)
     .eq('bjj_section_techniques.technique_id', techniqueId)
-    .order('workouts.performed_at', { ascending: false })
+    .order('workouts(performed_at)', { ascending: false })
     .limit(20)
 
   if (error) {
