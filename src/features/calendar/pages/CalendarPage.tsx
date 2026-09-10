@@ -1,5 +1,16 @@
 import { useSearchParams } from 'react-router'
-import { addDays, addMonths, addWeeks, format, startOfWeek, endOfWeek, subDays, subMonths, subWeeks } from 'date-fns'
+import { useState, useRef } from 'react'
+import {
+  addDays,
+  addMonths,
+  addWeeks,
+  format,
+  startOfWeek,
+  endOfWeek,
+  subDays,
+  subMonths,
+  subWeeks,
+} from 'date-fns'
 import {
   useWorkoutsByDateRange,
   computeMonthBoundaries,
@@ -12,6 +23,7 @@ import { CalendarGrid } from '../components/CalendarGrid'
 import { WeekGrid } from '../components/WeekGrid'
 import { DayView } from '../components/DayView'
 import { DateRangePicker } from '../components/DateRangePicker'
+import { MobileDayDetailPanel } from '../components/MobileDayDetailPanel'
 import type { CalendarView } from '../calendar.types'
 
 function getTitle(view: CalendarView, anchorDate: Date): string {
@@ -37,6 +49,28 @@ function getTitle(view: CalendarView, anchorDate: Date): string {
 export function CalendarPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const { view, anchorDate, dateRange } = parseCalendarParams(searchParams)
+
+      // Mobile day selection state — lives here so it can feed MobileDayDetailPanel.
+      const [selectedDay, setSelectedDay] = useState<Date | null>(null)
+      // Track which month the selection belongs to so we can clear it on month navigation.
+      const selectedMonthRef = useRef<{ year: number; month: number }>({
+        year: anchorDate.getFullYear(),
+        month: anchorDate.getMonth(),
+      })
+
+      // Clear selection whenever the displayed month changes.
+      // We do it imperatively here instead of in a useEffect to avoid an extra render.
+      const currentYear = anchorDate.getFullYear()
+      const currentMonth = anchorDate.getMonth()
+      if (
+        selectedDay !== null &&
+        (currentYear !== selectedMonthRef.current.year ||
+          currentMonth !== selectedMonthRef.current.month)
+      ) {
+        setSelectedDay(null)
+        selectedMonthRef.current.year = currentYear
+        selectedMonthRef.current.month = currentMonth
+      }
 
   // Compute date range based on current view
   const range =
@@ -82,6 +116,14 @@ export function CalendarPage() {
     navigate(view, newAnchor, range)
   }
 
+  function handleSelectDay(date: Date | null) {
+    setSelectedDay(date)
+    if (date !== null) {
+      selectedMonthRef.current.year = date.getFullYear()
+      selectedMonthRef.current.month = date.getMonth()
+    }
+  }
+
   // Compute title — show range label when custom range is active
   let title: string
   if (dateRange && view === 'month') {
@@ -108,12 +150,21 @@ export function CalendarPage() {
         onViewChange={handleViewChange}
       />
       {view === 'month' && (
-        <CalendarGrid
-          year={anchorDate.getFullYear()}
-          month={anchorDate.getMonth() + 1}
-          workouts={workouts}
-          isLoading={isLoading}
-        />
+        <>
+          <CalendarGrid
+            year={anchorDate.getFullYear()}
+            month={anchorDate.getMonth() + 1}
+            workouts={workouts}
+            isLoading={isLoading}
+            selectedDay={selectedDay}
+            onSelectDay={handleSelectDay}
+          />
+          <MobileDayDetailPanel
+            selectedDate={selectedDay}
+            workouts={workouts}
+            isLoading={isLoading}
+          />
+        </>
       )}
       {view === 'week' && (
         <WeekGrid anchorDate={anchorDate} workouts={workouts} isLoading={isLoading} />

@@ -1,5 +1,6 @@
 import { format } from 'date-fns'
 import { useNavigate } from 'react-router'
+import { isSameDay } from 'date-fns'
 import type { Workout } from '@/features/workouts/workout.types'
 import { buildCalendarDays } from '../utils/buildCalendarDays'
 import { CalendarCell } from './CalendarCell'
@@ -9,16 +10,33 @@ interface CalendarGridProps {
   month: number
   workouts: Workout[]
   isLoading: boolean
+  /** Currently selected day (controlled — drives MobileDayDetailPanel via CalendarPage). */
+  selectedDay?: Date | null
+  /** Called when the user taps a cell with workouts. Pass to sync external state. */
+  onSelectDay?: (date: Date | null) => void
 }
 
 const WEEK_DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
-export function CalendarGrid({ year, month, workouts, isLoading }: CalendarGridProps) {
+export function CalendarGrid({
+  year,
+  month,
+  workouts,
+  isLoading,
+  selectedDay = null,
+  onSelectDay,
+}: CalendarGridProps) {
   const navigate = useNavigate()
 
   function handleEmptyClick(date: Date) {
     const dateStr = format(date, 'yyyy-MM-dd')
     void navigate(`/workouts/new?date=${dateStr}`)
+  }
+
+  function handleWorkoutClick(date: Date) {
+    // Toggle: tapping the already-selected day deselects
+    const next = selectedDay !== null && isSameDay(selectedDay, date) ? null : date
+    onSelectDay?.(next)
   }
 
   const days = buildCalendarDays(year, month, workouts)
@@ -50,6 +68,8 @@ export function CalendarGrid({ year, month, workouts, isLoading }: CalendarGridP
                   key={day.date.toISOString()}
                   day={day}
                   onEmptyClick={handleEmptyClick}
+                  selected={selectedDay !== null && isSameDay(selectedDay, day.date)}
+                  onWorkoutClick={handleWorkoutClick}
                 />
               ))}
         </div>

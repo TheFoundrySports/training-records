@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router'
 import { buildCalendarDays } from '../utils/buildCalendarDays'
 import { CalendarGrid } from './CalendarGrid'
@@ -20,11 +21,18 @@ function renderGrid(props: {
   month?: number
   workouts?: Workout[]
   isLoading?: boolean
+  onSelectDay?: (date: Date | null) => void
 }) {
-  const { year = 2026, month = 4, workouts = [], isLoading = false } = props
+  const { year = 2026, month = 4, workouts = [], isLoading = false, onSelectDay } = props
   return render(
     <MemoryRouter>
-      <CalendarGrid year={year} month={month} workouts={workouts} isLoading={isLoading} />
+      <CalendarGrid
+year={year}
+month={month}
+workouts={workouts}
+isLoading={isLoading}
+onSelectDay={onSelectDay}
+      />
     </MemoryRouter>,
   )
 }
@@ -233,18 +241,126 @@ describe('CalendarGrid component — workout chip integration (REQ-CAL-06, REQ-C
   })
 })
 
-describe('CalendarGrid component — mobile scroll wrapper', () => {
-  it('wraps the grid in overflow-x-auto for horizontal scroll on mobile', () => {
-    renderGrid({ year: 2026, month: 4, workouts: [], isLoading: false })
+    describe('CalendarGrid component — mobile scroll wrapper', () => {
+      it('wraps the grid in overflow-x-auto for horizontal scroll on mobile', () => {
+        renderGrid({ year: 2026, month: 4, workouts: [], isLoading: false })
 
-    const wrapper = document.querySelector('.overflow-x-auto')
-    expect(wrapper).toBeInTheDocument()
-  })
+        const wrapper = document.querySelector('.overflow-x-auto')
+        expect(wrapper).toBeInTheDocument()
+      })
 
-  it('inner grid has min-w-[640px] to prevent crushing on small screens', () => {
-    renderGrid({ year: 2026, month: 4, workouts: [], isLoading: false })
+      it('inner grid has min-w-[640px] to prevent crushing on small screens', () => {
+        renderGrid({ year: 2026, month: 4, workouts: [], isLoading: false })
 
-    const innerGrid = document.querySelector('.min-w-\\[640px\\]')
-    expect(innerGrid).toBeInTheDocument()
-  })
-})
+        const innerGrid = document.querySelector('.min-w-\\[640px\\]')
+        expect(innerGrid).toBeInTheDocument()
+      })
+    })
+
+    // ---------------------------------------------------------------------------
+    // CalendarGrid — mobile day selection state (REQ-CAL-MOBILE-01..03)
+    // ---------------------------------------------------------------------------
+
+    describe('CalendarGrid — mobile day selection state', () => {
+      it('clicking a cell with workouts calls onSelectDay with that date', async () => {
+        const user = userEvent.setup()
+        const onSelectDay = vi.fn()
+        const workout = makeGridWorkout('2026-04-15T10:00:00.000Z', {
+          title: 'Morning WOD',
+          id: 'w-apr-15',
+        })
+        renderGrid({
+          year: 2026,
+          month: 4,
+          workouts: [workout],
+          isLoading: false,
+          onSelectDay,
+        })
+
+        // Click on the April 15 cell (it has a workout)
+        const cell = screen.getByText('Morning WOD').closest('[class*="min-h-24"]')!
+        await user.click(cell)
+
+        expect(onSelectDay).toHaveBeenCalledOnce()
+        expect(onSelectDay.mock.calls[0][0].getDate()).toBe(15)
+        expect(onSelectDay.mock.calls[0][0].getMonth()).toBe(3) // April
+      })
+
+      it('re-clicking the same selected cell calls onSelectDay with null (deselect)', async () => {
+        const user = userEvent.setup()
+        const onSelectDay = vi.fn()
+        const workout = makeGridWorkout('2026-04-15T10:00:00.000Z', {
+          title: 'Morning WOD',
+          id: 'w-apr-15',
+        })
+        renderGrid({
+          year: 2026,
+          month: 4,
+          workouts: [workout],
+          isLoading: false,
+          onSelectDay,
+        })
+
+        const cell = screen.getByText('Morning WOD').closest('[class*="min-h-24"]')!
+
+        // First click — selects
+        await user.click(cell)
+        // Second click — deselects
+        await user.click(cell)
+
+        // onSelectDay called twice: first with date, second with null
+        expect(onSelectDay).toHaveBeenCalledTimes(2)
+        expect(onSelectDay.mock.calls[1][0]).toBeNull()
+      })
+
+      it('clicking a different cell after a selection deselects the first one', async () => {
+        const user = userEvent.setup()
+        const onSelectDay = vi.fn()
+        const workout1 = makeGridWorkout('2026-04-15T10:00:00.000Z', {
+          title: 'WOD 15',
+          id: 'w-apr-15',
+        })
+        const workout2 = makeGridWorkout('2026-04-16T10:00:00.000Z', {
+          title: 'WOD 16',
+          id: 'w-apr-16',
+        })
+        renderGrid({
+          year: 2026,
+          month: 4,
+          workouts: [workout1, workout2],
+          isLoading: false,
+          onSelectDay,
+        })
+
+        const cell15 = screen.getByText('WOD 15').closest('[class*="min-h-24"]')!
+        const cell16 = screen.getByText('WOD 16').closest('[class*="min-h-24"]')!
+
+        await user.click(cell15) // selects April 15
+        await user.click(cell16) // deselects April 15, selects April 16
+
+        expect(onSelectDay).toHaveBeenCalledTimes(2)
+        expect(onSelectDay.mock.calls[0][0].getDate()).toBe(15)
+        expect(onSelectDay.mock.calls[1][0].getDate()).toBe(16)
+      })
+
+      it('clicking an empty current-month cell does NOT call onSelectDay', async () => {
+        const user = userEvent.setup()
+        const onSelectDay = vi.fn()
+        renderGrid({
+          year: 2026,
+          month: 4,
+          workouts: [],
+          isLoading: false,
+          onSelectDay,
+        })
+
+        // Find the March 30 cell (out-of-month, empty) — its date number is 30 and it
+        // has bg-muted class (out-of-month filler). We click it and verify onSelectDay
+        // is NOT called, confirming empty cells don't trigger selection.
+        const outOfMonthCell = document.querySelector('[class*="bg-muted"][class*="min-h-24"]')
+        expect(outOfMonthCell).toBeTruthy()
+        await user.click(outOfMonthCell!)
+
+        expect(onSelectDay).not.toHaveBeenCalled()
+      })
+    })

@@ -7,6 +7,10 @@ interface CalendarCellProps {
   day: CalendarDay
   onEmptyClick: (date: Date) => void
   disableOutOfMonthClick?: boolean
+  /** Highlights the cell when it is the currently selected day (mobile panel). */
+  selected?: boolean
+  /** Called when the user taps a cell that has workouts (mobile day selection). */
+  onWorkoutClick?: (date: Date) => void
 }
 
 const MAX_VISIBLE_CHIPS = 3
@@ -15,6 +19,8 @@ export function CalendarCell({
   day,
   onEmptyClick,
   disableOutOfMonthClick = true,
+  selected = false,
+  onWorkoutClick,
 }: CalendarCellProps) {
   const today = new Date()
   const isToday = isSameDay(day.date, today)
@@ -30,7 +36,10 @@ export function CalendarCell({
     if (disableOutOfMonthClick && !day.isCurrentMonth) return
     if (!hasWorkouts) {
       onEmptyClick(day.date)
+      return
     }
+    // Mobile day selection: tapping a cell with workouts fires onWorkoutClick
+    onWorkoutClick?.(day.date)
   }
 
   return (
@@ -41,13 +50,21 @@ export function CalendarCell({
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') handleCellClick()
       }}
+      aria-label={
+        hasWorkouts
+          ? `${day.workouts.length} workout${day.workouts.length > 1 ? 's' : ''} on ${day.date.toLocaleDateString()} — tap to view details`
+          : isClickable
+            ? `Add workout on ${day.date.toLocaleDateString()}`
+            : undefined
+      }
       className={cn(
         'min-h-24 p-1.5 border border-border rounded-sm flex flex-col gap-0.5',
         disableOutOfMonthClick && !day.isCurrentMonth && 'bg-muted',
         isClickable && 'cursor-pointer hover:bg-muted/50 transition-colors',
+        hasWorkouts && day.isCurrentMonth && 'cursor-pointer hover:bg-muted/50 transition-colors',
         isToday && 'ring-2 ring-primary ring-inset',
+        selected && 'ring-2 ring-blue-500 ring-inset bg-blue-50 dark:bg-blue-950/30',
       )}
-      aria-label={isClickable ? `Add workout on ${day.date.toLocaleDateString()}` : undefined}
     >
       {/* Day number */}
       <span
