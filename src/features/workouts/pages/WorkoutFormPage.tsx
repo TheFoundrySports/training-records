@@ -10,19 +10,9 @@ import { getFormat } from '../registry/index'
 import { WodFormatSelector } from '../components/WodFormatSelector'
 import { PublicWodPickerModal } from '../components/PublicWodPickerModal'
 import { AINotesPreviewPanel } from '../components/AINotesPreviewPanel'
+import { MaterialScope } from '@/components/MaterialScope'
 import type { PublicWodFormFields } from '@/features/public-wods'
 import type { WodFormat } from '../registry/types'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form'
 
 /**
  * WorkoutFormPage — used for both create (/workouts/new) and edit (/workouts/:id/edit).
@@ -48,7 +38,6 @@ export function WorkoutFormPage() {
     defaultValues: {
       title: '',
       type: 'crossfit',
-      // datetime-local input format (normalizeDateTime handles conversion to ISO8601)
       performedAt: new Date().toISOString().slice(0, 16),
       durationMinutes: 30,
       notes: '',
@@ -68,19 +57,15 @@ export function WorkoutFormPage() {
 
   const rootErrorRef = useRef<HTMLDivElement>(null)
 
-  // AI Enhance state
   const [aiPreview, setAiPreview] = useState<string | null>(null)
   const [aiError, setAiError] = useState<string | null>(null)
-  /** Blocks a second click before React re-renders with `isAIPending`. */
   const enhanceInFlightRef = useRef(false)
 
   const { enhance, isPending: isAIPending } = useWorkoutNotesAI()
 
   const notesValue = form.watch('notes')
-  /** Set to true when user clicks "Apply" on the AI preview — cleared on form reset/submit */
   const aiWasAppliedRef = useRef(false)
 
-  // Focus error summary on submit failure
   useEffect(() => {
     if (rootErrorRef.current && (mutationError ?? rootError)) {
       rootErrorRef.current.focus()
@@ -111,7 +96,6 @@ export function WorkoutFormPage() {
   }
 
   function handleAIApply(enhancedNotes: string) {
-    // Store enhanced notes separately — original notes are preserved
     form.setValue('enhancedNotes', enhancedNotes, { shouldValidate: true })
     aiWasAppliedRef.current = true
     setAiPreview(null)
@@ -135,7 +119,6 @@ export function WorkoutFormPage() {
 
   const wodFormat = form.watch('wodFormat')
 
-  // Populate form when editing and data is loaded
   useEffect(() => {
     if (isEdit && existing) {
       form.reset({
@@ -152,24 +135,29 @@ export function WorkoutFormPage() {
     }
   }, [isEdit, existing, form])
 
-  // Pre-fill form from AI navigation state (create mode only)
   useEffect(() => {
     const prefill = (location.state as { prefill?: WorkoutFormValues } | null)?.prefill
     if (!isEdit && prefill) {
       form.reset(prefill)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []) // run once on mount only — location.state is stable
+  }, []) // run once on mount only
 
   async function onSubmit(values: WorkoutFormValues) {
-    // Validate WOD payload if a format is selected
-    if (values.wodFormat) {
+    // Guard against NaN from empty number inputs
+    const safe = {
+      ...values,
+      durationMinutes: Number.isNaN(values.durationMinutes) ? undefined : values.durationMinutes,
+      rpe: Number.isNaN(values.rpe) ? undefined : values.rpe,
+    }
+
+    if (safe.wodFormat) {
       try {
-        const handler = getFormat(values.wodFormat as WodFormat)
-        const result = handler.schema.safeParse(values.payload)
+        const handler = getFormat(safe.wodFormat as WodFormat)
+        const result = handler.schema.safeParse(safe.payload)
         if (!result.success) {
           console.error('Zod validation errors:', JSON.stringify(result.error.issues, null, 2))
-          console.error('Payload being validated:', JSON.stringify(values.payload, null, 2))
+          console.error('Payload being validated:', JSON.stringify(safe.payload, null, 2))
           form.setError('root', { message: 'WOD payload is invalid' })
           return
         }
@@ -180,11 +168,10 @@ export function WorkoutFormPage() {
       }
     }
 
-    // Include enhanced notes in submission if user applied AI enhancement
-    const submissionValues: WorkoutFormValues = {
-      ...values,
-      enhancedNotes: aiWasAppliedRef.current ? form.getValues('notes') : values.enhancedNotes,
-    }
+    const submissionValues = {
+      ...safe,
+      enhancedNotes: aiWasAppliedRef.current ? form.getValues('notes') : safe.enhancedNotes,
+    } as WorkoutFormValues
 
     if (isEdit && id) {
       await updateMutation.mutateAsync({ id, data: submissionValues })
@@ -197,258 +184,461 @@ export function WorkoutFormPage() {
 
   if (isEdit && loadingExisting) {
     return (
-      <div className="container mx-auto px-4 py-8 max-w-2xl">
-        <div role="status" aria-label="Loading workout" className="space-y-4">
-          <div className="h-8 w-48 rounded bg-muted animate-pulse" aria-hidden="true" />
-          <div className="h-64 rounded-xl bg-muted animate-pulse" aria-hidden="true" />
+      <MaterialScope>
+        <div className="bjj-form">
+          <div className="shell">
+            <div role="status" aria-label="Loading workout" style={{ padding: 'var(--space-8) 0' }}>
+              <div
+                style={{
+                  height: 32,
+                  width: 192,
+                  background: 'var(--surface-warm)',
+                  borderRadius: 'var(--radius-md)',
+                }}
+              />
+            </div>
+          </div>
         </div>
-      </div>
+      </MaterialScope>
     )
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-2xl">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-semibold">{isEdit ? 'Edit Workout' : 'Log Workout'}</h1>
-        {!isEdit && (
-          <Button type="button" variant="outline" onClick={() => setPickerOpen(true)}>
-            Load Workout
-          </Button>
-        )}
-      </div>
-
-      <PublicWodPickerModal
-        open={pickerOpen}
-        onOpenChange={setPickerOpen}
-        onSelect={handlePublicWodSelect}
-      />
-
-      {(mutationError ?? rootError) && (
-        <div
-          ref={rootErrorRef}
-          role="alert"
-          aria-live="assertive"
-          tabIndex={-1}
-          className="mb-4 rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-destructive text-sm outline-none"
-        >
-          {mutationError ?? rootError}
-        </div>
-      )}
-
-      <Form {...form}>
-        <form
-          onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
-          className="space-y-5"
-          noValidate
-        >
-          {/* Title */}
-          <FormField
-            control={form.control}
-            name="title"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Title</FormLabel>
-                <FormControl>
-                  <Input placeholder="e.g. Morning WOD" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+    <MaterialScope>
+      <div className="bjj-form">
+        <div className="shell">
+          <header className="form-page-head">
+            <h1 className="form-page-title">{isEdit ? 'Edit Workout' : 'Log Workout'}</h1>
+            {!isEdit && (
+              <button type="button" className="btn" onClick={() => setPickerOpen(true)}>
+                Load Workout
+              </button>
             )}
+          </header>
+
+          <PublicWodPickerModal
+            open={pickerOpen}
+            onOpenChange={setPickerOpen}
+            onSelect={handlePublicWodSelect}
           />
 
-          {/* Type */}
-          <FormField
-            control={form.control}
-            name="type"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Type</FormLabel>
-                <FormControl>
-                  <select
-                    {...field}
-                    className="h-8 w-full rounded-lg border border-input bg-transparent px-2.5 py-1 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-                    aria-label="Workout type"
+          {(mutationError ?? rootError) && (
+            <div
+              ref={rootErrorRef}
+              role="alert"
+              aria-live="assertive"
+              tabIndex={-1}
+              className="banner error"
+              style={{ marginBottom: 'var(--space-5)' }}
+            >
+              <svg
+                viewBox="0 0 20 20"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.6"
+                aria-hidden="true"
+              >
+                <circle cx="10" cy="10" r="8" />
+                <path d="M10 8v2.5M10 12.8h0" strokeLinecap="round" />
+              </svg>
+              <span>{mutationError ?? rootError}</span>
+            </div>
+          )}
+
+          <form onSubmit={(e) => void form.handleSubmit(onSubmit)(e)} noValidate>
+            <div
+              className="form-col"
+              style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-5)' }}
+            >
+              {/* Session Details */}
+              <section className="card" aria-labelledby="hSession">
+                <div className="card-head">
+                  <h2
+                    id="hSession"
+                    style={{
+                      fontFamily: 'var(--font-display)',
+                      fontSize: 'var(--text-lg)',
+                      fontWeight: 500,
+                      margin: 0,
+                    }}
                   >
+                    Session Details
+                  </h2>
+                </div>
+
+                {/* Title */}
+                <div className="field" style={{ marginBottom: 'var(--space-4)' }}>
+                  <label className="label" htmlFor="field-title">
+                    Title
+                  </label>
+                  <input
+                    id="field-title"
+                    className="input"
+                    placeholder="e.g. Morning WOD"
+                    {...form.register('title')}
+                    aria-invalid={!!form.formState.errors.title}
+                    aria-describedby={form.formState.errors.title ? 'err-title' : undefined}
+                  />
+                  {form.formState.errors.title && (
+                    <p id="err-title" className="field-error" role="alert">
+                      <svg
+                        viewBox="0 0 16 16"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.6"
+                        aria-hidden="true"
+                      >
+                        <circle cx="8" cy="8" r="6.4" />
+                        <path d="M8 5v3.5M8 10.5h0" strokeLinecap="round" />
+                      </svg>
+                      <span>{form.formState.errors.title.message}</span>
+                    </p>
+                  )}
+                </div>
+
+                {/* Type */}
+                <div className="field" style={{ marginBottom: 'var(--space-4)' }}>
+                  <label className="label" htmlFor="field-type">
+                    Type
+                  </label>
+                  <select id="field-type" className="select" {...form.register('type')}>
                     <option value="crossfit">CrossFit</option>
                     <option value="functional">Functional</option>
                   </select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+                </div>
 
-          {/* WOD Format */}
-          <FormField
-            control={form.control}
-            name="wodFormat"
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
+                {/* Date + Duration */}
+                <div className="grid-2" style={{ marginBottom: 'var(--space-4)' }}>
+                  <div className="field">
+                    <label className="label" htmlFor="field-performedAt">
+                      Date &amp; Time
+                    </label>
+                    <input
+                      id="field-performedAt"
+                      type="datetime-local"
+                      className="input"
+                      {...form.register('performedAt')}
+                      aria-invalid={!!form.formState.errors.performedAt}
+                      aria-describedby={
+                        form.formState.errors.performedAt ? 'err-performedAt' : undefined
+                      }
+                    />
+                    {form.formState.errors.performedAt && (
+                      <p id="err-performedAt" className="field-error" role="alert">
+                        <svg
+                          viewBox="0 0 16 16"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.6"
+                          aria-hidden="true"
+                        >
+                          <circle cx="8" cy="8" r="6.4" />
+                          <path d="M8 5v3.5M8 10.5h0" strokeLinecap="round" />
+                        </svg>
+                        <span>{form.formState.errors.performedAt.message}</span>
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="field">
+                    <label className="label" htmlFor="field-durationMinutes">
+                      Duration (minutes)
+                    </label>
+                    <input
+                      id="field-durationMinutes"
+                      type="number"
+                      min={1}
+                      max={300}
+                      className="input"
+                      {...form.register('durationMinutes', {
+                        setValueAs: (v) => (v === '' ? undefined : Number(v)),
+                      })}
+                      aria-invalid={!!form.formState.errors.durationMinutes}
+                      aria-describedby={
+                        form.formState.errors.durationMinutes ? 'err-durationMinutes' : undefined
+                      }
+                    />
+                    {form.formState.errors.durationMinutes && (
+                      <p id="err-durationMinutes" className="field-error" role="alert">
+                        <svg
+                          viewBox="0 0 16 16"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.6"
+                          aria-hidden="true"
+                        >
+                          <circle cx="8" cy="8" r="6.4" />
+                          <path d="M8 5v3.5M8 10.5h0" strokeLinecap="round" />
+                        </svg>
+                        <span>{form.formState.errors.durationMinutes.message}</span>
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {/* RPE */}
+                <div className="field">
+                  <label className="label" htmlFor="field-rpe">
+                    RPE (1–10, optional)
+                  </label>
+                  <input
+                    id="field-rpe"
+                    type="number"
+                    min={1}
+                    max={10}
+                    className="input"
+                    placeholder="e.g. 7"
+                    {...form.register('rpe', {
+                      setValueAs: (v) => (v === '' ? undefined : Number(v)),
+                    })}
+                    aria-invalid={!!form.formState.errors.rpe}
+                    aria-describedby={form.formState.errors.rpe ? 'err-rpe' : undefined}
+                  />
+                  {form.formState.errors.rpe && (
+                    <p id="err-rpe" className="field-error" role="alert">
+                      <svg
+                        viewBox="0 0 16 16"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.6"
+                        aria-hidden="true"
+                      >
+                        <circle cx="8" cy="8" r="6.4" />
+                        <path d="M8 5v3.5M8 10.5h0" strokeLinecap="round" />
+                      </svg>
+                      <span>{form.formState.errors.rpe.message}</span>
+                    </p>
+                  )}
+                </div>
+              </section>
+
+              {/* WOD */}
+              <section className="card" aria-labelledby="hWod">
+                <div className="card-head">
+                  <h2
+                    id="hWod"
+                    style={{
+                      fontFamily: 'var(--font-display)',
+                      fontSize: 'var(--text-lg)',
+                      fontWeight: 500,
+                      margin: 0,
+                    }}
+                  >
+                    WOD
+                  </h2>
+                </div>
+
+                {/* WOD Format */}
+                <div className="field" style={{ marginBottom: 'var(--space-4)' }}>
+                  <label className="label" htmlFor="wod-format-select">
+                    WOD Format
+                  </label>
                   <WodFormatSelector
-                    value={field.value ?? ''}
+                    value={wodFormat ?? ''}
                     onChange={(format) => {
-                      field.onChange(format === '' ? undefined : format)
-                      // Clear payload when format changes
+                      form.setValue('wodFormat', format === '' ? undefined : (format as WodFormat))
                       form.setValue('payload', undefined)
                     }}
                     disabled={isPending}
                   />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Dynamic WOD Format Section */}
-          {wodFormat &&
-            (() => {
-              try {
-                const handler = getFormat(wodFormat as WodFormat)
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                const control = form.control as any
-                return <handler.FormSection control={control} name="payload" disabled={isPending} />
-              } catch {
-                return null
-              }
-            })()}
-
-          {/* Performed at */}
-          <FormField
-            control={form.control}
-            name="performedAt"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Date &amp; Time</FormLabel>
-                <FormControl>
-                  <Input type="datetime-local" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Duration */}
-          <FormField
-            control={form.control}
-            name="durationMinutes"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Duration (minutes)</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    min={1}
-                    max={300}
-                    {...field}
-                    onChange={(e) => field.onChange(e.target.valueAsNumber)}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Notes */}
-          <FormField
-            control={form.control}
-            name="notes"
-            render={({ field }) => (
-              <FormItem>
-                <div className="flex items-center justify-between">
-                  <FormLabel>Notes</FormLabel>
-                  {(notesValue ?? '').trim().length > 0 && (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={handleAIEnhance}
-                      disabled={isAIPending || isPending}
-                      className="h-7 text-xs"
-                    >
-                      {isAIPending ? 'Enhancing…' : '✦ Enhance with AI'}
-                    </Button>
+                  {form.formState.errors.wodFormat && (
+                    <p className="field-error" role="alert">
+                      <svg
+                        viewBox="0 0 16 16"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.6"
+                        aria-hidden="true"
+                      >
+                        <circle cx="8" cy="8" r="6.4" />
+                        <path d="M8 5v3.5M8 10.5h0" strokeLinecap="round" />
+                      </svg>
+                      <span>{form.formState.errors.wodFormat.message as string}</span>
+                    </p>
                   )}
                 </div>
-                <FormControl>
-                  <Textarea placeholder="How did it go?" {...field} />
-                </FormControl>
-                <FormMessage />
-                {aiError && (
-                  <p className="text-sm text-destructive rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 mt-1">
-                    {aiError}
-                  </p>
-                )}
-                {aiPreview && !aiError && (
-                  <AINotesPreviewPanel
-                    enhanced_notes={aiPreview}
-                    onApply={handleAIApply}
-                    onDiscard={handleAIDiscard}
-                  />
-                )}
-              </FormItem>
-            )}
-          />
 
-          {/* WOD Text */}
-          <FormField
-            control={form.control}
-            name="wodText"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>WOD Text</FormLabel>
-                <FormControl>
-                  <Textarea placeholder="Describe the workout in detail…" rows={6} {...field} />
-                </FormControl>
-                <p className="text-xs text-muted-foreground text-right">
-                  {(field.value ?? '').length} / 5000
-                </p>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+                {/* Dynamic WOD Format Section */}
+                {wodFormat &&
+                  (() => {
+                    try {
+                      const handler = getFormat(wodFormat as WodFormat)
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      const control = form.control as any
+                      return (
+                        <handler.FormSection
+                          control={control}
+                          name="payload"
+                          disabled={isPending}
+                        />
+                      )
+                    } catch {
+                      return null
+                    }
+                  })()}
 
-          {/* RPE */}
-          <FormField
-            control={form.control}
-            name="rpe"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>RPE (1–10, optional)</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    min={1}
-                    max={10}
-                    placeholder="e.g. 7"
-                    {...field}
-                    value={field.value ?? ''}
-                    onChange={(e) => {
-                      const val = e.target.value
-                      field.onChange(val === '' ? undefined : Number(val))
+                {/* WOD Text */}
+                <div className="field" style={{ marginTop: 'var(--space-4)' }}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      marginBottom: 6,
                     }}
+                  >
+                    <label className="label" htmlFor="field-wodText">
+                      WOD Text
+                    </label>
+                  </div>
+                  <textarea
+                    id="field-wodText"
+                    className="textarea"
+                    placeholder="Describe the workout in detail…"
+                    rows={6}
+                    maxLength={5000}
+                    {...form.register('wodText')}
+                    aria-invalid={!!form.formState.errors.wodText}
+                    aria-describedby={
+                      form.formState.errors.wodText ? 'err-wodText' : 'count-wodText'
+                    }
                   />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+                  <div className="field-foot">
+                    <span
+                      id="count-wodText"
+                      className="count"
+                      aria-live="polite"
+                      data-near-limit={
+                        (form.getValues('wodText') ?? '').length >= 4950 ? 'true' : 'false'
+                      }
+                    >
+                      {(form.getValues('wodText') ?? '').length} / 5000
+                    </span>
+                  </div>
+                  {form.formState.errors.wodText && (
+                    <p id="err-wodText" className="field-error" role="alert">
+                      <svg
+                        viewBox="0 0 16 16"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.6"
+                        aria-hidden="true"
+                      >
+                        <circle cx="8" cy="8" r="6.4" />
+                        <path d="M8 5v3.5M8 10.5h0" strokeLinecap="round" />
+                      </svg>
+                      <span>{form.formState.errors.wodText.message as string}</span>
+                    </p>
+                  )}
+                </div>
+              </section>
 
-          <div className="flex gap-3 pt-2">
-            <Button type="submit" disabled={isPending}>
-              {isPending ? 'Saving…' : 'Save'}
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => void navigate(isEdit && id ? `/workouts/${id}` : '/workouts')}
-              disabled={isPending}
-            >
-              Cancel
-            </Button>
-          </div>
-        </form>
-      </Form>
-    </div>
+              {/* Notes */}
+              <section className="card" aria-labelledby="hNotes">
+                <div className="card-head">
+                  <h2
+                    id="hNotes"
+                    style={{
+                      fontFamily: 'var(--font-display)',
+                      fontSize: 'var(--text-lg)',
+                      fontWeight: 500,
+                      margin: 0,
+                    }}
+                  >
+                    Notes
+                  </h2>
+                </div>
+
+                <div className="field">
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      marginBottom: 6,
+                    }}
+                  >
+                    <label className="label" htmlFor="field-notes">
+                      Notes
+                    </label>
+                    {(notesValue ?? '').trim().length > 0 && (
+                      <button
+                        type="button"
+                        className="btn btn-sm"
+                        onClick={handleAIEnhance}
+                        disabled={isAIPending || isPending}
+                      >
+                        {isAIPending ? 'Enhancing…' : '✦ Enhance with AI'}
+                      </button>
+                    )}
+                  </div>
+
+                  <textarea
+                    id="field-notes"
+                    className="textarea"
+                    placeholder="How did it go?"
+                    {...form.register('notes')}
+                    aria-invalid={!!form.formState.errors.notes}
+                    aria-describedby={form.formState.errors.notes ? 'err-notes' : undefined}
+                  />
+                  {form.formState.errors.notes && (
+                    <p id="err-notes" className="field-error" role="alert">
+                      <svg
+                        viewBox="0 0 16 16"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.6"
+                        aria-hidden="true"
+                      >
+                        <circle cx="8" cy="8" r="6.4" />
+                        <path d="M8 5v3.5M8 10.5h0" strokeLinecap="round" />
+                      </svg>
+                      <span>{form.formState.errors.notes.message as string}</span>
+                    </p>
+                  )}
+                  {aiError && (
+                    <div className="banner error" style={{ marginTop: 'var(--space-3)' }}>
+                      <svg
+                        viewBox="0 0 20 20"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.6"
+                        aria-hidden="true"
+                      >
+                        <circle cx="10" cy="10" r="8" />
+                        <path d="M10 8v2.5M10 12.8h0" strokeLinecap="round" />
+                      </svg>
+                      <span>{aiError}</span>
+                    </div>
+                  )}
+                  {aiPreview && !aiError && (
+                    <AINotesPreviewPanel
+                      enhanced_notes={aiPreview}
+                      onApply={handleAIApply}
+                      onDiscard={handleAIDiscard}
+                    />
+                  )}
+                </div>
+              </section>
+            </div>
+
+            {/* Actions */}
+            <div style={{ display: 'flex', gap: 'var(--space-3)', paddingTop: 'var(--space-6)' }}>
+              <button type="submit" className="btn btn-primary" disabled={isPending}>
+                {isPending ? 'Saving…' : 'Save'}
+              </button>
+              <button
+                type="button"
+                className="btn"
+                onClick={() => void navigate(isEdit && id ? `/workouts/${id}` : '/workouts')}
+                disabled={isPending}
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </MaterialScope>
   )
 }

@@ -4,10 +4,26 @@ import type { WorkoutFormValues } from '../workout.schema'
 import type { Workout } from '../workout.types'
 import { mapRow } from './mapRow'
 
+/**
+ * Coerce form-level values (strings from inputs) to the types expected by the schema.
+ * Safe because we validate with zodResolver before mutation.
+ */
+function coerceWorkoutFormValues(data: WorkoutFormValues): WorkoutFormValues {
+  return {
+    ...data,
+    durationMinutes:
+      typeof data.durationMinutes === 'string'
+        ? Number(data.durationMinutes)
+        : data.durationMinutes,
+    rpe: typeof data.rpe === 'string' ? Number(data.rpe) : data.rpe,
+  }
+}
+
 export function useCreateWorkout() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async (data: WorkoutFormValues): Promise<Workout> => {
+      const coerced = coerceWorkoutFormValues(data)
       const {
         data: { user },
         error: userError,
@@ -20,16 +36,16 @@ export function useCreateWorkout() {
       const { data: workout, error } = await supabase
         .from('workouts')
         .insert({
-          title: data.title,
-          type: data.type,
-          performed_at: data.performedAt,
-          duration_minutes: data.durationMinutes,
-          notes: data.notes ?? null,
-          enhanced_notes: data.enhancedNotes ?? null,
-          rpe: data.rpe ?? null,
-          wod_text: data.wodText ?? null,
-          wod_format: data.wodFormat ?? null,
-          payload: data.payload ?? null,
+          title: coerced.title,
+          type: coerced.type,
+          performed_at: coerced.performedAt,
+          duration_minutes: coerced.durationMinutes,
+          notes: coerced.notes ?? null,
+          enhanced_notes: coerced.enhancedNotes ?? null,
+          rpe: coerced.rpe ?? null,
+          wod_text: coerced.wodText ?? null,
+          wod_format: coerced.wodFormat ?? null,
+          payload: coerced.payload ?? null,
           user_id: user.id,
         })
         .select()
@@ -53,19 +69,20 @@ export function useUpdateWorkout() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: WorkoutFormValues }): Promise<Workout> => {
+      const coerced = coerceWorkoutFormValues(data)
       const { data: workout, error } = await supabase
         .from('workouts')
         .update({
-          title: data.title,
-          type: data.type,
-          performed_at: data.performedAt,
-          duration_minutes: data.durationMinutes,
-          notes: data.notes ?? null,
-          enhanced_notes: data.enhancedNotes ?? null,
-          rpe: data.rpe ?? null,
-          wod_text: data.wodText ?? null,
-          wod_format: data.wodFormat ?? null,
-          payload: data.payload ?? null,
+          title: coerced.title,
+          type: coerced.type,
+          performed_at: coerced.performedAt,
+          duration_minutes: coerced.durationMinutes,
+          notes: coerced.notes ?? null,
+          enhanced_notes: coerced.enhancedNotes ?? null,
+          rpe: coerced.rpe ?? null,
+          wod_text: coerced.wodText ?? null,
+          wod_format: coerced.wodFormat ?? null,
+          payload: coerced.payload ?? null,
         })
         .eq('id', id)
         .select()
