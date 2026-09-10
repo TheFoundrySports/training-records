@@ -7,11 +7,17 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card'
+import { PasswordStrengthMeter } from '@/components/ui/PasswordStrengthMeter'
 import { useAcceptInvite } from '../hooks/useAcceptInvite'
 
 const acceptInviteSchema = z
   .object({
-    password: z.string().min(8, 'Password must be at least 8 characters'),
+    password: z
+      .string()
+      .min(8, 'Must be at least 8 characters')
+      .regex(/[A-Z]/, 'Must contain an uppercase letter')
+      .regex(/\d/, 'Must contain a number')
+      .regex(/[!@#$%^&*(),.?":{}|<>]/, 'Must contain a symbol'),
     passwordConfirmation: z.string(),
   })
   .refine((data) => data.password === data.passwordConfirmation, {
@@ -33,10 +39,13 @@ export function AcceptInvitePage() {
     register,
     handleSubmit,
     reset: resetForm,
+    watch,
     formState: { errors },
   } = useForm<AcceptInviteFormData>({
     resolver: zodResolver(acceptInviteSchema),
   })
+
+  const password = watch('password') ?? ''
 
   // Redirect if no token
   React.useEffect(() => {
@@ -87,6 +96,7 @@ export function AcceptInvitePage() {
                 autoComplete="new-password"
                 {...register('password')}
               />
+              <PasswordStrengthMeter password={password} />
               {errors.password && (
                 <p className="text-sm text-destructive">{errors.password.message}</p>
               )}
@@ -104,12 +114,23 @@ export function AcceptInvitePage() {
               )}
             </div>
             {warning && !isError && (
-              <p role="status" aria-live="polite" aria-atomic="true" className="text-sm text-muted-foreground">
+              <p
+                role="status"
+                aria-live="polite"
+                aria-atomic="true"
+                className="text-sm text-muted-foreground"
+              >
                 {warning}
               </p>
             )}
             {(isError || tokenError) && (error || tokenError) && (
-              <p ref={errorRef} role="alert" aria-live="assertive" aria-atomic="true" className="text-sm font-medium text-destructive">
+              <p
+                ref={errorRef}
+                role="alert"
+                aria-live="assertive"
+                aria-atomic="true"
+                className="text-sm font-medium text-destructive"
+              >
                 {error ?? tokenError}
               </p>
             )}

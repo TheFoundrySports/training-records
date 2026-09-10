@@ -21,6 +21,8 @@ import { AdminShell } from '@/features/admin/admin-shell/AdminShell'
 import { UserManagementPage } from '@/features/admin/users/pages/UserManagementPage'
 import { RegisterPage } from '@/features/auth/pages/RegisterPage'
 import { AcceptInvitePage } from '@/features/auth/pages/AcceptInvitePage'
+import { ForgotPasswordPage } from '@/features/auth/pages/ForgotPasswordPage'
+import { ResetPasswordPage } from '@/features/auth/pages/ResetPasswordPage'
 import { CreateUserPage } from '@/features/admin/create-user/pages/CreateUserPage'
 import { RegistrationSettingsPage } from '@/features/admin/registration-settings/pages/RegistrationSettingsPage'
 import { BJJDashboardRoute } from './DashboardRoute'
@@ -37,6 +39,14 @@ export const router = createBrowserRouter([
   {
     path: '/accept-invite',
     element: <AcceptInvitePage />,
+  },
+  {
+    path: '/forgot-password',
+    element: <ForgotPasswordPage />,
+  },
+  {
+    path: '/reset-password',
+    element: <ResetPasswordPage />,
   },
   {
     path: '/',

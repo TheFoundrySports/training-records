@@ -34,10 +34,18 @@ vi.mock('@/features/auth/hooks/useRegister', () => ({
         registerState.error = err instanceof Error ? err.message : 'Unknown error'
       }
     },
-    get isLoading() { return registerState.isLoading },
-    get isSuccess() { return registerState.isSuccess },
-    get isError() { return registerState.isError },
-    get error() { return registerState.error },
+    get isLoading() {
+      return registerState.isLoading
+    },
+    get isSuccess() {
+      return registerState.isSuccess
+    },
+    get isError() {
+      return registerState.isError
+    },
+    get error() {
+      return registerState.error
+    },
   }),
 }))
 
@@ -121,8 +129,8 @@ describe('RegisterPage', () => {
     )
 
     await user.type(getByLabelText(/email/i), 'test@example.com')
-    await user.type(getByLabelText(/^password$/i), 'password123')
-    await user.type(getByLabelText(/confirm password/i), 'differentpassword')
+    await user.type(getByLabelText(/^password$/i), 'Password123!')
+    await user.type(getByLabelText(/confirm password/i), 'Different456!')
     await user.click(getByRole('button', { name: /create account/i }))
 
     expect(screen.getByText(/passwords do not match/i)).toBeInTheDocument()
@@ -143,14 +151,14 @@ describe('RegisterPage', () => {
     )
 
     await user.type(getByLabelText(/email/i), 'test@example.com')
-    await user.type(getByLabelText(/^password$/i), 'password123')
-    await user.type(getByLabelText(/confirm password/i), 'password123')
+    await user.type(getByLabelText(/^password$/i), 'Password123!')
+    await user.type(getByLabelText(/confirm password/i), 'Password123!')
     await user.click(getByRole('button', { name: /create account/i }))
 
     await waitFor(() => {
       expect(mockRegister).toHaveBeenCalledWith({
         email: 'test@example.com',
-        password: 'password123',
+        password: 'Password123!',
       })
     })
   })
@@ -186,8 +194,8 @@ describe('RegisterPage', () => {
     )
 
     await user.type(getByLabelText(/email/i), 'test@example.com')
-    await user.type(getByLabelText(/^password$/i), 'password123')
-    await user.type(getByLabelText(/confirm password/i), 'password123')
+    await user.type(getByLabelText(/^password$/i), 'Password123!')
+    await user.type(getByLabelText(/confirm password/i), 'Password123!')
     await user.click(getByRole('button', { name: /create account/i }))
 
     await waitFor(() => {

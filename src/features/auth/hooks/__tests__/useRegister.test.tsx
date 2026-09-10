@@ -48,12 +48,12 @@ describe('useRegister', () => {
       wrapper: makeWrapper(queryClient),
     })
 
-    await result.current.register({ email: 'test@example.com', password: 'password123' })
+    await result.current.register({ email: 'test@example.com', password: 'Password1!' })
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
     expect(mockInvoke).toHaveBeenCalledWith('register-user', {
-      body: { email: 'test@example.com', password: 'password123' },
+      body: { email: 'test@example.com', password: 'Password1!' },
     })
   })
 
@@ -67,14 +67,14 @@ describe('useRegister', () => {
 
     await result.current.register({
       email: 'invited@example.com',
-      password: 'password123',
+      password: 'Password1!',
       token: 'abc-123-def',
     })
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
     expect(mockInvoke).toHaveBeenCalledWith('register-user', {
-      body: { email: 'invited@example.com', password: 'password123', token: 'abc-123-def' },
+      body: { email: 'invited@example.com', password: 'Password1!', token: 'abc-123-def' },
     })
   })
 
@@ -87,7 +87,7 @@ describe('useRegister', () => {
     })
 
     try {
-      await result.current.register({ email: 'test@example.com', password: 'password123' })
+      await result.current.register({ email: 'test@example.com', password: 'Password1!' })
     } catch {
       // Expected - error is thrown
     }
@@ -106,7 +106,7 @@ describe('useRegister', () => {
     })
 
     try {
-      await result.current.register({ email: 'test@example.com', password: 'password123' })
+      await result.current.register({ email: 'test@example.com', password: 'Password1!' })
     } catch {
       // Expected - error is thrown
     }
@@ -114,5 +114,59 @@ describe('useRegister', () => {
     await waitFor(() => expect(result.current.isError).toBe(true))
 
     expect(result.current.error).toBe('Network error')
+  })
+
+  it('throws error when password is weak (no uppercase)', async () => {
+    const queryClient = makeQueryClient()
+
+    const { result } = renderHook(() => useRegister(), {
+      wrapper: makeWrapper(queryClient),
+    })
+
+    try {
+      await result.current.register({ email: 'test@example.com', password: 'password1!' })
+    } catch {
+      // Expected - error is thrown
+    }
+
+    await waitFor(() => expect(result.current.isError).toBe(true))
+
+    expect(result.current.error).toBe('Password must contain an uppercase letter')
+  })
+
+  it('throws error when password is weak (no number)', async () => {
+    const queryClient = makeQueryClient()
+
+    const { result } = renderHook(() => useRegister(), {
+      wrapper: makeWrapper(queryClient),
+    })
+
+    try {
+      await result.current.register({ email: 'test@example.com', password: 'Password!' })
+    } catch {
+      // Expected - error is thrown
+    }
+
+    await waitFor(() => expect(result.current.isError).toBe(true))
+
+    expect(result.current.error).toBe('Password must contain a number')
+  })
+
+  it('throws error when password is weak (no symbol)', async () => {
+    const queryClient = makeQueryClient()
+
+    const { result } = renderHook(() => useRegister(), {
+      wrapper: makeWrapper(queryClient),
+    })
+
+    try {
+      await result.current.register({ email: 'test@example.com', password: 'Password1' })
+    } catch {
+      // Expected - error is thrown
+    }
+
+    await waitFor(() => expect(result.current.isError).toBe(true))
+
+    expect(result.current.error).toBe('Password must contain a symbol (!@#$%^&*(),.?"{}|<>)')
   })
 })

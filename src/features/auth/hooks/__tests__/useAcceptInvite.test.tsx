@@ -48,12 +48,12 @@ describe('useAcceptInvite', () => {
       wrapper: makeWrapper(queryClient),
     })
 
-    await result.current.acceptInvite({ token: 'abc-123-def', password: 'newpassword' })
+    await result.current.acceptInvite({ token: 'abc-123-def', password: 'Newpassword1!' })
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
     expect(mockInvoke).toHaveBeenCalledWith('accept-invite', {
-      body: { token: 'abc-123-def', password: 'newpassword' },
+      body: { token: 'abc-123-def', password: 'Newpassword1!' },
     })
   })
 
@@ -66,7 +66,7 @@ describe('useAcceptInvite', () => {
     })
 
     try {
-      await result.current.acceptInvite({ token: 'bad-token', password: 'newpassword' })
+      await result.current.acceptInvite({ token: 'bad-token', password: 'Newpassword1!' })
     } catch {
       // Expected
     }
@@ -85,7 +85,7 @@ describe('useAcceptInvite', () => {
     })
 
     try {
-      await result.current.acceptInvite({ token: 'used-token', password: 'newpassword' })
+      await result.current.acceptInvite({ token: 'used-token', password: 'Newpassword1!' })
     } catch {
       // Expected
     }
@@ -93,5 +93,59 @@ describe('useAcceptInvite', () => {
     await waitFor(() => expect(result.current.isError).toBe(true))
 
     expect(result.current.error).toBe('Invitation already used')
+  })
+
+  it('throws error when password is weak (no uppercase)', async () => {
+    const queryClient = makeQueryClient()
+
+    const { result } = renderHook(() => useAcceptInvite(), {
+      wrapper: makeWrapper(queryClient),
+    })
+
+    try {
+      await result.current.acceptInvite({ token: 'abc-123-def', password: 'newpassword1!' })
+    } catch {
+      // Expected
+    }
+
+    await waitFor(() => expect(result.current.isError).toBe(true))
+
+    expect(result.current.error).toBe('Password must contain an uppercase letter')
+  })
+
+  it('throws error when password is weak (no number)', async () => {
+    const queryClient = makeQueryClient()
+
+    const { result } = renderHook(() => useAcceptInvite(), {
+      wrapper: makeWrapper(queryClient),
+    })
+
+    try {
+      await result.current.acceptInvite({ token: 'abc-123-def', password: 'Newpassword!' })
+    } catch {
+      // Expected
+    }
+
+    await waitFor(() => expect(result.current.isError).toBe(true))
+
+    expect(result.current.error).toBe('Password must contain a number')
+  })
+
+  it('throws error when password is weak (no symbol)', async () => {
+    const queryClient = makeQueryClient()
+
+    const { result } = renderHook(() => useAcceptInvite(), {
+      wrapper: makeWrapper(queryClient),
+    })
+
+    try {
+      await result.current.acceptInvite({ token: 'abc-123-def', password: 'Newpassword1' })
+    } catch {
+      // Expected
+    }
+
+    await waitFor(() => expect(result.current.isError).toBe(true))
+
+    expect(result.current.error).toBe('Password must contain a symbol (!@#$%^&*(),.?"{}|<>)')
   })
 })
