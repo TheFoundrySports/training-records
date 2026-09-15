@@ -1,35 +1,46 @@
-import { Button } from '@/components/ui/button'
-
 interface AINotesPreviewPanelProps {
   enhanced_notes: string
   onApply: (notes: string) => void
   onDiscard: () => void
 }
 
-export function AINotesPreviewPanel({ enhanced_notes, onApply, onDiscard }: AINotesPreviewPanelProps) {
+export function AINotesPreviewPanel({
+  enhanced_notes,
+  onApply,
+  onDiscard,
+}: AINotesPreviewPanelProps) {
   return (
-    <div className="rounded-md border bg-muted/50 px-3 py-3 space-y-3">
-      <div>
-        <p className="text-xs font-medium text-muted-foreground mb-1">AI Enhanced</p>
-        <p className="text-sm whitespace-pre-wrap">{enhanced_notes}</p>
-      </div>
-
-      <div className="flex gap-2 pt-1">
-        <Button
+    <div className="card" style={{ padding: 'var(--space-4)' }}>
+      <p
+        style={{
+          fontSize: 'var(--text-xs)',
+          fontWeight: 500,
+          color: 'var(--muted)',
+          marginBottom: 'var(--space-2)',
+        }}
+      >
+        AI Enhanced
+      </p>
+      <p
+        style={{
+          fontSize: 'var(--text-sm)',
+          whiteSpace: 'pre-wrap',
+          marginBottom: 'var(--space-4)',
+        }}
+      >
+        {enhanced_notes}
+      </p>
+      <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
+        <button
           type="button"
-          size="sm"
+          className="btn btn-sm btn-primary"
           onClick={() => onApply(enhanced_notes)}
         >
           Apply
-        </Button>
-        <Button
-          type="button"
-          size="sm"
-          variant="outline"
-          onClick={onDiscard}
-        >
+        </button>
+        <button type="button" className="btn btn-sm" onClick={onDiscard}>
           Discard
-        </Button>
+        </button>
       </div>
     </div>
   )

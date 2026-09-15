@@ -1,9 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, cleanup } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { WorkoutFormPage } from './WorkoutFormPage'
+import { ThemeProvider } from '@/theme/ThemeContext'
 import type { useCreateWorkout, useUpdateWorkout } from '../hooks/useWorkoutMutations'
 import type { useWorkout } from '../hooks/useWorkouts'
 import type { WorkoutFormValues } from '../workout.schema'
@@ -76,12 +77,14 @@ function renderCreate() {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return render(
     <QueryClientProvider client={queryClient}>
-      <MemoryRouter initialEntries={['/workouts/new']}>
-        <Routes>
-          <Route path="/workouts/new" element={<WorkoutFormPage />} />
-          <Route path="/workouts" element={<div>Workouts list</div>} />
-        </Routes>
-      </MemoryRouter>
+      <ThemeProvider>
+        <MemoryRouter initialEntries={['/workouts/new']}>
+          <Routes>
+            <Route path="/workouts/new" element={<WorkoutFormPage />} />
+            <Route path="/workouts" element={<div>Workouts list</div>} />
+          </Routes>
+        </MemoryRouter>
+      </ThemeProvider>
     </QueryClientProvider>,
   )
 }
@@ -90,15 +93,21 @@ function renderCreateWithPrefill(prefill: WorkoutFormValues) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return render(
     <QueryClientProvider client={queryClient}>
-      <MemoryRouter initialEntries={[{ pathname: '/workouts/new', state: { prefill } }]}>
-        <Routes>
-          <Route path="/workouts/new" element={<WorkoutFormPage />} />
-          <Route path="/workouts" element={<div>Workouts list</div>} />
-        </Routes>
-      </MemoryRouter>
+      <ThemeProvider>
+        <MemoryRouter initialEntries={[{ pathname: '/workouts/new', state: { prefill } }]}>
+          <Routes>
+            <Route path="/workouts/new" element={<WorkoutFormPage />} />
+            <Route path="/workouts" element={<div>Workouts list</div>} />
+          </Routes>
+        </MemoryRouter>
+      </ThemeProvider>
     </QueryClientProvider>,
   )
 }
+
+afterEach(() => {
+  cleanup()
+})
 
 const samplePrefill: WorkoutFormValues = {
   title: 'AI Generated WOD',
@@ -125,7 +134,7 @@ describe('WorkoutFormPage (create mode)', () => {
     expect(screen.getByLabelText(/type/i)).toBeInTheDocument()
     expect(screen.getByLabelText(/date/i)).toBeInTheDocument()
     expect(screen.getByLabelText(/duration/i)).toBeInTheDocument()
-    expect(screen.getByLabelText(/notes/i)).toBeInTheDocument()
+    expect(screen.getByRole('textbox', { name: /^Notes$/i })).toBeInTheDocument()
     expect(screen.getByLabelText(/wod text/i)).toBeInTheDocument()
     expect(screen.getByLabelText(/rpe/i)).toBeInTheDocument()
   })

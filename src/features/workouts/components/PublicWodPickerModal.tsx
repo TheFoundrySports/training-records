@@ -1,13 +1,5 @@
 import { useState, useEffect } from 'react'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
+import { Dialog, DialogTitle, DialogContent, TextField } from '@mui/material'
 import { usePublicWods } from '@/features/public-wods'
 import type { PublicWodFormFields } from '@/features/public-wods'
 import type { PublicWod } from '@/features/public-wods'
@@ -16,20 +8,6 @@ interface PublicWodPickerModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onSelect: (fields: PublicWodFormFields) => void
-}
-
-const CATEGORY_LABELS: Record<string, string> = {
-  Hero: 'Hero',
-  Girl: 'Girl',
-  Benchmark: 'Benchmark',
-  General: 'General',
-}
-
-const CATEGORY_VARIANT: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
-  Hero: 'destructive',
-  Girl: 'secondary',
-  Benchmark: 'default',
-  General: 'outline',
 }
 
 function wodToFormFields(wod: PublicWod): PublicWodFormFields {
@@ -47,11 +25,8 @@ export function PublicWodPickerModal({ open, onOpenChange, onSelect }: PublicWod
   const [search, setSearch] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
 
-  // Debounce search input — 300ms
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(search)
-    }, 300)
+    const timer = setTimeout(() => setDebouncedSearch(search), 300)
     return () => clearTimeout(timer)
   }, [search])
 
@@ -67,33 +42,69 @@ export function PublicWodPickerModal({ open, onOpenChange, onSelect }: PublicWod
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
-        <DialogHeader>
-          <DialogTitle>Load a Public WOD</DialogTitle>
-          <DialogDescription>
-            Select a benchmark, hero, or reference workout to pre-fill the form.
-          </DialogDescription>
-        </DialogHeader>
-
-        {/* Search */}
-        <Input
+    <Dialog open={open} onClose={() => onOpenChange(false)} maxWidth="sm" fullWidth>
+      <DialogTitle
+        style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-lg)', fontWeight: 500 }}
+      >
+        Load a Public WOD
+      </DialogTitle>
+      <DialogContent
+        dividers
+        style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}
+      >
+        <TextField
+          size="small"
           placeholder="Search workouts..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           autoFocus
+          fullWidth
         />
 
-        {/* List */}
-        <div className="max-h-[400px] overflow-y-auto -mx-4 px-4 space-y-1">
-          {isLoading && <p className="py-8 text-center text-sm text-muted-foreground">Loading…</p>}
+        <div
+          style={{
+            maxHeight: 360,
+            overflowY: 'auto',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 'var(--space-2)',
+          }}
+        >
+          {isLoading && (
+            <p
+              style={{
+                textAlign: 'center',
+                padding: 'var(--space-8)',
+                color: 'var(--muted)',
+                fontSize: 'var(--text-sm)',
+              }}
+            >
+              Loading…
+            </p>
+          )}
           {isError && (
-            <p className="py-8 text-center text-sm text-destructive">
+            <p
+              style={{
+                textAlign: 'center',
+                padding: 'var(--space-8)',
+                color: 'var(--danger)',
+                fontSize: 'var(--text-sm)',
+              }}
+            >
               Failed to load workouts. Try again.
             </p>
           )}
           {!isLoading && !isError && wods?.length === 0 && (
-            <p className="py-8 text-center text-sm text-muted-foreground">No workouts found.</p>
+            <p
+              style={{
+                textAlign: 'center',
+                padding: 'var(--space-8)',
+                color: 'var(--muted)',
+                fontSize: 'var(--text-sm)',
+              }}
+            >
+              No workouts found.
+            </p>
           )}
           {!isLoading &&
             !isError &&
@@ -102,28 +113,87 @@ export function PublicWodPickerModal({ open, onOpenChange, onSelect }: PublicWod
                 key={wod.id}
                 type="button"
                 onClick={() => handleSelect(wod)}
-                className="w-full text-left rounded-lg px-3 py-2.5 hover:bg-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 4,
+                  padding: 'var(--space-3) var(--space-4)',
+                  borderRadius: 'var(--radius-md)',
+                  background: 'var(--surface-warm)',
+                  border: '1px solid var(--border-soft)',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                  transition: 'background var(--motion-fast) var(--ease-standard)',
+                  width: '100%',
+                }}
+                onMouseEnter={(e) => {
+                  ;(e.currentTarget as HTMLButtonElement).style.background = 'var(--surface)'
+                }}
+                onMouseLeave={(e) => {
+                  ;(e.currentTarget as HTMLButtonElement).style.background = 'var(--surface-warm)'
+                }}
               >
-                <div className="flex items-center justify-between gap-2">
-                  <span className="font-medium text-sm truncate">{wod.title}</span>
-                  <div className="flex items-center gap-1 shrink-0">
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: 'var(--space-2)',
+                  }}
+                >
+                  <span
+                    style={{
+                      fontWeight: 500,
+                      fontSize: 'var(--text-sm)',
+                      color: 'var(--fg)',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                      flex: 1,
+                    }}
+                  >
+                    {wod.title}
+                  </span>
+                  <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
                     {wod.category && (
-                      <Badge
-                        variant={CATEGORY_VARIANT[wod.category] ?? 'outline'}
-                        className="text-xs"
+                      <span
+                        style={{
+                          fontSize: 11,
+                          fontWeight: 500,
+                          padding: '2px 8px',
+                          borderRadius: 'var(--radius-pill)',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.04em',
+                          background: 'var(--surface)',
+                          color: 'var(--accent)',
+                        }}
                       >
-                        {CATEGORY_LABELS[wod.category] ?? wod.category}
-                      </Badge>
+                        {wod.category}
+                      </span>
                     )}
                     {wod.wodFormat && (
-                      <Badge variant="outline" className="text-xs uppercase">
+                      <span
+                        style={{
+                          fontSize: 11,
+                          fontWeight: 500,
+                          padding: '2px 8px',
+                          borderRadius: 'var(--radius-pill)',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.04em',
+                          border: '1px solid var(--border)',
+                          background: 'var(--surface)',
+                          color: 'var(--muted)',
+                        }}
+                      >
                         {wod.wodFormat}
-                      </Badge>
+                      </span>
                     )}
                   </div>
                 </div>
                 {wod.durationMinutes && (
-                  <p className="text-xs text-muted-foreground mt-0.5">{wod.durationMinutes} min</p>
+                  <p style={{ fontSize: 'var(--text-xs)', color: 'var(--muted)' }}>
+                    {wod.durationMinutes} min
+                  </p>
                 )}
               </button>
             ))}

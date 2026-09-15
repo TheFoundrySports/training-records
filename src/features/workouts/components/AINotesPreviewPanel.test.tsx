@@ -95,7 +95,7 @@ describe('AINotesPreviewPanel', () => {
     expect(screen.getByRole('button', { name: /discard/i })).not.toBeDisabled()
   })
 
-  it('renders with rounded border styling', () => {
+  it('renders with card styling', () => {
     const { container } = render(
       <AINotesPreviewPanel
         enhanced_notes="Styled text"
@@ -104,7 +104,7 @@ describe('AINotesPreviewPanel', () => {
       />,
     )
 
-    const panel = container.querySelector('.rounded-md')
+    const panel = container.querySelector('.card')
     expect(panel).not.toBeNull()
   })
 })
