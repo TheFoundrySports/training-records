@@ -21,57 +21,59 @@ const inputClass =
 function ForTimeFormSection({ control, name, disabled }: WodFormSectionProps<ForTimePayload>) {
   return (
     <div data-testid={`wod-form-section-for-time-${name}`} className="space-y-4">
-      <div className="flex flex-col gap-1.5">
-        <label
-          htmlFor={`${name}-rounds`}
-          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-        >
-          Rounds
-        </label>
-        <Controller
-          control={control}
-          name={`${name}.rounds`}
-          render={({ field }) => (
-            <input
-              id={`${name}-rounds`}
-              type="number"
-              min={1}
-              max={100}
-              disabled={disabled}
-              className={inputClass}
-              value={field.value ?? ''}
-              onChange={(e) =>
-                field.onChange(e.target.value === '' ? undefined : Number(e.target.value))
-              }
-            />
-          )}
-        />
-      </div>
-      <div className="flex flex-col gap-1.5">
-        <label
-          htmlFor={`${name}-timeCap`}
-          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-        >
-          Time Cap (minutes, optional)
-        </label>
-        <Controller
-          control={control}
-          name={`${name}.timeCap`}
-          render={({ field }) => (
-            <input
-              id={`${name}-timeCap`}
-              type="number"
-              min={1}
-              max={60}
-              disabled={disabled}
-              className={inputClass}
-              value={field.value ?? ''}
-              onChange={(e) =>
-                field.onChange(e.target.value === '' ? undefined : Number(e.target.value))
-              }
-            />
-          )}
-        />
+      <div className="grid-2">
+        <div className="flex flex-col gap-1.5">
+          <label
+            htmlFor={`${name}-rounds`}
+            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+          >
+            Rounds
+          </label>
+          <Controller
+            control={control}
+            name={`${name}.rounds`}
+            render={({ field }) => (
+              <input
+                id={`${name}-rounds`}
+                type="number"
+                min={1}
+                max={100}
+                disabled={disabled}
+                className={inputClass}
+                value={field.value ?? ''}
+                onChange={(e) =>
+                  field.onChange(e.target.value === '' ? undefined : Number(e.target.value))
+                }
+              />
+            )}
+          />
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <label
+            htmlFor={`${name}-timeCap`}
+            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+          >
+            Time Cap (minutes, optional)
+          </label>
+          <Controller
+            control={control}
+            name={`${name}.timeCap`}
+            render={({ field }) => (
+              <input
+                id={`${name}-timeCap`}
+                type="number"
+                min={1}
+                max={60}
+                disabled={disabled}
+                className={inputClass}
+                value={field.value ?? ''}
+                onChange={(e) =>
+                  field.onChange(e.target.value === '' ? undefined : Number(e.target.value))
+                }
+              />
+            )}
+          />
+        </div>
       </div>
       <MovementFieldArray control={control} name={`${name}.movements`} disabled={disabled} />
     </div>
