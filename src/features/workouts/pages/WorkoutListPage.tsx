@@ -22,7 +22,7 @@ import {
 import type { Theme } from '@mui/material/styles'
 import WhatshotIcon from '@mui/icons-material/Whatshot'
 import SelfImprovementIcon from '@mui/icons-material/SelfImprovement'
-import SportsMmaIcon from '@mui/icons-material/SportsMma'
+import type { SvgIconProps } from '@mui/material/SvgIcon'
 import { useWorkouts } from '../hooks/useWorkouts'
 import { ExportAllWorkoutsButton } from '../components/ExportAllWorkoutsButton'
 import { ImportWorkoutsModal } from '../components/ImportWorkoutsModal'
@@ -38,18 +38,72 @@ const FILTER_OPTIONS: { label: string; value: FilterType }[] = [
   { label: 'BJJ', value: 'bjj' },
 ]
 
+/** Friendly display labels for workout categories on the card chip. */
+const CATEGORY_LABELS: Record<WorkoutType, string> = {
+  crossfit: 'CrossFit',
+  functional: 'Functional',
+  bjj: 'Brazilian JiuJitsu',
+}
+
 /**
- * Pick the right MUI icon for a workout category. Centralised so the
- * WorkoutCard chip and any future badge share the same source of truth.
+ * BJJ white belt icon — inlined from Wikimedia Commons
+ * (https://commons.wikimedia.org/wiki/File:BJJ_White_Belt.svg). The original
+ * SVG (viewBox 0 0 478.619 184.762) is preserved as-is and rendered at 1em
+ * with `vector-effect="non-scaling-stroke"` so the line weight stays
+ * legible when the chip shrinks the icon to ~18–24px.
+ *
+ * MUI's icon library has no belt/gi icon, so this lives inline.
+ * Stroke uses currentColor so the chip's category color (violet for BJJ)
+ * tints the belt. Fill stays #FFF (original) which reads as the belt surface
+ * against the chip's light-tinted background.
  */
-function CategoryIcon({ type }: { type: WorkoutType }) {
+function BjjBeltIcon(props: SvgIconProps) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 478.619 184.762"
+      width="1em"
+      height="1em"
+      data-testid="category-icon-bjj"
+      aria-hidden="true"
+      {...props}
+    >
+      <g
+        fill="#FFF"
+        stroke="currentColor"
+        strokeWidth={4}
+        vectorEffect="non-scaling-stroke"
+      >
+        <path d="M192.044 46.054s-1.475 4.952.21 7.375c1.686 2.423 24.86 1.791 24.86 1.791L205.845 45l-13.801 1.054z" />
+        <path d="M9.831 23.198S129.012 55.285 243.61 55.285 458.289 4.098 462.11 1.806c3.819-2.292 12.987 38.963.765 48.131-12.225 9.168-80.983 48.896-216.208 48.896-135.226 0-233.015-21.392-239.892-29.032-6.876-7.64-6.876-38.199 3.056-46.603z" />
+        <path d="M252.014 126.336s-22.156-6.112-28.268-21.392c-6.111-15.279 58.827-29.795 58.827-29.795l-6.112 31.324-24.447 19.863z" />
+        <path d="M195.479 102.652s30.56 21.392 35.143 19.1c4.584-2.292 58.827-36.671 58.827-36.671L243.61 51.465l-50.423 38.2 2.292 12.987z" />
+        <path d="M22.818 152.312S148.111 75.914 223.746 45.354c75.635-30.56 30.56 29.031 30.56 29.031s-78.69 38.199-110.778 57.299-81.746 50.424-87.858 51.188c-6.112.763-32.852-30.56-32.852-30.56z" />
+        <path d="M255.967 27.303s-5.29-1.851-14.146 8.46c-8.857 10.312 15.07 8.197 15.07 8.197l-.924-16.657z" />
+        <path d="M232.15 28.546s94.734 49.659 127.586 60.355c32.851 10.696 113.832 46.603 116.889 55.771s-27.503 30.559-27.503 30.559-23.685-21.391-54.243-34.379c-30.56-12.987-83.274-34.379-112.306-48.131-29.031-13.751-89.387-47.367-89.387-47.367l38.964-16.808z" />
+        <path d="M255.834 27.782s-2.292 92.442-4.584 97.026c-2.293 4.584 42.783-12.987 43.546-18.335.765-5.349 6.877-50.423 2.293-55.007s-36.672-25.976-41.255-23.684zM52.833 134.34s20.641 24.654 33.446 31.918c4.013-1.912 87.34-50.839 87.34-50.839s-25.801-22.933-29.623-32.107c-7.453 4.205-91.163 51.028-91.163 51.028z" />
+        <path d="M62.006 129.18s20.641 24.655 33.446 31.917c4.013-1.911 68.995-40.707 68.995-40.707s-25.801-22.933-29.624-32.108c-7.452 4.205-72.817 40.898-72.817 40.898z" />
+      </g>
+    </svg>
+  )
+}
+
+/**
+ * Pick the right icon for a workout category. Centralised so the
+ * WorkoutCard chip and any future badge share the same source of truth.
+ * MUI ships icons for CrossFit (Whatshot) and Functional (SelfImprovement),
+ * but BJJ gets an inline tied-belt SVG (no MUI equivalent).
+ * All three forward arbitrary SvgIconProps (size, color, sx, etc.) so the
+ * chip can scale them uniformly.
+ */
+function CategoryIcon({ type, ...iconProps }: { type: WorkoutType } & SvgIconProps) {
   switch (type) {
     case 'crossfit':
-      return <WhatshotIcon data-testid={`category-icon-${type}`} fontSize="small" />
+      return <WhatshotIcon data-testid={`category-icon-${type}`} {...iconProps} />
     case 'functional':
-      return <SelfImprovementIcon data-testid={`category-icon-${type}`} fontSize="small" />
+      return <SelfImprovementIcon data-testid={`category-icon-${type}`} {...iconProps} />
     case 'bjj':
-      return <SportsMmaIcon data-testid={`category-icon-${type}`} fontSize="small" />
+      return <BjjBeltIcon {...iconProps} />
   }
 }
 
@@ -96,20 +150,20 @@ function WorkoutCard({ workout }: { workout: Workout }) {
           </Typography>
         </Box>
         <Chip
-          icon={<CategoryIcon type={workout.type} />}
-          label={workout.type}
-          size="small"
+          icon={<CategoryIcon type={workout.type} fontSize="medium" />}
+          label={CATEGORY_LABELS[workout.type]}
+          size="medium"
           variant="outlined"
           data-testid={`category-chip-${workout.type}`}
           sx={{
-            textTransform: 'capitalize',
             flexShrink: 0,
+            fontSize: '0.875rem',
             color: categoryColor.main,
             borderColor: categoryColor.main,
             // Slightly tint the background using the category's `light` shade
             // (white-on-orange would be harsh; a soft fill reads better).
             backgroundColor: categoryColor.light,
-            '& .MuiChip-icon': { color: categoryColor.main },
+            '& .MuiChip-icon': { color: categoryColor.main, fontSize: '1.5rem' },
             '&:hover': {
               backgroundColor: categoryColor.dark,
               color: '#ffffff',

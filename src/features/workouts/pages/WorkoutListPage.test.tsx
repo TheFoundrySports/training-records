@@ -98,11 +98,12 @@ describe('WorkoutListPage', () => {
     expect(screen.getByText('Functional Flow')).toBeInTheDocument()
     expect(screen.getByText(/45 min/i)).toBeInTheDocument()
     expect(screen.getByText(/60 min/i)).toBeInTheDocument()
-    // Scope to the workout list so the toggle button text (also "CrossFit")
-    // doesn't collide with the chip's lowercase label.
+    // Chips now display human-readable labels via CATEGORY_LABELS, not the raw
+    // `workout.type` token. The toggle buttons still use the raw token ("BJJ"),
+    // so scoping to the list avoids collisions like before.
     const list = screen.getByRole('list', { name: /workout list/i })
-    expect(within(list).getByText(/^crossfit$/i)).toBeInTheDocument()
-    expect(within(list).getByText(/^functional$/i)).toBeInTheDocument()
+    expect(within(list).getByText('CrossFit')).toBeInTheDocument()
+    expect(within(list).getByText('Functional')).toBeInTheDocument()
   })
 
   it('each workout card links to the detail page', () => {
@@ -141,7 +142,7 @@ describe('WorkoutListPage', () => {
     expect(mockUseWorkouts).toHaveBeenLastCalledWith({ type: 'crossfit' })
   })
 
-  it('renders the category icon per workout (Whatshot / SelfImprovement / SportsMartialArts)', () => {
+  it('renders the category icon per workout (Whatshot / SelfImprovement / BjjBeltIcon)', () => {
     const allTypes: Workout[] = [
       {
         id: 'wc',
@@ -178,10 +179,28 @@ describe('WorkoutListPage', () => {
     renderPage()
     expect(screen.getByTestId('category-icon-crossfit')).toBeInTheDocument()
     expect(screen.getByTestId('category-icon-functional')).toBeInTheDocument()
-    expect(screen.getByTestId('category-icon-bjj')).toBeInTheDocument()
-  })
+        expect(screen.getByTestId('category-icon-bjj')).toBeInTheDocument()
+      })
 
-  it('chips have a category-scoped test id (for downstream visual testing)', () => {
+      it('BJJ chip displays the friendly label "Brazilian JiuJitsu" (not raw "bjj")', () => {
+        const bjjWorkout: Workout = {
+          id: 'wbj',
+          userId: 'u1',
+          title: 'BJJ Rolls',
+          type: 'bjj',
+          performedAt: '2026-04-05T08:00:00.000Z',
+          durationMinutes: 45,
+          createdAt: '2026-04-05T08:00:00.000Z',
+          updatedAt: '2026-04-05T08:00:00.000Z',
+        }
+        mockReturn({ data: [bjjWorkout], isLoading: false, isError: false, error: null })
+        renderPage()
+        const list = screen.getByRole('list', { name: /workout list/i })
+        expect(within(list).getByText('Brazilian JiuJitsu')).toBeInTheDocument()
+        expect(within(list).queryByText(/^bjj$/)).not.toBeInTheDocument()
+      })
+
+      it('chips have a category-scoped test id (for downstream visual testing)', () => {
     mockReturn({ data: sampleWorkouts, isLoading: false, isError: false, error: null })
     renderPage()
     const list = screen.getByRole('list', { name: /workout list/i })
