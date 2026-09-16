@@ -22,7 +22,7 @@ import {
 import type { Theme } from '@mui/material/styles'
 import WhatshotIcon from '@mui/icons-material/Whatshot'
 import SelfImprovementIcon from '@mui/icons-material/SelfImprovement'
-import SportsMartialArtsIcon from '@mui/icons-material/SportsMartialArts'
+import SportsMmaIcon from '@mui/icons-material/SportsMma'
 import { useWorkouts } from '../hooks/useWorkouts'
 import { ExportAllWorkoutsButton } from '../components/ExportAllWorkoutsButton'
 import { ImportWorkoutsModal } from '../components/ImportWorkoutsModal'
@@ -49,7 +49,7 @@ function CategoryIcon({ type }: { type: WorkoutType }) {
     case 'functional':
       return <SelfImprovementIcon data-testid={`category-icon-${type}`} fontSize="small" />
     case 'bjj':
-      return <SportsMartialArtsIcon data-testid={`category-icon-${type}`} fontSize="small" />
+      return <SportsMmaIcon data-testid={`category-icon-${type}`} fontSize="small" />
   }
 }
 
@@ -110,7 +110,11 @@ function WorkoutCard({ workout }: { workout: Workout }) {
             // (white-on-orange would be harsh; a soft fill reads better).
             backgroundColor: categoryColor.light,
             '& .MuiChip-icon': { color: categoryColor.main },
-            '&:hover': { backgroundColor: categoryColor.dark, color: '#ffffff', borderColor: categoryColor.dark },
+            '&:hover': {
+              backgroundColor: categoryColor.dark,
+              color: '#ffffff',
+              borderColor: categoryColor.dark,
+            },
           }}
         />
       </Card>
@@ -154,13 +158,7 @@ function useCategoryToggleSx(type: FilterType) {
   } as const
 }
 
-function TypeFilter({
-  value,
-  onChange,
-}: {
-  value: FilterType
-  onChange: (v: FilterType) => void
-}) {
+function TypeFilter({ value, onChange }: { value: FilterType; onChange: (v: FilterType) => void }) {
   return (
     <ToggleButtonGroup
       value={value}
