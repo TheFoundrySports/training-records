@@ -53,9 +53,13 @@ const CATEGORY_LABELS: Record<WorkoutType, string> = {
  * legible when the chip shrinks the icon to ~18–24px.
  *
  * MUI's icon library has no belt/gi icon, so this lives inline.
- * Stroke uses currentColor so the chip's category color (violet for BJJ)
- * tints the belt. Fill stays #FFF (original) which reads as the belt surface
- * against the chip's light-tinted background.
+ *
+ * Fill uses `currentColor` so the entire belt renders in the chip's
+ * category color (violet for BJJ), giving strong contrast against the
+ * chip's light-tinted background. The stroke uses the same color but
+ * with a thinner visual weight (non-scaling 4px), creating internal
+ * detail between paths. Original SVG fill was #FFF (white), which read
+ * as the belt surface — but on the light-tinted chip it disappeared.
  */
 function BjjBeltIcon(props: SvgIconProps) {
   return (
@@ -68,12 +72,7 @@ function BjjBeltIcon(props: SvgIconProps) {
       aria-hidden="true"
       {...props}
     >
-      <g
-        fill="#FFF"
-        stroke="currentColor"
-        strokeWidth={4}
-        vectorEffect="non-scaling-stroke"
-      >
+      <g fill="currentColor" stroke="currentColor" strokeWidth={4} vectorEffect="non-scaling-stroke">
         <path d="M192.044 46.054s-1.475 4.952.21 7.375c1.686 2.423 24.86 1.791 24.86 1.791L205.845 45l-13.801 1.054z" />
         <path d="M9.831 23.198S129.012 55.285 243.61 55.285 458.289 4.098 462.11 1.806c3.819-2.292 12.987 38.963.765 48.131-12.225 9.168-80.983 48.896-216.208 48.896-135.226 0-233.015-21.392-239.892-29.032-6.876-7.64-6.876-38.199 3.056-46.603z" />
         <path d="M252.014 126.336s-22.156-6.112-28.268-21.392c-6.111-15.279 58.827-29.795 58.827-29.795l-6.112 31.324-24.447 19.863z" />
