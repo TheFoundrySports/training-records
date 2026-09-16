@@ -81,7 +81,9 @@ describe('WorkoutListPage', () => {
       data: undefined,
       isLoading: false,
       isError: true,
-      error: { error: { code: 'NETWORK_ERROR', message: 'Network request failed' } } as unknown as Error,
+      error: {
+        error: { code: 'NETWORK_ERROR', message: 'Network request failed' },
+      } as unknown as Error,
     })
     renderPage()
     expect(screen.getByRole('alert')).toBeInTheDocument()
@@ -137,5 +139,53 @@ describe('WorkoutListPage', () => {
     renderPage()
     await user.click(screen.getByRole('button', { name: /^crossfit$/i }))
     expect(mockUseWorkouts).toHaveBeenLastCalledWith({ type: 'crossfit' })
+  })
+
+  it('renders the category icon per workout (Whatshot / SelfImprovement / SportsMartialArts)', () => {
+    const allTypes: Workout[] = [
+      {
+        id: 'wc',
+        userId: 'u1',
+        title: 'CrossFit WOD',
+        type: 'crossfit',
+        performedAt: '2026-04-05T08:00:00.000Z',
+        durationMinutes: 45,
+        createdAt: '2026-04-05T08:00:00.000Z',
+        updatedAt: '2026-04-05T08:00:00.000Z',
+      },
+      {
+        id: 'wf',
+        userId: 'u1',
+        title: 'Functional Flow',
+        type: 'functional',
+        performedAt: '2026-04-04T10:00:00.000Z',
+        durationMinutes: 60,
+        createdAt: '2026-04-04T10:00:00.000Z',
+        updatedAt: '2026-04-04T10:00:00.000Z',
+      },
+      {
+        id: 'wb',
+        userId: 'u1',
+        title: 'BJJ Rolls',
+        type: 'bjj',
+        performedAt: '2026-04-03T10:00:00.000Z',
+        durationMinutes: 45,
+        createdAt: '2026-04-03T10:00:00.000Z',
+        updatedAt: '2026-04-03T10:00:00.000Z',
+      },
+    ]
+    mockReturn({ data: allTypes, isLoading: false, isError: false, error: null })
+    renderPage()
+    expect(screen.getByTestId('category-icon-crossfit')).toBeInTheDocument()
+    expect(screen.getByTestId('category-icon-functional')).toBeInTheDocument()
+    expect(screen.getByTestId('category-icon-bjj')).toBeInTheDocument()
+  })
+
+  it('chips have a category-scoped test id (for downstream visual testing)', () => {
+    mockReturn({ data: sampleWorkouts, isLoading: false, isError: false, error: null })
+    renderPage()
+    const list = screen.getByRole('list', { name: /workout list/i })
+    expect(within(list).getByTestId('category-chip-crossfit')).toBeInTheDocument()
+    expect(within(list).getByTestId('category-chip-functional')).toBeInTheDocument()
   })
 })

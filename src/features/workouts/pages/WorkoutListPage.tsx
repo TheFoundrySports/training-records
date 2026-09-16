@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { useNavigate } from 'react-router'
+import { useNavigate, Link as LinkLike } from 'react-router'
 import { useQueryClient } from '@tanstack/react-query'
 import {
   Alert,
@@ -17,7 +17,12 @@ import {
   ToggleButton,
   ToggleButtonGroup,
   Typography,
+  useTheme,
 } from '@mui/material'
+import type { Theme } from '@mui/material/styles'
+import WhatshotIcon from '@mui/icons-material/Whatshot'
+import SelfImprovementIcon from '@mui/icons-material/SelfImprovement'
+import SportsMartialArtsIcon from '@mui/icons-material/SportsMartialArts'
 import { useWorkouts } from '../hooks/useWorkouts'
 import { ExportAllWorkoutsButton } from '../components/ExportAllWorkoutsButton'
 import { ImportWorkoutsModal } from '../components/ImportWorkoutsModal'
@@ -33,6 +38,26 @@ const FILTER_OPTIONS: { label: string; value: FilterType }[] = [
   { label: 'BJJ', value: 'bjj' },
 ]
 
+/**
+ * Pick the right MUI icon for a workout category. Centralised so the
+ * WorkoutCard chip and any future badge share the same source of truth.
+ */
+function CategoryIcon({ type }: { type: WorkoutType }) {
+  switch (type) {
+    case 'crossfit':
+      return <WhatshotIcon data-testid={`category-icon-${type}`} fontSize="small" />
+    case 'functional':
+      return <SelfImprovementIcon data-testid={`category-icon-${type}`} fontSize="small" />
+    case 'bjj':
+      return <SportsMartialArtsIcon data-testid={`category-icon-${type}`} fontSize="small" />
+  }
+}
+
+/** Resolve the theme palette color slot for a workout category. */
+function useCategoryColor(theme: Theme, type: WorkoutType) {
+  return theme.palette[type]
+}
+
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString(undefined, {
     year: 'numeric',
@@ -42,6 +67,8 @@ function formatDate(iso: string) {
 }
 
 function WorkoutCard({ workout }: { workout: Workout }) {
+  const theme = useTheme()
+  const categoryColor = useCategoryColor(theme, workout.type)
   return (
     <ListItem disablePadding>
       <Card
@@ -57,7 +84,7 @@ function WorkoutCard({ workout }: { workout: Workout }) {
           textDecoration: 'none',
           color: 'inherit',
           cursor: 'pointer',
-          '&:hover': { borderColor: 'primary.main' },
+          '&:hover': { borderColor: categoryColor.main },
         }}
       >
         <Box sx={{ flex: 1, minWidth: 0 }}>
@@ -69,18 +96,27 @@ function WorkoutCard({ workout }: { workout: Workout }) {
           </Typography>
         </Box>
         <Chip
+          icon={<CategoryIcon type={workout.type} />}
           label={workout.type}
           size="small"
           variant="outlined"
-          sx={{ textTransform: 'capitalize', flexShrink: 0 }}
+          data-testid={`category-chip-${workout.type}`}
+          sx={{
+            textTransform: 'capitalize',
+            flexShrink: 0,
+            color: categoryColor.main,
+            borderColor: categoryColor.main,
+            // Slightly tint the background using the category's `light` shade
+            // (white-on-orange would be harsh; a soft fill reads better).
+            backgroundColor: categoryColor.light,
+            '& .MuiChip-icon': { color: categoryColor.main },
+            '&:hover': { backgroundColor: categoryColor.dark, color: '#ffffff', borderColor: categoryColor.dark },
+          }}
         />
       </Card>
     </ListItem>
   )
 }
-
-// React Router's Link, aliased to avoid clashing with MUI's Link.
-import { Link as LinkLike } from 'react-router'
 
 function LoadingSkeleton() {
   return (
@@ -94,6 +130,28 @@ function LoadingSkeleton() {
       ))}
     </Box>
   )
+}
+
+/** Highlight the active category toggle with the category's color (or `primary` for "all"). */
+function useCategoryToggleSx(type: FilterType) {
+  const theme = useTheme()
+  if (type === 'all') {
+    return {
+      '&.Mui-selected': {
+        backgroundColor: theme.palette.primary.main,
+        color: theme.palette.primary.contrastText,
+        '&:hover': { backgroundColor: theme.palette.primary.main },
+      },
+    } as const
+  }
+  const color = theme.palette[type]
+  return {
+    '&.Mui-selected': {
+      backgroundColor: color.main,
+      color: color.contrastText,
+      '&:hover': { backgroundColor: color.dark },
+    },
+  } as const
 }
 
 function TypeFilter({
@@ -112,11 +170,18 @@ function TypeFilter({
       sx={{ mb: 3, flexWrap: 'wrap', gap: 0.5 }}
     >
       {FILTER_OPTIONS.map((opt) => (
-        <ToggleButton key={opt.value} value={opt.value} aria-label={opt.label}>
-          {opt.label}
-        </ToggleButton>
+        <CategoryToggleButton key={opt.value} option={opt} />
       ))}
     </ToggleButtonGroup>
+  )
+}
+
+function CategoryToggleButton({ option }: { option: { label: string; value: FilterType } }) {
+  const sx = useCategoryToggleSx(option.value)
+  return (
+    <ToggleButton value={option.value} aria-label={option.label} sx={sx}>
+      {option.label}
+    </ToggleButton>
   )
 }
 
