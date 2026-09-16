@@ -1,12 +1,27 @@
-import { useState } from 'react'
-import { Link, useNavigate } from 'react-router'
+import { useMemo, useState } from 'react'
+import { useNavigate } from 'react-router'
 import { useQueryClient } from '@tanstack/react-query'
+import {
+  Alert,
+  AlertTitle,
+  Box,
+  Button,
+  Card,
+  Chip,
+  Container,
+  List,
+  ListItem,
+  Skeleton,
+  Stack,
+  ThemeProvider,
+  ToggleButton,
+  ToggleButtonGroup,
+  Typography,
+} from '@mui/material'
 import { useWorkouts } from '../hooks/useWorkouts'
 import { ExportAllWorkoutsButton } from '../components/ExportAllWorkoutsButton'
 import { ImportWorkoutsModal } from '../components/ImportWorkoutsModal'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Card, CardContent } from '@/components/ui/card'
+import { createWorkoutsTheme, readShadcnDarkMode } from '../theme/mui-workouts-theme'
 import type { Workout, WorkoutType } from '../workout.types'
 
 type FilterType = 'all' | WorkoutType
@@ -28,124 +43,165 @@ function formatDate(iso: string) {
 
 function WorkoutCard({ workout }: { workout: Workout }) {
   return (
-    <Link
-      to={`/workouts/${workout.id}`}
-      className="block hover:no-underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded-xl"
-    >
-      <Card className="hover:ring-primary/40 focus-visible:ring-primary/50 transition-shadow cursor-pointer">
-        <CardContent className="flex items-start justify-between gap-4 py-4">
-          <div className="flex-1 min-w-0">
-            <p className="font-medium truncate">{workout.title}</p>
-            <p className="text-sm text-muted-foreground mt-1">
-              {formatDate(workout.performedAt)} &bull; {workout.durationMinutes} min
-            </p>
-          </div>
-          <Badge variant="secondary" className="shrink-0 capitalize">
-            {workout.type}
-          </Badge>
-        </CardContent>
+    <ListItem disablePadding>
+      <Card
+        component={LinkLike}
+        to={`/workouts/${workout.id}`}
+        sx={{
+          width: '100%',
+          p: 2,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 2,
+          textDecoration: 'none',
+          color: 'inherit',
+          cursor: 'pointer',
+          '&:hover': { borderColor: 'primary.main' },
+        }}
+      >
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Typography variant="body1" noWrap sx={{ fontWeight: 500 }}>
+            {workout.title}
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+            {formatDate(workout.performedAt)} &bull; {workout.durationMinutes} min
+          </Typography>
+        </Box>
+        <Chip
+          label={workout.type}
+          size="small"
+          variant="outlined"
+          sx={{ textTransform: 'capitalize', flexShrink: 0 }}
+        />
       </Card>
-    </Link>
+    </ListItem>
   )
 }
+
+// React Router's Link, aliased to avoid clashing with MUI's Link.
+import { Link as LinkLike } from 'react-router'
 
 function LoadingSkeleton() {
   return (
-    <div role="status" aria-label="Loading workouts" className="space-y-3">
+    <Box
+      role="status"
+      aria-label="Loading workouts"
+      sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}
+    >
       {[1, 2, 3].map((i) => (
-        <div key={i} className="h-20 rounded-xl bg-muted animate-pulse" aria-hidden="true" />
+        <Skeleton key={i} variant="rectangular" height={80} sx={{ borderRadius: 1.25 }} />
       ))}
-    </div>
+    </Box>
   )
 }
 
-function TypeFilter({ value, onChange }: { value: FilterType; onChange: (v: FilterType) => void }) {
+function TypeFilter({
+  value,
+  onChange,
+}: {
+  value: FilterType
+  onChange: (v: FilterType) => void
+}) {
   return (
-    <div role="group" aria-label="Filter workouts by type" className="flex flex-wrap gap-1 mb-6">
+    <ToggleButtonGroup
+      value={value}
+      exclusive
+      onChange={(_, next) => next && onChange(next as FilterType)}
+      aria-label="Filter workouts by type"
+      sx={{ mb: 3, flexWrap: 'wrap', gap: 0.5 }}
+    >
       {FILTER_OPTIONS.map((opt) => (
-        <button
-          key={opt.value}
-          type="button"
-          onClick={() => onChange(opt.value)}
-          aria-pressed={value === opt.value}
-          className={`px-3 py-1 rounded-full text-sm border transition-colors ${
-            value === opt.value
-              ? 'bg-primary text-primary-foreground border-primary'
-              : 'border-input hover:bg-accent'
-          }`}
-        >
+        <ToggleButton key={opt.value} value={opt.value} aria-label={opt.label}>
           {opt.label}
-        </button>
+        </ToggleButton>
       ))}
-    </div>
+    </ToggleButtonGroup>
   )
 }
 
 export function WorkoutListPage() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const theme = useMemo(() => createWorkoutsTheme(readShadcnDarkMode()), [])
   const [filter, setFilter] = useState<FilterType>('all')
   const [importModalOpen, setImportModalOpen] = useState(false)
   const { data: workouts, isLoading, isError, error } = useWorkouts({ type: filter })
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-2xl">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
-        <h1 className="text-2xl font-semibold">Workouts</h1>
-<div className="flex flex-wrap items-center gap-2">
-          <ExportAllWorkoutsButton />
-          <Button variant="outline" onClick={() => setImportModalOpen(true)}>
-            Import
-          </Button>
-          <Button onClick={() => void navigate('/workouts/new')}>Log workout</Button>
-        </div>
-      </div>
-
-      <TypeFilter value={filter} onChange={setFilter} />
-
-      {isLoading && <LoadingSkeleton />}
-
-      {isError && (
-        <div
-          role="alert"
-          className="rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-destructive"
+    <ThemeProvider theme={theme}>
+      <Container maxWidth="sm" sx={{ py: 4 }}>
+        <Stack
+          direction={{ xs: 'column', sm: 'row' }}
+          spacing={1.5}
+          alignItems={{ sm: 'center' }}
+          justifyContent="space-between"
+          sx={{ mb: 3 }}
         >
-          <p className="font-medium">Failed to load workouts</p>
-          <p className="text-sm mt-1 text-destructive/80">
+          <Typography variant="h4" component="h1">
+            Workouts
+          </Typography>
+          <Stack direction="row" spacing={1} flexWrap="wrap">
+            <ExportAllWorkoutsButton />
+            <Button variant="outlined" onClick={() => setImportModalOpen(true)}>
+              Import
+            </Button>
+            <Button variant="contained" onClick={() => void navigate('/workouts/new')}>
+              Log workout
+            </Button>
+          </Stack>
+        </Stack>
+
+        <TypeFilter value={filter} onChange={setFilter} />
+
+        {isLoading && <LoadingSkeleton />}
+
+        {isError && (
+          <Alert severity="error" sx={{ borderRadius: 1, mb: 2 }}>
+            <AlertTitle>Failed to load workouts</AlertTitle>
             {(error as { error?: { message?: string } })?.error?.message ??
               'An unexpected error occurred. Please try again.'}
-          </p>
-        </div>
-      )}
+          </Alert>
+        )}
 
-      {!isLoading && !isError && workouts && workouts.length === 0 && (
-        <div className="text-center py-16 text-muted-foreground">
-          <p className="text-lg font-medium">No workouts yet</p>
-          <p className="text-sm mt-1">Log your first workout to get started.</p>
-          <Button className="mt-4" onClick={() => void navigate('/workouts/new')}>
-            Log workout
-          </Button>
-        </div>
-      )}
+        {!isLoading && !isError && workouts && workouts.length === 0 && (
+          <Stack alignItems="center" spacing={1} sx={{ py: 8 }}>
+            <Typography variant="body1" sx={{ fontWeight: 500 }}>
+              No workouts yet
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Log your first workout to get started.
+            </Typography>
+            <Button
+              variant="contained"
+              sx={{ mt: 2 }}
+              onClick={() => void navigate('/workouts/new')}
+            >
+              Log workout
+            </Button>
+          </Stack>
+        )}
 
-      {!isLoading && !isError && workouts && workouts.length > 0 && (
-        <ul aria-label="Workout list" className="space-y-3">
-          {workouts.map((workout) => (
-            <li key={workout.id}>
-              <WorkoutCard workout={workout} />
-            </li>
-          ))}
-        </ul>
-      )}
+        {!isLoading && !isError && workouts && workouts.length > 0 && (
+          <List
+            aria-label="Workout list"
+            sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, p: 0 }}
+          >
+            {workouts.map((workout) => (
+              <WorkoutCard key={workout.id} workout={workout} />
+            ))}
+          </List>
+        )}
 
-      <ImportWorkoutsModal
-        open={importModalOpen}
-        onClose={() => setImportModalOpen(false)}
-        onSuccess={() => {
-          setImportModalOpen(false)
-          void queryClient.invalidateQueries({ queryKey: ['workouts'] })
-        }}
-      />
-    </div>
+        <ImportWorkoutsModal
+          open={importModalOpen}
+          onClose={() => setImportModalOpen(false)}
+          onSuccess={() => {
+            setImportModalOpen(false)
+            void queryClient.invalidateQueries({ queryKey: ['workouts'] })
+          }}
+        />
+      </Container>
+    </ThemeProvider>
   )
 }

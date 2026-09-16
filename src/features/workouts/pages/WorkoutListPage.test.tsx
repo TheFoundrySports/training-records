@@ -1,10 +1,11 @@
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { screen, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { WorkoutListPage } from './WorkoutListPage'
 import type { Workout } from '../workout.types'
 import type { useWorkouts } from '../hooks/useWorkouts'
+import { renderWithMuiTheme } from '../theme/renderWithMuiTheme'
 
 // Mock the hook module
 vi.mock('../hooks/useWorkouts', () => ({
@@ -26,12 +27,14 @@ function renderPage() {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   })
-  return render(
+  // Use a tiny shim so we can compose the MUI theme wrapper with the
+  // existing QueryClient + MemoryRouter wrappers without restructuring every test.
+  return renderWithMuiTheme(
     <QueryClientProvider client={queryClient}>
       <MemoryRouter>
         <WorkoutListPage />
       </MemoryRouter>
-    </QueryClientProvider>
+    </QueryClientProvider>,
   )
 }
 
@@ -93,8 +96,11 @@ describe('WorkoutListPage', () => {
     expect(screen.getByText('Functional Flow')).toBeInTheDocument()
     expect(screen.getByText(/45 min/i)).toBeInTheDocument()
     expect(screen.getByText(/60 min/i)).toBeInTheDocument()
-    expect(screen.getByText('crossfit')).toBeInTheDocument()
-    expect(screen.getByText('functional')).toBeInTheDocument()
+    // Scope to the workout list so the toggle button text (also "CrossFit")
+    // doesn't collide with the chip's lowercase label.
+    const list = screen.getByRole('list', { name: /workout list/i })
+    expect(within(list).getByText(/^crossfit$/i)).toBeInTheDocument()
+    expect(within(list).getByText(/^functional$/i)).toBeInTheDocument()
   })
 
   it('each workout card links to the detail page', () => {
@@ -110,14 +116,26 @@ describe('WorkoutListPage', () => {
   it('renders the Log workout button', () => {
     mockReturn({ data: [], isLoading: false, isError: false, error: null })
     renderPage()
+    // Two "Log workout" buttons exist: header action + empty-state CTA
     expect(screen.getAllByRole('button', { name: /log workout/i }).length).toBeGreaterThan(0)
   })
 
-  it('action buttons container uses flex-wrap so buttons stack on small screens', () => {
+  it('renders four filter toggle buttons', () => {
+    mockReturn({ data: sampleWorkouts, isLoading: false, isError: false, error: null })
+    renderPage()
+    const toggleGroup = screen.getByRole('group', { name: /filter workouts by type/i })
+    expect(toggleGroup).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /^all$/i, pressed: true })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /^crossfit$/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /^functional$/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /^bjj$/i })).toBeInTheDocument()
+  })
+
+  it('filters by CrossFit when that toggle is clicked', async () => {
+    const user = (await import('@testing-library/user-event')).default
     mockReturn({ data: [], isLoading: false, isError: false, error: null })
     renderPage()
-
-    const buttonContainer = document.querySelector('.flex.flex-wrap')
-    expect(buttonContainer).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: /^crossfit$/i }))
+    expect(mockUseWorkouts).toHaveBeenLastCalledWith({ type: 'crossfit' })
   })
 })
