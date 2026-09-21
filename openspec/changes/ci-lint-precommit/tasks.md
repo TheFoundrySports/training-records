@@ -2,14 +2,14 @@
 
 ## Review Workload Forecast
 
-| Field | Value |
-|-------|-------|
+| Field                   | Value                          |
+| ----------------------- | ------------------------------ |
 | Estimated changed lines | ~50–70 (additions + deletions) |
-| 400-line budget risk | Low |
-| Chained PRs recommended | No |
-| Suggested split | Single PR |
-| Delivery strategy | ask-on-risk |
-| Chain strategy | N/A — single PR |
+| 400-line budget risk    | Low                            |
+| Chained PRs recommended | No                             |
+| Suggested split         | Single PR                      |
+| Delivery strategy       | ask-on-risk                    |
+| Chain strategy          | N/A — single PR                |
 
 Decision needed before apply: No
 Chained PRs recommended: No
@@ -18,9 +18,9 @@ Chain strategy: stacked-to-main
 
 ### Suggested Work Units
 
-| Unit | Goal | Likely PR | Notes |
-|------|------|-----------|-------|
-| 1 | All 6 file changes in one cohesive PR | PR 1 | Self-contained; no chaining needed |
+| Unit | Goal                                  | Likely PR | Notes                              |
+| ---- | ------------------------------------- | --------- | ---------------------------------- |
+| 1    | All 6 file changes in one cohesive PR | PR 1      | Self-contained; no chaining needed |
 
 ---
 

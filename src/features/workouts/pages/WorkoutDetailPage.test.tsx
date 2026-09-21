@@ -1,9 +1,10 @@
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { WorkoutDetailPage } from './WorkoutDetailPage'
+import { renderWithMuiTheme } from '../theme/renderWithMuiTheme'
 import type { Workout } from '../workout.types'
 import type { useWorkout } from '../hooks/useWorkouts'
 import type { useDeleteWorkout } from '../hooks/useWorkoutMutations'
@@ -39,6 +40,16 @@ vi.mock('@/features/auth/AuthContext', () => ({
   useAuth: vi.fn(() => ({ user: { id: 'u1' }, session: {}, role: 'athlete', isLoading: false })),
 }))
 
+vi.mock('@/features/garmin', () => ({
+  useGarminActivity: vi.fn(() => ({ data: null })),
+  useTrainingEvaluation: vi.fn(() => ({ data: null, isLoading: false })),
+  useNextWorkout: vi.fn(() => ({ data: null })),
+  useAdaptationWarning: vi.fn(() => null),
+  GarminImportTrigger: vi.fn(() => null),
+  TrainingMetricsPanel: vi.fn(() => null),
+  AIEvaluationCard: vi.fn(() => null),
+}))
+
 import { useAuth as useAuthMock } from '@/features/auth/AuthContext'
 import { useWorkout as useWorkoutMock } from '../hooks/useWorkouts'
 import { useDeleteWorkout as useDeleteWorkoutMock } from '../hooks/useWorkoutMutations'
@@ -68,7 +79,7 @@ function renderPage(id = 'w1') {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   })
-  return render(
+  return renderWithMuiTheme(
     <QueryClientProvider client={queryClient}>
       <MemoryRouter initialEntries={[`/workouts/${id}`]}>
         <Routes>

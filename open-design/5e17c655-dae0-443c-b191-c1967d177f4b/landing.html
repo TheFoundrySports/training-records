@@ -1,357 +1,915 @@
 <!doctype html>
 <html lang="en">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>MAT — Train Brazilian Jiu-Jitsu, seriously</title>
-<style>
-:root {
-  --bg: #f8fafd;
-  --surface: #ffffff;
-  --surface-warm: #e8f0fe;
-  --fg: #202124;
-  --fg-2: #3c4043;
-  --muted: #5f6368;
-  --meta: #1a73e8;
-  --border: #dadce0;
-  --border-soft: #edf0f2;
-  --accent: #1a73e8;
-  --accent-on: #ffffff;
-  --accent-hover: color-mix(in oklab, var(--accent), black 8%);
-  --accent-active: color-mix(in oklab, var(--accent), black 14%);
-  --success: #188038;
-  --warn: #f9ab00;
-  --danger: #d93025;
-  --font-display: "Google Sans", Roboto, Arial, sans-serif;
-  --font-body: Roboto, Arial, sans-serif;
-  --font-mono: "Roboto Mono", ui-monospace, Menlo, monospace;
-  --text-xs: 12px;
-  --text-sm: 14px;
-  --text-base: 16px;
-  --text-lg: 18px;
-  --text-xl: 24px;
-  --text-2xl: 32px;
-  --text-3xl: 48px;
-  --text-4xl: 64px;
-  --leading-body: 1.5;
-  --leading-tight: 1.12;
-  --tracking-display: 0;
-  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;
-  --space-5: 20px; --space-6: 24px; --space-8: 32px; --space-12: 48px;
-  --section-y-desktop: 96px; --section-y-tablet: 68px; --section-y-phone: 48px;
-  --radius-sm: 4px;
-  --radius-md: 12px;
-  --radius-lg: 24px;
-  --radius-pill: 9999px;
-  --elev-flat: none;
-  --elev-ring: 0 0 0 1px var(--border);
-  --elev-raised: 0 3px 8px rgba(60, 64, 67, 0.18);
-  --focus-ring: 0 0 0 4px rgba(26, 115, 232, 0.24);
-  --motion-fast: 150ms; --motion-base: 250ms;
-  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
-  --container-max: 1200px;
-  --container-gutter-desktop: 36px; --container-gutter-tablet: 24px; --container-gutter-phone: 16px;
-}
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>MAT — Train Brazilian Jiu-Jitsu, seriously</title>
+    <style>
+      :root {
+        --bg: #f8fafd;
+        --surface: #ffffff;
+        --surface-warm: #e8f0fe;
+        --fg: #202124;
+        --fg-2: #3c4043;
+        --muted: #5f6368;
+        --meta: #1a73e8;
+        --border: #dadce0;
+        --border-soft: #edf0f2;
+        --accent: #1a73e8;
+        --accent-on: #ffffff;
+        --accent-hover: color-mix(in oklab, var(--accent), black 8%);
+        --accent-active: color-mix(in oklab, var(--accent), black 14%);
+        --success: #188038;
+        --warn: #f9ab00;
+        --danger: #d93025;
+        --font-display: 'Google Sans', Roboto, Arial, sans-serif;
+        --font-body: Roboto, Arial, sans-serif;
+        --font-mono: 'Roboto Mono', ui-monospace, Menlo, monospace;
+        --text-xs: 12px;
+        --text-sm: 14px;
+        --text-base: 16px;
+        --text-lg: 18px;
+        --text-xl: 24px;
+        --text-2xl: 32px;
+        --text-3xl: 48px;
+        --text-4xl: 64px;
+        --leading-body: 1.5;
+        --leading-tight: 1.12;
+        --tracking-display: 0;
+        --space-1: 4px;
+        --space-2: 8px;
+        --space-3: 12px;
+        --space-4: 16px;
+        --space-5: 20px;
+        --space-6: 24px;
+        --space-8: 32px;
+        --space-12: 48px;
+        --section-y-desktop: 96px;
+        --section-y-tablet: 68px;
+        --section-y-phone: 48px;
+        --radius-sm: 4px;
+        --radius-md: 12px;
+        --radius-lg: 24px;
+        --radius-pill: 9999px;
+        --elev-flat: none;
+        --elev-ring: 0 0 0 1px var(--border);
+        --elev-raised: 0 3px 8px rgba(60, 64, 67, 0.18);
+        --focus-ring: 0 0 0 4px rgba(26, 115, 232, 0.24);
+        --motion-fast: 150ms;
+        --motion-base: 250ms;
+        --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+        --container-max: 1200px;
+        --container-gutter-desktop: 36px;
+        --container-gutter-tablet: 24px;
+        --container-gutter-phone: 16px;
+      }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: var(--text-base); line-height: var(--leading-body); -webkit-font-smoothing: antialiased; }
-body { min-height: 100vh; }
-a { color: inherit; text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 2px; }
-button { font: inherit; cursor: pointer; background: none; border: 0; color: inherit; }
-img, svg { display: block; max-width: 100%; }
-:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html,
+      body {
+        background: var(--bg);
+        color: var(--fg);
+        font-family: var(--font-body);
+        font-size: var(--text-base);
+        line-height: var(--leading-body);
+        -webkit-font-smoothing: antialiased;
+      }
+      body {
+        min-height: 100vh;
+      }
+      a {
+        color: inherit;
+        text-decoration: underline;
+        text-underline-offset: 3px;
+        text-decoration-thickness: 2px;
+      }
+      button {
+        font: inherit;
+        cursor: pointer;
+        background: none;
+        border: 0;
+        color: inherit;
+      }
+      img,
+      svg {
+        display: block;
+        max-width: 100%;
+      }
+      :focus-visible {
+        outline: none;
+        box-shadow: var(--focus-ring);
+      }
 
-.shell { max-width: var(--container-max); margin: 0 auto; padding: 0 var(--container-gutter-desktop); }
-@media (max-width: 1024px) { .shell { padding: 0 var(--container-gutter-tablet); } }
-@media (max-width: 600px)  { .shell { padding: 0 var(--container-gutter-phone); } }
+      .shell {
+        max-width: var(--container-max);
+        margin: 0 auto;
+        padding: 0 var(--container-gutter-desktop);
+      }
+      @media (max-width: 1024px) {
+        .shell {
+          padding: 0 var(--container-gutter-tablet);
+        }
+      }
+      @media (max-width: 600px) {
+        .shell {
+          padding: 0 var(--container-gutter-phone);
+        }
+      }
 
-/* Top bar */
-.topbar { background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 50; }
-.topbar-inner { display: flex; align-items: center; gap: var(--space-6); padding: var(--space-3) 0; }
-.brand { display: flex; align-items: center; gap: var(--space-3); font-family: var(--font-display); font-size: var(--text-xl); letter-spacing: var(--tracking-display); font-weight: 500; text-decoration: none; color: var(--fg); }
-.brand-mark { width: 36px; height: 36px; background: var(--surface-warm); color: var(--accent); border-radius: var(--radius-md); display: grid; place-items: center; font-family: var(--font-display); font-size: 18px; font-weight: 500; }
-.nav { display: flex; gap: var(--space-5); margin-left: auto; align-items: center; }
-.nav a { font-family: var(--font-body); font-weight: 500; font-size: var(--text-sm); text-decoration: none; color: var(--fg-2); transition: color var(--motion-fast) var(--ease-standard); }
-.nav a:hover { color: var(--fg); }
-.nav a.btn-cta { background: var(--accent); color: var(--accent-on); padding: 10px 18px; border-radius: var(--radius-pill); transition: background var(--motion-fast) var(--ease-standard); }
-.nav a.btn-cta:hover { background: var(--accent-hover); color: var(--accent-on); }
-@media (max-width: 600px) { .nav a:not(.btn-cta) { display: none; } .brand { font-size: 18px; } .brand-mark { width: 30px; height: 30px; font-size: 16px; } }
+      /* Top bar */
+      .topbar {
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
+        position: sticky;
+        top: 0;
+        z-index: 50;
+      }
+      .topbar-inner {
+        display: flex;
+        align-items: center;
+        gap: var(--space-6);
+        padding: var(--space-3) 0;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        font-family: var(--font-display);
+        font-size: var(--text-xl);
+        letter-spacing: var(--tracking-display);
+        font-weight: 500;
+        text-decoration: none;
+        color: var(--fg);
+      }
+      .brand-mark {
+        width: 36px;
+        height: 36px;
+        background: var(--surface-warm);
+        color: var(--accent);
+        border-radius: var(--radius-md);
+        display: grid;
+        place-items: center;
+        font-family: var(--font-display);
+        font-size: 18px;
+        font-weight: 500;
+      }
+      .nav {
+        display: flex;
+        gap: var(--space-5);
+        margin-left: auto;
+        align-items: center;
+      }
+      .nav a {
+        font-family: var(--font-body);
+        font-weight: 500;
+        font-size: var(--text-sm);
+        text-decoration: none;
+        color: var(--fg-2);
+        transition: color var(--motion-fast) var(--ease-standard);
+      }
+      .nav a:hover {
+        color: var(--fg);
+      }
+      .nav a.btn-cta {
+        background: var(--accent);
+        color: var(--accent-on);
+        padding: 10px 18px;
+        border-radius: var(--radius-pill);
+        transition: background var(--motion-fast) var(--ease-standard);
+      }
+      .nav a.btn-cta:hover {
+        background: var(--accent-hover);
+        color: var(--accent-on);
+      }
+      @media (max-width: 600px) {
+        .nav a:not(.btn-cta) {
+          display: none;
+        }
+        .brand {
+          font-size: 18px;
+        }
+        .brand-mark {
+          width: 30px;
+          height: 30px;
+          font-size: 16px;
+        }
+      }
 
-/* Hero */
-.hero { padding: var(--section-y-phone) 0 var(--section-y-desktop); }
-.hero-eyebrow { font-family: var(--font-body); font-weight: 500; text-transform: uppercase; letter-spacing: 0.12em; font-size: var(--text-xs); color: var(--accent); display: inline-block; padding: 6px 0; margin-bottom: var(--space-4); }
-.hero h1 { font-family: var(--font-display); font-size: clamp(48px, 9vw, var(--text-4xl)); line-height: var(--leading-tight); letter-spacing: var(--tracking-display); font-weight: 500; }
-.hero h1 .strike { color: var(--accent); }
-.hero h1 .ink { background: var(--accent); color: var(--accent-on); padding: 0 14px; border-radius: var(--radius-md); }
-.hero p.lead { font-size: clamp(17px, 2.2vw, var(--text-lg)); max-width: 36ch; margin-top: var(--space-5); color: var(--fg-2); }
-.hero-actions { display: flex; gap: var(--space-3); margin-top: var(--space-6); flex-wrap: wrap; }
-.btn { font-family: var(--font-body); font-weight: 500; font-size: var(--text-base); padding: 10px 20px; border-radius: var(--radius-md); background: var(--surface); color: var(--fg); border: 1px solid var(--border); text-decoration: none; display: inline-block; transition: background var(--motion-fast) var(--ease-standard), box-shadow var(--motion-fast) var(--ease-standard); }
-.btn:hover { background: var(--surface-warm); box-shadow: var(--elev-ring); }
-.btn:active { box-shadow: var(--elev-flat); }
-.btn-primary { background: var(--accent); color: var(--accent-on); border-color: var(--accent); }
-.btn-primary:hover { background: var(--accent-hover); color: var(--accent-on); }
+      /* Hero */
+      .hero {
+        padding: var(--section-y-phone) 0 var(--section-y-desktop);
+      }
+      .hero-eyebrow {
+        font-family: var(--font-body);
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-size: var(--text-xs);
+        color: var(--accent);
+        display: inline-block;
+        padding: 6px 0;
+        margin-bottom: var(--space-4);
+      }
+      .hero h1 {
+        font-family: var(--font-display);
+        font-size: clamp(48px, 9vw, var(--text-4xl));
+        line-height: var(--leading-tight);
+        letter-spacing: var(--tracking-display);
+        font-weight: 500;
+      }
+      .hero h1 .strike {
+        color: var(--accent);
+      }
+      .hero h1 .ink {
+        background: var(--accent);
+        color: var(--accent-on);
+        padding: 0 14px;
+        border-radius: var(--radius-md);
+      }
+      .hero p.lead {
+        font-size: clamp(17px, 2.2vw, var(--text-lg));
+        max-width: 36ch;
+        margin-top: var(--space-5);
+        color: var(--fg-2);
+      }
+      .hero-actions {
+        display: flex;
+        gap: var(--space-3);
+        margin-top: var(--space-6);
+        flex-wrap: wrap;
+      }
+      .btn {
+        font-family: var(--font-body);
+        font-weight: 500;
+        font-size: var(--text-base);
+        padding: 10px 20px;
+        border-radius: var(--radius-md);
+        background: var(--surface);
+        color: var(--fg);
+        border: 1px solid var(--border);
+        text-decoration: none;
+        display: inline-block;
+        transition:
+          background var(--motion-fast) var(--ease-standard),
+          box-shadow var(--motion-fast) var(--ease-standard);
+      }
+      .btn:hover {
+        background: var(--surface-warm);
+        box-shadow: var(--elev-ring);
+      }
+      .btn:active {
+        box-shadow: var(--elev-flat);
+      }
+      .btn-primary {
+        background: var(--accent);
+        color: var(--accent-on);
+        border-color: var(--accent);
+      }
+      .btn-primary:hover {
+        background: var(--accent-hover);
+        color: var(--accent-on);
+      }
 
-.hero-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: var(--space-5); align-items: stretch; margin-top: var(--space-8); }
-@media (max-width: 900px) { .hero-grid { grid-template-columns: 1fr; } }
-.hero-meta { background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--border-soft); padding: var(--space-6); box-shadow: var(--elev-raised); }
-.hero-meta dl { display: grid; grid-template-columns: auto 1fr; gap: var(--space-3) var(--space-5); font-family: var(--font-body); font-size: var(--text-sm); }
-.hero-meta dt { color: var(--muted); }
-.hero-meta dd { font-weight: 500; color: var(--fg); }
+      .hero-grid {
+        display: grid;
+        grid-template-columns: 1.2fr 1fr;
+        gap: var(--space-5);
+        align-items: stretch;
+        margin-top: var(--space-8);
+      }
+      @media (max-width: 900px) {
+        .hero-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+      .hero-meta {
+        background: var(--surface);
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border-soft);
+        padding: var(--space-6);
+        box-shadow: var(--elev-raised);
+      }
+      .hero-meta dl {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: var(--space-3) var(--space-5);
+        font-family: var(--font-body);
+        font-size: var(--text-sm);
+      }
+      .hero-meta dt {
+        color: var(--muted);
+      }
+      .hero-meta dd {
+        font-weight: 500;
+        color: var(--fg);
+      }
 
-/* Big "proof" row */
-.proof { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-4); margin: var(--space-8) auto; }
-@media (max-width: 800px) { .proof { grid-template-columns: repeat(2, 1fr); } }
-.proof-cell { background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--border-soft); padding: var(--space-6); box-shadow: var(--elev-raised); }
-.proof-num { font-family: var(--font-display); font-size: clamp(40px, 6vw, 64px); line-height: 1; font-weight: 500; letter-spacing: var(--tracking-display); color: var(--accent); font-variant-numeric: tabular-nums; }
-.proof-label { font-family: var(--font-body); font-weight: 500; font-size: var(--text-sm); color: var(--muted); margin-top: var(--space-2); }
+      /* Big "proof" row */
+      .proof {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: var(--space-4);
+        margin: var(--space-8) auto;
+      }
+      @media (max-width: 800px) {
+        .proof {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+      .proof-cell {
+        background: var(--surface);
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border-soft);
+        padding: var(--space-6);
+        box-shadow: var(--elev-raised);
+      }
+      .proof-num {
+        font-family: var(--font-display);
+        font-size: clamp(40px, 6vw, 64px);
+        line-height: 1;
+        font-weight: 500;
+        letter-spacing: var(--tracking-display);
+        color: var(--accent);
+        font-variant-numeric: tabular-nums;
+      }
+      .proof-label {
+        font-family: var(--font-body);
+        font-weight: 500;
+        font-size: var(--text-sm);
+        color: var(--muted);
+        margin-top: var(--space-2);
+      }
 
-/* Section */
-.section { padding: var(--section-y-desktop) 0; }
-@media (max-width: 1024px) { .section { padding: var(--section-y-tablet) 0; } }
-@media (max-width: 600px)  { .section { padding: var(--section-y-phone) 0; } }
-.eyebrow { font-family: var(--font-body); font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; font-size: var(--text-xs); color: var(--accent); display: inline-block; padding: 2px 0; margin-bottom: var(--space-3); }
-h2 { font-family: var(--font-display); font-size: clamp(32px, 5vw, var(--text-3xl)); line-height: var(--leading-tight); letter-spacing: var(--tracking-display); font-weight: 500; color: var(--fg); }
-h3 { font-family: var(--font-display); font-size: var(--text-xl); font-weight: 500; letter-spacing: 0; }
+      /* Section */
+      .section {
+        padding: var(--section-y-desktop) 0;
+      }
+      @media (max-width: 1024px) {
+        .section {
+          padding: var(--section-y-tablet) 0;
+        }
+      }
+      @media (max-width: 600px) {
+        .section {
+          padding: var(--section-y-phone) 0;
+        }
+      }
+      .eyebrow {
+        font-family: var(--font-body);
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-size: var(--text-xs);
+        color: var(--accent);
+        display: inline-block;
+        padding: 2px 0;
+        margin-bottom: var(--space-3);
+      }
+      h2 {
+        font-family: var(--font-display);
+        font-size: clamp(32px, 5vw, var(--text-3xl));
+        line-height: var(--leading-tight);
+        letter-spacing: var(--tracking-display);
+        font-weight: 500;
+        color: var(--fg);
+      }
+      h3 {
+        font-family: var(--font-display);
+        font-size: var(--text-xl);
+        font-weight: 500;
+        letter-spacing: 0;
+      }
 
-/* Features */
-.feat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-5); margin-top: var(--space-6); }
-@media (max-width: 900px) { .feat-grid { grid-template-columns: 1fr; } }
-.feat { background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--border-soft); box-shadow: var(--elev-raised); padding: var(--space-6); transition: box-shadow var(--motion-fast) var(--ease-standard); }
-.feat:hover { box-shadow: 0 6px 16px rgba(60, 64, 67, 0.22); }
-.feat-num { font-family: var(--font-display); font-size: var(--text-2xl); line-height: 1; font-weight: 500; color: var(--accent); font-variant-numeric: tabular-nums; }
-.feat h3 { margin: var(--space-3) 0 var(--space-2); }
-.feat p { color: var(--fg-2); }
-.feat.alt { background: var(--surface-warm); }
+      /* Features */
+      .feat-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: var(--space-5);
+        margin-top: var(--space-6);
+      }
+      @media (max-width: 900px) {
+        .feat-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+      .feat {
+        background: var(--surface);
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border-soft);
+        box-shadow: var(--elev-raised);
+        padding: var(--space-6);
+        transition: box-shadow var(--motion-fast) var(--ease-standard);
+      }
+      .feat:hover {
+        box-shadow: 0 6px 16px rgba(60, 64, 67, 0.22);
+      }
+      .feat-num {
+        font-family: var(--font-display);
+        font-size: var(--text-2xl);
+        line-height: 1;
+        font-weight: 500;
+        color: var(--accent);
+        font-variant-numeric: tabular-nums;
+      }
+      .feat h3 {
+        margin: var(--space-3) 0 var(--space-2);
+      }
+      .feat p {
+        color: var(--fg-2);
+      }
+      .feat.alt {
+        background: var(--surface-warm);
+      }
 
-/* Preview / device */
-.preview { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-8); align-items: center; margin-top: var(--space-6); }
-@media (max-width: 900px) { .preview { grid-template-columns: 1fr; } }
-.preview-list { display: flex; flex-direction: column; gap: var(--space-2); }
-.preview-row { display: grid; grid-template-columns: 48px 1fr; gap: var(--space-4); padding: var(--space-4); border-radius: var(--radius-md); background: var(--surface-warm); align-items: center; }
-.preview-row.on { background: var(--accent); color: var(--accent-on); }
-.preview-row.on span { color: rgba(255,255,255,0.85); }
-.preview-row .n { font-family: var(--font-display); font-size: var(--text-xl); font-weight: 500; text-align: center; color: var(--accent); }
-.preview-row.on .n { color: var(--accent-on); }
-.preview-row strong { font-family: var(--font-display); font-weight: 500; display: block; font-size: var(--text-base); }
-.preview-row span { font-family: var(--font-body); font-size: var(--text-sm); color: var(--muted); }
+      /* Preview / device */
+      .preview {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--space-8);
+        align-items: center;
+        margin-top: var(--space-6);
+      }
+      @media (max-width: 900px) {
+        .preview {
+          grid-template-columns: 1fr;
+        }
+      }
+      .preview-list {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-2);
+      }
+      .preview-row {
+        display: grid;
+        grid-template-columns: 48px 1fr;
+        gap: var(--space-4);
+        padding: var(--space-4);
+        border-radius: var(--radius-md);
+        background: var(--surface-warm);
+        align-items: center;
+      }
+      .preview-row.on {
+        background: var(--accent);
+        color: var(--accent-on);
+      }
+      .preview-row.on span {
+        color: rgba(255, 255, 255, 0.85);
+      }
+      .preview-row .n {
+        font-family: var(--font-display);
+        font-size: var(--text-xl);
+        font-weight: 500;
+        text-align: center;
+        color: var(--accent);
+      }
+      .preview-row.on .n {
+        color: var(--accent-on);
+      }
+      .preview-row strong {
+        font-family: var(--font-display);
+        font-weight: 500;
+        display: block;
+        font-size: var(--text-base);
+      }
+      .preview-row span {
+        font-family: var(--font-body);
+        font-size: var(--text-sm);
+        color: var(--muted);
+      }
 
-/* Phone frame preview */
-.phone { border-radius: 36px; background: var(--surface); box-shadow: var(--elev-raised); padding: 18px; max-width: 320px; margin: 0 auto; aspect-ratio: 9/16; display: flex; flex-direction: column; border: 1px solid var(--border-soft); }
-.phone-screen { flex: 1; border-radius: 24px; background: var(--bg); padding: var(--space-4); display: flex; flex-direction: column; gap: var(--space-2); }
-.phone-stat { display: flex; justify-content: space-between; border-radius: var(--radius-sm); padding: 8px 10px; background: var(--surface); font-family: var(--font-body); font-weight: 500; font-size: 12px; color: var(--fg-2); }
-.phone-stat.on { background: var(--accent); color: var(--accent-on); }
-.phone-clock { font-family: var(--font-display); font-size: 56px; line-height: 1; text-align: center; padding: var(--space-4) 0; border-radius: var(--radius-md); background: var(--surface); font-weight: 500; letter-spacing: var(--tracking-display); font-variant-numeric: tabular-nums; color: var(--fg); }
-.phone-clock .lbl { font-family: var(--font-body); font-weight: 500; font-size: 11px; color: var(--muted); display: block; text-transform: uppercase; letter-spacing: 0.08em; }
-.phone-foot { display: flex; gap: 8px; }
-.phone-foot button { flex: 1; border-radius: var(--radius-pill); background: var(--accent); color: var(--accent-on); padding: 10px 0; font-family: var(--font-body); font-weight: 500; font-size: 12px; border: 0; }
-.phone-foot button.ghost { background: var(--surface); color: var(--fg-2); }
+      /* Phone frame preview */
+      .phone {
+        border-radius: 36px;
+        background: var(--surface);
+        box-shadow: var(--elev-raised);
+        padding: 18px;
+        max-width: 320px;
+        margin: 0 auto;
+        aspect-ratio: 9/16;
+        display: flex;
+        flex-direction: column;
+        border: 1px solid var(--border-soft);
+      }
+      .phone-screen {
+        flex: 1;
+        border-radius: 24px;
+        background: var(--bg);
+        padding: var(--space-4);
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-2);
+      }
+      .phone-stat {
+        display: flex;
+        justify-content: space-between;
+        border-radius: var(--radius-sm);
+        padding: 8px 10px;
+        background: var(--surface);
+        font-family: var(--font-body);
+        font-weight: 500;
+        font-size: 12px;
+        color: var(--fg-2);
+      }
+      .phone-stat.on {
+        background: var(--accent);
+        color: var(--accent-on);
+      }
+      .phone-clock {
+        font-family: var(--font-display);
+        font-size: 56px;
+        line-height: 1;
+        text-align: center;
+        padding: var(--space-4) 0;
+        border-radius: var(--radius-md);
+        background: var(--surface);
+        font-weight: 500;
+        letter-spacing: var(--tracking-display);
+        font-variant-numeric: tabular-nums;
+        color: var(--fg);
+      }
+      .phone-clock .lbl {
+        font-family: var(--font-body);
+        font-weight: 500;
+        font-size: 11px;
+        color: var(--muted);
+        display: block;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+      .phone-foot {
+        display: flex;
+        gap: 8px;
+      }
+      .phone-foot button {
+        flex: 1;
+        border-radius: var(--radius-pill);
+        background: var(--accent);
+        color: var(--accent-on);
+        padding: 10px 0;
+        font-family: var(--font-body);
+        font-weight: 500;
+        font-size: 12px;
+        border: 0;
+      }
+      .phone-foot button.ghost {
+        background: var(--surface);
+        color: var(--fg-2);
+      }
 
-/* CTA */
-.cta { background: var(--fg); color: var(--accent-on); padding: var(--section-y-desktop) 0; border-radius: var(--radius-lg); }
-.cta-inner { display: grid; grid-template-columns: 1.4fr 1fr; gap: var(--space-6); align-items: center; }
-@media (max-width: 900px) { .cta-inner { grid-template-columns: 1fr; } }
-.cta h2 { color: var(--surface); font-size: clamp(40px, 6vw, 72px); }
-.cta h2 .ink { background: var(--accent); color: var(--accent-on); padding: 0 12px; border-radius: var(--radius-md); }
-.cta p { color: rgba(255,255,255,0.78); font-size: var(--text-lg); max-width: 50ch; }
-.cta .btn { background: var(--accent); color: var(--accent-on); border-color: var(--accent); }
-.cta .btn:hover { background: var(--surface); color: var(--fg); border-color: var(--surface); }
+      /* CTA */
+      .cta {
+        background: var(--fg);
+        color: var(--accent-on);
+        padding: var(--section-y-desktop) 0;
+        border-radius: var(--radius-lg);
+      }
+      .cta-inner {
+        display: grid;
+        grid-template-columns: 1.4fr 1fr;
+        gap: var(--space-6);
+        align-items: center;
+      }
+      @media (max-width: 900px) {
+        .cta-inner {
+          grid-template-columns: 1fr;
+        }
+      }
+      .cta h2 {
+        color: var(--surface);
+        font-size: clamp(40px, 6vw, 72px);
+      }
+      .cta h2 .ink {
+        background: var(--accent);
+        color: var(--accent-on);
+        padding: 0 12px;
+        border-radius: var(--radius-md);
+      }
+      .cta p {
+        color: rgba(255, 255, 255, 0.78);
+        font-size: var(--text-lg);
+        max-width: 50ch;
+      }
+      .cta .btn {
+        background: var(--accent);
+        color: var(--accent-on);
+        border-color: var(--accent);
+      }
+      .cta .btn:hover {
+        background: var(--surface);
+        color: var(--fg);
+        border-color: var(--surface);
+      }
 
-/* FAQ */
-.faq { display: flex; flex-direction: column; gap: var(--space-3); margin-top: var(--space-6); }
-.faq details { border-radius: var(--radius-md); background: var(--surface); padding: var(--space-5) var(--space-6); border: 1px solid var(--border-soft); box-shadow: var(--elev-ring); }
-.faq details[open] { background: var(--surface-warm); }
-.faq summary { font-family: var(--font-display); font-weight: 500; font-size: var(--text-base); cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; color: var(--fg); }
-.faq summary::-webkit-details-marker { display: none; }
-.faq summary::after { content: '+'; font-family: var(--font-display); font-size: 24px; color: var(--accent); }
-.faq details[open] summary::after { content: '−'; }
-.faq p { margin-top: var(--space-3); color: var(--fg-2); max-width: 70ch; }
+      /* FAQ */
+      .faq {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-3);
+        margin-top: var(--space-6);
+      }
+      .faq details {
+        border-radius: var(--radius-md);
+        background: var(--surface);
+        padding: var(--space-5) var(--space-6);
+        border: 1px solid var(--border-soft);
+        box-shadow: var(--elev-ring);
+      }
+      .faq details[open] {
+        background: var(--surface-warm);
+      }
+      .faq summary {
+        font-family: var(--font-display);
+        font-weight: 500;
+        font-size: var(--text-base);
+        cursor: pointer;
+        list-style: none;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: var(--fg);
+      }
+      .faq summary::-webkit-details-marker {
+        display: none;
+      }
+      .faq summary::after {
+        content: '+';
+        font-family: var(--font-display);
+        font-size: 24px;
+        color: var(--accent);
+      }
+      .faq details[open] summary::after {
+        content: '−';
+      }
+      .faq p {
+        margin-top: var(--space-3);
+        color: var(--fg-2);
+        max-width: 70ch;
+      }
 
-footer.foot { padding: var(--space-6) 0; border-top: 1px solid var(--border-soft); display: flex; justify-content: space-between; flex-wrap: wrap; gap: var(--space-3); font-family: var(--font-body); font-weight: 500; font-size: var(--text-sm); color: var(--muted); }
-</style>
-</head>
-<body>
-
-<header class="topbar">
-  <div class="shell topbar-inner">
-    <a href="index.html" class="brand"><span class="brand-mark">M</span><span>MAT / BJJ</span></a>
-    <nav class="nav">
-      <a href="#how">How it works</a>
-      <a href="#preview">Preview</a>
-      <a href="#faq">FAQ</a>
-      <a href="app.html" class="btn-cta">Open the app →</a>
-    </nav>
-  </div>
-</header>
-
-<!-- Hero -->
-<section class="hero">
-  <div class="shell">
-    <span class="hero-eyebrow">bjj training app · v0.4 · built for the mat</span>
-    <h1>
-      Roll<br/>
-      <span class="strike">drill</span><br/>
-      <span class="ink">repeat.</span>
-    </h1>
-    <p class="lead">A round timer, a technique library, and a session log that remembers what worked. No streaks. No badges. No fluff.</p>
-    <div class="hero-actions">
-      <a href="app.html" class="btn btn-primary">Start a session →</a>
-      <a href="#how" class="btn">See how it works</a>
-    </div>
-
-    <div class="hero-grid">
-      <div class="hero-meta">
-        <dl>
-          <dt>built for</dt><dd>gi &amp; no-gi · all belts</dd>
-          <dt>session length</dt><dd>30–60 min</dd>
-          <dt>works offline</dt><dd>yes — no login required</dd>
-          <dt>price</dt><dd>free during open beta</dd>
-        </dl>
+      footer.foot {
+        padding: var(--space-6) 0;
+        border-top: 1px solid var(--border-soft);
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: var(--space-3);
+        font-family: var(--font-body);
+        font-weight: 500;
+        font-size: var(--text-sm);
+        color: var(--muted);
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="shell topbar-inner">
+        <a href="index.html" class="brand"
+          ><span class="brand-mark">M</span><span>MAT / BJJ</span></a
+        >
+        <nav class="nav">
+          <a href="#how">How it works</a>
+          <a href="#preview">Preview</a>
+          <a href="#faq">FAQ</a>
+          <a href="app.html" class="btn-cta">Open the app →</a>
+        </nav>
       </div>
-      <div class="hero-meta" style="background: var(--surface-warm);">
-        <dl>
-          <dt>design stance</dt><dd>bento · modular tiles</dd>
-          <dt>typography</dt><dd>inter display + body</dd>
-          <dt>color</dt><dd>soft blue surface + indigo accent</dd>
-          <dt>tagline</dt><dd>"built for the mat, not the screen"</dd>
-        </dl>
-      </div>
-    </div>
-  </div>
-</section>
+    </header>
 
-<!-- Proof -->
-<div class="proof">
-  <div class="proof-cell"><div class="proof-num">42</div><div class="proof-label">techniques in library</div></div>
-  <div class="proof-cell"><div class="proof-num">5/2</div><div class="proof-label">rolling / rest minutes</div></div>
-  <div class="proof-cell"><div class="proof-num">0</div><div class="proof-label">ads · no paywall · no signup</div></div>
-  <div class="proof-cell"><div class="proof-num">∞</div><div class="proof-label">sessions, stored locally</div></div>
-</div>
-
-<!-- How it works -->
-<section class="section" id="how">
-  <div class="shell">
-    <span class="eyebrow">how it works</span>
-    <h2>Three views. No clutter.</h2>
-    <div class="feat-grid">
-      <div class="feat">
-        <div class="feat-num">01</div>
-        <h3>Round timer</h3>
-        <p>Configurable rolling and rest intervals. Loud haptic at round end. Auto-advance through rounds. Big clock you can read across the gym.</p>
-      </div>
-      <div class="feat alt">
-        <div class="feat-num">02</div>
-        <h3>Technique library</h3>
-        <p>Filter by category, belt level, and position. Each entry has a diagram, the cue, and the most common mistake. Drill them in sets.</p>
-      </div>
-      <div class="feat">
-        <div class="feat-num">03</div>
-        <h3>Session log</h3>
-        <p>What got you tapped, what worked, what to drill next. Coverage bars show weak positions. No streak shaming.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- Preview -->
-<section class="section" id="preview">
-  <div class="shell">
-    <span class="eyebrow">preview · live session</span>
-    <h2>Open the app. Hit roll.</h2>
-    <div class="preview">
-      <div class="preview-list">
-        <div class="preview-row on">
-          <div class="n">01</div>
-          <div><strong>Warm-up · 10 min</strong><span>shrimps · technical stand-up · breakfalls</span></div>
+    <!-- Hero -->
+    <section class="hero">
+      <div class="shell">
+        <span class="hero-eyebrow">bjj training app · v0.4 · built for the mat</span>
+        <h1>
+          Roll<br />
+          <span class="strike">drill</span><br />
+          <span class="ink">repeat.</span>
+        </h1>
+        <p class="lead">
+          A round timer, a technique library, and a session log that remembers what worked. No
+          streaks. No badges. No fluff.
+        </p>
+        <div class="hero-actions">
+          <a href="app.html" class="btn btn-primary">Start a session →</a>
+          <a href="#how" class="btn">See how it works</a>
         </div>
-        <div class="preview-row on">
-          <div class="n">02</div>
-          <div><strong>Drill · armbar from guard</strong><span>5 sets · 10 reps · both sides</span></div>
-        </div>
-        <div class="preview-row">
-          <div class="n">03</div>
-          <div><strong>Live rolls · 5 × 5 min</strong><span>2 min rest · 2 partners · rotate</span></div>
-        </div>
-        <div class="preview-row">
-          <div class="n">04</div>
-          <div><strong>Drill · triangle from guard</strong><span>5 sets · 10 reps · both sides</span></div>
-        </div>
-        <div class="preview-row">
-          <div class="n">05</div>
-          <div><strong>Cooldown · 3 min</strong><span>box breathing · journal 1 takeaway</span></div>
-        </div>
-      </div>
-      <div class="phone" aria-label="App preview">
-        <div class="phone-screen">
-          <div class="phone-stat on">● LIVE · ROUND 3/5</div>
-          <div class="phone-clock">03:42<span class="lbl">rolling</span></div>
-          <div class="phone-stat">rest 02:00</div>
-          <div class="phone-stat">subs 2 · sweeps 3</div>
-          <div class="phone-stat">taps 1 · HR 148</div>
-          <div class="phone-foot">
-            <button>Pause</button>
-            <button class="ghost">Reset</button>
-            <button>Skip →</button>
+
+        <div class="hero-grid">
+          <div class="hero-meta">
+            <dl>
+              <dt>built for</dt>
+              <dd>gi &amp; no-gi · all belts</dd>
+              <dt>session length</dt>
+              <dd>30–60 min</dd>
+              <dt>works offline</dt>
+              <dd>yes — no login required</dd>
+              <dt>price</dt>
+              <dd>free during open beta</dd>
+            </dl>
+          </div>
+          <div class="hero-meta" style="background: var(--surface-warm)">
+            <dl>
+              <dt>design stance</dt>
+              <dd>bento · modular tiles</dd>
+              <dt>typography</dt>
+              <dd>inter display + body</dd>
+              <dt>color</dt>
+              <dd>soft blue surface + indigo accent</dd>
+              <dt>tagline</dt>
+              <dd>"built for the mat, not the screen"</dd>
+            </dl>
           </div>
         </div>
       </div>
-    </div>
-  </div>
-</section>
+    </section>
 
-<!-- CTA -->
-<section class="section" id="cta">
-  <div class="shell">
-    <div class="cta">
-      <div class="shell cta-inner">
-        <div>
-          <span class="eyebrow" style="color: var(--accent);">open beta · free</span>
-          <h2>No login.<br/>No ads.<br/><span class="ink">Just train.</span></h2>
-        </div>
-        <div>
-          <p>MAT is a side project built by white belts for white belts, and refined by blues and purples who got tired of glossy fitness apps. Drop in for a session — you can leave whenever.</p>
-          <div class="hero-actions" style="margin-top: 24px;">
-            <a href="app.html" class="btn">Open the app →</a>
+    <!-- Proof -->
+    <div class="proof">
+      <div class="proof-cell">
+        <div class="proof-num">42</div>
+        <div class="proof-label">techniques in library</div>
+      </div>
+      <div class="proof-cell">
+        <div class="proof-num">5/2</div>
+        <div class="proof-label">rolling / rest minutes</div>
+      </div>
+      <div class="proof-cell">
+        <div class="proof-num">0</div>
+        <div class="proof-label">ads · no paywall · no signup</div>
+      </div>
+      <div class="proof-cell">
+        <div class="proof-num">∞</div>
+        <div class="proof-label">sessions, stored locally</div>
+      </div>
+    </div>
+
+    <!-- How it works -->
+    <section class="section" id="how">
+      <div class="shell">
+        <span class="eyebrow">how it works</span>
+        <h2>Three views. No clutter.</h2>
+        <div class="feat-grid">
+          <div class="feat">
+            <div class="feat-num">01</div>
+            <h3>Round timer</h3>
+            <p>
+              Configurable rolling and rest intervals. Loud haptic at round end. Auto-advance
+              through rounds. Big clock you can read across the gym.
+            </p>
+          </div>
+          <div class="feat alt">
+            <div class="feat-num">02</div>
+            <h3>Technique library</h3>
+            <p>
+              Filter by category, belt level, and position. Each entry has a diagram, the cue, and
+              the most common mistake. Drill them in sets.
+            </p>
+          </div>
+          <div class="feat">
+            <div class="feat-num">03</div>
+            <h3>Session log</h3>
+            <p>
+              What got you tapped, what worked, what to drill next. Coverage bars show weak
+              positions. No streak shaming.
+            </p>
           </div>
         </div>
       </div>
-    </div>
-  </div>
-</section>
+    </section>
 
-<!-- FAQ -->
-<section class="section" id="faq">
-  <div class="shell">
-    <span class="eyebrow">faq</span>
-    <h2>Quick answers.</h2>
-    <div class="faq">
-      <details open>
-        <summary>Do I need an account?</summary>
-        <p>No. The app stores everything in your browser. Closing the tab doesn't lose your session log — it just keeps it local.</p>
-      </details>
-      <details>
-        <summary>Gi or no-gi?</summary>
-        <p>Both. The technique library is tagged for gi and no-gi, and the timer works the same for either.</p>
-      </details>
-      <details>
-        <summary>Can I customize the round / rest length?</summary>
-        <p>Yes — defaults are 5/2 minutes, 5 rounds, but you can change them per session. Comp sims are 6 rounds with 1-minute rest.</p>
-      </details>
-      <details>
-        <summary>Is this for competition prep?</summary>
-        <p>It's a session tool, not a curriculum. Pair it with your coach's programming and it'll track what you did and what you got hit by.</p>
-      </details>
-      <details>
-        <summary>Why bento?</summary>
-        <p>Because the mat has zones. A live timer, a session plan, a technique library, and a coverage log — each one a tile, each one readable from across the gym.</p>
-      </details>
-    </div>
-  </div>
-</section>
+    <!-- Preview -->
+    <section class="section" id="preview">
+      <div class="shell">
+        <span class="eyebrow">preview · live session</span>
+        <h2>Open the app. Hit roll.</h2>
+        <div class="preview">
+          <div class="preview-list">
+            <div class="preview-row on">
+              <div class="n">01</div>
+              <div>
+                <strong>Warm-up · 10 min</strong
+                ><span>shrimps · technical stand-up · breakfalls</span>
+              </div>
+            </div>
+            <div class="preview-row on">
+              <div class="n">02</div>
+              <div>
+                <strong>Drill · armbar from guard</strong><span>5 sets · 10 reps · both sides</span>
+              </div>
+            </div>
+            <div class="preview-row">
+              <div class="n">03</div>
+              <div>
+                <strong>Live rolls · 5 × 5 min</strong><span>2 min rest · 2 partners · rotate</span>
+              </div>
+            </div>
+            <div class="preview-row">
+              <div class="n">04</div>
+              <div>
+                <strong>Drill · triangle from guard</strong
+                ><span>5 sets · 10 reps · both sides</span>
+              </div>
+            </div>
+            <div class="preview-row">
+              <div class="n">05</div>
+              <div>
+                <strong>Cooldown · 3 min</strong><span>box breathing · journal 1 takeaway</span>
+              </div>
+            </div>
+          </div>
+          <div class="phone" aria-label="App preview">
+            <div class="phone-screen">
+              <div class="phone-stat on">● LIVE · ROUND 3/5</div>
+              <div class="phone-clock">03:42<span class="lbl">rolling</span></div>
+              <div class="phone-stat">rest 02:00</div>
+              <div class="phone-stat">subs 2 · sweeps 3</div>
+              <div class="phone-stat">taps 1 · HR 148</div>
+              <div class="phone-foot">
+                <button>Pause</button>
+                <button class="ghost">Reset</button>
+                <button>Skip →</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
 
-<footer class="foot shell">
-  <span>mat / bjj · open beta · no login · no ads</span>
-  <span>built for the mat, not the screen.</span>
-</footer>
+    <!-- CTA -->
+    <section class="section" id="cta">
+      <div class="shell">
+        <div class="cta">
+          <div class="shell cta-inner">
+            <div>
+              <span class="eyebrow" style="color: var(--accent)">open beta · free</span>
+              <h2>No login.<br />No ads.<br /><span class="ink">Just train.</span></h2>
+            </div>
+            <div>
+              <p>
+                MAT is a side project built by white belts for white belts, and refined by blues and
+                purples who got tired of glossy fitness apps. Drop in for a session — you can leave
+                whenever.
+              </p>
+              <div class="hero-actions" style="margin-top: 24px">
+                <a href="app.html" class="btn">Open the app →</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
 
-</body>
+    <!-- FAQ -->
+    <section class="section" id="faq">
+      <div class="shell">
+        <span class="eyebrow">faq</span>
+        <h2>Quick answers.</h2>
+        <div class="faq">
+          <details open>
+            <summary>Do I need an account?</summary>
+            <p>
+              No. The app stores everything in your browser. Closing the tab doesn't lose your
+              session log — it just keeps it local.
+            </p>
+          </details>
+          <details>
+            <summary>Gi or no-gi?</summary>
+            <p>
+              Both. The technique library is tagged for gi and no-gi, and the timer works the same
+              for either.
+            </p>
+          </details>
+          <details>
+            <summary>Can I customize the round / rest length?</summary>
+            <p>
+              Yes — defaults are 5/2 minutes, 5 rounds, but you can change them per session. Comp
+              sims are 6 rounds with 1-minute rest.
+            </p>
+          </details>
+          <details>
+            <summary>Is this for competition prep?</summary>
+            <p>
+              It's a session tool, not a curriculum. Pair it with your coach's programming and it'll
+              track what you did and what you got hit by.
+            </p>
+          </details>
+          <details>
+            <summary>Why bento?</summary>
+            <p>
+              Because the mat has zones. A live timer, a session plan, a technique library, and a
+              coverage log — each one a tile, each one readable from across the gym.
+            </p>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <footer class="foot shell">
+      <span>mat / bjj · open beta · no login · no ads</span>
+      <span>built for the mat, not the screen.</span>
+    </footer>
+  </body>
 </html>

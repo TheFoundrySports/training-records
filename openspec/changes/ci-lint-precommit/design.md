@@ -6,12 +6,12 @@ Two-phase delivery: (1) remove 2 trivial unused-variable ESLint errors in test f
 
 ## Architecture Decisions
 
-| Decision | Choice | Alternatives Rejected | Rationale |
-|----------|--------|-----------------------|-----------|
-| Git hook manager | husky v9 | lefthook, simple-git-hooks, manual `.git/hooks` | Industry standard; `prepare` npm lifecycle is native; team familiarity assumed |
-| Hook scope | lint-staged on staged `*.{ts,tsx}` only | Full `eslint .` on commit | Staged-only is fast; cross-file issues are caught by CI's full `eslint .` gate |
-| Auto-fix in hook | `eslint --fix` | Error-only (no fix) | Auto-fix resolves trivial issues without blocking commit; remaining errors abort commit |
-| ESLint v9 ignore for coverage | `globalIgnores(['coverage'])` | `.eslintignore` file | Flat config (v9) deprecates `.eslintignore`; `globalIgnores` is the correct API |
+| Decision                      | Choice                                  | Alternatives Rejected                           | Rationale                                                                               |
+| ----------------------------- | --------------------------------------- | ----------------------------------------------- | --------------------------------------------------------------------------------------- |
+| Git hook manager              | husky v9                                | lefthook, simple-git-hooks, manual `.git/hooks` | Industry standard; `prepare` npm lifecycle is native; team familiarity assumed          |
+| Hook scope                    | lint-staged on staged `*.{ts,tsx}` only | Full `eslint .` on commit                       | Staged-only is fast; cross-file issues are caught by CI's full `eslint .` gate          |
+| Auto-fix in hook              | `eslint --fix`                          | Error-only (no fix)                             | Auto-fix resolves trivial issues without blocking commit; remaining errors abort commit |
+| ESLint v9 ignore for coverage | `globalIgnores(['coverage'])`           | `.eslintignore` file                            | Flat config (v9) deprecates `.eslintignore`; `globalIgnores` is the correct API         |
 
 ## Data Flow
 
@@ -34,14 +34,14 @@ CI (push / PR) — full authoritative gate:
 
 ## File Changes
 
-| File | Action | Description |
-|------|--------|-------------|
-| `src/features/auth/pages/__tests__/AcceptInvitePage.test.tsx` | Modify | Remove unused `type { ReactNode }` import (line 4) |
-| `src/features/bjj/__tests__/BJJSectionEditor.test.tsx` | Modify | Remove unused `const user = userEvent.setup()` (line 252) |
-| `package.json` | Modify | Add `husky` + `lint-staged` devDeps; add `prepare` and `lint:fix` scripts; add `lint-staged` config block |
-| `.husky/pre-commit` | Create | Executable shell script: `npx lint-staged` |
-| `eslint.config.js` | Modify | Add `'coverage'` to `globalIgnores` array |
-| `docs/STANDARDS.md` | Modify | Document pre-commit lint hook, `--no-verify` bypass, and `lint:fix` script |
+| File                                                          | Action | Description                                                                                               |
+| ------------------------------------------------------------- | ------ | --------------------------------------------------------------------------------------------------------- |
+| `src/features/auth/pages/__tests__/AcceptInvitePage.test.tsx` | Modify | Remove unused `type { ReactNode }` import (line 4)                                                        |
+| `src/features/bjj/__tests__/BJJSectionEditor.test.tsx`        | Modify | Remove unused `const user = userEvent.setup()` (line 252)                                                 |
+| `package.json`                                                | Modify | Add `husky` + `lint-staged` devDeps; add `prepare` and `lint:fix` scripts; add `lint-staged` config block |
+| `.husky/pre-commit`                                           | Create | Executable shell script: `npx lint-staged`                                                                |
+| `eslint.config.js`                                            | Modify | Add `'coverage'` to `globalIgnores` array                                                                 |
+| `docs/STANDARDS.md`                                           | Modify | Document pre-commit lint hook, `--no-verify` bypass, and `lint:fix` script                                |
 
 ## Interfaces / Contracts
 
@@ -50,15 +50,15 @@ CI (push / PR) — full authoritative gate:
 {
   "scripts": {
     "prepare": "husky",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
   },
   "devDependencies": {
     "husky": "^9.x.x",
-    "lint-staged": "^16.x.x"
+    "lint-staged": "^16.x.x",
   },
   "lint-staged": {
-    "*.{ts,tsx}": ["eslint --fix"]
-  }
+    "*.{ts,tsx}": ["eslint --fix"],
+  },
 }
 ```
 
@@ -74,12 +74,12 @@ globalIgnores(['dist', 'docs/oldcode', 'supabase/functions', 'coverage'])
 
 ## Testing Strategy
 
-| Layer | What to Test | Approach |
-|-------|-------------|----------|
-| Manual | `npm run lint` exits 0 | Run locally after fixing test files |
-| Manual | Pre-commit hook fires on staged `.tsx` | Stage any `.tsx`, run `git commit` |
-| Manual | Hook auto-fixes and passes clean file | Stage file with fixable whitespace issue |
-| CI | Lint step green | Push branch, verify GitHub Actions Lint step |
+| Layer  | What to Test                           | Approach                                     |
+| ------ | -------------------------------------- | -------------------------------------------- |
+| Manual | `npm run lint` exits 0                 | Run locally after fixing test files          |
+| Manual | Pre-commit hook fires on staged `.tsx` | Stage any `.tsx`, run `git commit`           |
+| Manual | Hook auto-fixes and passes clean file  | Stage file with fixable whitespace issue     |
+| CI     | Lint step green                        | Push branch, verify GitHub Actions Lint step |
 
 ## Migration / Rollout
 

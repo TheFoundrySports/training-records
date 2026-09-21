@@ -7,6 +7,7 @@
 ## Purpose
 
 Requirements covering the project's ESLint enforcement strategy:
+
 1. ESLint errors resolved to keep CI green
 2. A pre-commit hook that catches lint issues before push
 3. Developer workflow documentation

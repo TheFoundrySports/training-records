@@ -4,7 +4,7 @@
   "notes": "Initial prototype of the BJJ Evolution Dashboard per the iteration 8 PRD. Mocked data simulating a 30-day window of BJJ training: techniques, technique category breakdown, role balance, roll outcomes, and position flow transitions. All UI strings in English (aligned with prd-bjj-dashboard.md v0.3). No live source connected; refresh re-runs against the inlined data only.",
   "sources": [
     { "label": "PRD: BJJ Evolution Dashboard v0.1", "type": "user_input" },
-    { "label": "Seeded mock data (30-day window)",  "type": "user_input" }
+    { "label": "Seeded mock data (30-day window)", "type": "user_input" }
   ],
   "transformations": [
     "Computed donut SVG dasharray/dashoffset for 7 technique categories at a 50px radius (C=2*pi*50).",

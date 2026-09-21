@@ -107,16 +107,10 @@
       "stages": [
         {
           "id": "generate",
-          "atoms": [
-            "file-write",
-            "live-artifact"
-          ]
+          "atoms": ["file-write", "live-artifact"]
         }
       ]
     },
-    "capabilities": [
-      "prompt:inject",
-      "fs:write"
-    ]
+    "capabilities": ["prompt:inject", "fs:write"]
   }
 }

@@ -1,491 +1,1192 @@
 <!doctype html>
 <html lang="en">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>MAT — Train</title>
-<style>
-/* Material design system — bound verbatim from tokens.css */
-:root {
-  --bg: #f8fafd;
-  --surface: #ffffff;
-  --surface-warm: #e8f0fe;
-  --fg: #202124;
-  --fg-2: #3c4043;
-  --muted: #5f6368;
-  --meta: #1a73e8;
-  --border: #dadce0;
-  --border-soft: #edf0f2;
-  --accent: #1a73e8;
-  --accent-on: #ffffff;
-  --accent-hover: color-mix(in oklab, var(--accent), black 8%);
-  --accent-active: color-mix(in oklab, var(--accent), black 14%);
-  --success: #188038;
-  --warn: #f9ab00;
-  --danger: #d93025;
-  --font-display: "Google Sans", Roboto, Arial, sans-serif;
-  --font-body: Roboto, Arial, sans-serif;
-  --font-mono: "Roboto Mono", ui-monospace, Menlo, monospace;
-  --text-xs: 12px;
-  --text-sm: 14px;
-  --text-base: 16px;
-  --text-lg: 18px;
-  --text-xl: 24px;
-  --text-2xl: 32px;
-  --text-3xl: 48px;
-  --text-4xl: 64px;
-  --leading-body: 1.5;
-  --leading-tight: 1.12;
-  --tracking-display: 0;
-  --space-1: 4px;
-  --space-2: 8px;
-  --space-3: 12px;
-  --space-4: 16px;
-  --space-5: 20px;
-  --space-6: 24px;
-  --space-8: 32px;
-  --space-12: 48px;
-  --section-y-desktop: 96px;
-  --section-y-tablet: 68px;
-  --section-y-phone: 48px;
-  --radius-sm: 4px;
-  --radius-md: 12px;
-  --radius-lg: 24px;
-  --radius-pill: 9999px;
-  --elev-flat: none;
-  --elev-ring: 0 0 0 1px var(--border);
-  --elev-raised: 0 3px 8px rgba(60, 64, 67, 0.18);
-  --focus-ring: 0 0 0 4px rgba(26, 115, 232, 0.24);
-  --motion-fast: 150ms;
-  --motion-base: 250ms;
-  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
-  --container-max: 1200px;
-  --container-gutter-desktop: 36px;
-  --container-gutter-tablet: 24px;
-  --container-gutter-phone: 16px;
-}
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>MAT — Train</title>
+    <style>
+      /* Material design system — bound verbatim from tokens.css */
+      :root {
+        --bg: #f8fafd;
+        --surface: #ffffff;
+        --surface-warm: #e8f0fe;
+        --fg: #202124;
+        --fg-2: #3c4043;
+        --muted: #5f6368;
+        --meta: #1a73e8;
+        --border: #dadce0;
+        --border-soft: #edf0f2;
+        --accent: #1a73e8;
+        --accent-on: #ffffff;
+        --accent-hover: color-mix(in oklab, var(--accent), black 8%);
+        --accent-active: color-mix(in oklab, var(--accent), black 14%);
+        --success: #188038;
+        --warn: #f9ab00;
+        --danger: #d93025;
+        --font-display: 'Google Sans', Roboto, Arial, sans-serif;
+        --font-body: Roboto, Arial, sans-serif;
+        --font-mono: 'Roboto Mono', ui-monospace, Menlo, monospace;
+        --text-xs: 12px;
+        --text-sm: 14px;
+        --text-base: 16px;
+        --text-lg: 18px;
+        --text-xl: 24px;
+        --text-2xl: 32px;
+        --text-3xl: 48px;
+        --text-4xl: 64px;
+        --leading-body: 1.5;
+        --leading-tight: 1.12;
+        --tracking-display: 0;
+        --space-1: 4px;
+        --space-2: 8px;
+        --space-3: 12px;
+        --space-4: 16px;
+        --space-5: 20px;
+        --space-6: 24px;
+        --space-8: 32px;
+        --space-12: 48px;
+        --section-y-desktop: 96px;
+        --section-y-tablet: 68px;
+        --section-y-phone: 48px;
+        --radius-sm: 4px;
+        --radius-md: 12px;
+        --radius-lg: 24px;
+        --radius-pill: 9999px;
+        --elev-flat: none;
+        --elev-ring: 0 0 0 1px var(--border);
+        --elev-raised: 0 3px 8px rgba(60, 64, 67, 0.18);
+        --focus-ring: 0 0 0 4px rgba(26, 115, 232, 0.24);
+        --motion-fast: 150ms;
+        --motion-base: 250ms;
+        --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+        --container-max: 1200px;
+        --container-gutter-desktop: 36px;
+        --container-gutter-tablet: 24px;
+        --container-gutter-phone: 16px;
+      }
 
-/* Dark theme — bound via [data-theme="dark"] */
-:root[data-theme="dark"] {
-  --bg: #0f1115;
-  --surface: #1a1c20;
-  --surface-warm: #1e2a3d;
-  --fg: #e8eaed;
-  --fg-2: #bdc1c6;
-  --muted: #9aa0a6;
-  --border: #3c4043;
-  --border-soft: #2a2d31;
-  --accent: #8ab4f8;
-  --accent-on: #0f1115;
-}
+      /* Dark theme — bound via [data-theme="dark"] */
+      :root[data-theme='dark'] {
+        --bg: #0f1115;
+        --surface: #1a1c20;
+        --surface-warm: #1e2a3d;
+        --fg: #e8eaed;
+        --fg-2: #bdc1c6;
+        --muted: #9aa0a6;
+        --border: #3c4043;
+        --border-soft: #2a2d31;
+        --accent: #8ab4f8;
+        --accent-on: #0f1115;
+      }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: var(--text-base); line-height: var(--leading-body); -webkit-font-smoothing: antialiased; }
-body { min-height: 100vh; padding-bottom: var(--space-12); }
-a { color: inherit; text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 2px; }
-button { font: inherit; cursor: pointer; background: none; border: 0; color: inherit; }
-input, select, textarea { font: inherit; }
-img, svg { display: block; max-width: 100%; }
-:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html,
+      body {
+        background: var(--bg);
+        color: var(--fg);
+        font-family: var(--font-body);
+        font-size: var(--text-base);
+        line-height: var(--leading-body);
+        -webkit-font-smoothing: antialiased;
+      }
+      body {
+        min-height: 100vh;
+        padding-bottom: var(--space-12);
+      }
+      a {
+        color: inherit;
+        text-decoration: underline;
+        text-underline-offset: 3px;
+        text-decoration-thickness: 2px;
+      }
+      button {
+        font: inherit;
+        cursor: pointer;
+        background: none;
+        border: 0;
+        color: inherit;
+      }
+      input,
+      select,
+      textarea {
+        font: inherit;
+      }
+      img,
+      svg {
+        display: block;
+        max-width: 100%;
+      }
+      :focus-visible {
+        outline: none;
+        box-shadow: var(--focus-ring);
+      }
 
-/* Layout shell */
-.shell { max-width: var(--container-max); margin: 0 auto; padding: 0 var(--container-gutter-desktop); }
-@media (max-width: 1024px) { .shell { padding: 0 var(--container-gutter-tablet); } }
-@media (max-width: 600px)  { .shell { padding: 0 var(--container-gutter-phone); } }
+      /* Layout shell */
+      .shell {
+        max-width: var(--container-max);
+        margin: 0 auto;
+        padding: 0 var(--container-gutter-desktop);
+      }
+      @media (max-width: 1024px) {
+        .shell {
+          padding: 0 var(--container-gutter-tablet);
+        }
+      }
+      @media (max-width: 600px) {
+        .shell {
+          padding: 0 var(--container-gutter-phone);
+        }
+      }
 
-/* Top bar — shared with mat-bjj-app.html */
-.topbar { background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 50; }
-.topbar-inner { display: flex; align-items: center; gap: var(--space-6); padding: var(--space-3) 0; }
-.brand { display: flex; align-items: center; gap: var(--space-3); font-family: var(--font-display); font-size: var(--text-xl); letter-spacing: var(--tracking-display); font-weight: 500; text-decoration: none; color: var(--fg); }
-.brand-mark { width: 36px; height: 36px; background: var(--surface-warm); color: var(--accent); border-radius: var(--radius-md); display: grid; place-items: center; font-family: var(--font-display); font-size: 18px; font-weight: 500; }
-.tabs { display: flex; gap: var(--space-1); margin-left: auto; align-items: center; }
-.tab { padding: var(--space-2) var(--space-4); font-family: var(--font-body); font-weight: 500; font-size: var(--text-sm); color: var(--fg-2); border-radius: var(--radius-pill); text-decoration: none; transition: background var(--motion-fast) var(--ease-standard), color var(--motion-fast) var(--ease-standard); }
-.tab[aria-current="page"] { background: var(--accent); color: var(--accent-on); }
-.tab:hover { background: var(--surface-warm); color: var(--fg); }
-.theme-btn { width: 36px; height: 36px; border-radius: var(--radius-pill); background: var(--surface-warm); color: var(--fg-2); display: grid; place-items: center; border: 0; transition: background var(--motion-fast) var(--ease-standard), color var(--motion-fast) var(--ease-standard); }
-.theme-btn:hover { background: var(--accent); color: var(--accent-on); }
-.theme-btn svg { width: 18px; height: 18px; }
-@media (max-width: 600px) { .tab { padding: var(--space-2) var(--space-3); font-size: 11px; } .brand { font-size: 18px; } .brand-mark { width: 30px; height: 30px; font-size: 16px; } }
+      /* Top bar — shared with mat-bjj-app.html */
+      .topbar {
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
+        position: sticky;
+        top: 0;
+        z-index: 50;
+      }
+      .topbar-inner {
+        display: flex;
+        align-items: center;
+        gap: var(--space-6);
+        padding: var(--space-3) 0;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        font-family: var(--font-display);
+        font-size: var(--text-xl);
+        letter-spacing: var(--tracking-display);
+        font-weight: 500;
+        text-decoration: none;
+        color: var(--fg);
+      }
+      .brand-mark {
+        width: 36px;
+        height: 36px;
+        background: var(--surface-warm);
+        color: var(--accent);
+        border-radius: var(--radius-md);
+        display: grid;
+        place-items: center;
+        font-family: var(--font-display);
+        font-size: 18px;
+        font-weight: 500;
+      }
+      .tabs {
+        display: flex;
+        gap: var(--space-1);
+        margin-left: auto;
+        align-items: center;
+      }
+      .tab {
+        padding: var(--space-2) var(--space-4);
+        font-family: var(--font-body);
+        font-weight: 500;
+        font-size: var(--text-sm);
+        color: var(--fg-2);
+        border-radius: var(--radius-pill);
+        text-decoration: none;
+        transition:
+          background var(--motion-fast) var(--ease-standard),
+          color var(--motion-fast) var(--ease-standard);
+      }
+      .tab[aria-current='page'] {
+        background: var(--accent);
+        color: var(--accent-on);
+      }
+      .tab:hover {
+        background: var(--surface-warm);
+        color: var(--fg);
+      }
+      .theme-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: var(--radius-pill);
+        background: var(--surface-warm);
+        color: var(--fg-2);
+        display: grid;
+        place-items: center;
+        border: 0;
+        transition:
+          background var(--motion-fast) var(--ease-standard),
+          color var(--motion-fast) var(--ease-standard);
+      }
+      .theme-btn:hover {
+        background: var(--accent);
+        color: var(--accent-on);
+      }
+      .theme-btn svg {
+        width: 18px;
+        height: 18px;
+      }
+      @media (max-width: 600px) {
+        .tab {
+          padding: var(--space-2) var(--space-3);
+          font-size: 11px;
+        }
+        .brand {
+          font-size: 18px;
+        }
+        .brand-mark {
+          width: 30px;
+          height: 30px;
+          font-size: 16px;
+        }
+      }
 
-/* Section header */
-.section { padding: var(--space-8) 0; }
-.eyebrow { font-family: var(--font-body); font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; font-size: var(--text-xs); color: var(--accent); display: inline-block; padding: 2px 0; margin-bottom: var(--space-3); }
-h1 { font-family: var(--font-display); font-size: clamp(40px, 6vw, var(--text-3xl)); line-height: var(--leading-tight); letter-spacing: var(--tracking-display); font-weight: 500; color: var(--fg); }
-h2 { font-family: var(--font-display); font-size: clamp(28px, 4vw, var(--text-2xl)); line-height: var(--leading-tight); letter-spacing: var(--tracking-display); font-weight: 500; }
-h3 { font-family: var(--font-display); font-size: var(--text-lg); font-weight: 500; letter-spacing: 0; }
-.lead { font-size: var(--text-lg); max-width: 60ch; color: var(--fg-2); line-height: var(--leading-body); }
-.mono { font-family: var(--font-mono); }
+      /* Section header */
+      .section {
+        padding: var(--space-8) 0;
+      }
+      .eyebrow {
+        font-family: var(--font-body);
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-size: var(--text-xs);
+        color: var(--accent);
+        display: inline-block;
+        padding: 2px 0;
+        margin-bottom: var(--space-3);
+      }
+      h1 {
+        font-family: var(--font-display);
+        font-size: clamp(40px, 6vw, var(--text-3xl));
+        line-height: var(--leading-tight);
+        letter-spacing: var(--tracking-display);
+        font-weight: 500;
+        color: var(--fg);
+      }
+      h2 {
+        font-family: var(--font-display);
+        font-size: clamp(28px, 4vw, var(--text-2xl));
+        line-height: var(--leading-tight);
+        letter-spacing: var(--tracking-display);
+        font-weight: 500;
+      }
+      h3 {
+        font-family: var(--font-display);
+        font-size: var(--text-lg);
+        font-weight: 500;
+        letter-spacing: 0;
+      }
+      .lead {
+        font-size: var(--text-lg);
+        max-width: 60ch;
+        color: var(--fg-2);
+        line-height: var(--leading-body);
+      }
+      .mono {
+        font-family: var(--font-mono);
+      }
 
-/* Live session row */
-.live-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: var(--space-6); margin-top: var(--space-6); }
-@media (max-width: 900px) { .live-grid { grid-template-columns: 1fr; } }
+      /* Live session row */
+      .live-grid {
+        display: grid;
+        grid-template-columns: 1.2fr 1fr;
+        gap: var(--space-6);
+        margin-top: var(--space-6);
+      }
+      @media (max-width: 900px) {
+        .live-grid {
+          grid-template-columns: 1fr;
+        }
+      }
 
-.card { background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--elev-raised); padding: var(--space-6); border: 1px solid var(--border-soft); }
-.card-head { display: flex; align-items: center; justify-content: space-between; padding-bottom: var(--space-4); margin-bottom: var(--space-5); gap: var(--space-3); flex-wrap: wrap; }
-.card-head h2 { font-size: var(--text-xl); }
-.tag { font-family: var(--font-body); font-weight: 500; font-size: var(--text-xs); padding: 4px 10px; border-radius: var(--radius-pill); background: var(--surface-warm); color: var(--accent); }
-.tag.live { background: var(--danger); color: #fff; animation: blink 1.4s var(--ease-standard) infinite; }
-@keyframes blink { 50% { opacity: 0.55; } }
+      .card {
+        background: var(--surface);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--elev-raised);
+        padding: var(--space-6);
+        border: 1px solid var(--border-soft);
+      }
+      .card-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-bottom: var(--space-4);
+        margin-bottom: var(--space-5);
+        gap: var(--space-3);
+        flex-wrap: wrap;
+      }
+      .card-head h2 {
+        font-size: var(--text-xl);
+      }
+      .tag {
+        font-family: var(--font-body);
+        font-weight: 500;
+        font-size: var(--text-xs);
+        padding: 4px 10px;
+        border-radius: var(--radius-pill);
+        background: var(--surface-warm);
+        color: var(--accent);
+      }
+      .tag.live {
+        background: var(--danger);
+        color: #fff;
+        animation: blink 1.4s var(--ease-standard) infinite;
+      }
+      @keyframes blink {
+        50% {
+          opacity: 0.55;
+        }
+      }
 
-/* Round timer */
-.timer { display: grid; place-items: center; padding: var(--space-6) 0 var(--space-4); }
-.timer-clock { font-family: var(--font-display); font-size: clamp(80px, 14vw, 144px); line-height: 1; letter-spacing: var(--tracking-display); font-weight: 500; font-variant-numeric: tabular-nums; color: var(--fg); }
-.timer-meta { display: flex; gap: var(--space-2); margin-top: var(--space-3); flex-wrap: wrap; justify-content: center; }
-.chip { font-family: var(--font-body); font-weight: 500; font-size: var(--text-sm); border-radius: var(--radius-pill); padding: 6px 12px; background: var(--surface-warm); color: var(--fg-2); }
-.chip.on { background: var(--accent); color: var(--accent-on); }
-.chip.rest { background: color-mix(in oklab, var(--accent), white 80%); color: var(--accent); }
-:root[data-theme="dark"] .chip.rest { background: color-mix(in oklab, var(--accent), black 70%); color: var(--accent); }
-.timer-controls { display: flex; gap: var(--space-3); margin-top: var(--space-5); justify-content: center; flex-wrap: wrap; }
-.btn { font-family: var(--font-body); font-weight: 500; font-size: var(--text-base); padding: 10px 20px; border-radius: var(--radius-md); background: var(--surface); color: var(--fg); border: 1px solid var(--border); transition: background var(--motion-fast) var(--ease-standard), box-shadow var(--motion-fast) var(--ease-standard); }
-.btn:hover { background: var(--surface-warm); box-shadow: var(--elev-ring); }
-.btn:active { box-shadow: var(--elev-flat); }
-.btn-primary { background: var(--accent); color: var(--accent-on); border-color: var(--accent); }
-.btn-primary:hover { background: var(--accent-hover); color: var(--accent-on); }
-.btn-danger { background: var(--danger); color: #fff; border-color: var(--danger); }
-.btn-ghost { background: transparent; border-color: transparent; box-shadow: none; }
+      /* Round timer */
+      .timer {
+        display: grid;
+        place-items: center;
+        padding: var(--space-6) 0 var(--space-4);
+      }
+      .timer-clock {
+        font-family: var(--font-display);
+        font-size: clamp(80px, 14vw, 144px);
+        line-height: 1;
+        letter-spacing: var(--tracking-display);
+        font-weight: 500;
+        font-variant-numeric: tabular-nums;
+        color: var(--fg);
+      }
+      .timer-meta {
+        display: flex;
+        gap: var(--space-2);
+        margin-top: var(--space-3);
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      .chip {
+        font-family: var(--font-body);
+        font-weight: 500;
+        font-size: var(--text-sm);
+        border-radius: var(--radius-pill);
+        padding: 6px 12px;
+        background: var(--surface-warm);
+        color: var(--fg-2);
+      }
+      .chip.on {
+        background: var(--accent);
+        color: var(--accent-on);
+      }
+      .chip.rest {
+        background: color-mix(in oklab, var(--accent), white 80%);
+        color: var(--accent);
+      }
+      :root[data-theme='dark'] .chip.rest {
+        background: color-mix(in oklab, var(--accent), black 70%);
+        color: var(--accent);
+      }
+      .timer-controls {
+        display: flex;
+        gap: var(--space-3);
+        margin-top: var(--space-5);
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+      .btn {
+        font-family: var(--font-body);
+        font-weight: 500;
+        font-size: var(--text-base);
+        padding: 10px 20px;
+        border-radius: var(--radius-md);
+        background: var(--surface);
+        color: var(--fg);
+        border: 1px solid var(--border);
+        transition:
+          background var(--motion-fast) var(--ease-standard),
+          box-shadow var(--motion-fast) var(--ease-standard);
+      }
+      .btn:hover {
+        background: var(--surface-warm);
+        box-shadow: var(--elev-ring);
+      }
+      .btn:active {
+        box-shadow: var(--elev-flat);
+      }
+      .btn-primary {
+        background: var(--accent);
+        color: var(--accent-on);
+        border-color: var(--accent);
+      }
+      .btn-primary:hover {
+        background: var(--accent-hover);
+        color: var(--accent-on);
+      }
+      .btn-danger {
+        background: var(--danger);
+        color: #fff;
+        border-color: var(--danger);
+      }
+      .btn-ghost {
+        background: transparent;
+        border-color: transparent;
+        box-shadow: none;
+      }
 
-/* Session plan */
-.plan-list { display: flex; flex-direction: column; gap: var(--space-2); }
-.plan-row { display: grid; grid-template-columns: 48px 1fr auto; gap: var(--space-4); align-items: center; padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); background: var(--surface-warm); transition: background var(--motion-fast) var(--ease-standard); }
-.plan-row.active { background: var(--accent); color: var(--accent-on); }
-.plan-row.active .plan-info span, .plan-row.active .plan-stat { color: rgba(255,255,255,0.85); }
-:root[data-theme="dark"] .plan-row.active .plan-info span, :root[data-theme="dark"] .plan-row.active .plan-stat { color: rgba(15, 17, 21, 0.78); }
-.plan-row.done { background: var(--surface); border: 1px solid var(--border-soft); opacity: 0.7; }
-.plan-num { font-family: var(--font-display); font-size: var(--text-xl); text-align: center; font-weight: 500; color: var(--accent); }
-.plan-row.active .plan-num { color: var(--accent-on); }
-.plan-info strong { font-family: var(--font-display); font-weight: 500; display: block; font-size: var(--text-base); }
-.plan-info span { font-family: var(--font-body); font-size: var(--text-xs); color: var(--muted); }
-.plan-stat { font-family: var(--font-body); font-weight: 500; font-size: var(--text-sm); text-align: right; color: var(--fg-2); }
+      /* Session plan */
+      .plan-list {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-2);
+      }
+      .plan-row {
+        display: grid;
+        grid-template-columns: 48px 1fr auto;
+        gap: var(--space-4);
+        align-items: center;
+        padding: var(--space-3) var(--space-4);
+        border-radius: var(--radius-md);
+        background: var(--surface-warm);
+        transition: background var(--motion-fast) var(--ease-standard);
+      }
+      .plan-row.active {
+        background: var(--accent);
+        color: var(--accent-on);
+      }
+      .plan-row.active .plan-info span,
+      .plan-row.active .plan-stat {
+        color: rgba(255, 255, 255, 0.85);
+      }
+      :root[data-theme='dark'] .plan-row.active .plan-info span,
+      :root[data-theme='dark'] .plan-row.active .plan-stat {
+        color: rgba(15, 17, 21, 0.78);
+      }
+      .plan-row.done {
+        background: var(--surface);
+        border: 1px solid var(--border-soft);
+        opacity: 0.7;
+      }
+      .plan-num {
+        font-family: var(--font-display);
+        font-size: var(--text-xl);
+        text-align: center;
+        font-weight: 500;
+        color: var(--accent);
+      }
+      .plan-row.active .plan-num {
+        color: var(--accent-on);
+      }
+      .plan-info strong {
+        font-family: var(--font-display);
+        font-weight: 500;
+        display: block;
+        font-size: var(--text-base);
+      }
+      .plan-info span {
+        font-family: var(--font-body);
+        font-size: var(--text-xs);
+        color: var(--muted);
+      }
+      .plan-stat {
+        font-family: var(--font-body);
+        font-weight: 500;
+        font-size: var(--text-sm);
+        text-align: right;
+        color: var(--fg-2);
+      }
 
-/* Stats row */
-.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-4); margin-top: var(--space-6); }
-@media (max-width: 700px) { .stats { grid-template-columns: repeat(2, 1fr); } }
-.stat { background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--border-soft); padding: var(--space-5); box-shadow: var(--elev-raised); }
-.stat .label { font-family: var(--font-body); font-weight: 500; font-size: var(--text-sm); color: var(--muted); }
-.stat .value { font-family: var(--font-display); font-size: var(--text-2xl); line-height: 1.1; margin-top: var(--space-2); font-weight: 500; font-variant-numeric: tabular-nums; }
-.stat.warm { background: var(--surface-warm); border-color: var(--border-soft); }
+      /* Stats row */
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: var(--space-4);
+        margin-top: var(--space-6);
+      }
+      @media (max-width: 700px) {
+        .stats {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+      .stat {
+        background: var(--surface);
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border-soft);
+        padding: var(--space-5);
+        box-shadow: var(--elev-raised);
+      }
+      .stat .label {
+        font-family: var(--font-body);
+        font-weight: 500;
+        font-size: var(--text-sm);
+        color: var(--muted);
+      }
+      .stat .value {
+        font-family: var(--font-display);
+        font-size: var(--text-2xl);
+        line-height: 1.1;
+        margin-top: var(--space-2);
+        font-weight: 500;
+        font-variant-numeric: tabular-nums;
+      }
+      .stat.warm {
+        background: var(--surface-warm);
+        border-color: var(--border-soft);
+      }
 
-/* Technique library */
-.lib-head { display: flex; align-items: end; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; }
-.filters { display: flex; gap: var(--space-2); flex-wrap: wrap; }
-.filter { font-family: var(--font-body); font-weight: 500; font-size: var(--text-sm); padding: 8px 14px; border-radius: var(--radius-pill); background: var(--surface); color: var(--fg-2); border: 1px solid var(--border); }
-.filter[aria-pressed="true"] { background: var(--accent); color: var(--accent-on); border-color: var(--accent); }
-.lib-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-5); margin-top: var(--space-6); }
-@media (max-width: 1000px) { .lib-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 600px)  { .lib-grid { grid-template-columns: 1fr; } }
-.tech { background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--border-soft); box-shadow: var(--elev-raised); display: flex; flex-direction: column; cursor: pointer; overflow: hidden; transition: box-shadow var(--motion-fast) var(--ease-standard); }
-.tech:hover { box-shadow: 0 6px 16px rgba(60, 64, 67, 0.22); }
-.tech-diagram { aspect-ratio: 4/3; background: var(--surface-warm); display: grid; place-items: center; position: relative; overflow: hidden; }
-.tech-diagram svg { width: 70%; height: 70%; }
-.tech-body { padding: var(--space-4) var(--space-5) var(--space-5); }
-.tech-cat { font-family: var(--font-body); font-weight: 500; font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
-.tech-name { font-family: var(--font-display); font-size: var(--text-lg); font-weight: 500; margin-top: 4px; color: var(--fg); }
-.tech-meta { display: flex; gap: var(--space-2); margin-top: var(--space-3); flex-wrap: wrap; }
-.belt { font-family: var(--font-body); font-weight: 500; font-size: 11px; padding: 3px 8px; border-radius: var(--radius-pill); background: var(--surface-warm); color: var(--fg-2); text-transform: uppercase; letter-spacing: 0.04em; }
-/* Belt colors: IBJJF content vocabulary, not chrome. Inline rather than tokens. */
-.belt.white { background: #f1f5f9; color: #1e293b; }
-.belt.blue { background: #dbeafe; color: #1e3a8a; }
-.belt.purple { background: #ede9fe; color: #5b21b6; }
-.belt.brown { background: #fef3c7; color: #92400e; }
-.belt.black { background: #1e293b; color: #fff; }
+      /* Technique library */
+      .lib-head {
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: var(--space-4);
+        flex-wrap: wrap;
+      }
+      .filters {
+        display: flex;
+        gap: var(--space-2);
+        flex-wrap: wrap;
+      }
+      .filter {
+        font-family: var(--font-body);
+        font-weight: 500;
+        font-size: var(--text-sm);
+        padding: 8px 14px;
+        border-radius: var(--radius-pill);
+        background: var(--surface);
+        color: var(--fg-2);
+        border: 1px solid var(--border);
+      }
+      .filter[aria-pressed='true'] {
+        background: var(--accent);
+        color: var(--accent-on);
+        border-color: var(--accent);
+      }
+      .lib-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: var(--space-5);
+        margin-top: var(--space-6);
+      }
+      @media (max-width: 1000px) {
+        .lib-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+      @media (max-width: 600px) {
+        .lib-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+      .tech {
+        background: var(--surface);
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border-soft);
+        box-shadow: var(--elev-raised);
+        display: flex;
+        flex-direction: column;
+        cursor: pointer;
+        overflow: hidden;
+        transition: box-shadow var(--motion-fast) var(--ease-standard);
+      }
+      .tech:hover {
+        box-shadow: 0 6px 16px rgba(60, 64, 67, 0.22);
+      }
+      .tech-diagram {
+        aspect-ratio: 4/3;
+        background: var(--surface-warm);
+        display: grid;
+        place-items: center;
+        position: relative;
+        overflow: hidden;
+      }
+      .tech-diagram svg {
+        width: 70%;
+        height: 70%;
+      }
+      .tech-body {
+        padding: var(--space-4) var(--space-5) var(--space-5);
+      }
+      .tech-cat {
+        font-family: var(--font-body);
+        font-weight: 500;
+        font-size: var(--text-xs);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--muted);
+      }
+      .tech-name {
+        font-family: var(--font-display);
+        font-size: var(--text-lg);
+        font-weight: 500;
+        margin-top: 4px;
+        color: var(--fg);
+      }
+      .tech-meta {
+        display: flex;
+        gap: var(--space-2);
+        margin-top: var(--space-3);
+        flex-wrap: wrap;
+      }
+      .belt {
+        font-family: var(--font-body);
+        font-weight: 500;
+        font-size: 11px;
+        padding: 3px 8px;
+        border-radius: var(--radius-pill);
+        background: var(--surface-warm);
+        color: var(--fg-2);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      /* Belt colors: IBJJF content vocabulary, not chrome. Inline rather than tokens. */
+      .belt.white {
+        background: #f1f5f9;
+        color: #1e293b;
+      }
+      .belt.blue {
+        background: #dbeafe;
+        color: #1e3a8a;
+      }
+      .belt.purple {
+        background: #ede9fe;
+        color: #5b21b6;
+      }
+      .belt.brown {
+        background: #fef3c7;
+        color: #92400e;
+      }
+      .belt.black {
+        background: #1e293b;
+        color: #fff;
+      }
 
-/* Progress / log */
-.split { display: grid; grid-template-columns: 1.2fr 1fr; gap: var(--space-6); margin-top: var(--space-6); }
-@media (max-width: 900px) { .split { grid-template-columns: 1fr; } }
+      /* Progress / log */
+      .split {
+        display: grid;
+        grid-template-columns: 1.2fr 1fr;
+        gap: var(--space-6);
+        margin-top: var(--space-6);
+      }
+      @media (max-width: 900px) {
+        .split {
+          grid-template-columns: 1fr;
+        }
+      }
 
-.bar-row { display: grid; grid-template-columns: 140px 1fr 50px; gap: var(--space-4); align-items: center; padding: var(--space-3) 0; }
-.bar-track { height: 10px; border-radius: var(--radius-pill); background: var(--surface-warm); position: relative; overflow: hidden; }
-.bar-fill { position: absolute; inset: 0; background: var(--accent); width: 0%; border-radius: var(--radius-pill); transition: width 600ms var(--ease-standard); }
-.bar-fill.green { background: var(--success); }
-.bar-fill.orange { background: var(--warn); }
-.bar-name { font-family: var(--font-body); font-weight: 500; font-size: var(--text-sm); color: var(--fg); }
-.bar-pct { font-family: var(--font-body); font-weight: 500; font-size: var(--text-sm); text-align: right; color: var(--muted); font-variant-numeric: tabular-nums; }
+      .bar-row {
+        display: grid;
+        grid-template-columns: 140px 1fr 50px;
+        gap: var(--space-4);
+        align-items: center;
+        padding: var(--space-3) 0;
+      }
+      .bar-track {
+        height: 10px;
+        border-radius: var(--radius-pill);
+        background: var(--surface-warm);
+        position: relative;
+        overflow: hidden;
+      }
+      .bar-fill {
+        position: absolute;
+        inset: 0;
+        background: var(--accent);
+        width: 0%;
+        border-radius: var(--radius-pill);
+        transition: width 600ms var(--ease-standard);
+      }
+      .bar-fill.green {
+        background: var(--success);
+      }
+      .bar-fill.orange {
+        background: var(--warn);
+      }
+      .bar-name {
+        font-family: var(--font-body);
+        font-weight: 500;
+        font-size: var(--text-sm);
+        color: var(--fg);
+      }
+      .bar-pct {
+        font-family: var(--font-body);
+        font-weight: 500;
+        font-size: var(--text-sm);
+        text-align: right;
+        color: var(--muted);
+        font-variant-numeric: tabular-nums;
+      }
 
-/* Log */
-.log { display: flex; flex-direction: column; gap: var(--space-2); }
-.log-row { display: grid; grid-template-columns: 84px 1fr auto; gap: var(--space-4); padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); background: var(--surface-warm); align-items: center; }
-.log-day { font-family: var(--font-body); font-weight: 500; font-size: var(--text-xs); color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
-.log-title { font-family: var(--font-display); font-weight: 500; font-size: var(--text-sm); color: var(--fg); }
-.log-tag { font-family: var(--font-body); font-weight: 500; font-size: var(--text-xs); border-radius: var(--radius-pill); background: var(--surface); color: var(--accent); padding: 4px 10px; border: 1px solid var(--border-soft); }
+      /* Log */
+      .log {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-2);
+      }
+      .log-row {
+        display: grid;
+        grid-template-columns: 84px 1fr auto;
+        gap: var(--space-4);
+        padding: var(--space-3) var(--space-4);
+        border-radius: var(--radius-md);
+        background: var(--surface-warm);
+        align-items: center;
+      }
+      .log-day {
+        font-family: var(--font-body);
+        font-weight: 500;
+        font-size: var(--text-xs);
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
+      .log-title {
+        font-family: var(--font-display);
+        font-weight: 500;
+        font-size: var(--text-sm);
+        color: var(--fg);
+      }
+      .log-tag {
+        font-family: var(--font-body);
+        font-weight: 500;
+        font-size: var(--text-xs);
+        border-radius: var(--radius-pill);
+        background: var(--surface);
+        color: var(--accent);
+        padding: 4px 10px;
+        border: 1px solid var(--border-soft);
+      }
 
-/* Footer */
-.foot { display: flex; justify-content: space-between; align-items: center; padding: var(--space-6) 0 0; margin-top: var(--space-8); border-top: 1px solid var(--border-soft); flex-wrap: wrap; gap: var(--space-3); }
-.foot .mono { font-size: var(--text-sm); color: var(--muted); }
+      /* Footer */
+      .foot {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: var(--space-6) 0 0;
+        margin-top: var(--space-8);
+        border-top: 1px solid var(--border-soft);
+        flex-wrap: wrap;
+        gap: var(--space-3);
+      }
+      .foot .mono {
+        font-size: var(--text-sm);
+        color: var(--muted);
+      }
 
-/* Mobile collapse */
-@media (max-width: 600px) {
-  .timer-clock { font-size: 88px; }
-  .plan-row { grid-template-columns: 44px 1fr; }
-  .plan-stat { grid-column: 1 / -1; text-align: left; }
-  .log-row { grid-template-columns: 60px 1fr; }
-  .log-row .log-tag { grid-column: 1 / -1; justify-self: start; }
-  .bar-row { grid-template-columns: 90px 1fr 40px; }
-  .topbar-inner { gap: var(--space-3); }
-}
-</style>
-</head>
-<body>
+      /* Mobile collapse */
+      @media (max-width: 600px) {
+        .timer-clock {
+          font-size: 88px;
+        }
+        .plan-row {
+          grid-template-columns: 44px 1fr;
+        }
+        .plan-stat {
+          grid-column: 1 / -1;
+          text-align: left;
+        }
+        .log-row {
+          grid-template-columns: 60px 1fr;
+        }
+        .log-row .log-tag {
+          grid-column: 1 / -1;
+          justify-self: start;
+        }
+        .bar-row {
+          grid-template-columns: 90px 1fr 40px;
+        }
+        .topbar-inner {
+          gap: var(--space-3);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="shell topbar-inner">
+        <a href="index.html" class="brand" aria-label="MAT home">
+          <span class="brand-mark">M</span>
+          <span>MAT / BJJ</span>
+        </a>
+        <nav class="tabs" aria-label="Primary">
+          <a class="tab" href="mat-bjj-app.html">BJJ Dashboard</a>
+          <a class="tab" href="app.html" aria-current="page">Train</a>
+          <a class="tab" href="#techniques">Library</a>
+          <a class="tab" href="#log">Log</a>
+          <button class="theme-btn" id="themeBtn" aria-label="Toggle dark mode">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+            </svg>
+          </button>
+        </nav>
+      </div>
+    </header>
 
-<header class="topbar">
-  <div class="shell topbar-inner">
-    <a href="index.html" class="brand" aria-label="MAT home">
-      <span class="brand-mark">M</span>
-      <span>MAT / BJJ</span>
-    </a>
-    <nav class="tabs" aria-label="Primary">
-      <a class="tab" href="mat-bjj-app.html">BJJ Dashboard</a>
-      <a class="tab" href="app.html" aria-current="page">Train</a>
-      <a class="tab" href="#techniques">Library</a>
-      <a class="tab" href="#log">Log</a>
-      <button class="theme-btn" id="themeBtn" aria-label="Toggle dark mode">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-        </svg>
-      </button>
-    </nav>
-  </div>
-</header>
+    <main class="shell">
+      <section class="section">
+        <span class="eyebrow">session 14 · open mat · tuesday 06:42pm</span>
+        <h1>Roll until you can't.</h1>
+        <p class="lead">
+          Five 5-minute rounds. Two minutes rest. Log the techniques that hit you, the ones that
+          didn't, and the ones you want to drill next.
+        </p>
 
-<main class="shell">
+        <div class="live-grid">
+          <div class="card" aria-label="Round timer">
+            <div class="card-head">
+              <h2>Round 03 / 05</h2>
+              <span class="tag live" id="liveTag">● LIVE</span>
+            </div>
+            <div class="timer">
+              <div class="timer-clock" id="clock">05:00</div>
+              <div class="timer-meta">
+                <span class="chip on" id="phaseChip">Rolling</span>
+                <span class="chip" id="roundChip">Round 3 of 5</span>
+                <span class="chip" id="restChip">Rest 2:00</span>
+                <span class="chip" id="totalChip">Total 17:42</span>
+              </div>
+              <div class="timer-controls">
+                <button class="btn btn-primary" id="toggleBtn">Pause</button>
+                <button class="btn" id="resetBtn">Reset</button>
+                <button class="btn btn-ghost" id="skipBtn">Skip →</button>
+              </div>
+            </div>
+          </div>
 
-  <section class="section">
-    <span class="eyebrow">session 14 · open mat · tuesday 06:42pm</span>
-    <h1>Roll until you can't.</h1>
-    <p class="lead">Five 5-minute rounds. Two minutes rest. Log the techniques that hit you, the ones that didn't, and the ones you want to drill next.</p>
-
-    <div class="live-grid">
-      <div class="card" aria-label="Round timer">
-        <div class="card-head">
-          <h2>Round 03 / 05</h2>
-          <span class="tag live" id="liveTag">● LIVE</span>
+          <div class="card" aria-label="Session plan">
+            <div class="card-head">
+              <h2>Today's plan</h2>
+              <span class="tag">42 min</span>
+            </div>
+            <div class="plan-list" id="planList">
+              <div class="plan-row done">
+                <div class="plan-num">01</div>
+                <div class="plan-info">
+                  <strong>Warm-up · shrimps &amp; technical stand-up</strong
+                  ><span>10 reps · both sides</span>
+                </div>
+                <div class="plan-stat">DONE</div>
+              </div>
+              <div class="plan-row done">
+                <div class="plan-num">02</div>
+                <div class="plan-info">
+                  <strong>Drill · armbar from closed guard</strong><span>5 sets · 10 reps</span>
+                </div>
+                <div class="plan-stat">DONE</div>
+              </div>
+              <div class="plan-row active">
+                <div class="plan-num">03</div>
+                <div class="plan-info">
+                  <strong>Live rolls · 5-min rounds</strong><span>Rolling · 2-min rest</span>
+                </div>
+                <div class="plan-stat" id="planRound">ROUND 3</div>
+              </div>
+              <div class="plan-row">
+                <div class="plan-num">04</div>
+                <div class="plan-info">
+                  <strong>Drill · triangle from guard</strong><span>5 sets · 10 reps</span>
+                </div>
+                <div class="plan-stat">—</div>
+              </div>
+              <div class="plan-row">
+                <div class="plan-num">05</div>
+                <div class="plan-info">
+                  <strong>Cooldown · breathing &amp; journaling</strong><span>3 min</span>
+                </div>
+                <div class="plan-stat">—</div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="timer">
-          <div class="timer-clock" id="clock">05:00</div>
-          <div class="timer-meta">
-            <span class="chip on" id="phaseChip">Rolling</span>
-            <span class="chip" id="roundChip">Round 3 of 5</span>
-            <span class="chip" id="restChip">Rest 2:00</span>
-            <span class="chip" id="totalChip">Total 17:42</span>
-          </div>
-          <div class="timer-controls">
-            <button class="btn btn-primary" id="toggleBtn">Pause</button>
-            <button class="btn" id="resetBtn">Reset</button>
-            <button class="btn btn-ghost" id="skipBtn">Skip →</button>
-          </div>
-        </div>
-      </div>
 
-      <div class="card" aria-label="Session plan">
-        <div class="card-head">
-          <h2>Today's plan</h2>
-          <span class="tag">42 min</span>
-        </div>
-        <div class="plan-list" id="planList">
-          <div class="plan-row done">
-            <div class="plan-num">01</div>
-            <div class="plan-info"><strong>Warm-up · shrimps &amp; technical stand-up</strong><span>10 reps · both sides</span></div>
-            <div class="plan-stat">DONE</div>
+        <div class="stats" aria-label="Session stats">
+          <div class="stat warm">
+            <div class="label">Submissions hit</div>
+            <div class="value" id="statSubs">2</div>
           </div>
-          <div class="plan-row done">
-            <div class="plan-num">02</div>
-            <div class="plan-info"><strong>Drill · armbar from closed guard</strong><span>5 sets · 10 reps</span></div>
-            <div class="plan-stat">DONE</div>
+          <div class="stat">
+            <div class="label">Sweeps landed</div>
+            <div class="value" id="statSweeps">3</div>
           </div>
-          <div class="plan-row active">
-            <div class="plan-num">03</div>
-            <div class="plan-info"><strong>Live rolls · 5-min rounds</strong><span>Rolling · 2-min rest</span></div>
-            <div class="plan-stat" id="planRound">ROUND 3</div>
+          <div class="stat">
+            <div class="label">Tapped out</div>
+            <div class="value" id="statTaps">1</div>
           </div>
-          <div class="plan-row">
-            <div class="plan-num">04</div>
-            <div class="plan-info"><strong>Drill · triangle from guard</strong><span>5 sets · 10 reps</span></div>
-            <div class="plan-stat">—</div>
-          </div>
-          <div class="plan-row">
-            <div class="plan-num">05</div>
-            <div class="plan-info"><strong>Cooldown · breathing &amp; journaling</strong><span>3 min</span></div>
-            <div class="plan-stat">—</div>
+          <div class="stat">
+            <div class="label">Heart rate avg</div>
+            <div class="value" id="statHr">148 <span style="font-size: 14px">bpm</span></div>
           </div>
         </div>
-      </div>
-    </div>
+      </section>
 
-    <div class="stats" aria-label="Session stats">
-      <div class="stat warm">
-        <div class="label">Submissions hit</div>
-        <div class="value" id="statSubs">2</div>
-      </div>
-      <div class="stat">
-        <div class="label">Sweeps landed</div>
-        <div class="value" id="statSweeps">3</div>
-      </div>
-      <div class="stat">
-        <div class="label">Tapped out</div>
-        <div class="value" id="statTaps">1</div>
-      </div>
-      <div class="stat">
-        <div class="label">Heart rate avg</div>
-        <div class="value" id="statHr">148 <span style="font-size: 14px;">bpm</span></div>
-      </div>
-    </div>
-  </section>
-
-  <section class="section" id="techniques">
-    <div class="lib-head">
-      <div>
-        <span class="eyebrow">technique library · 42 entries</span>
-        <h2>What got you tapped?</h2>
-      </div>
-      <div class="filters" role="toolbar" aria-label="Filter by category">
-        <button class="filter" aria-pressed="true" data-cat="all">All</button>
-        <button class="filter" aria-pressed="false" data-cat="submission">Submissions</button>
-        <button class="filter" aria-pressed="false" data-cat="sweep">Sweeps</button>
-        <button class="filter" aria-pressed="false" data-cat="escape">Escapes</button>
-        <button class="filter" aria-pressed="false" data-cat="takedown">Takedowns</button>
-      </div>
-    </div>
-
-    <div class="lib-grid" id="libGrid"></div>
-  </section>
-
-  <section class="section" id="log">
-    <span class="eyebrow">progress · last 30 days</span>
-    <h2>You showed up 18 / 22 days.</h2>
-
-    <div class="split">
-      <div class="card">
-        <div class="card-head"><h2>Coverage by position</h2><span class="tag">goal · balanced</span></div>
-        <div class="bar-row"><div class="bar-name">Guard (closed/open)</div><div class="bar-track"><div class="bar-fill" data-pct="86"></div></div><div class="bar-pct">86%</div></div>
-        <div class="bar-row"><div class="bar-name">Side control</div><div class="bar-track"><div class="bar-fill" data-pct="72"></div></div><div class="bar-pct">72%</div></div>
-        <div class="bar-row"><div class="bar-name">Back mount</div><div class="bar-track"><div class="bar-fill orange" data-pct="54"></div></div><div class="bar-pct">54%</div></div>
-        <div class="bar-row"><div class="bar-name">Half guard</div><div class="bar-track"><div class="bar-fill" data-pct="68"></div></div><div class="bar-pct">68%</div></div>
-        <div class="bar-row"><div class="bar-name">Mount</div><div class="bar-track"><div class="bar-fill green" data-pct="91"></div></div><div class="bar-pct">91%</div></div>
-        <div class="bar-row"><div class="bar-name">Takedowns</div><div class="bar-track"><div class="bar-fill orange" data-pct="38"></div></div><div class="bar-pct">38%</div></div>
-      </div>
-
-      <div class="card">
-        <div class="card-head"><h2>Recent sessions</h2><span class="tag">view all →</span></div>
-        <div class="log">
-          <div class="log-row">
-            <div class="log-day">JUN 10</div>
-            <div class="log-title">Open mat · 5 rounds · tapped by RNC</div>
-            <div class="log-tag">Drill: RNC defense</div>
+      <section class="section" id="techniques">
+        <div class="lib-head">
+          <div>
+            <span class="eyebrow">technique library · 42 entries</span>
+            <h2>What got you tapped?</h2>
           </div>
-          <div class="log-row">
-            <div class="log-day">JUN 08</div>
-            <div class="log-title">Gi class · armbar from mount</div>
-            <div class="log-tag">Submission</div>
-          </div>
-          <div class="log-row">
-            <div class="log-day">JUN 06</div>
-            <div class="log-title">No-gi · heel hook defense</div>
-            <div class="log-tag">Leg lock</div>
-          </div>
-          <div class="log-row">
-            <div class="log-day">JUN 04</div>
-            <div class="log-title">Open mat · back take × 4</div>
-            <div class="log-tag">Sweep</div>
-          </div>
-          <div class="log-row">
-            <div class="log-day">JUN 02</div>
-            <div class="log-title">Competition sim · 6 rounds</div>
-            <div class="log-tag">Comp prep</div>
+          <div class="filters" role="toolbar" aria-label="Filter by category">
+            <button class="filter" aria-pressed="true" data-cat="all">All</button>
+            <button class="filter" aria-pressed="false" data-cat="submission">Submissions</button>
+            <button class="filter" aria-pressed="false" data-cat="sweep">Sweeps</button>
+            <button class="filter" aria-pressed="false" data-cat="escape">Escapes</button>
+            <button class="filter" aria-pressed="false" data-cat="takedown">Takedowns</button>
           </div>
         </div>
-      </div>
-    </div>
-  </section>
 
-  <footer class="foot">
-    <span class="mono">mat / bjj · v0.5 · shared nav across surfaces</span>
-    <a href="landing.html" class="btn btn-ghost">About this app</a>
-  </footer>
+        <div class="lib-grid" id="libGrid"></div>
+      </section>
 
-</main>
+      <section class="section" id="log">
+        <span class="eyebrow">progress · last 30 days</span>
+        <h2>You showed up 18 / 22 days.</h2>
 
-<script>
-/* Theme toggle — persisted to localStorage */
-const themeBtn = document.getElementById('themeBtn');
-const storedTheme = localStorage.getItem('mat-theme');
-if (storedTheme === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
-themeBtn.addEventListener('click', () => {
-  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-  if (isDark) {
-    document.documentElement.removeAttribute('data-theme');
-    localStorage.setItem('mat-theme', 'light');
-  } else {
-    document.documentElement.setAttribute('data-theme', 'dark');
-    localStorage.setItem('mat-theme', 'dark');
-  }
-});
+        <div class="split">
+          <div class="card">
+            <div class="card-head">
+              <h2>Coverage by position</h2>
+              <span class="tag">goal · balanced</span>
+            </div>
+            <div class="bar-row">
+              <div class="bar-name">Guard (closed/open)</div>
+              <div class="bar-track"><div class="bar-fill" data-pct="86"></div></div>
+              <div class="bar-pct">86%</div>
+            </div>
+            <div class="bar-row">
+              <div class="bar-name">Side control</div>
+              <div class="bar-track"><div class="bar-fill" data-pct="72"></div></div>
+              <div class="bar-pct">72%</div>
+            </div>
+            <div class="bar-row">
+              <div class="bar-name">Back mount</div>
+              <div class="bar-track"><div class="bar-fill orange" data-pct="54"></div></div>
+              <div class="bar-pct">54%</div>
+            </div>
+            <div class="bar-row">
+              <div class="bar-name">Half guard</div>
+              <div class="bar-track"><div class="bar-fill" data-pct="68"></div></div>
+              <div class="bar-pct">68%</div>
+            </div>
+            <div class="bar-row">
+              <div class="bar-name">Mount</div>
+              <div class="bar-track"><div class="bar-fill green" data-pct="91"></div></div>
+              <div class="bar-pct">91%</div>
+            </div>
+            <div class="bar-row">
+              <div class="bar-name">Takedowns</div>
+              <div class="bar-track"><div class="bar-fill orange" data-pct="38"></div></div>
+              <div class="bar-pct">38%</div>
+            </div>
+          </div>
 
-/* ===== Technique library data + render ===== */
-const techniques = [
-  { id: 't1', name: 'Armbar from guard', cat: 'submission', belt: 'white', pos: 'guard', svg: 'armbar' },
-  { id: 't2', name: 'Triangle choke', cat: 'submission', belt: 'white', pos: 'guard', svg: 'triangle' },
-  { id: 't3', name: 'Rear naked choke', cat: 'submission', belt: 'blue', pos: 'back', svg: 'rnc' },
-  { id: 't4', name: 'Kimura from side', cat: 'submission', belt: 'blue', pos: 'side', svg: 'kimura' },
-  { id: 't5', name: 'Hip bump sweep', cat: 'sweep', belt: 'white', pos: 'guard', svg: 'sweep' },
-  { id: 't6', name: 'Flower sweep', cat: 'sweep', belt: 'blue', pos: 'guard', svg: 'sweep' },
-  { id: 't7', name: 'Bridge &amp; roll escape', cat: 'escape', belt: 'white', pos: 'mount', svg: 'bridge' },
-  { id: 't8', name: 'Side control → mount', cat: 'takedown', belt: 'purple', pos: 'side', svg: 'mount' },
-  { id: 't9', name: 'Heel hook (ibjjf illegal)', cat: 'submission', belt: 'black', pos: 'leg', svg: 'leg' },
-  { id: 't10', name: 'Double leg', cat: 'takedown', belt: 'white', pos: 'standing', svg: 'takedown' },
-  { id: 't11', name: 'Guillotine', cat: 'submission', belt: 'blue', pos: 'guard', svg: 'guillotine' },
-  { id: 't12', name: 'Bow &amp; arrow choke', cat: 'submission', belt: 'purple', pos: 'back', svg: 'rnc' },
-];
+          <div class="card">
+            <div class="card-head">
+              <h2>Recent sessions</h2>
+              <span class="tag">view all →</span>
+            </div>
+            <div class="log">
+              <div class="log-row">
+                <div class="log-day">JUN 10</div>
+                <div class="log-title">Open mat · 5 rounds · tapped by RNC</div>
+                <div class="log-tag">Drill: RNC defense</div>
+              </div>
+              <div class="log-row">
+                <div class="log-day">JUN 08</div>
+                <div class="log-title">Gi class · armbar from mount</div>
+                <div class="log-tag">Submission</div>
+              </div>
+              <div class="log-row">
+                <div class="log-day">JUN 06</div>
+                <div class="log-title">No-gi · heel hook defense</div>
+                <div class="log-tag">Leg lock</div>
+              </div>
+              <div class="log-row">
+                <div class="log-day">JUN 04</div>
+                <div class="log-title">Open mat · back take × 4</div>
+                <div class="log-tag">Sweep</div>
+              </div>
+              <div class="log-row">
+                <div class="log-day">JUN 02</div>
+                <div class="log-title">Competition sim · 6 rounds</div>
+                <div class="log-tag">Comp prep</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
-const svgFor = (kind) => {
-  const stroke = '#202124';
-  const sw = 3;
-  const wrap = (inner) => `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${inner}</svg>`;
-  switch (kind) {
-    case 'armbar':
-      return wrap(`<rect x="20" y="20" width="60" height="60" fill="#e8f0fe" stroke="${stroke}" stroke-width="${sw}"/>
+      <footer class="foot">
+        <span class="mono">mat / bjj · v0.5 · shared nav across surfaces</span>
+        <a href="landing.html" class="btn btn-ghost">About this app</a>
+      </footer>
+    </main>
+
+    <script>
+      /* Theme toggle — persisted to localStorage */
+      const themeBtn = document.getElementById('themeBtn')
+      const storedTheme = localStorage.getItem('mat-theme')
+      if (storedTheme === 'dark') document.documentElement.setAttribute('data-theme', 'dark')
+      themeBtn.addEventListener('click', () => {
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark'
+        if (isDark) {
+          document.documentElement.removeAttribute('data-theme')
+          localStorage.setItem('mat-theme', 'light')
+        } else {
+          document.documentElement.setAttribute('data-theme', 'dark')
+          localStorage.setItem('mat-theme', 'dark')
+        }
+      })
+
+      /* ===== Technique library data + render ===== */
+      const techniques = [
+        {
+          id: 't1',
+          name: 'Armbar from guard',
+          cat: 'submission',
+          belt: 'white',
+          pos: 'guard',
+          svg: 'armbar',
+        },
+        {
+          id: 't2',
+          name: 'Triangle choke',
+          cat: 'submission',
+          belt: 'white',
+          pos: 'guard',
+          svg: 'triangle',
+        },
+        {
+          id: 't3',
+          name: 'Rear naked choke',
+          cat: 'submission',
+          belt: 'blue',
+          pos: 'back',
+          svg: 'rnc',
+        },
+        {
+          id: 't4',
+          name: 'Kimura from side',
+          cat: 'submission',
+          belt: 'blue',
+          pos: 'side',
+          svg: 'kimura',
+        },
+        {
+          id: 't5',
+          name: 'Hip bump sweep',
+          cat: 'sweep',
+          belt: 'white',
+          pos: 'guard',
+          svg: 'sweep',
+        },
+        { id: 't6', name: 'Flower sweep', cat: 'sweep', belt: 'blue', pos: 'guard', svg: 'sweep' },
+        {
+          id: 't7',
+          name: 'Bridge &amp; roll escape',
+          cat: 'escape',
+          belt: 'white',
+          pos: 'mount',
+          svg: 'bridge',
+        },
+        {
+          id: 't8',
+          name: 'Side control → mount',
+          cat: 'takedown',
+          belt: 'purple',
+          pos: 'side',
+          svg: 'mount',
+        },
+        {
+          id: 't9',
+          name: 'Heel hook (ibjjf illegal)',
+          cat: 'submission',
+          belt: 'black',
+          pos: 'leg',
+          svg: 'leg',
+        },
+        {
+          id: 't10',
+          name: 'Double leg',
+          cat: 'takedown',
+          belt: 'white',
+          pos: 'standing',
+          svg: 'takedown',
+        },
+        {
+          id: 't11',
+          name: 'Guillotine',
+          cat: 'submission',
+          belt: 'blue',
+          pos: 'guard',
+          svg: 'guillotine',
+        },
+        {
+          id: 't12',
+          name: 'Bow &amp; arrow choke',
+          cat: 'submission',
+          belt: 'purple',
+          pos: 'back',
+          svg: 'rnc',
+        },
+      ]
+
+      const svgFor = (kind) => {
+        const stroke = '#202124'
+        const sw = 3
+        const wrap = (inner) =>
+          `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${inner}</svg>`
+        switch (kind) {
+          case 'armbar':
+            return wrap(`<rect x="20" y="20" width="60" height="60" fill="#e8f0fe" stroke="${stroke}" stroke-width="${sw}"/>
         <line x1="20" y1="50" x2="80" y2="50" stroke="${stroke}" stroke-width="${sw}"/>
-        <circle cx="35" cy="35" r="6" fill="#202124"/><circle cx="65" cy="65" r="6" fill="#202124"/>`);
-    case 'triangle':
-      return wrap(`<polygon points="50,15 85,80 15,80" fill="#e8f0fe" stroke="${stroke}" stroke-width="${sw}"/>
-        <circle cx="50" cy="62" r="8" fill="#202124"/>`);
-    case 'rnc':
-      return wrap(`<rect x="25" y="25" width="50" height="50" fill="#e8f0fe" stroke="${stroke}" stroke-width="${sw}"/>
-        <path d="M30 40 Q50 30 70 40" fill="none" stroke="${stroke}" stroke-width="${sw}"/>`);
-    case 'kimura':
-      return wrap(`<circle cx="50" cy="50" r="30" fill="#e8f0fe" stroke="${stroke}" stroke-width="${sw}"/>
-        <path d="M35 50 L65 50 M50 35 L50 65" stroke="${stroke}" stroke-width="${sw}"/>`);
-    case 'sweep':
-      return wrap(`<path d="M20 70 Q50 20 80 70" fill="#e8f0fe" stroke="${stroke}" stroke-width="${sw}"/>
-        <polygon points="78,62 88,70 78,78" fill="${stroke}"/>`);
-    case 'bridge':
-      return wrap(`<path d="M20 70 Q50 20 80 70 Z" fill="#e8f0fe" stroke="${stroke}" stroke-width="${sw}"/>
-        <circle cx="50" cy="55" r="6" fill="#202124"/>`);
-    case 'mount':
-      return wrap(`<rect x="20" y="40" width="60" height="20" fill="#e8f0fe" stroke="${stroke}" stroke-width="${sw}"/>
-        <rect x="35" y="20" width="30" height="22" fill="#ffffff" stroke="${stroke}" stroke-width="${sw}"/>`);
-    case 'leg':
-      return wrap(`<path d="M30 30 L70 70 M30 70 L70 30" stroke="${stroke}" stroke-width="${sw}"/>
-        <circle cx="50" cy="50" r="20" fill="#e8f0fe" stroke="${stroke}" stroke-width="${sw}"/>`);
-    case 'takedown':
-      return wrap(`<circle cx="35" cy="40" r="12" fill="#e8f0fe" stroke="${stroke}" stroke-width="${sw}"/>
+        <circle cx="35" cy="35" r="6" fill="#202124"/><circle cx="65" cy="65" r="6" fill="#202124"/>`)
+          case 'triangle':
+            return wrap(`<polygon points="50,15 85,80 15,80" fill="#e8f0fe" stroke="${stroke}" stroke-width="${sw}"/>
+        <circle cx="50" cy="62" r="8" fill="#202124"/>`)
+          case 'rnc':
+            return wrap(`<rect x="25" y="25" width="50" height="50" fill="#e8f0fe" stroke="${stroke}" stroke-width="${sw}"/>
+        <path d="M30 40 Q50 30 70 40" fill="none" stroke="${stroke}" stroke-width="${sw}"/>`)
+          case 'kimura':
+            return wrap(`<circle cx="50" cy="50" r="30" fill="#e8f0fe" stroke="${stroke}" stroke-width="${sw}"/>
+        <path d="M35 50 L65 50 M50 35 L50 65" stroke="${stroke}" stroke-width="${sw}"/>`)
+          case 'sweep':
+            return wrap(`<path d="M20 70 Q50 20 80 70" fill="#e8f0fe" stroke="${stroke}" stroke-width="${sw}"/>
+        <polygon points="78,62 88,70 78,78" fill="${stroke}"/>`)
+          case 'bridge':
+            return wrap(`<path d="M20 70 Q50 20 80 70 Z" fill="#e8f0fe" stroke="${stroke}" stroke-width="${sw}"/>
+        <circle cx="50" cy="55" r="6" fill="#202124"/>`)
+          case 'mount':
+            return wrap(`<rect x="20" y="40" width="60" height="20" fill="#e8f0fe" stroke="${stroke}" stroke-width="${sw}"/>
+        <rect x="35" y="20" width="30" height="22" fill="#ffffff" stroke="${stroke}" stroke-width="${sw}"/>`)
+          case 'leg':
+            return wrap(`<path d="M30 30 L70 70 M30 70 L70 30" stroke="${stroke}" stroke-width="${sw}"/>
+        <circle cx="50" cy="50" r="20" fill="#e8f0fe" stroke="${stroke}" stroke-width="${sw}"/>`)
+          case 'takedown':
+            return wrap(`<circle cx="35" cy="40" r="12" fill="#e8f0fe" stroke="${stroke}" stroke-width="${sw}"/>
         <circle cx="65" cy="65" r="12" fill="#e8f0fe" stroke="${stroke}" stroke-width="${sw}"/>
-        <line x1="35" y1="52" x2="65" y2="53" stroke="${stroke}" stroke-width="${sw}"/>`);
-    case 'guillotine':
-      return wrap(`<path d="M30 30 L50 80 L70 30 Z" fill="#e8f0fe" stroke="${stroke}" stroke-width="${sw}"/>
-        <line x1="30" y1="30" x2="70" y2="30" stroke="${stroke}" stroke-width="${sw}"/>`);
-    default:
-      return wrap(`<rect x="25" y="25" width="50" height="50" fill="#e8f0fe" stroke="${stroke}" stroke-width="${sw}"/>`);
-  }
-};
+        <line x1="35" y1="52" x2="65" y2="53" stroke="${stroke}" stroke-width="${sw}"/>`)
+          case 'guillotine':
+            return wrap(`<path d="M30 30 L50 80 L70 30 Z" fill="#e8f0fe" stroke="${stroke}" stroke-width="${sw}"/>
+        <line x1="30" y1="30" x2="70" y2="30" stroke="${stroke}" stroke-width="${sw}"/>`)
+          default:
+            return wrap(
+              `<rect x="25" y="25" width="50" height="50" fill="#e8f0fe" stroke="${stroke}" stroke-width="${sw}"/>`,
+            )
+        }
+      }
 
-const libGrid = document.getElementById('libGrid');
-function renderLib(filter='all') {
-  libGrid.innerHTML = '';
-  techniques
-    .filter(t => filter === 'all' || t.cat === filter)
-    .forEach(t => {
-      const card = document.createElement('article');
-      card.className = 'tech';
-      card.innerHTML = `
+      const libGrid = document.getElementById('libGrid')
+      function renderLib(filter = 'all') {
+        libGrid.innerHTML = ''
+        techniques
+          .filter((t) => filter === 'all' || t.cat === filter)
+          .forEach((t) => {
+            const card = document.createElement('article')
+            card.className = 'tech'
+            card.innerHTML = `
         <div class="tech-diagram">${svgFor(t.svg)}</div>
         <div class="tech-body">
           <div class="tech-cat">${t.cat} · ${t.pos}</div>
@@ -494,86 +1195,121 @@ function renderLib(filter='all') {
             <span class="belt ${t.belt}">${t.belt} belt</span>
             <span class="belt">drill 3×/wk</span>
           </div>
-        </div>`;
-      libGrid.appendChild(card);
-    });
-}
-renderLib();
+        </div>`
+            libGrid.appendChild(card)
+          })
+      }
+      renderLib()
 
-document.querySelectorAll('.filter').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.filter').forEach(b => b.setAttribute('aria-pressed','false'));
-    btn.setAttribute('aria-pressed','true');
-    renderLib(btn.dataset.cat);
-  });
-});
+      document.querySelectorAll('.filter').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          document
+            .querySelectorAll('.filter')
+            .forEach((b) => b.setAttribute('aria-pressed', 'false'))
+          btn.setAttribute('aria-pressed', 'true')
+          renderLib(btn.dataset.cat)
+        })
+      })
 
-/* ===== Round timer ===== */
-const ROUND_SECONDS = 5 * 60;
-const REST_SECONDS  = 2 * 60;
-const TOTAL_ROUNDS  = 5;
-let phase = 'rolling';
-let roundIdx = 1;
-let secondsLeft = ROUND_SECONDS;
-let running = true;
-let totalElapsed = 2 * 60 + 18;
+      /* ===== Round timer ===== */
+      const ROUND_SECONDS = 5 * 60
+      const REST_SECONDS = 2 * 60
+      const TOTAL_ROUNDS = 5
+      let phase = 'rolling'
+      let roundIdx = 1
+      let secondsLeft = ROUND_SECONDS
+      let running = true
+      let totalElapsed = 2 * 60 + 18
 
-const clock = document.getElementById('clock');
-const phaseChip = document.getElementById('phaseChip');
-const roundChip = document.getElementById('roundChip');
-const restChip = document.getElementById('restChip');
-const totalChip = document.getElementById('totalChip');
-const liveTag = document.getElementById('liveTag');
-const toggleBtn = document.getElementById('toggleBtn');
-const planRound = document.getElementById('planRound');
+      const clock = document.getElementById('clock')
+      const phaseChip = document.getElementById('phaseChip')
+      const roundChip = document.getElementById('roundChip')
+      const restChip = document.getElementById('restChip')
+      const totalChip = document.getElementById('totalChip')
+      const liveTag = document.getElementById('liveTag')
+      const toggleBtn = document.getElementById('toggleBtn')
+      const planRound = document.getElementById('planRound')
 
-const fmt = (s) => `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+      const fmt = (s) =>
+        `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`
 
-function paint() {
-  clock.textContent = fmt(secondsLeft);
-  phaseChip.textContent = phase === 'rolling' ? 'Rolling' : 'Rest';
-  phaseChip.classList.toggle('on', phase === 'rolling');
-  phaseChip.classList.toggle('rest', phase === 'rest');
-  roundChip.textContent = `Round ${roundIdx} of ${TOTAL_ROUNDS}`;
-  restChip.textContent = phase === 'rest' ? `Rest ${fmt(secondsLeft)}` : `Rest ${fmt(REST_SECONDS)}`;
-  totalChip.textContent = `Total ${fmt(totalElapsed)}`;
-  planRound.textContent = `ROUND ${roundIdx}`;
-  if (!running) {
-    liveTag.textContent = '⏸ PAUSED';
-    liveTag.classList.remove('live');
-  } else {
-    liveTag.textContent = '● LIVE';
-    liveTag.classList.add('live');
-  }
-}
-paint();
+      function paint() {
+        clock.textContent = fmt(secondsLeft)
+        phaseChip.textContent = phase === 'rolling' ? 'Rolling' : 'Rest'
+        phaseChip.classList.toggle('on', phase === 'rolling')
+        phaseChip.classList.toggle('rest', phase === 'rest')
+        roundChip.textContent = `Round ${roundIdx} of ${TOTAL_ROUNDS}`
+        restChip.textContent =
+          phase === 'rest' ? `Rest ${fmt(secondsLeft)}` : `Rest ${fmt(REST_SECONDS)}`
+        totalChip.textContent = `Total ${fmt(totalElapsed)}`
+        planRound.textContent = `ROUND ${roundIdx}`
+        if (!running) {
+          liveTag.textContent = '⏸ PAUSED'
+          liveTag.classList.remove('live')
+        } else {
+          liveTag.textContent = '● LIVE'
+          liveTag.classList.add('live')
+        }
+      }
+      paint()
 
-let tick = setInterval(() => {
-  if (!running) return;
-  secondsLeft -= 1;
-  totalElapsed += 1;
-  if (secondsLeft <= 0) {
-    if (phase === 'rolling') {
-      if (roundIdx >= TOTAL_ROUNDS) { running = false; clearInterval(tick); liveTag.textContent = '✓ DONE'; liveTag.classList.remove('live'); }
-      else { phase = 'rest'; secondsLeft = REST_SECONDS; }
-    } else {
-      phase = 'rolling'; roundIdx += 1; secondsLeft = ROUND_SECONDS;
-    }
-  }
-  paint();
-}, 1000);
+      let tick = setInterval(() => {
+        if (!running) return
+        secondsLeft -= 1
+        totalElapsed += 1
+        if (secondsLeft <= 0) {
+          if (phase === 'rolling') {
+            if (roundIdx >= TOTAL_ROUNDS) {
+              running = false
+              clearInterval(tick)
+              liveTag.textContent = '✓ DONE'
+              liveTag.classList.remove('live')
+            } else {
+              phase = 'rest'
+              secondsLeft = REST_SECONDS
+            }
+          } else {
+            phase = 'rolling'
+            roundIdx += 1
+            secondsLeft = ROUND_SECONDS
+          }
+        }
+        paint()
+      }, 1000)
 
-toggleBtn.addEventListener('click', () => { running = !running; toggleBtn.textContent = running ? 'Pause' : 'Start'; paint(); });
-document.getElementById('resetBtn').addEventListener('click', () => { running = false; phase = 'rolling'; roundIdx = 1; secondsLeft = ROUND_SECONDS; totalElapsed = 0; toggleBtn.textContent = 'Start'; paint(); });
-document.getElementById('skipBtn').addEventListener('click', () => { if (phase === 'rolling') { phase = 'rest'; secondsLeft = REST_SECONDS; } else { phase = 'rolling'; roundIdx = Math.min(roundIdx + 1, TOTAL_ROUNDS); secondsLeft = ROUND_SECONDS; } paint(); });
+      toggleBtn.addEventListener('click', () => {
+        running = !running
+        toggleBtn.textContent = running ? 'Pause' : 'Start'
+        paint()
+      })
+      document.getElementById('resetBtn').addEventListener('click', () => {
+        running = false
+        phase = 'rolling'
+        roundIdx = 1
+        secondsLeft = ROUND_SECONDS
+        totalElapsed = 0
+        toggleBtn.textContent = 'Start'
+        paint()
+      })
+      document.getElementById('skipBtn').addEventListener('click', () => {
+        if (phase === 'rolling') {
+          phase = 'rest'
+          secondsLeft = REST_SECONDS
+        } else {
+          phase = 'rolling'
+          roundIdx = Math.min(roundIdx + 1, TOTAL_ROUNDS)
+          secondsLeft = ROUND_SECONDS
+        }
+        paint()
+      })
 
-/* ===== Animate bar fills ===== */
-requestAnimationFrame(() => {
-  document.querySelectorAll('.bar-fill').forEach(el => {
-    const pct = parseInt(el.dataset.pct, 10) || 0;
-    el.style.width = pct + '%';
-  });
-});
-</script>
-</body>
+      /* ===== Animate bar fills ===== */
+      requestAnimationFrame(() => {
+        document.querySelectorAll('.bar-fill').forEach((el) => {
+          const pct = parseInt(el.dataset.pct, 10) || 0
+          el.style.width = pct + '%'
+        })
+      })
+    </script>
+  </body>
 </html>

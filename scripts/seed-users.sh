@@ -64,8 +64,8 @@ create_user() {
     --post-data="{\"email\":\"$email\",\"password\":\"$password\",\"email_confirm\":true}" \
     --header='Content-Type: application/json' \
     --header="Authorization: Bearer $SERVICE_KEY" \
-    "http://localhost:9999/admin/users" \
-    | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('id') or '')")
+    "http://localhost:9999/admin/users" |
+    python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('id') or '')")
   if [[ ! $id =~ $UUID_REGEX ]]; then
     echo "Failed to create $email — GoTrue did not return a user id (got: '${id:-<empty>}'). Response may be an error object." >&2
     exit 1
@@ -138,9 +138,9 @@ echo "Applying BJJ test data (seed-rolls.sql)..."
 # auth.users exists (so the user_id subqueries in seed-rolls.sql would fail).
 # After seed-users.sh creates athlete1, the subqueries resolve correctly.
 if [[ -f "$REPO_ROOT/supabase/seed-rolls.sql" ]]; then
-  docker exec -i supabase_db_training-records psql -U postgres -d postgres < "$REPO_ROOT/supabase/seed-rolls.sql" >/dev/null 2>&1 \
-    && echo "  ✓ BJJ workouts + sections + roll events seeded" \
-    || echo "  ✗ seed-rolls.sql failed (dashboard widgets will show empty states)"
+  docker exec -i supabase_db_training-records psql -U postgres -d postgres <"$REPO_ROOT/supabase/seed-rolls.sql" >/dev/null 2>&1 &&
+    echo "  ✓ BJJ workouts + sections + roll events seeded" ||
+    echo "  ✗ seed-rolls.sql failed (dashboard widgets will show empty states)"
 else
   echo "  (supabase/seed-rolls.sql not found — skipping)"
 fi

@@ -6,6 +6,7 @@
 ## Purpose
 
 This is a new specification (no existing spec to delta) covering:
+
 1. Immediate ESLint error fixes that unblock CI
 2. A pre-commit hook that catches lint errors before push
 3. Developer workflow documentation updates

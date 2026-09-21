@@ -170,8 +170,8 @@ describe('material-dashboard.css — class-name coverage (REQ-BD7)', () => {
     const contents = readFileSync(CSS_PATH, 'utf-8')
     const requiredCats = ['takedown', 'guard_pass', 'guard', 'submission', 'escape', 'transition', 'other']
     for (const cat of requiredCats) {
-      expect(contents, `expected CSS to contain ".chip[data-cat=\\"${cat}\\"]"`).toContain(
-        `.chip[data-cat="${cat}"]`,
+      expect(contents, `expected CSS to contain '.chip[data-cat='${cat}']'`).toContain(
+        `.chip[data-cat='${cat}']`,
       )
     }
   })

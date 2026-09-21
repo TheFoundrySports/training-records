@@ -1,11 +1,22 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router'
-import { Trash2 } from 'lucide-react'
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  Chip,
+  Stack,
+  Box,
+  Typography,
+  Button as MuiButton,
+  Skeleton,
+  ToggleButton,
+  ToggleButtonGroup,
+  Divider,
+} from '@mui/material'
+import PlayArrowIcon from '@mui/icons-material/PlayArrow'
 import { useBJJSections } from '../hooks/useBJJSections'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Separator } from '@/components/ui/separator'
+import { MetadataField, MetadataGrid } from '@/features/workouts/components/MetadataField'
 import type { Workout } from '@/features/workouts/workout.types'
 import type { BJJSection } from '../bjj.types'
 
@@ -27,92 +38,102 @@ function formatDate(iso: string) {
   })
 }
 
-function DetailRow({ label, value }: { label: string; value: React.ReactNode }) {
-  return (
-    <div className="flex items-start gap-3 py-2">
-      <span className="w-40 shrink-0 text-sm text-muted-foreground">{label}</span>
-      <span className="text-sm">{value}</span>
-    </div>
-  )
-}
+/** BJJ violet color from material-tokens */
+const BJJ_COLOR = { main: '#7c3aed', contrastText: '#ffffff' }
 
+/** BJJ section card using MUI components */
 function BJJSectionCard({ section }: { section: BJJSection }) {
   const [view, setView] = useState<'raw' | 'ai'>(section.aiDescription ? 'ai' : 'raw')
 
   const hasDescription = section.rawDescription || section.aiDescription
-  const showRaw = view === 'raw' ? section.rawDescription : section.aiDescription
+  const showDescription = view === 'raw' ? section.rawDescription : section.aiDescription
 
   return (
-    <Card className="mb-4">
-      <CardHeader className="pb-2">
-        <div className="flex items-start justify-between gap-2">
-          <CardTitle className="text-sm font-semibold">
-            Section {section.sectionNumber}: {section.goal}
-          </CardTitle>
-          {section.durationMinutes && (
-            <Badge variant="outline" className="shrink-0 text-xs">
-              {section.durationMinutes} min
-            </Badge>
-          )}
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-3">
+    <Card sx={{ mb: 2 }}>
+      <CardHeader
+        sx={{ pb: 1 }}
+        title={
+          <Stack direction="row" spacing={1} alignItems="center" justifyContent="space-between">
+            <Typography variant="body2" component="span" sx={{ fontWeight: 600 }}>
+              Section {section.sectionNumber}: {section.goal}
+            </Typography>
+            {section.durationMinutes && (
+              <Chip
+                label={`${section.durationMinutes} min`}
+                size="small"
+                variant="outlined"
+                sx={{ height: 24, fontSize: '0.75rem' }}
+              />
+            )}
+          </Stack>
+        }
+      />
+
+      <CardContent sx={{ pt: 1 }}>
         {/* Techniques */}
         {section.techniques.length > 0 && (
-          <div className="flex flex-wrap gap-2">
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
             {section.techniques.map((technique) => (
-              <Badge key={technique.id} variant="secondary" className="gap-1">
-                {technique.name}
-                {technique.youtubeUrl && (
-                  <a
-                    href={technique.youtubeUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={`Watch ${technique.name} on YouTube`}
-                    className="ml-1 text-red-500 hover:text-red-600"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    ▶
-                  </a>
-                )}
-              </Badge>
+              <Chip
+                key={technique.id}
+                label={
+                  <Box component="span" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                    {technique.name}
+                    {technique.youtubeUrl && (
+                      <a
+                        href={technique.youtubeUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={`Watch ${technique.name} on YouTube`}
+                        style={{ color: '#ef4444', marginLeft: 4 }}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <PlayArrowIcon sx={{ fontSize: 14 }} />
+                      </a>
+                    )}
+                  </Box>
+                }
+                size="small"
+                sx={{
+                  backgroundColor: BJJ_COLOR.main,
+                  color: BJJ_COLOR.contrastText,
+                  '& .MuiChip-label': { px: 1 },
+                }}
+              />
             ))}
-          </div>
+          </Box>
         )}
 
         {/* Description toggle */}
         {hasDescription && (
-          <div>
+          <Box>
             {section.rawDescription && section.aiDescription && (
-              <div className="flex gap-2 mb-2">
-                <button
-                  type="button"
-                  onClick={() => setView('raw')}
-                  className={`text-xs px-2 py-1 rounded border transition-colors ${
-                    view === 'raw'
-                      ? 'bg-primary text-primary-foreground border-primary'
-                      : 'border-input hover:bg-accent'
-                  }`}
-                >
-                  Raw
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setView('ai')}
-                  className={`text-xs px-2 py-1 rounded border transition-colors ${
-                    view === 'ai'
-                      ? 'bg-primary text-primary-foreground border-primary'
-                      : 'border-input hover:bg-accent'
-                  }`}
-                >
-                  AI Enhanced
-                </button>
-              </div>
+              <ToggleButtonGroup
+                value={view}
+                exclusive
+                onChange={(_, next) => next && setView(next)}
+                size="small"
+                sx={{ mb: 1.5 }}
+              >
+                <ToggleButton value="raw">Raw</ToggleButton>
+                <ToggleButton value="ai">AI Enhanced</ToggleButton>
+              </ToggleButtonGroup>
             )}
-            {showRaw && (
-              <p className="text-sm whitespace-pre-wrap text-muted-foreground">{showRaw}</p>
+            {showDescription && (
+              <Typography
+                variant="body2"
+                component="pre"
+                sx={{
+                  color: 'text.secondary',
+                  fontFamily: 'inherit',
+                  whiteSpace: 'pre-wrap',
+                  m: 0,
+                }}
+              >
+                {showDescription}
+              </Typography>
             )}
-          </div>
+          </Box>
         )}
       </CardContent>
     </Card>
@@ -130,75 +151,118 @@ export function BJJWorkoutDetail({
   const { data: sections, isLoading, isError } = useBJJSections(workoutId)
 
   return (
-    <div>
-      <Card>
-        <CardHeader className="border-b pb-4">
-          <div className="flex items-start justify-between gap-4">
-            <CardTitle className="text-xl">{workout.title}</CardTitle>
-            <Badge variant="secondary" className="capitalize shrink-0">
-              BJJ
-            </Badge>
-          </div>
-        </CardHeader>
-        <CardContent className="divide-y">
-          <DetailRow label="Date" value={formatDate(workout.performedAt)} />
-          <DetailRow label="Duration" value={`${workout.durationMinutes} minutes`} />
-          {workout.rpe !== undefined && <DetailRow label="RPE" value={`${workout.rpe} / 10`} />}
+    <Stack spacing={3}>
+      {/* Main metadata card */}
+      <Card sx={{ borderRadius: 2 }}>
+        <CardHeader
+          sx={{ borderBottom: 1, borderColor: 'divider', pb: 2 }}
+          title={
+            <Typography variant="h5" component="span" sx={{ fontWeight: 600 }}>
+              {workout.title}
+            </Typography>
+          }
+          titleTypographyProps={{ component: 'h1' }}
+          action={
+            <Chip
+              label="BJJ"
+              size="small"
+              sx={{
+                backgroundColor: BJJ_COLOR.main,
+                color: BJJ_COLOR.contrastText,
+                fontWeight: 500,
+              }}
+            />
+          }
+        />
+
+        <CardContent>
+          <MetadataGrid>
+            <MetadataField label="Date" value={formatDate(workout.performedAt)} />
+            <MetadataField label="Duration" value={`${workout.durationMinutes} minutes`} />
+            {workout.rpe !== undefined && (
+              <MetadataField label="RPE" value={`${workout.rpe} / 10`} />
+            )}
+          </MetadataGrid>
+
           {workout.notes && (
             <>
-              <Separator className="my-2" />
-              <div className="py-2">
-                <p className="text-sm text-muted-foreground mb-1">Notes</p>
-                <p className="text-sm whitespace-pre-wrap">{workout.notes}</p>
-              </div>
+              <Divider sx={{ my: 2 }} />
+              <Box>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                  Notes
+                </Typography>
+                <Typography
+                  variant="body1"
+                  component="pre"
+                  sx={{
+                    fontFamily: 'inherit',
+                    whiteSpace: 'pre-wrap',
+                    m: 0,
+                  }}
+                >
+                  {workout.notes}
+                </Typography>
+              </Box>
             </>
           )}
         </CardContent>
       </Card>
 
+      {/* Action buttons */}
       {(canEdit || (canDelete && onDelete)) && (
-        <div className="flex flex-wrap gap-3 mt-6">
+        <Stack direction="row" spacing={1.5} flexWrap="wrap">
           {canEdit && (
-            <Button variant="outline" onClick={() => void navigate(`/bjj/${workout.id}/edit`)}>
+            <MuiButton variant="outlined" onClick={() => void navigate(`/bjj/${workout.id}/edit`)}>
               Edit
-            </Button>
+            </MuiButton>
           )}
           {canDelete && onDelete && (
-            <Button variant="destructive" size="sm" onClick={onDelete}>
-              <Trash2 className="h-4 w-4 mr-1" aria-hidden="true" />
+            <MuiButton variant="outlined" color="error" onClick={onDelete}>
               Delete
-            </Button>
+            </MuiButton>
           )}
-        </div>
+        </Stack>
       )}
 
       {/* Sections */}
-      <div className="mt-6">
-        <h2 className="text-lg font-semibold mb-4">Sections</h2>
+      <Box>
+        <Typography variant="h6" component="h2" sx={{ mb: 2, fontWeight: 600 }}>
+          Sections
+        </Typography>
 
         {isLoading && (
-          <div role="status" aria-label="Loading sections" className="space-y-3">
+          <Stack spacing={2} role="status" aria-label="Loading sections">
             {[1, 2].map((i) => (
-              <div key={i} className="h-24 rounded-xl bg-muted animate-pulse" aria-hidden="true" />
+              <Skeleton key={i} variant="rectangular" height={120} sx={{ borderRadius: 2 }} />
             ))}
-          </div>
+          </Stack>
         )}
 
         {isError && (
-          <div
+          <Box
             role="alert"
-            className="rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-destructive text-sm"
+            sx={{
+              borderRadius: 2,
+              border: '1px solid',
+              borderColor: 'error.main',
+              backgroundColor: 'error.contrastText',
+              p: 2,
+            }}
           >
-            Failed to load sections.
-          </div>
+            <Typography variant="body2" color="error.main">
+              Failed to load sections.
+            </Typography>
+          </Box>
         )}
 
         {!isLoading && !isError && sections && sections.length === 0 && (
-          <p className="text-sm text-muted-foreground">No sections recorded for this workout.</p>
+          <Typography variant="body2" color="text.secondary">
+            No sections recorded for this workout.
+          </Typography>
         )}
 
         {!isLoading && !isError && sections && sections.length > 0 && (
-          <ul aria-label="Workout sections">
+          <ul aria-label="Workout sections" style={{ listStyle: 'none' }}>
             {sections.map((section) => (
               <li key={section.id}>
                 <BJJSectionCard section={section} />
@@ -206,7 +270,7 @@ export function BJJWorkoutDetail({
             ))}
           </ul>
         )}
-      </div>
-    </div>
+      </Box>
+    </Stack>
   )
 }
