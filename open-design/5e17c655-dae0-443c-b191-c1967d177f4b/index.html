@@ -1,379 +1,136 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>MAT / BJJ — Project launcher</title>
-    <style>
-      :root {
-        --bg: #f8fafd;
-        --surface: #ffffff;
-        --surface-warm: #e8f0fe;
-        --fg: #202124;
-        --fg-2: #3c4043;
-        --muted: #5f6368;
-        --meta: #1a73e8;
-        --border: #dadce0;
-        --border-soft: #edf0f2;
-        --accent: #1a73e8;
-        --accent-on: #ffffff;
-        --accent-hover: color-mix(in oklab, var(--accent), black 8%);
-        --accent-active: color-mix(in oklab, var(--accent), black 14%);
-        --success: #188038;
-        --warn: #f9ab00;
-        --danger: #d93025;
-        --font-display: 'Google Sans', Roboto, Arial, sans-serif;
-        --font-body: Roboto, Arial, sans-serif;
-        --font-mono: 'Roboto Mono', ui-monospace, Menlo, monospace;
-        --text-xs: 12px;
-        --text-sm: 14px;
-        --text-base: 16px;
-        --text-lg: 18px;
-        --text-xl: 24px;
-        --text-2xl: 32px;
-        --text-3xl: 48px;
-        --text-4xl: 64px;
-        --leading-tight: 1.12;
-        --leading-body: 1.5;
-        --tracking-display: 0;
-        --space-2: 8px;
-        --space-3: 12px;
-        --space-4: 16px;
-        --space-5: 20px;
-        --space-6: 24px;
-        --space-8: 32px;
-        --space-12: 48px;
-        --container-max: 1200px;
-        --container-gutter-desktop: 36px;
-        --container-gutter-tablet: 24px;
-        --container-gutter-phone: 16px;
-        --radius-sm: 4px;
-        --radius-md: 12px;
-        --radius-lg: 24px;
-        --radius-pill: 9999px;
-        --elev-raised: 0 3px 8px rgba(60, 64, 67, 0.18);
-        --focus-ring: 0 0 0 4px rgba(26, 115, 232, 0.24);
-        --motion-fast: 150ms;
-        --motion-base: 250ms;
-        --ease-standard: cubic-bezier(0.2, 0, 0, 1);
-      }
-      * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-      }
-      html,
-      body {
-        background: var(--bg);
-        color: var(--fg);
-        font-family: var(--font-body);
-        font-size: var(--text-base);
-        line-height: var(--leading-body);
-        -webkit-font-smoothing: antialiased;
-      }
-      body {
-        min-height: 100vh;
-      }
-      a {
-        color: inherit;
-        text-decoration: none;
-      }
-      button {
-        font: inherit;
-        cursor: pointer;
-        background: none;
-        border: 0;
-        color: inherit;
-      }
-      :focus-visible {
-        outline: none;
-        box-shadow: var(--focus-ring);
-      }
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>MAT / BJJ — Project launcher</title>
+<style>
+:root {
+  --bg: #f8fafd; --surface: #ffffff; --surface-warm: #e8f0fe;
+  --fg: #202124; --fg-2: #3c4043; --muted: #5f6368;
+  --meta: #1a73e8; --border: #dadce0; --border-soft: #edf0f2;
+  --accent: #1a73e8; --accent-on: #ffffff;
+  --accent-hover: color-mix(in oklab, var(--accent), black 8%);
+  --accent-active: color-mix(in oklab, var(--accent), black 14%);
+  --success: #188038; --warn: #f9ab00; --danger: #d93025;
+  --font-display: "Google Sans", Roboto, Arial, sans-serif;
+  --font-body: Roboto, Arial, sans-serif;
+  --font-mono: "Roboto Mono", ui-monospace, Menlo, monospace;
+  --text-xs: 12px; --text-sm: 14px; --text-base: 16px; --text-lg: 18px;
+  --text-xl: 24px; --text-2xl: 32px; --text-3xl: 48px; --text-4xl: 64px;
+  --leading-tight: 1.12; --leading-body: 1.5; --tracking-display: 0;
+  --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-5: 20px;
+  --space-6: 24px; --space-8: 32px; --space-12: 48px;
+  --container-max: 1200px;
+  --container-gutter-desktop: 36px; --container-gutter-tablet: 24px; --container-gutter-phone: 16px;
+  --radius-sm: 4px; --radius-md: 12px; --radius-lg: 24px; --radius-pill: 9999px;
+  --elev-raised: 0 3px 8px rgba(60, 64, 67, 0.18);
+  --focus-ring: 0 0 0 4px rgba(26, 115, 232, 0.24);
+  --motion-fast: 150ms; --motion-base: 250ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: var(--text-base); line-height: var(--leading-body); -webkit-font-smoothing: antialiased; }
+body { min-height: 100vh; }
+a { color: inherit; text-decoration: none; }
+button { font: inherit; cursor: pointer; background: none; border: 0; color: inherit; }
+:focus-visible { outline: none; box-shadow: var(--focus-ring); }
 
-      .shell {
-        max-width: var(--container-max);
-        margin: 0 auto;
-        padding: 0 var(--container-gutter-desktop);
-      }
-      @media (max-width: 1024px) {
-        .shell {
-          padding: 0 var(--container-gutter-tablet);
-        }
-      }
-      @media (max-width: 600px) {
-        .shell {
-          padding: 0 var(--container-gutter-phone);
-        }
-      }
+.shell { max-width: var(--container-max); margin: 0 auto; padding: 0 var(--container-gutter-desktop); }
+@media (max-width: 1024px) { .shell { padding: 0 var(--container-gutter-tablet); } }
+@media (max-width: 600px)  { .shell { padding: 0 var(--container-gutter-phone); } }
 
-      .topbar {
-        background: var(--surface);
-        border-bottom: 1px solid var(--border);
-      }
-      .topbar-inner {
-        display: flex;
-        align-items: center;
-        gap: var(--space-4);
-        padding: var(--space-3) 0;
-      }
-      .brand {
-        display: flex;
-        align-items: center;
-        gap: var(--space-3);
-        font-family: var(--font-display);
-        font-size: var(--text-xl);
-        letter-spacing: var(--tracking-display);
-        font-weight: 500;
-      }
-      .brand-mark {
-        width: 36px;
-        height: 36px;
-        background: var(--surface-warm);
-        color: var(--accent);
-        border-radius: var(--radius-md);
-        display: grid;
-        place-items: center;
-        font-family: var(--font-display);
-        font-size: 18px;
-        font-weight: 500;
-      }
-      .tag {
-        font-family: var(--font-body);
-        font-weight: 500;
-        font-size: var(--text-xs);
-        padding: 4px 10px;
-        border-radius: var(--radius-pill);
-        background: var(--surface-warm);
-        color: var(--accent);
-        margin-left: auto;
-      }
-      @media (max-width: 600px) {
-        .brand {
-          font-size: 18px;
-        }
-        .brand-mark {
-          width: 30px;
-          height: 30px;
-          font-size: 16px;
-        }
-        .tag {
-          font-size: 11px;
-        }
-      }
+.topbar { background: var(--surface); border-bottom: 1px solid var(--border); }
+.topbar-inner { display: flex; align-items: center; gap: var(--space-4); padding: var(--space-3) 0; }
+.brand { display: flex; align-items: center; gap: var(--space-3); font-family: var(--font-display); font-size: var(--text-xl); letter-spacing: var(--tracking-display); font-weight: 500; }
+.brand-mark { width: 36px; height: 36px; background: var(--surface-warm); color: var(--accent); border-radius: var(--radius-md); display: grid; place-items: center; font-family: var(--font-display); font-size: 18px; font-weight: 500; }
+.tag { font-family: var(--font-body); font-weight: 500; font-size: var(--text-xs); padding: 4px 10px; border-radius: var(--radius-pill); background: var(--surface-warm); color: var(--accent); margin-left: auto; }
+@media (max-width: 600px) { .brand { font-size: 18px; } .brand-mark { width: 30px; height: 30px; font-size: 16px; } .tag { font-size: 11px; } }
 
-      main {
-        padding: var(--space-8) 0 var(--space-12);
-      }
-      .eyebrow {
-        font-family: var(--font-body);
-        font-weight: 500;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        font-size: var(--text-xs);
-        color: var(--accent);
-        display: inline-block;
-        padding: 2px 0;
-        margin-bottom: var(--space-3);
-      }
-      h1 {
-        font-family: var(--font-display);
-        font-size: clamp(40px, 7vw, var(--text-3xl));
-        line-height: var(--leading-tight);
-        letter-spacing: var(--tracking-display);
-        font-weight: 500;
-      }
-      h1 .strike {
-        color: var(--accent);
-      }
-      .lead {
-        font-size: var(--text-lg);
-        max-width: 60ch;
-        color: var(--fg-2);
-        margin-top: var(--space-4);
-      }
+main { padding: var(--space-8) 0 var(--space-12); }
+.eyebrow { font-family: var(--font-body); font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; font-size: var(--text-xs); color: var(--accent); display: inline-block; padding: 2px 0; margin-bottom: var(--space-3); }
+h1 { font-family: var(--font-display); font-size: clamp(40px, 7vw, var(--text-3xl)); line-height: var(--leading-tight); letter-spacing: var(--tracking-display); font-weight: 500; }
+h1 .strike { color: var(--accent); }
+.lead { font-size: var(--text-lg); max-width: 60ch; color: var(--fg-2); margin-top: var(--space-4); }
 
-      .cards {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: var(--space-6);
-        margin-top: var(--space-8);
-      }
-      @media (max-width: 800px) {
-        .cards {
-          grid-template-columns: 1fr;
-        }
-      }
+.cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-6); margin-top: var(--space-8); }
+@media (max-width: 800px) { .cards { grid-template-columns: 1fr; } }
 
-      .card {
-        display: block;
-        background: var(--surface);
-        border-radius: var(--radius-lg);
-        border: 1px solid var(--border-soft);
-        box-shadow: var(--elev-raised);
-        padding: var(--space-6);
-        position: relative;
-        transition: box-shadow var(--motion-fast) var(--ease-standard);
-        color: var(--fg);
-      }
-      .card:hover {
-        box-shadow: 0 6px 16px rgba(60, 64, 67, 0.22);
-      }
-      .card.alt {
-        background: var(--surface-warm);
-      }
-      .card .num {
-        font-family: var(--font-display);
-        font-size: var(--text-2xl);
-        line-height: 1;
-        font-weight: 500;
-        color: var(--accent);
-        font-variant-numeric: tabular-nums;
-      }
-      .card h2 {
-        font-family: var(--font-display);
-        font-size: var(--text-xl);
-        font-weight: 500;
-        margin: var(--space-3) 0 var(--space-3);
-        letter-spacing: 0;
-      }
-      .card p {
-        color: var(--fg-2);
-        margin-bottom: var(--space-4);
-      }
-      .card .meta {
-        display: flex;
-        gap: var(--space-2);
-        flex-wrap: wrap;
-        margin-bottom: var(--space-4);
-      }
-      .meta-chip {
-        font-family: var(--font-body);
-        font-weight: 500;
-        font-size: var(--text-xs);
-        padding: 4px 10px;
-        border-radius: var(--radius-pill);
-        background: var(--surface-warm);
-        color: var(--fg-2);
-      }
-      .card .arrow {
-        font-family: var(--font-display);
-        font-size: var(--text-base);
-        font-weight: 500;
-        display: inline-block;
-        border-bottom: 2px solid var(--accent);
-        padding-bottom: 2px;
-        color: var(--accent);
-      }
+.card { display: block; background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--border-soft); box-shadow: var(--elev-raised); padding: var(--space-6); position: relative; transition: box-shadow var(--motion-fast) var(--ease-standard); color: var(--fg); }
+.card:hover { box-shadow: 0 6px 16px rgba(60, 64, 67, 0.22); }
+.card.alt { background: var(--surface-warm); }
+.card .num { font-family: var(--font-display); font-size: var(--text-2xl); line-height: 1; font-weight: 500; color: var(--accent); font-variant-numeric: tabular-nums; }
+.card h2 { font-family: var(--font-display); font-size: var(--text-xl); font-weight: 500; margin: var(--space-3) 0 var(--space-3); letter-spacing: 0; }
+.card p { color: var(--fg-2); margin-bottom: var(--space-4); }
+.card .meta { display: flex; gap: var(--space-2); flex-wrap: wrap; margin-bottom: var(--space-4); }
+.meta-chip { font-family: var(--font-body); font-weight: 500; font-size: var(--text-xs); padding: 4px 10px; border-radius: var(--radius-pill); background: var(--surface-warm); color: var(--fg-2); }
+.card .arrow { font-family: var(--font-display); font-size: var(--text-base); font-weight: 500; display: inline-block; border-bottom: 2px solid var(--accent); padding-bottom: 2px; color: var(--accent); }
 
-      .notes {
-        margin-top: var(--space-8);
-        padding: var(--space-6);
-        border-radius: var(--radius-lg);
-        background: var(--surface);
-        border: 1px solid var(--border-soft);
-        font-family: var(--font-body);
-        font-size: var(--text-sm);
-        color: var(--fg-2);
-      }
-      .notes h3 {
-        font-family: var(--font-display);
-        font-weight: 500;
-        font-size: var(--text-base);
-        margin-bottom: var(--space-3);
-        color: var(--fg);
-      }
-      .notes ul {
-        margin-left: 20px;
-      }
-      .notes li {
-        margin: 4px 0;
-      }
+.notes { margin-top: var(--space-8); padding: var(--space-6); border-radius: var(--radius-lg); background: var(--surface); border: 1px solid var(--border-soft); font-family: var(--font-body); font-size: var(--text-sm); color: var(--fg-2); }
+.notes h3 { font-family: var(--font-display); font-weight: 500; font-size: var(--text-base); margin-bottom: var(--space-3); color: var(--fg); }
+.notes ul { margin-left: 20px; }
+.notes li { margin: 4px 0; }
 
-      .foot {
-        padding: var(--space-6) 0;
-        border-top: 1px solid var(--border-soft);
-        display: flex;
-        justify-content: space-between;
-        font-family: var(--font-body);
-        font-weight: 500;
-        font-size: var(--text-sm);
-        color: var(--muted);
-        flex-wrap: wrap;
-        gap: var(--space-3);
-      }
-    </style>
-  </head>
-  <body>
-    <header class="topbar">
-      <div class="shell topbar-inner">
-        <span class="brand"><span class="brand-mark">M</span><span>MAT / BJJ</span></span>
-        <span class="tag">project launcher</span>
+.foot { padding: var(--space-6) 0; border-top: 1px solid var(--border-soft); display: flex; justify-content: space-between; font-family: var(--font-body); font-weight: 500; font-size: var(--text-sm); color: var(--muted); flex-wrap: wrap; gap: var(--space-3); }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="shell topbar-inner">
+    <span class="brand"><span class="brand-mark">M</span><span>MAT / BJJ</span></span>
+    <span class="tag">project launcher</span>
+  </div>
+</header>
+
+<main class="shell">
+  <span class="eyebrow">bjj training app · material · responsive</span>
+  <h1>Train the <span class="strike">mat</span>.</h1>
+  <p class="lead">Two surfaces in this project: the marketing page and the actual training app. Pick where you want to land.</p>
+
+  <div class="cards">
+    <a class="card" href="landing.html">
+      <div class="num">01</div>
+      <h2>Marketing page</h2>
+      <p>Hero, how-it-works, live preview, FAQ, CTA. For people who haven't opened the app yet.</p>
+      <div class="meta">
+        <span class="meta-chip">landing.html</span>
+        <span class="meta-chip">hero + features + faq</span>
+        <span class="meta-chip">responsive</span>
       </div>
-    </header>
+      <span class="arrow">Open landing →</span>
+    </a>
 
-    <main class="shell">
-      <span class="eyebrow">bjj training app · material · responsive</span>
-      <h1>Train the <span class="strike">mat</span>.</h1>
-      <p class="lead">
-        Two surfaces in this project: the marketing page and the actual training app. Pick where you
-        want to land.
-      </p>
-
-      <div class="cards">
-        <a class="card" href="landing.html">
-          <div class="num">01</div>
-          <h2>Marketing page</h2>
-          <p>
-            Hero, how-it-works, live preview, FAQ, CTA. For people who haven't opened the app yet.
-          </p>
-          <div class="meta">
-            <span class="meta-chip">landing.html</span>
-            <span class="meta-chip">hero + features + faq</span>
-            <span class="meta-chip">responsive</span>
-          </div>
-          <span class="arrow">Open landing →</span>
-        </a>
-
-        <a class="card alt" href="app.html">
-          <div class="num">02</div>
-          <h2>Training app</h2>
-          <p>
-            Live round timer, session plan, technique library, coverage bars, recent log. The thing
-            you actually open at the gym.
-          </p>
-          <div class="meta">
-            <span class="meta-chip">app.html</span>
-            <span class="meta-chip">timer + plan + library + log</span>
-            <span class="meta-chip">interactive</span>
-          </div>
-          <span class="arrow">Open app →</span>
-        </a>
+    <a class="card alt" href="app.html">
+      <div class="num">02</div>
+      <h2>Training app</h2>
+      <p>Live round timer, session plan, technique library, coverage bars, recent log. The thing you actually open at the gym.</p>
+      <div class="meta">
+        <span class="meta-chip">app.html</span>
+        <span class="meta-chip">timer + plan + library + log</span>
+        <span class="meta-chip">interactive</span>
       </div>
+      <span class="arrow">Open app →</span>
+    </a>
+  </div>
 
-      <div class="notes">
-        <h3>notes</h3>
-        <ul>
-          <li>design system · material · tokens bound from design-systems/material/tokens.css</li>
-          <li>primary action · #1a73e8 (blue) on soft #e8f0fe surface</li>
-          <li>type · Google Sans display + Roboto body + Roboto Mono for metadata</li>
-          <li>
-            components · buttons, cards, technique tiles, progress bars, log rows — all from
-            material component manifest
-          </li>
-          <li>
-            interaction · round timer runs in real time, pause/reset/skip, technique filter chips
-          </li>
-          <li>
-            no data is invented as a metric — every figure is a label, a count, or a bar (no fake
-            "10× faster")
-          </li>
-        </ul>
-      </div>
-    </main>
+  <div class="notes">
+    <h3>notes</h3>
+    <ul>
+      <li>design system · material · tokens bound from design-systems/material/tokens.css</li>
+      <li>primary action · #1a73e8 (blue) on soft #e8f0fe surface</li>
+      <li>type · Google Sans display + Roboto body + Roboto Mono for metadata</li>
+      <li>components · buttons, cards, technique tiles, progress bars, log rows — all from material component manifest</li>
+      <li>interaction · round timer runs in real time, pause/reset/skip, technique filter chips</li>
+      <li>no data is invented as a metric — every figure is a label, a count, or a bar (no fake "10× faster")</li>
+    </ul>
+  </div>
+</main>
 
-    <footer class="foot shell">
-      <span>mat / bjj · project index</span>
-      <span>open landing.html or app.html to view a surface</span>
-    </footer>
-  </body>
+<footer class="foot shell">
+  <span>mat / bjj · project index</span>
+  <span>open landing.html or app.html to view a surface</span>
+</footer>
+
+</body>
 </html>

@@ -6,13 +6,13 @@ Re-implement two admin registration flows using Supabase Edge Functions with adm
 
 ## Architecture Decisions
 
-| Decision                                        | Choice                                            | Alternatives                      | Rationale                                                                                                              |
-| ----------------------------------------------- | ------------------------------------------------- | --------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `email_confirm: false` for `admin-create-user`  | Supabase sends "Confirm signup" email             | `email_confirm: true` skips email | Admin sets password but email verification confirms identity before login                                              |
-| `inviteUserByEmail` for `create_invite`         | Supabase sends "You have been invited" with link  | Custom email with UUID token      | Supabase owns email delivery, bounce handling, and rate limits — external email adds complexity                        |
-| `getEdgeFunctionErrorMessage` for error parsing | Shared helper in `src/lib/edge-function-error.ts` | Inline error handling per hook    | EF responses use `{ error: { code, message } }` shape; helper normalizes both `error: string` and `error: { message }` |
-| Bearer token required for both EFs              | Admin JWT validated server-side via `getUser()`   | Service role key only             | EFs need to identify the calling admin for audit (`invited_by` in `invitations` table) and role check                  |
-| Session on invite link via hash                 | Supabase sets `#session=<token>` on redirect URL  | Query param `?token=<uuid>`       | Hash fragments are not sent to the server — avoids leaking session tokens in server logs                               |
+| Decision | Choice | Alternatives | Rationale |
+|----------|--------|--------------|-----------|
+| `email_confirm: false` for `admin-create-user` | Supabase sends "Confirm signup" email | `email_confirm: true` skips email | Admin sets password but email verification confirms identity before login |
+| `inviteUserByEmail` for `create_invite` | Supabase sends "You have been invited" with link | Custom email with UUID token | Supabase owns email delivery, bounce handling, and rate limits — external email adds complexity |
+| `getEdgeFunctionErrorMessage` for error parsing | Shared helper in `src/lib/edge-function-error.ts` | Inline error handling per hook | EF responses use `{ error: { code, message } }` shape; helper normalizes both `error: string` and `error: { message }` |
+| Bearer token required for both EFs | Admin JWT validated server-side via `getUser()` | Service role key only | EFs need to identify the calling admin for audit (`invited_by` in `invitations` table) and role check |
+| Session on invite link via hash | Supabase sets `#session=<token>` on redirect URL | Query param `?token=<uuid>` | Hash fragments are not sent to the server — avoids leaking session tokens in server logs |
 
 ## Data Flow
 
@@ -69,15 +69,15 @@ User logged in
 
 ## File Changes
 
-| File                                                      | Action | Description                                                                            |
-| --------------------------------------------------------- | ------ | -------------------------------------------------------------------------------------- |
-| `supabase/functions/admin-create-user/index.ts`           | Modify | Add `email_confirm: false`; already implemented                                        |
-| `supabase/functions/create_invite/index.ts`               | Modify | Already uses `inviteUserByEmail`; already implemented                                  |
-| `supabase/functions/accept-invite/index.ts`               | Modify | Already reads session from hash via `onAuthStateChange`; already implemented           |
-| `src/features/admin/create-user/hooks/useCreateUser.ts`   | Modify | Already calls `admin-create-user`; already implemented                                 |
-| `src/features/admin/create-user/hooks/useCreateInvite.ts` | Modify | Already calls `create_invite`; already implemented                                     |
-| `src/lib/edge-function-error.ts`                          | Modify | Already exists; already used by both hooks                                             |
-| `src/features/admin/create-user/create-user.types.ts`     | Modify | Already has `CreateUserInput`, `CreateInviteInput`, `CreateUserResult`, `InviteResult` |
+| File | Action | Description |
+|------|--------|-------------|
+| `supabase/functions/admin-create-user/index.ts` | Modify | Add `email_confirm: false`; already implemented |
+| `supabase/functions/create_invite/index.ts` | Modify | Already uses `inviteUserByEmail`; already implemented |
+| `supabase/functions/accept-invite/index.ts` | Modify | Already reads session from hash via `onAuthStateChange`; already implemented |
+| `src/features/admin/create-user/hooks/useCreateUser.ts` | Modify | Already calls `admin-create-user`; already implemented |
+| `src/features/admin/create-user/hooks/useCreateInvite.ts` | Modify | Already calls `create_invite`; already implemented |
+| `src/lib/edge-function-error.ts` | Modify | Already exists; already used by both hooks |
+| `src/features/admin/create-user/create-user.types.ts` | Modify | Already has `CreateUserInput`, `CreateInviteInput`, `CreateUserResult`, `InviteResult` |
 
 No new files required. All components already exist and are wired correctly.
 
@@ -86,7 +86,6 @@ No new files required. All components already exist and are wired correctly.
 ### Edge Function: `admin-create-user`
 
 **Request:**
-
 ```
 POST /admin-create-user
 Authorization: Bearer <admin-token>
@@ -96,13 +95,11 @@ Content-Type: application/json
 ```
 
 **Response (200):**
-
 ```json
 { "success": true, "user_id": "uuid" }
 ```
 
 **Error responses:**
-
 ```json
 { "error": { "code": "UNAUTHORIZED", "message": "..." } }  // 401
 { "error": { "code": "FORBIDDEN", "message": "..." } }     // 403
@@ -113,7 +110,6 @@ Content-Type: application/json
 ### Edge Function: `create_invite`
 
 **Request:**
-
 ```
 POST /create_invite
 Authorization: Bearer <admin-token>
@@ -123,13 +119,11 @@ Content-Type: application/json
 ```
 
 **Response (200):**
-
 ```json
 { "success": true, "expires_at": "ISO8601", "user_id": "uuid" }
 ```
 
 **Error responses:**
-
 ```json
 { "error": { "code": "INVITE_EXISTS", "message": "..." } } // 400
 { "error": { "code": "EMAIL_ALREADY_EXISTS", "message": "..." } } // 409
@@ -158,7 +152,6 @@ Both hooks follow the same pattern:
 3. Otherwise return `data` as success
 
 This handles three error shapes Supabase EFs can return:
-
 - `{ error: "string message" }` — direct string (rare)
 - `{ error: { code, message } }` — structured error (standard)
 - Network-level errors caught by `invoke()` itself

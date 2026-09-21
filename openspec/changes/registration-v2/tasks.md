@@ -2,14 +2,14 @@
 
 ## Review Workload Forecast
 
-| Field                   | Value                                         |
-| ----------------------- | --------------------------------------------- |
+| Field | Value |
+|-------|-------|
 | Estimated changed lines | ~100–150 (tests only, no code changes needed) |
-| 400-line budget risk    | Low                                           |
-| Chained PRs recommended | No                                            |
-| Suggested split         | Single PR                                     |
-| Delivery strategy       | exception-ok                                  |
-| Chain strategy          | pending                                       |
+| 400-line budget risk | Low |
+| Chained PRs recommended | No |
+| Suggested split | Single PR |
+| Delivery strategy | exception-ok |
+| Chain strategy | pending |
 
 Decision needed before apply: No
 Chained PRs recommended: No

@@ -35,8 +35,7 @@ async function fetchTechniqueWorkoutHistory(
 ): Promise<WorkoutHistoryEntry[]> {
   const { data, error } = await supabase
     .from('bjj_sections')
-    .select(
-      `
+    .select(`
       section_number,
       goal,
       ai_description,
@@ -48,8 +47,7 @@ async function fetchTechniqueWorkoutHistory(
       bjj_section_techniques!inner (
         technique_id
       )
-    `,
-    )
+    `)
     .eq('workouts.user_id', userId)
     .eq('bjj_section_techniques.technique_id', techniqueId)
     .order('workouts(performed_at)', { ascending: false })
@@ -67,7 +65,6 @@ async function fetchTechniqueWorkoutHistory(
 
   if (!data) return []
 
-  // SAFETY: PostgREST embed returns the raw union; we trust the inferred shape matches WorkoutHistoryRow.
   return (data as unknown as WorkoutHistoryRow[]).map((row) => ({
     workout_id: row.workouts.id,
     performed_at: row.workouts.performed_at,

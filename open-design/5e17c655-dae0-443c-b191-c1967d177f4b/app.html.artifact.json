@@ -5,7 +5,11 @@
   "entry": "app.html",
   "renderer": "html",
   "status": "complete",
-  "exports": ["html", "pdf", "zip"],
+  "exports": [
+    "html",
+    "pdf",
+    "zip"
+  ],
   "createdAt": "2026-06-11T20:38:38.644Z",
   "updatedAt": "2026-06-11T20:38:38.644Z",
   "metadata": {
