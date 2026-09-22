@@ -117,7 +117,7 @@ supabase/
 ## Prerequisites
 
 - Node.js LTS (v24 — see `.nvmrc`)
-- npm 10+
+- pnpm 9+ (`corepack enable` or `npm i -g pnpm`)
 - [Supabase CLI](https://supabase.com/docs/guides/cli) — `brew install supabase/tap/supabase`
 - Docker (required by Supabase local dev stack)
 
@@ -128,26 +128,42 @@ supabase/
 ### Initial setup (first time only)
 
 ```bash
-# 1. Install dependencies
-npm install
+# 1. Install dependencies (pnpm is the project's packageManager — see package.json)
+pnpm install
 
 # 2. Configure environment variables
 cp .env.example .env
 # Defaults already point to the local Supabase instance (127.0.0.1:54321)
 
-# 3. Start the Supabase local stack (DB + Auth + Storage)
-supabase start
+# 3. Bring up the full dev stack (Supabase + Edge Functions + Vite, all in background)
+./scripts/dev.sh start
+# On first run this also applies migrations (via supabase start), seeds reference
+# data (via supabase/seed.sql), and creates the three test users via
+# scripts/seed-users.sh. Idempotent on subsequent runs.
 
-# 4. Apply migrations and seed reference data
-supabase db reset
-
-# 5. Seed users
-bash scripts/seed-users.sh
+# 4. Open the app
+open http://localhost:5173
 ```
 
-### Starting services (day-to-day)
+### Daily workflow
 
-Run these commands in **separate terminals**:
+`scripts/dev.sh` orchestrates the three services so you don't need three terminals:
+
+| Command                                                   | What it does                                                  |
+|-----------------------------------------------------------|---------------------------------------------------------------|
+| `./scripts/dev.sh start`                                  | Bring up Supabase + Edge Functions + Vite in the background   |
+| `./scripts/dev.sh status`                                 | Show what's running and which ports are listening             |
+| `./scripts/dev.sh logs [vite\|functions\|supabase\|seed\|all]` | Tail the logs in `.dev-state/logs/`                        |
+| `./scripts/dev.sh stop`                                   | Stop Vite + functions (Supabase data persists)                |
+| `./scripts/dev.sh reset`                                  | Tear down everything, including Supabase volumes (data wiped) |
+
+The script is idempotent: `start` is a no-op for anything already running, and
+seeds users only when `auth.users` is empty. State lives in `.dev-state/` at the
+repo root (gitignored).
+
+### Manual fallback (no script)
+
+If you'd rather run the pieces yourself, use three terminals:
 
 **Terminal 1 — Supabase Edge Functions:**
 ```bash
@@ -156,7 +172,7 @@ supabase functions serve
 
 **Terminal 2 — Vite dev server:**
 ```bash
-npm run dev
+pnpm dev
 ```
 
 **Terminal 3 (optional) — Engram Cloud (persistent memory across team):**
@@ -165,8 +181,21 @@ cd infra/engram-cloud
 docker compose up
 ```
 
-> `supabase functions serve` and `npm run dev` must run concurrently.
+> `supabase functions serve` and `pnpm dev` must run concurrently.
 > Vite proxies `/api/v1/*` → `http://127.0.0.1:54321/functions/v1/*`.
+
+### Supabase data lifecycle
+
+| Command                    | What happens to DB data                                          |
+|----------------------------|------------------------------------------------------------------|
+| `supabase start`           | Creates Docker volumes on first run, then reuses them            |
+| `supabase stop`            | Stops containers, volumes kept                                   |
+| `supabase db reset`        | Drops + recreates DB, reapplies migrations, runs `seed.sql`     |
+| `supabase db push --local` | Applies new migrations without dropping data                     |
+| `./scripts/dev.sh reset`   | Equivalent to `supabase stop --no-backup` + wipe of `.dev-state/`|
+
+After any `db reset`, re-run `bash scripts/seed-users.sh` to recreate the test
+users.
 
 ---
 
