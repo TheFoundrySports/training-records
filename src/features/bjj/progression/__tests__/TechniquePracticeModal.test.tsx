@@ -1,10 +1,19 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { ReactNode } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { TechniquePracticeModal } from '../components/TechniquePracticeModal'
 import type { WorkoutHistoryEntry } from '../types/technique-tracking.types'
+
+// ── Test IDs for layout assertions ────────────────────────────────────────────
+const LIST_TEST_ID = 'practice-history-list'
+
+// ── Hoisted shared mock for useTechniqueWorkoutHistory ────────────────────────
+//
+// vi.hoisted() ensures this vi.fn() is initialized before all vi.mock factories.
+// Tests override the return value with mockReturnValue / mockReturnValueOnce.
+const mockUseTechniqueWorkoutHistory = vi.hoisted(() => vi.fn())
 
 // ── Mock Supabase ─────────────────────────────────────────────────────────────
 
@@ -44,6 +53,10 @@ vi.mock('@/lib/supabase', () => ({
   },
 }))
 
+vi.mock('../hooks/useTechniqueWorkoutHistory', () => ({
+  useTechniqueWorkoutHistory: mockUseTechniqueWorkoutHistory,
+}))
+
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
 function makeQueryClient() {
@@ -68,7 +81,8 @@ const twoWorkouts: WorkoutHistoryEntry[] = [
     performed_at: '2026-05-10T10:00:00.000Z',
     section_number: 2,
     goal: 'Warm-up + technique drills',
-    ai_description: 'Today we worked on guard passing [Knee Slide Pass] and spider guard sweeps.',
+    ai_description:
+      'Today we worked on guard passing [Knee Slide Pass] and spider guard sweeps.',
   },
   {
     workout_id: 'w2',
@@ -79,17 +93,33 @@ const twoWorkouts: WorkoutHistoryEntry[] = [
   },
 ]
 
-// ── Tests ──────────────────────────────────────────────────────────────────────
+// ── Tests ─────────────────────────────────────────────────────────────────────
 
 describe('TechniquePracticeModal', () => {
   beforeEach(() => {
     mockWorkoutData = []
     mockError = null
+    // Reset to loading state so tests that don't set mockReturnValueOnce don't crash.
+    // clearAllMocks clears call history only (not mockReturnValue queue).
     vi.clearAllMocks()
+    mockUseTechniqueWorkoutHistory.mockReturnValue({
+      data: undefined,
+      isLoading: true,
+      isError: false,
+      error: null,
+    })
   })
 
   it('renders dialog with technique name when open', async () => {
     mockWorkoutData = twoWorkouts
+    mockError = null
+    mockUseTechniqueWorkoutHistory.mockReturnValueOnce({
+      data: twoWorkouts,
+      isLoading: false,
+      isError: false,
+      error: null,
+    })
+
     render(
       <TechniquePracticeModal
         techniqueId="t1"
@@ -119,7 +149,53 @@ describe('TechniquePracticeModal', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
+  it('renders workout cards that stretch to full modal width (issue #92)', async () => {
+    mockUseTechniqueWorkoutHistory.mockReturnValueOnce({
+      data: twoWorkouts,
+      isLoading: false,
+      isError: false,
+      error: null,
+    })
+
+    render(
+      <TechniquePracticeModal
+        techniqueId="t1"
+        techniqueName="Knee Slide Pass"
+        open={true}
+        onClose={vi.fn()}
+      />,
+      { wrapper: Wrapper }
+    )
+
+    // The scroll container has data-testid="practice-history-list"
+    const list = screen.getByTestId(LIST_TEST_ID)
+    expect(list).toHaveClass('w-full')
+
+    // Each card renders with w-full (full modal content width)
+    const cards = screen.getAllByTestId(/^workout-card-/)
+    expect(cards.length).toBe(2)
+    for (const card of cards) {
+      expect(card).toHaveClass('w-full')
+    }
+
+    // The inner flex column of each card also stretches width
+    const innerContainers = list.querySelectorAll('[class*="flex-col"]')
+    expect(innerContainers.length).toBeGreaterThan(0)
+    for (const container of innerContainers) {
+      expect(container).toHaveClass('w-full')
+    }
+  })
+
   it('calls onClose when close button clicked', async () => {
+    mockWorkoutData = twoWorkouts
+    mockError = null
+    mockUseTechniqueWorkoutHistory.mockReturnValueOnce({
+      data: twoWorkouts,
+      isLoading: false,
+      isError: false,
+      error: null,
+    })
+
     const onClose = vi.fn()
     render(
       <TechniquePracticeModal
@@ -140,7 +216,15 @@ describe('TechniquePracticeModal', () => {
   })
 
   it('shows error alert when query fails', async () => {
-    mockError = { message: 'Failed to fetch' }
+    // Override beforeEach's default loading state with an error state.
+    // beforeEach resets to loading for the next test.
+    mockUseTechniqueWorkoutHistory.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isError: true,
+      error: { error: { message: 'Failed to fetch' } },
+    })
+
     render(
       <TechniquePracticeModal
         techniqueId="t1"
