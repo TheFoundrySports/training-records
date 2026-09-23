@@ -207,4 +207,33 @@ describe('WorkoutListPage', () => {
     expect(within(list).getByTestId('category-chip-crossfit')).toBeInTheDocument()
     expect(within(list).getByTestId('category-chip-functional')).toBeInTheDocument()
   })
+
+  it('Export All button uses MUI Button (not shadcn) and is outlined', () => {
+    mockReturn({ data: [], isLoading: false, isError: false, error: null })
+    renderPage()
+    const exportBtn = screen.getByRole('button', { name: /export all workouts/i })
+    // MUI Button renders a button whose className contains 'MuiButton'
+    expect(exportBtn.className).toMatch(/MuiButton/)
+    // shadcn Base UI Button adds data-slot="button" — must be absent
+    expect(exportBtn).not.toHaveAttribute('data-slot')
+    // Outlined variant matches the Import button
+    expect(exportBtn.className).toMatch(/outlined/i)
+  })
+
+  it('Import and Log workout buttons are MUI outlined and contained respectively', () => {
+    mockReturn({ data: [], isLoading: false, isError: false, error: null })
+    renderPage()
+    const importBtn = screen.getByRole('button', { name: /import/i })
+    // There are two "Log workout" buttons (header + empty-state CTA); scope to the
+    // header stack by filtering to the outlined sibling (Import) and its
+    // contained sibling (Log workout in the action row).
+    const headerStack = importBtn.parentElement!
+    const logBtn = within(headerStack).getByRole('button', { name: /^log workout$/i })
+    // Both are MUI
+    expect(importBtn.className).toMatch(/MuiButton/)
+    expect(logBtn.className).toMatch(/MuiButton/)
+    // Hierarchy: Log = contained (primary), Import = outlined (secondary)
+    expect(importBtn.className).toMatch(/outlined/i)
+    expect(logBtn.className).toMatch(/contained/i)
+  })
 })
