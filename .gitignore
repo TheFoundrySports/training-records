@@ -58,3 +58,6 @@ e2e/.pi-lens/
 *.njsproj
 *.sln
 *.sw?
+
+# Local dev orchestration state (PIDs + logs from scripts/dev.sh)
+.dev-state/
