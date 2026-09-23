@@ -135,7 +135,7 @@ async function resolveAIConfig(supabaseAdmin: ReturnType<typeof createClient>): 
     return {
       apiKey: envKey,
       baseUrl: 'https://api.minimax.io/v1',
-      model: 'MiniMax-M2.7',
+      model: 'MiniMax-M3',
     }
   }
 
