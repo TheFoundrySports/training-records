@@ -593,7 +593,7 @@ class AIProviderAdapter {
 **Config resolution (3-tier fallback):**
 ```
 1. Query ai_settings DB table → use OPENAI_API_KEY env var
-2. Fall back to OPENAI_API_KEY env var + MiniMax defaults (https://api.minimax.io/v1, MiniMax-M2.7)
+2. Fall back to OPENAI_API_KEY env var + MiniMax defaults (https://api.minimax.io/v1, MiniMax-M3)
 3. Return null → mock response { ai_description: "... [AI unavailable]", matched_technique_ids: [] }
 ```
 

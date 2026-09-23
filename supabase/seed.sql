@@ -1089,7 +1089,7 @@ on conflict (id) do nothing;
 -- AI Settings (single-row, always use id 00000000-0000-0000-0000-000000000001)
 -- ---------------------------------------------------------------------------
 insert into public.ai_settings (id, provider_name, base_url, model)
-values ('00000000-0000-0000-0000-000000000001', 'minimax', 'https://api.minimax.io/v1', 'MiniMax-M2.7')
+values ('00000000-0000-0000-0000-000000000001', 'minimax', 'https://api.minimax.io/v1', 'MiniMax-M3')
 on conflict (id) do update set
   provider_name = EXCLUDED.provider_name,
   base_url      = EXCLUDED.base_url,
