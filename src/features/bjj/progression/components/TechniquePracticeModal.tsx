@@ -37,9 +37,9 @@ function WorkoutCard({ entry }: { entry: WorkoutHistoryEntry }) {
   const truncatedDescription = truncateDescription(entry.ai_description, MAX_DESCRIPTION_LENGTH)
 
   return (
-    <Card size="sm" data-testid={`workout-card-${entry.workout_id}`}>
+    <Card size="sm" data-testid={`workout-card-${entry.workout_id}`} className="w-full">
       <CardContent>
-        <div className="flex flex-col gap-1.5">
+        <div className="flex w-full flex-col gap-1.5">
           <div className="flex items-center justify-between">
             <span className="text-xs font-medium text-muted-foreground">{date}</span>
             <a
@@ -86,7 +86,10 @@ function TechniquePracticeModal({
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-      <DialogContent aria-describedby="technique-modal-description">
+      <DialogContent
+        aria-describedby="technique-modal-description"
+        className="sm:max-w-lg"
+      >
         <DialogHeader>
           <DialogTitle>{techniqueName}</DialogTitle>
           <DialogDescription id="technique-modal-description">
@@ -112,9 +115,12 @@ function TechniquePracticeModal({
         )}
 
         {!isLoading && !isError && (
-          <div className="flex flex-col gap-3 max-h-[400px] overflow-y-auto">
+          <div
+            className="flex w-full flex-col gap-3 max-h-[400px] overflow-y-auto"
+            data-testid="practice-history-list"
+          >
             {workouts && workouts.length > 0 ? (
-              workouts.map((entry) => <WorkoutCard key={entry.workout_id} entry={entry} />)
+              workouts.map((entry: WorkoutHistoryEntry) => <WorkoutCard key={entry.workout_id} entry={entry} />)
             ) : (
               <p
                 className="text-sm text-muted-foreground py-4 text-center"
