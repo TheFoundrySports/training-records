@@ -27,6 +27,7 @@ import { useWorkouts } from '../hooks/useWorkouts'
 import { ExportAllWorkoutsButton } from '../components/ExportAllWorkoutsButton'
 import { ImportWorkoutsModal } from '../components/ImportWorkoutsModal'
 import { createWorkoutsTheme, readShadcnDarkMode } from '../theme/mui-workouts-theme'
+import { useAuth } from '@/features/auth/AuthContext'
 import type { Workout, WorkoutType } from '../workout.types'
 
 type FilterType = 'all' | WorkoutType
@@ -243,6 +244,8 @@ export function WorkoutListPage() {
   const [filter, setFilter] = useState<FilterType>('all')
   const [importModalOpen, setImportModalOpen] = useState(false)
   const { data: workouts, isLoading, isError, error } = useWorkouts({ type: filter })
+  const { role } = useAuth()
+  const isAdmin = role === 'admin'
 
   return (
     <ThemeProvider theme={theme}>
@@ -259,9 +262,11 @@ export function WorkoutListPage() {
           </Typography>
           <Stack direction="row" spacing={1} flexWrap="wrap">
             <ExportAllWorkoutsButton />
-            <Button variant="outlined" onClick={() => setImportModalOpen(true)}>
-              Import
-            </Button>
+            {isAdmin && (
+              <Button variant="outlined" onClick={() => setImportModalOpen(true)}>
+                Import
+              </Button>
+            )}
             <Button variant="contained" onClick={() => void navigate('/workouts/new')}>
               Log workout
             </Button>
