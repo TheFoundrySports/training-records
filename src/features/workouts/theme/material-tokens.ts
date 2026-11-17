@@ -52,10 +52,12 @@ const lightPalette: MuiPalette = {
   error: { main: '#dc2626', contrastText: '#ffffff' }, // --destructive
   info: { main: '#0288d1', contrastText: '#ffffff' }, // MUI blue (light) — ensures `color="info"` is a real blue, not black
   success: { main: '#2e7d32', contrastText: '#ffffff' }, // MUI green (light)
-  // Workout categories — orange/cyan/violet for visual differentiation
-  crossfit: { main: '#ea580c', light: '#fed7aa', dark: '#9a3412', contrastText: '#ffffff' }, // orange-600 family
-  functional: { main: '#0891b2', light: '#cffafe', dark: '#155e75', contrastText: '#ffffff' }, // cyan-600 family
-  bjj: { main: '#7c3aed', light: '#ddd6fe', dark: '#4c1d95', contrastText: '#ffffff' }, // violet-600 family
+  // Workout categories — orange/cyan/violet for visual differentiation.
+  // `main` sits on `light` as the chip label, so it has to clear 4.5:1 against
+  // it (the 600 shades only reached 2.6:1, 3.3:1 and 4.1:1).
+  crossfit: { main: '#9a3412', light: '#fed7aa', dark: '#7c2d12', contrastText: '#ffffff' }, // orange-800 family
+  functional: { main: '#0e7490', light: '#cffafe', dark: '#155e75', contrastText: '#ffffff' }, // cyan-700 family
+  bjj: { main: '#6d28d9', light: '#ddd6fe', dark: '#4c1d95', contrastText: '#ffffff' }, // violet-700 family
 }
 
 // ---------------------------------------------------------------------------
@@ -76,10 +78,11 @@ const darkPalette: MuiPalette = {
   error: { main: '#ff5546', contrastText: '#ffffff' }, // .dark --destructive
   info: { main: '#29b6f6', contrastText: '#0a0a0a' }, // MUI blue (dark) — lighter for contrast
   success: { main: '#66bb6a', contrastText: '#0a0a0a' }, // MUI green (dark)
-  // Workout categories — brighter shades for dark-mode contrast
-  crossfit: { main: '#fb923c', light: '#9a3412', dark: '#7c2d12', contrastText: '#0a0a0a' }, // orange-400 (brighter on dark)
-  functional: { main: '#22d3ee', light: '#155e75', dark: '#164e63', contrastText: '#0a0a0a' }, // cyan-400
-  bjj: { main: '#a78bfa', light: '#4c1d95', dark: '#2e1065', contrastText: '#0a0a0a' }, // violet-400
+  // Workout categories — brighter shades for dark-mode contrast. `main` is the
+  // label on `light`, so it has to clear 4.5:1 against it there too.
+  crossfit: { main: '#fcd34d', light: '#9a3412', dark: '#7c2d12', contrastText: '#0a0a0a' }, // amber-300 on orange-800
+  functional: { main: '#67e8f9', light: '#155e75', dark: '#164e63', contrastText: '#0a0a0a' }, // cyan-300
+  bjj: { main: '#c4b5fd', light: '#4c1d95', dark: '#2e1065', contrastText: '#0a0a0a' }, // violet-300
 }
 
 export const palettes: Record<ThemeMode, MuiPalette> = {
