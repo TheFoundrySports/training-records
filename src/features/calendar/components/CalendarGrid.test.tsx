@@ -241,19 +241,72 @@ describe('CalendarGrid component — workout chip integration (REQ-CAL-06, REQ-C
   })
 })
 
-    describe('CalendarGrid component — mobile scroll wrapper', () => {
-      it('wraps the grid in overflow-x-auto for horizontal scroll on mobile', () => {
+    // ---------------------------------------------------------------------------
+    // CalendarGrid — responsive layout (issue #99 mobile month view)
+    //
+    // Bug recap: the weekday-header row was a sibling of the `overflow-x-auto`
+    // wrapper while the day grid (with `min-w-[640px]`) was its child. On mobile,
+    // headers fit the viewport (~55 px / col) but cells forced 640 px and
+    // required horizontal scroll, leaving `Mon…Sun` misaligned. The fix moves
+    // both into the same scroll wrapper and replaces the rigid 640 px floor
+    // with `min-w-[18rem] sm:min-w-0`.
+    // ---------------------------------------------------------------------------
+
+    describe('CalendarGrid component — responsive layout (issue #99)', () => {
+      it('wraps both the weekday header row and the day grid inside ONE overflow-x-auto container so they co-scroll and stay aligned', () => {
         renderGrid({ year: 2026, month: 4, workouts: [], isLoading: false })
 
-        const wrapper = document.querySelector('.overflow-x-auto')
-        expect(wrapper).toBeInTheDocument()
+        // Single scroll wrapper present
+        const scrollWrapper = document.querySelector('.overflow-x-auto')
+        expect(scrollWrapper).toBeInTheDocument()
+        expect(scrollWrapper).not.toBeNull()
+
+        // Both Mon and Sun live inside the same scroll wrapper as the day grid
+        expect(scrollWrapper!.contains(screen.getByText('Mon'))).toBe(true)
+        expect(scrollWrapper!.contains(screen.getByText('Sun'))).toBe(true)
+        expect(scrollWrapper!.contains(screen.getByTestId('calendar-day-grid'))).toBe(true)
       })
 
-      it('inner grid has min-w-[640px] to prevent crushing on small screens', () => {
+      it('day grid no longer carries the legacy rigid min-w-[640px] (issue #99 root cause)', () => {
         renderGrid({ year: 2026, month: 4, workouts: [], isLoading: false })
 
-        const innerGrid = document.querySelector('.min-w-\\[640px\\]')
-        expect(innerGrid).toBeInTheDocument()
+        // The previous bug forced a 640px min-width, breaking mobile.
+        expect(document.querySelector('.min-w-\\[640px\\]')).not.toBeInTheDocument()
+      })
+
+      it('day grid keeps the 7-column track regardless of width floor', () => {
+        renderGrid({ year: 2026, month: 4, workouts: [], isLoading: false })
+
+        const grid = screen.getByTestId('calendar-day-grid')
+        expect(grid.className).toMatch(/\bgrid-cols-7\b/)
+      })
+
+      it('inner scroll child uses a smaller floor with a sm: breakpoint so the grid can shrink on wider viewports', () => {
+        renderGrid({ year: 2026, month: 4, workouts: [], isLoading: false })
+
+        // The shared inner container sits between the overflow wrapper and the grid.
+        // It must declare both a mobile floor and a desktop shrink-to-fit breakpoint.
+        const grid = screen.getByTestId('calendar-day-grid')
+        const inner = grid.parentElement!
+        expect(inner).not.toBeNull()
+
+        const classes = inner.className
+        const hasMobileFloor = /\bmin-w-\[\d+rem\]/.test(classes)
+        const hasShrinkAtSm = /\bsm:min-w-0\b/.test(classes)
+        expect(hasMobileFloor).toBe(true)
+        expect(hasShrinkAtSm).toBe(true)
+      })
+
+      it('header row and day grid share the same column-track class (grid-cols-7)', () => {
+        renderGrid({ year: 2026, month: 4, workouts: [], isLoading: false })
+
+        // Header row — direct parent of the Mon/Tue/... label cells
+        const headerRow = screen.getByText('Mon').parentElement!
+        expect(headerRow.className).toMatch(/\bgrid-cols-7\b/)
+
+        // Body grid
+        const bodyGrid = screen.getByTestId('calendar-day-grid')
+        expect(bodyGrid.className).toMatch(/\bgrid-cols-7\b/)
       })
     })
 
