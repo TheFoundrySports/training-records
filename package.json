@@ -13,7 +13,12 @@
     "prepare": "husky",
     "test": "vitest",
     "test:coverage": "vitest --coverage",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "stack:start": "bash ./scripts/dev.sh start",
+    "stack:stop": "bash ./scripts/dev.sh stop",
+    "stack:status": "bash ./scripts/dev.sh status",
+    "stack:logs": "bash ./scripts/dev.sh logs",
+    "stack:reset": "bash ./scripts/dev.sh reset"
   },
   "dependencies": {
     "@base-ui/react": "^1.3.0",
