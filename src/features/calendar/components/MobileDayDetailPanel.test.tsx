@@ -1,6 +1,5 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
-import { format } from 'date-fns'
 import { MobileDayDetailPanel } from './MobileDayDetailPanel'
 import type { Workout } from '@/features/workouts/workout.types'
 import { MemoryRouter } from 'react-router'
