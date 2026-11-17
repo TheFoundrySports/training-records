@@ -235,8 +235,19 @@ describe('BJJSectionEditor — REQ-306, REQ-315', () => {
       const notesInput = screen.getByLabelText('Notes (optional)')
       await user.type(notesInput, 'Some notes about drilling')
 
+      expect(notesInput).toHaveValue('Some notes about drilling')
       // EF returns 400 if section_goal is empty; UI keeps button disabled to match
       expect(screen.getByRole('button', { name: /enhance with ai/i })).toBeDisabled()
+    })
+
+    it('keeps typed text in Enhanced notes', async () => {
+      const user = userEvent.setup()
+      render(<SectionEditorWrapper />)
+
+      const enhancedNotes = screen.getByLabelText('Enhanced notes (AI, optional)')
+      await user.type(enhancedNotes, 'Cleaner version of the notes')
+
+      expect(enhancedNotes).toHaveValue('Cleaner version of the notes')
     })
 
     it('enables Enhance button when goal has content', async () => {
