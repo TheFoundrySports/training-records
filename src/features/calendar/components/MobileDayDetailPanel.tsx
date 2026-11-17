@@ -26,12 +26,16 @@ export function MobileDayDetailPanel({ selectedDate, workouts, isLoading }: Mobi
 
   if (selectedDate === null) return null
 
+  // Narrow once and reuse: TypeScript does not keep the null check inside the
+  // callback below, where the date is read again.
+  const day = selectedDate
+
   const dayWorkouts = workouts.filter((w) =>
-    isSameDay(new Date(w.performedAt), selectedDate),
+    isSameDay(new Date(w.performedAt), day),
   )
 
   function handleAddWorkout() {
-    const dateStr = format(selectedDate, 'yyyy-MM-dd')
+    const dateStr = format(day, 'yyyy-MM-dd')
     void navigate(`/workouts/new?date=${dateStr}`)
   }
 
@@ -39,12 +43,12 @@ export function MobileDayDetailPanel({ selectedDate, workouts, isLoading }: Mobi
     <div
       data-testid="mobile-day-detail-panel"
       className="mt-4 md:hidden border rounded-lg p-4 bg-card"
-      aria-label={`Workouts for ${format(selectedDate, 'EEEE d MMMM yyyy')}`}
+      aria-label={`Workouts for ${format(day, 'EEEE d MMMM yyyy')}`}
     >
       {/* Panel heading */}
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-base font-semibold" aria-live="polite">
-          {format(selectedDate, 'EEEE, d MMMM')}
+          {format(day, 'EEEE, d MMMM')}
         </h2>
         <Button variant="outline" size="sm" onClick={handleAddWorkout}>
           + Add workout
