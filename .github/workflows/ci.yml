@@ -9,7 +9,10 @@ on:
 jobs:
   build-and-test:
     name: Build & Test
-    runs-on: ubuntu-latest
+    # Pinned: ubuntu-latest now resolves to ubuntu26.04, which Playwright 1.60
+    # cannot install browsers on, so the install step kills the whole job.
+    # Unpin when the Playwright version in package.json supports it.
+    runs-on: ubuntu-24.04
 
     env:
       VITE_SUPABASE_URL: http://127.0.0.1:54321
