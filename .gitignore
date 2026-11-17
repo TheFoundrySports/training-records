@@ -48,6 +48,9 @@ e2e/.pi-lens/
 .codegraph/
 .opencode/
 
+# Gentle AI model routing config (local per-machine routing)
+.pi/gentle-ai/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
