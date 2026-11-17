@@ -1,4 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
+import { useState } from 'react'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router'
@@ -33,6 +34,44 @@ workouts={workouts}
 isLoading={isLoading}
 onSelectDay={onSelectDay}
       />
+    </MemoryRouter>,
+  )
+}
+
+/** CalendarGrid is controlled: it deselects only when the parent passes the selected day back. */
+function ControlledGrid({
+  onSelectDay,
+  ...props
+}: {
+  onSelectDay: (date: Date | null) => void
+  year?: number
+  month?: number
+  workouts?: Workout[]
+  isLoading?: boolean
+}) {
+  const [selectedDay, setSelectedDay] = useState<Date | null>(null)
+  return (
+    <CalendarGrid
+      {...props}
+      selectedDay={selectedDay}
+      onSelectDay={(date) => {
+        setSelectedDay(date)
+        onSelectDay(date)
+      }}
+    />
+  )
+}
+
+function renderControlledGrid(props: {
+  year?: number
+  month?: number
+  workouts?: Workout[]
+  isLoading?: boolean
+  onSelectDay: (date: Date | null) => void
+}) {
+  return render(
+    <MemoryRouter>
+      <ControlledGrid {...props} />
     </MemoryRouter>,
   )
 }
@@ -293,7 +332,7 @@ describe('CalendarGrid component — workout chip integration (REQ-CAL-06, REQ-C
           title: 'Morning WOD',
           id: 'w-apr-15',
         })
-        renderGrid({
+        renderControlledGrid({
           year: 2026,
           month: 4,
           workouts: [workout],
