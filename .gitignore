@@ -61,3 +61,6 @@ e2e/.pi-lens/
 
 # Local dev orchestration state (PIDs + logs from scripts/dev.sh)
 .dev-state/
+
+# Supabase CLI local state (local version markers and temp files)
+supabase/.temp/
