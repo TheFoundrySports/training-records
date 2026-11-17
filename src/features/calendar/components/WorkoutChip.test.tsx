@@ -40,6 +40,14 @@ function renderChip(workout: Workout) {
 describe('WorkoutChip', () => {
   beforeEach(() => {
     mockNavigate.mockClear()
+    // Default to light mode so tests are deterministic regardless of the
+    // global `<html>` class state set up by other suites. Each dark-mode
+    // describe block re-toggles the class and restores it in `afterEach`.
+    document.documentElement.classList.remove('dark')
+  })
+
+  afterEach(() => {
+    document.documentElement.classList.remove('dark')
   })
 
   it('renders short title as-is (≤ 20 chars)', () => {
@@ -121,6 +129,125 @@ describe('WorkoutChip', () => {
       expect(
         screen.getByRole('button', { name: 'View planned workout: Future WOD' }),
       ).toBeInTheDocument()
+    })
+  })
+
+  describe('category coloring — title text (issue #100)', () => {
+    it('crossfit title uses orange #ea580c', () => {
+      renderChip(makeWorkout({ type: 'crossfit', title: 'Fran' }))
+      expect(screen.getByText('Fran')).toHaveStyle({ color: '#ea580c' })
+    })
+
+    it('functional title uses cyan #0891b2', () => {
+      renderChip(makeWorkout({ type: 'functional', title: 'Mobility Flow' }))
+      expect(screen.getByText('Mobility Flow')).toHaveStyle({ color: '#0891b2' })
+    })
+
+    it('bjj title uses violet #7c3aed', () => {
+      renderChip(makeWorkout({ type: 'bjj', title: 'Guard Drills' }))
+      expect(screen.getByText('Guard Drills')).toHaveStyle({ color: '#7c3aed' })
+    })
+
+    it('crossfit title uses brighter orange #fb923c in dark mode', () => {
+      document.documentElement.classList.add('dark')
+      renderChip(makeWorkout({ type: 'crossfit', title: 'Fran' }))
+      expect(screen.getByText('Fran')).toHaveStyle({ color: '#fb923c' })
+    })
+
+    it('bjj title uses brighter violet #a78bfa in dark mode', () => {
+      document.documentElement.classList.add('dark')
+      renderChip(makeWorkout({ type: 'bjj', title: 'Guard Drills' }))
+      expect(screen.getByText('Guard Drills')).toHaveStyle({ color: '#a78bfa' })
+    })
+
+    it('functional title uses brighter cyan #22d3ee in dark mode', () => {
+      document.documentElement.classList.add('dark')
+      renderChip(makeWorkout({ type: 'functional', title: 'Mobility Flow' }))
+      expect(screen.getByText('Mobility Flow')).toHaveStyle({ color: '#22d3ee' })
+    })
+  })
+
+  describe('category coloring — type badge (issue #100)', () => {
+    it('crossfit badge has orange border, orange text, soft orange fill', () => {
+      renderChip(makeWorkout({ type: 'crossfit' }))
+      const badge = screen.getByTestId('workout-chip-type-crossfit')
+      expect(badge).toHaveStyle({
+        color: '#ea580c',
+        borderColor: '#ea580c',
+        backgroundColor: '#fed7aa',
+      })
+    })
+
+    it('bjj badge has violet border, violet text, soft violet fill', () => {
+      renderChip(makeWorkout({ type: 'bjj' }))
+      const badge = screen.getByTestId('workout-chip-type-bjj')
+      expect(badge).toHaveStyle({
+        color: '#7c3aed',
+        borderColor: '#7c3aed',
+        backgroundColor: '#ddd6fe',
+      })
+    })
+
+    it('functional badge has cyan border, cyan text, soft cyan fill', () => {
+      renderChip(makeWorkout({ type: 'functional' }))
+      const badge = screen.getByTestId('workout-chip-type-functional')
+      expect(badge).toHaveStyle({
+        color: '#0891b2',
+        borderColor: '#0891b2',
+        backgroundColor: '#cffafe',
+      })
+    })
+
+    it('crossfit badge in dark mode uses brighter orange + darker orange fill', () => {
+      document.documentElement.classList.add('dark')
+      renderChip(makeWorkout({ type: 'crossfit' }))
+      const badge = screen.getByTestId('workout-chip-type-crossfit')
+      expect(badge).toHaveStyle({
+        color: '#fb923c',
+        borderColor: '#fb923c',
+        backgroundColor: '#9a3412',
+      })
+    })
+  })
+
+  describe('planned state preserves category color (issue #100 acceptance)', () => {
+    beforeEach(() => {
+      vi.useFakeTimers()
+      vi.setSystemTime(new Date(2026, 0, 1))
+    })
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    it('planned chip keeps dashed + opacity styling', () => {
+      renderChip(makeWorkout({ type: 'bjj', performedAt: '2026-12-01T10:00:00.000Z' }))
+      const btn = screen.getByRole('button')
+      expect(btn.className).toMatch(/opacity-70/)
+      expect(btn.className).toMatch(/border-dashed/)
+    })
+
+    it('planned chip dashed border picks up category color (not neutral border)', () => {
+      renderChip(makeWorkout({ type: 'bjj', performedAt: '2026-12-01T10:00:00.000Z' }))
+      const btn = screen.getByRole('button')
+      expect(btn).toHaveStyle({ borderColor: '#7c3aed' })
+    })
+
+    it('planned chip title still shows category color', () => {
+      renderChip(makeWorkout({ type: 'bjj', title: 'Drill', performedAt: '2026-12-01T10:00:00.000Z' }))
+      expect(screen.getByText('Drill')).toHaveStyle({ color: '#7c3aed' })
+    })
+
+    it('planned chip type badge still shows category color', () => {
+      renderChip(makeWorkout({ type: 'crossfit', performedAt: '2026-12-01T10:00:00.000Z' }))
+      const badge = screen.getByTestId('workout-chip-type-crossfit')
+      expect(badge).toHaveStyle({ color: '#ea580c', borderColor: '#ea580c' })
+    })
+
+    it('planned crossfit chip dashed border is orange in dark mode', () => {
+      document.documentElement.classList.add('dark')
+      renderChip(makeWorkout({ type: 'crossfit', performedAt: '2026-12-01T10:00:00.000Z' }))
+      const btn = screen.getByRole('button')
+      expect(btn).toHaveStyle({ borderColor: '#fb923c' })
     })
   })
 })
