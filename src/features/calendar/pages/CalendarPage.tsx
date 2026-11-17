@@ -1,5 +1,5 @@
 import { useSearchParams } from 'react-router'
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import {
   addDays,
   addMonths,
@@ -50,27 +50,28 @@ export function CalendarPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const { view, anchorDate, dateRange } = parseCalendarParams(searchParams)
 
-      // Mobile day selection state — lives here so it can feed MobileDayDetailPanel.
-      const [selectedDay, setSelectedDay] = useState<Date | null>(null)
-      // Track which month the selection belongs to so we can clear it on month navigation.
-      const selectedMonthRef = useRef<{ year: number; month: number }>({
-        year: anchorDate.getFullYear(),
-        month: anchorDate.getMonth(),
-      })
+  // Mobile day selection state — lives here so it can feed MobileDayDetailPanel.
+  // The selection carries the month it belongs to, so a month change can drop it
+  // without reading or writing a ref during render.
+  const [selection, setSelection] = useState<{
+    date: Date
+    year: number
+    month: number
+  } | null>(null)
 
-      // Clear selection whenever the displayed month changes.
-      // We do it imperatively here instead of in a useEffect to avoid an extra render.
-      const currentYear = anchorDate.getFullYear()
-      const currentMonth = anchorDate.getMonth()
-      if (
-        selectedDay !== null &&
-        (currentYear !== selectedMonthRef.current.year ||
-          currentMonth !== selectedMonthRef.current.month)
-      ) {
-        setSelectedDay(null)
-        selectedMonthRef.current.year = currentYear
-        selectedMonthRef.current.month = currentMonth
-      }
+  const currentYear = anchorDate.getFullYear()
+  const currentMonth = anchorDate.getMonth()
+
+  // Clear the selection whenever the displayed month changes. Adjusting the
+  // state during render keeps the stale day from painting for a frame.
+  if (
+    selection !== null &&
+    (selection.year !== currentYear || selection.month !== currentMonth)
+  ) {
+    setSelection(null)
+  }
+
+  const selectedDay = selection?.date ?? null
 
   // Compute date range based on current view
   const range =
@@ -117,11 +118,11 @@ export function CalendarPage() {
   }
 
   function handleSelectDay(date: Date | null) {
-    setSelectedDay(date)
-    if (date !== null) {
-      selectedMonthRef.current.year = date.getFullYear()
-      selectedMonthRef.current.month = date.getMonth()
-    }
+    setSelection(
+      date === null
+        ? null
+        : { date, year: date.getFullYear(), month: date.getMonth() }
+    )
   }
 
   // Compute title — show range label when custom range is active
