@@ -214,6 +214,10 @@ export function BJJSectionEditor({
             aria-describedby={describedBy}
             disabled={disabled}
             value={field.value ?? ''}
+            onChange={field.onChange}
+            onBlur={field.onBlur}
+            name={field.name}
+            ref={field.ref}
           />
         )}
       />
@@ -233,6 +237,10 @@ export function BJJSectionEditor({
             aria-describedby={describedBy}
             disabled={disabled}
             value={field.value ?? ''}
+            onChange={field.onChange}
+            onBlur={field.onBlur}
+            name={field.name}
+            ref={field.ref}
           />
         )}
       />
