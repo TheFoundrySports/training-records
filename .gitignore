@@ -48,6 +48,9 @@ e2e/.pi-lens/
 .codegraph/
 .opencode/
 
+# Gentle AI model routing config (local per-machine routing)
+.pi/gentle-ai/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -61,3 +64,6 @@ e2e/.pi-lens/
 
 # Local dev orchestration state (PIDs + logs from scripts/dev.sh)
 .dev-state/
+
+# Supabase CLI local state (local version markers and temp files)
+supabase/.temp/
