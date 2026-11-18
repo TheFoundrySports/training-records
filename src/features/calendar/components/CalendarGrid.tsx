@@ -44,34 +44,51 @@ export function CalendarGrid({
 
   return (
     <div>
-      {/* Day-of-week header row */}
-      <div className="grid grid-cols-7 mb-1">
-        {WEEK_DAY_LABELS.map((label) => (
-          <div key={label} className="text-center text-xs font-medium text-muted-foreground py-1">
-            {label}
-          </div>
-        ))}
-      </div>
-
-      {/* Calendar grid */}
+      {/*
+        Scroll wrapper is intentionally shared by the weekday-header row AND the day
+        grid so they co-scroll and stay column-aligned at every viewport width.
+        Previously (issue #99) the header was a sibling of the wrapper while the day
+        grid was a `min-w-[640px]` child of it, which broke mobile: headers fit the
+        viewport (~55px / col) while cells forced 640px and required horizontal scroll,
+        leaving "Mon" and "Sun" misaligned.
+        The inner div uses `min-w-[18rem] sm:min-w-0`:
+          - 18rem (~288px) keeps cells tappable on the narrowest phones (320–390px viewport).
+          - `sm:min-w-0` (>= 640px viewport) lets the grid fill the parent naturally.
+          - `overflow-x-auto` is a safety net for sub-288px viewports.
+      */}
       <div className="overflow-x-auto">
-        <div
-          data-testid="calendar-day-grid"
-          className="grid grid-cols-7 gap-px bg-border rounded min-w-[640px]"
-        >
-          {isLoading
-            ? Array.from({ length: 35 }).map((_, i) => (
-                <div key={i} className="min-h-24 bg-muted animate-pulse" aria-hidden="true" />
-              ))
-            : days.map((day) => (
-                <CalendarCell
-                  key={day.date.toISOString()}
-                  day={day}
-                  onEmptyClick={handleEmptyClick}
-                  selected={selectedDay !== null && isSameDay(selectedDay, day.date)}
-                  onWorkoutClick={handleWorkoutClick}
-                />
-              ))}
+        <div className="min-w-[18rem] sm:min-w-0">
+          {/* Day-of-week header row — co-scrolled with the day grid */}
+          <div className="grid grid-cols-7 mb-1">
+            {WEEK_DAY_LABELS.map((label) => (
+              <div
+                key={label}
+                className="text-center text-xs font-medium text-muted-foreground py-1"
+              >
+                {label}
+              </div>
+            ))}
+          </div>
+
+          {/* Calendar grid */}
+          <div
+            data-testid="calendar-day-grid"
+            className="grid grid-cols-7 gap-px bg-border rounded"
+          >
+            {isLoading
+              ? Array.from({ length: 35 }).map((_, i) => (
+                  <div key={i} className="min-h-24 bg-muted animate-pulse" aria-hidden="true" />
+                ))
+              : days.map((day) => (
+                  <CalendarCell
+                    key={day.date.toISOString()}
+                    day={day}
+                    onEmptyClick={handleEmptyClick}
+                    selected={selectedDay !== null && isSameDay(selectedDay, day.date)}
+                    onWorkoutClick={handleWorkoutClick}
+                  />
+                ))}
+          </div>
         </div>
       </div>
 
