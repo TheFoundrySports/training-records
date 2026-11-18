@@ -206,7 +206,9 @@ function useCategoryToggleSx(type: FilterType) {
     '&.Mui-selected': {
       backgroundColor: color.main,
       color: color.contrastText,
-      '&:hover': { backgroundColor: color.dark },
+      // The hover fill is the category's dark shade in both modes, so the
+      // label has to be the light one to stay readable.
+      '&:hover': { backgroundColor: color.dark, color: '#ffffff' },
     },
   } as const
 }

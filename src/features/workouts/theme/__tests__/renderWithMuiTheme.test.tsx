@@ -39,32 +39,32 @@ describe('renderWithMuiTheme', () => {
   describe('category palette augmentation', () => {
     it('exposes palette.crossfit (orange) in light mode', () => {
       renderWithMuiTheme(<PaletteProbe slot="crossfit" />)
-      expect(screen.getByTestId('palette-crossfit')).toHaveTextContent('#ea580c')
+      expect(screen.getByTestId('palette-crossfit')).toHaveTextContent('#9a3412')
     })
 
     it('exposes palette.functional (cyan) in light mode', () => {
       renderWithMuiTheme(<PaletteProbe slot="functional" />)
-      expect(screen.getByTestId('palette-functional')).toHaveTextContent('#0891b2')
+      expect(screen.getByTestId('palette-functional')).toHaveTextContent('#0e7490')
     })
 
     it('exposes palette.bjj (violet) in light mode', () => {
       renderWithMuiTheme(<PaletteProbe slot="bjj" />)
-      expect(screen.getByTestId('palette-bjj')).toHaveTextContent('#7c3aed')
+      expect(screen.getByTestId('palette-bjj')).toHaveTextContent('#6d28d9')
     })
 
     it('exposes palette.crossfit (brighter orange) in dark mode', () => {
       renderWithMuiTheme(<PaletteProbe slot="crossfit" />, { mode: 'dark' })
-      expect(screen.getByTestId('palette-crossfit')).toHaveTextContent('#fb923c')
+      expect(screen.getByTestId('palette-crossfit')).toHaveTextContent('#fcd34d')
     })
 
     it('exposes palette.functional (brighter cyan) in dark mode', () => {
       renderWithMuiTheme(<PaletteProbe slot="functional" />, { mode: 'dark' })
-      expect(screen.getByTestId('palette-functional')).toHaveTextContent('#22d3ee')
+      expect(screen.getByTestId('palette-functional')).toHaveTextContent('#67e8f9')
     })
 
     it('exposes palette.bjj (brighter violet) in dark mode', () => {
       renderWithMuiTheme(<PaletteProbe slot="bjj" />, { mode: 'dark' })
-      expect(screen.getByTestId('palette-bjj')).toHaveTextContent('#a78bfa')
+      expect(screen.getByTestId('palette-bjj')).toHaveTextContent('#c4b5fd')
     })
 
     it('exposes palette.info (blue) and palette.success (green)', () => {
