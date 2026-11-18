@@ -13,9 +13,27 @@ vi.mock('../hooks/useWorkouts', () => ({
   useWorkout: vi.fn(),
 }))
 
+// Stub the auth context. Default to admin so existing tests — which were
+// written assuming all header actions render — keep passing without
+// modification. Tests that exercise the admin gating override this
+// mock per-test (athletes / no role).
+const mockUseAuth = vi.fn()
+vi.mock('@/features/auth/AuthContext', () => ({
+  useAuth: () => mockUseAuth(),
+}))
+
 import { useWorkouts as useWorkoutsMock } from '../hooks/useWorkouts'
 
 const mockUseWorkouts = vi.mocked(useWorkoutsMock)
+
+beforeEach(() => {
+  mockUseAuth.mockReturnValue({
+    session: { user: { id: 'admin-1', user_metadata: { role: 'admin' } } },
+    user: { id: 'admin-1', user_metadata: { role: 'admin' } },
+    role: 'admin',
+    isLoading: false,
+  })
+})
 
 type UseWorkoutsResult = ReturnType<typeof useWorkouts>
 
@@ -235,5 +253,55 @@ describe('WorkoutListPage', () => {
     // Hierarchy: Log = contained (primary), Import = outlined (secondary)
     expect(importBtn.className).toMatch(/outlined/i)
     expect(logBtn.className).toMatch(/contained/i)
+  })
+})
+
+/**
+ * Admin gating for the Import button on the workouts list (issue #97).
+ * Only admins should see Import; athletes and unauthenticated users
+ * must not. Log workout and Export All stay visible to everyone.
+ */
+describe('WorkoutListPage — Import button admin gating (#97)', () => {
+  it('shows the Import button for admin users', () => {
+    mockReturn({ data: [], isLoading: false, isError: false, error: null })
+    renderPage()
+    expect(screen.getByRole('button', { name: /import/i })).toBeInTheDocument()
+  })
+
+  it('hides the Import button for non-admin users (athlete)', () => {
+    mockUseAuth.mockReturnValue({
+      session: { user: { id: 'athlete-1', user_metadata: { role: 'athlete' } } },
+      user: { id: 'athlete-1', user_metadata: { role: 'athlete' } },
+      role: 'athlete',
+      isLoading: false,
+    })
+    mockReturn({ data: [], isLoading: false, isError: false, error: null })
+    renderPage()
+    expect(screen.queryByRole('button', { name: /^import$/i })).toBeNull()
+  })
+
+  it('hides the Import button when the user has no role yet (unauthenticated)', () => {
+    mockUseAuth.mockReturnValue({
+      session: null,
+      user: null,
+      role: null,
+      isLoading: false,
+    })
+    mockReturn({ data: [], isLoading: false, isError: false, error: null })
+    renderPage()
+    expect(screen.queryByRole('button', { name: /^import$/i })).toBeNull()
+  })
+
+  it('still shows Export All and Log workout to non-admin users', () => {
+    mockUseAuth.mockReturnValue({
+      session: { user: { id: 'athlete-1', user_metadata: { role: 'athlete' } } },
+      user: { id: 'athlete-1', user_metadata: { role: 'athlete' } },
+      role: 'athlete',
+      isLoading: false,
+    })
+    mockReturn({ data: [], isLoading: false, isError: false, error: null })
+    renderPage()
+    expect(screen.getByRole('button', { name: /export all workouts/i })).toBeInTheDocument()
+    expect(screen.getAllByRole('button', { name: /log workout/i }).length).toBeGreaterThan(0)
   })
 })
